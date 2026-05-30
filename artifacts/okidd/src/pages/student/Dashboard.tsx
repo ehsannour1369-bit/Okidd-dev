@@ -158,16 +158,15 @@ export default function StudentDashboard() {
   const completedProgressIds = new Set(progress.filter(p => p.completed && p.bookId === selectedBook?.id).map(p => p.lessonId));
 
   return (
-    <div style={{ position: "relative", minHeight: "calc(100vh - 60px)", overflow: "hidden", background: screen === "home" ? "transparent" : "linear-gradient(135deg, #0d0a1a 0%, #1a0a2e 50%, #0a1a2e 100%)" }}>
+    <div style={{ position: "relative", minHeight: "calc(100vh - 60px)", overflow: "hidden", background: screen === "home" ? (isGirl ? "linear-gradient(135deg, #d946ef 0%, #a855f7 30%, #6366f1 60%, #0ea5e9 100%)" : "linear-gradient(135deg, #2563eb 0%, #7c3aed 40%, #9333ea 70%, #db2777 100%)") : "linear-gradient(135deg, #0d0a1a 0%, #1a0a2e 50%, #0a1a2e 100%)" }}>
 
-      {/* Balloons */}
-      {balloons.filter(b => !b.popped).map(balloon => (
-        <div key={balloon.id} onClick={() => handleBalloonClick(balloon)} style={{ position: "absolute", left: `${balloon.x}%`, top: `${balloon.y}%`, width: balloon.size, height: balloon.size * 1.2, cursor: "pointer", userSelect: "none", transition: "none", zIndex: 5, display: "flex", flexDirection: "column", alignItems: "center", filter: popFeedback?.id === balloon.id ? "brightness(2) saturate(2)" : "none" }}>
-          <div style={{ width: balloon.size, height: balloon.size, borderRadius: "50% 50% 50% 50% / 60% 60% 40% 40%", background: `radial-gradient(circle at 35% 35%, ${balloon.color}cc, ${balloon.color})`, boxShadow: `0 0 ${balloon.size * 0.3}px ${balloon.color}66, inset 0 0 ${balloon.size * 0.2}px rgba(255,255,255,0.2)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: balloon.size * 0.4, position: "relative" }}>
+      {/* Balloons — glassmorphism style on gradient */}
+      {screen === "home" && balloons.filter(b => !b.popped).map(balloon => (
+        <div key={balloon.id} onClick={() => handleBalloonClick(balloon)} style={{ position: "absolute", left: `${balloon.x}%`, top: `${balloon.y}%`, width: balloon.size, height: balloon.size, cursor: "pointer", userSelect: "none", transition: "none", zIndex: 5, display: "flex", alignItems: "center", justifyContent: "center", filter: popFeedback?.id === balloon.id ? "brightness(2) saturate(2)" : "none" }}>
+          <div style={{ width: balloon.size, height: balloon.size, borderRadius: "50%", background: "rgba(255,255,255,0.22)", backdropFilter: "blur(6px)", border: "1.5px solid rgba(255,255,255,0.35)", boxShadow: "0 4px 20px rgba(0,0,0,0.12), inset 0 0 12px rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: balloon.size * 0.42, position: "relative" }}>
             {balloon.question ? "❓" : balloon.emoji}
-            {balloon.question && <div style={{ position: "absolute", top: -4, right: -4, width: 14, height: 14, background: "#f59e0b", borderRadius: "50%", fontSize: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>!</div>}
+            {balloon.question && <div style={{ position: "absolute", top: -3, right: -3, width: 16, height: 16, background: "#f59e0b", borderRadius: "50%", fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 6px rgba(0,0,0,0.2)" }}>!</div>}
           </div>
-          <div style={{ width: 1, height: balloon.size * 0.3, background: `${balloon.color}88` }} />
         </div>
       ))}
 
@@ -321,39 +320,64 @@ export default function StudentDashboard() {
 
       {/* HOME */}
       {screen === "home" && (
-        <div style={{
-          position: "absolute", inset: 0, zIndex: 10,
-          backgroundImage: `url(${isGirl ? "/girl-bg.png" : "/boy-bg.png"})`,
-          backgroundSize: "cover", backgroundPosition: "center",
-          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-        }}>
-          <div style={{ textAlign: "center", pointerEvents: "all" }}>
+        <div style={{ position: "absolute", inset: 0, zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+          {/* Floating icon bubbles */}
+          {[
+            { icon: "⭐", x: 8, y: 15, size: 56, delay: 0 },
+            { icon: "🎵", x: 18, y: 55, size: 48, delay: 1.2 },
+            { icon: "✏️", x: 12, y: 75, size: 52, delay: 0.6 },
+            { icon: "😊", x: 82, y: 12, size: 60, delay: 0.8 },
+            { icon: "🏆", x: 72, y: 48, size: 50, delay: 1.5 },
+            { icon: "🧠", x: 85, y: 65, size: 54, delay: 0.3 },
+            { icon: "❤️", x: 78, y: 82, size: 46, delay: 1.0 },
+            { icon: "🌟", x: 88, y: 35, size: 44, delay: 1.8 },
+          ].map((b, i) => (
+            <div key={i} style={{
+              position: "absolute", left: `${b.x}%`, top: `${b.y}%`,
+              width: b.size, height: b.size, borderRadius: "50%",
+              background: "rgba(255,255,255,0.15)",
+              backdropFilter: "blur(8px)",
+              border: "1px solid rgba(255,255,255,0.25)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: b.size * 0.42,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.15), inset 0 0 10px rgba(255,255,255,0.1)",
+              animation: `floatBubble ${3 + b.delay * 0.5}s ease-in-out infinite`,
+              animationDelay: `${b.delay}s`,
+              zIndex: 1, pointerEvents: "none",
+            }}>
+              {b.icon}
+            </div>
+          ))}
+
+          {/* Central content */}
+          <div style={{ textAlign: "center", pointerEvents: "all", zIndex: 5 }}>
             <div style={{
-              fontSize: 28, color: "#f8f5ff", fontWeight: 800, marginBottom: 8,
-              textShadow: "0 2px 20px rgba(0,0,0,0.5), 0 0 40px rgba(0,0,0,0.3)",
+              fontSize: 30, color: "#ffffff", fontWeight: 800, marginBottom: 10,
+              textShadow: "0 2px 16px rgba(0,0,0,0.3)", letterSpacing: 0.5,
             }}>سلام {user?.name}! {isGirl ? "🌸" : "🚀"}</div>
             <div style={{
-              fontSize: 14, color: "#f8f5ff", marginBottom: 40,
-              textShadow: "0 1px 10px rgba(0,0,0,0.4)",
+              fontSize: 15, color: "rgba(255,255,255,0.85)", marginBottom: 48,
+              textShadow: "0 1px 8px rgba(0,0,0,0.2)",
             }}>{isGirl ? "امروز هم عالی یاد بگیر!" : "بزن بریم یاد بگیریم!"}</div>
+
             <button onClick={() => setScreen("books")} style={{
-              width: 160, height: 160, borderRadius: "50%",
-              background: "rgba(255,255,255,0.2)",
-              backdropFilter: "blur(12px)",
+              width: 170, height: 170, borderRadius: "50%",
+              background: "rgba(255,255,255,0.18)",
+              backdropFilter: "blur(14px)",
               border: "2px solid rgba(255,255,255,0.35)",
               cursor: "pointer",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.25), inset 0 0 20px rgba(255,255,255,0.1)",
+              boxShadow: "0 8px 40px rgba(0,0,0,0.2), inset 0 0 30px rgba(255,255,255,0.08)",
               display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
               fontFamily: "Vazirmatn, sans-serif", color: "white",
               transition: "transform 0.2s",
-              textShadow: "0 1px 8px rgba(0,0,0,0.3)",
+              textShadow: "0 1px 6px rgba(0,0,0,0.2)",
             }}
               onMouseOver={e => (e.currentTarget.style.transform = "scale(1.08)")}
               onMouseOut={e => (e.currentTarget.style.transform = "scale(1)")}>
-              <div style={{ fontSize: 40, marginBottom: 6 }}>✨</div>
-              <div style={{ fontWeight: 800, fontSize: 15 }}>شروع یادگیری</div>
+              <div style={{ fontSize: 44, marginBottom: 4 }}>✨</div>
+              <div style={{ fontWeight: 800, fontSize: 14 }}>شروع یادگیری</div>
             </button>
-            <div style={{ marginTop: 20, fontSize: 13, color: "rgba(255,255,255,0.8)", textShadow: "0 1px 8px rgba(0,0,0,0.3)" }}>برای شروع کلیک کن</div>
+            <div style={{ marginTop: 18, fontSize: 13, color: "rgba(255,255,255,0.7)", textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>برای شروع کلیک کن</div>
           </div>
         </div>
       )}
@@ -446,6 +470,10 @@ export default function StudentDashboard() {
         @keyframes fadeOut {
           0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
           100% { opacity: 0; transform: translate(-50%, -100%) scale(1.5); }
+        }
+        @keyframes floatBubble {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-12px); }
         }
       `}</style>
     </div>
