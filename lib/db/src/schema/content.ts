@@ -5,7 +5,7 @@ import { z } from "zod/v4";
 export const contentTable = pgTable("content", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
-  type: text("type").notNull().default("link"),
+  type: text("type").notNull().default("animation"),
   url: text("url"),
   filePath: text("file_path"),
   apiEndpoint: text("api_endpoint"),
@@ -13,6 +13,7 @@ export const contentTable = pgTable("content", {
   classId: integer("class_id"),
   bookId: integer("book_id"),
   description: text("description"),
+  orderIndex: integer("order_index").notNull().default(1),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

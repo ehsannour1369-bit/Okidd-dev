@@ -7,6 +7,13 @@ export const branchesTable = pgTable("branches", {
   schoolId: integer("school_id").notNull(),
   name: text("name").notNull(),
   address: text("address"),
+  phone: text("phone"),
+  academicYear: text("academic_year"),
+  managerUserId: integer("manager_user_id"),
+  managerName: text("manager_name"),
+  managerPhone: text("manager_phone"),
+  managerNationalId: text("manager_national_id"),
+  educationalLevels: text("educational_levels"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

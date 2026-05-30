@@ -6,8 +6,8 @@ export const notificationRepliesTable = pgTable("notification_replies", {
   id: serial("id").primaryKey(),
   notificationId: integer("notification_id").notNull(),
   senderId: integer("sender_id").notNull(),
-  senderRole: text("sender_role").notNull().default("student"),
-  senderName: text("sender_name").notNull().default(""),
+  senderRole: text("sender_role").notNull(),
+  senderName: text("sender_name").notNull(),
   body: text("body").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

@@ -11,6 +11,17 @@ export const notificationsTable = pgTable("notifications", {
   branchId: integer("branch_id"),
   gradeLevelId: integer("grade_level_id"),
   classId: integer("class_id"),
+  // JSON arrays for specific recipients (null = همه / all in category)
+  recipientStudentIds: text("recipient_student_ids"),
+  recipientTeacherIds: text("recipient_teacher_ids"),
+  recipientClassIds: text("recipient_class_ids"),
+  recipientBranchIds: text("recipient_branch_ids"),
+  recipientGrades: text("recipient_grades"),
+  recipientGradeLevels: text("recipient_grade_levels"),
+  // Sender info (null = sent by system/admin)
+  fromUserId: integer("from_user_id"),
+  fromRole: text("from_role"),
+  fromName: text("from_name"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
