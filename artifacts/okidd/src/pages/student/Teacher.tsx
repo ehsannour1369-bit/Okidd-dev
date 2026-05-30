@@ -61,8 +61,8 @@ export default function StudentTeacher() {
   });
 
   return (
-    <div>
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: "#2d1b69", marginBottom: 24 }}>
+    <div style={{ padding: "24px 20px", minHeight: "100vh", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
+      <h1 style={{ fontSize: 22, fontWeight: 800, color: "white", marginBottom: 24, textShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>
         👨‍🏫 مدرس من
       </h1>
 

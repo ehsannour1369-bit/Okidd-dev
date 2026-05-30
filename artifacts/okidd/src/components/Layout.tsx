@@ -369,6 +369,11 @@ export default function Layout({ children }: { children: ReactNode }) {
         width: showDesktopSidebar ? "calc(100% - 240px)" : "100%",
         maxWidth: "100%",
         overflow: "hidden",
+        background: isStudent
+          ? (isGirl
+            ? "linear-gradient(135deg, #4facfe 0%, #c084fc 38%, #f472b6 72%, #fb7185 100%)"
+            : "linear-gradient(135deg, #4facfe 0%, #818cf8 42%, #a78bfa 72%, #c084fc 100%)")
+          : undefined,
       }}>
         {/* Topbar — hidden for student */}
         {!isStudent && (
@@ -409,7 +414,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           </div>
         )}
         {/* Page content */}
-        <div style={{ padding: isMobile ? "12px" : "24px" }}>{children}</div>
+        <div style={{ padding: isStudent ? 0 : (isMobile ? "12px" : "24px") }}>{children}</div>
       </div>
     </div>
   );

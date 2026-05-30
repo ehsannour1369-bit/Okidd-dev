@@ -96,10 +96,10 @@ export default function StudentNotifications() {
   const accentColor = user?.gender === "female" ? "#ec4899" : "#7c3aed";
 
   return (
-    <div>
+    <div style={{ padding: "24px 20px", minHeight: "100vh", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#2d1b69" }}>🔔 اعلانات و پیام‌ها</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "white", textShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>🔔 اعلانات و پیام‌ها</h1>
         <button onClick={() => setShowForm(!showForm)}
           style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", background: `linear-gradient(135deg, ${accentColor}, ${user?.gender === "female" ? "#f472b6" : "#a855f7"})`, border: "none", borderRadius: 12, color: "white", fontSize: 14, fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", boxShadow: `0 4px 15px ${accentColor}40` }}>
           <Plus size={16} /> پیام جدید
