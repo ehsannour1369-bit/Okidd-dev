@@ -3,7 +3,7 @@ import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
-import { Menu, X, Lock, CheckCircle, ChevronRight, ChevronDown, ChevronUp, Bell, Calendar, Plus, Send as SendIcon, MessageCircle } from "lucide-react";
+import { Menu, X, Lock, CheckCircle, ChevronRight, ChevronDown, ChevronUp, Bell, Calendar, Plus, Send as SendIcon, MessageCircle, Home, GraduationCap, BookOpen, Star } from "lucide-react";
 import NotificationThread from "../../components/NotificationThread";
 
 interface BalloonItem {
@@ -52,6 +52,7 @@ export default function StudentDashboard() {
 
   const [screen, setScreen] = useState<Screen>("home");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const [menuSection, setMenuSection] = useState<MenuSection>("books");
   const [selectedBook, setSelectedBook] = useState<any>(null);
   const [currentLesson, setCurrentLesson] = useState(1);
@@ -247,203 +248,148 @@ export default function StudentDashboard() {
         </div>
       )}
 
-      {/* Score display */}
-      <div style={{ position: "absolute", top: 16, left: 16, zIndex: 20, background: "rgba(245,158,11,0.15)", border: "1px solid rgba(245,158,11,0.4)", borderRadius: 12, padding: "8px 14px", display: "flex", alignItems: "center", gap: 6 }}>
-        <span style={{ fontSize: 16 }}>⭐</span>
-        <span style={{ color: "#fbbf24", fontWeight: 700 }}>{score.toLocaleString("fa-IR")}</span>
+      {/* Top bar */}
+      <div style={{ position: "absolute", top: 16, left: 0, right: 0, zIndex: 20, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 16px" }}>
+        {/* Bell — left */}
+        <button onClick={() => setNotifOpen(true)} style={{ position: "relative", width: 44, height: 44, borderRadius: 12, background: "rgba(30,18,60,0.8)", border: `1px solid ${accent}44`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: accentLight }}>
+          <Bell size={20} />
+          {receivedNotifs.length > 0 && (
+            <span style={{ position: "absolute", top: 8, left: 8, width: 8, height: 8, background: "#f59e0b", borderRadius: "50%", border: "1px solid rgba(18,14,42,0.9)" }} />
+          )}
+        </button>
+        {/* Score — center */}
+        <div style={{ background: "rgba(245,158,11,0.15)", border: "1px solid rgba(245,158,11,0.4)", borderRadius: 12, padding: "8px 14px", display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ fontSize: 16 }}>⭐</span>
+          <span style={{ color: "#fbbf24", fontWeight: 700 }}>{score.toLocaleString("fa-IR")}</span>
+        </div>
+        {/* Hamburger — right */}
+        <button onClick={() => setMenuOpen(true)} style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(30,18,60,0.8)", border: `1px solid ${accent}44`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: accentLight }}>
+          <Menu size={22} />
+        </button>
       </div>
 
-      {/* Hamburger */}
-      <button onClick={() => setMenuOpen(true)} style={{ position: "absolute", top: 16, right: 16, zIndex: 20, background: "rgba(30,18,60,0.8)", border: `1px solid ${accent}44`, borderRadius: 12, padding: 10, cursor: "pointer", color: accentLight }}>
-        <Menu size={22} />
-        {receivedNotifs.length > 0 && (
-          <span style={{ position: "absolute", top: 6, right: 6, width: 8, height: 8, background: "#f59e0b", borderRadius: "50%", border: "1px solid rgba(0,0,0,0.5)" }} />
-        )}
-      </button>
-
-      {/* Slide-out menu */}
-      <div style={{ position: "fixed", top: 0, right: menuOpen ? 0 : "-100%", width: 300, height: "100vh", background: "rgba(18,14,42,0.98)", border: `1px solid ${accent}33`, zIndex: 500, transition: "right 0.3s ease", overflowY: "auto", boxShadow: menuOpen ? `-20px 0 60px rgba(0,0,0,0.8)` : "none" }}>
-        <div style={{ padding: 18 }}>
+      {/* ── Hamburger slide-out (nav cards) ── */}
+      <div style={{ position: "fixed", top: 0, right: menuOpen ? 0 : "-100%", width: 280, height: "100vh", background: "rgba(13,10,26,0.97)", backdropFilter: "blur(20px)", border: `1px solid ${accent}33`, zIndex: 500, transition: "right 0.3s ease", overflowY: "auto", boxShadow: menuOpen ? `-20px 0 60px rgba(0,0,0,0.8)` : "none" }}>
+        <div style={{ padding: "20px 16px" }}>
           {/* Header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-            <div style={{ fontWeight: 800, fontSize: 18, color: "#f8f5ff" }}>منو</div>
-            <button onClick={() => setMenuOpen(false)} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer" }}><X size={20} /></button>
+            <div style={{ fontWeight: 800, fontSize: 17, color: "#f8f5ff" }}>منو</div>
+            <button onClick={() => setMenuOpen(false)} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer", padding: 4 }}><X size={20} /></button>
           </div>
-
-          {/* Profile */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20, padding: "12px 14px", background: `${accent}22`, borderRadius: 14, border: `1px solid ${accent}33` }}>
-            <div style={{ fontSize: 32 }}>{isGirl ? "👧" : "👦"}</div>
+          {/* Profile chip */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24, padding: "12px 14px", background: `${accent}1a`, borderRadius: 16, border: `1px solid ${accent}33` }}>
+            <div style={{ fontSize: 30 }}>{isGirl ? "👧" : "👦"}</div>
             <div>
-              <div style={{ fontWeight: 700, color: "#f8f5ff" }}>{user?.name}</div>
-              <div style={{ fontSize: 12, color: "#8b5cf6" }}>دانش‌آموز</div>
+              <div style={{ fontWeight: 700, color: "#f8f5ff", fontSize: 14 }}>{user?.name}</div>
+              <div style={{ fontSize: 11, color: accentLight }}>دانش‌آموز</div>
             </div>
           </div>
-
-          {/* Section Tabs */}
-          <div style={{ display: "flex", gap: 5, marginBottom: 16 }}>
-            {([["books", "📚", "کتاب‌هام"], ["school", "🏫", "مدرسه"], ["notifs", "🔔", "اعلانات"]] as const).map(([sec, emoji, label]) => (
-              <button key={sec} onClick={() => setMenuSection(sec)} style={{ flex: 1, padding: "7px 0", borderRadius: 10, border: `1px solid ${menuSection === sec ? accent : "rgba(139,92,246,0.2)"}`, background: menuSection === sec ? `${accent}22` : "transparent", color: menuSection === sec ? accentLight : "#8b5cf6", fontSize: 11, fontFamily: "Vazirmatn", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, position: "relative" }}>
-                <span style={{ fontSize: 14 }}>{emoji}</span>
-                <span>{label}</span>
-                {sec === "notifs" && receivedNotifs.length > 0 && (
-                  <span style={{ position: "absolute", top: 4, right: 4, width: 7, height: 7, background: "#f59e0b", borderRadius: "50%" }} />
-                )}
+          {/* 2×2 nav cards */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            {([
+              { icon: <Home size={26} />, label: "خانه", color: "#6366f1", bg: "rgba(99,102,241,0.15)", action: () => { setScreen("home"); setMenuOpen(false); } },
+              { icon: <GraduationCap size={26} />, label: "معلم من", color: "#10b981", bg: "rgba(16,185,129,0.15)", action: () => { navigate("/student/teacher"); setMenuOpen(false); } },
+              { icon: <BookOpen size={26} />, label: "کتاب‌های من", color: accentLight, bg: `${accent}1a`, action: () => { navigate("/student/books"); setMenuOpen(false); } },
+              { icon: <Star size={26} />, label: "رتبه من", color: "#f59e0b", bg: "rgba(245,158,11,0.15)", action: () => { navigate("/student/ranking"); setMenuOpen(false); } },
+            ] as const).map((item, i) => (
+              <button key={i} onClick={item.action} style={{ background: item.bg, border: `1px solid ${item.color}44`, borderRadius: 16, padding: "18px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, color: item.color, fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 700, transition: "transform 0.15s", boxShadow: `0 4px 20px ${item.color}22` }}
+                onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.04)")}
+                onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
+              >
+                {item.icon}
+                {item.label}
               </button>
             ))}
           </div>
+        </div>
+      </div>
+      {menuOpen && <div onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 499 }} />}
 
-          {/* My Books Section */}
-          {menuSection === "books" && (
-            <div>
-              {enrolledBooks.length === 0 ? (
-                <div style={{ color: "#8b5cf6", fontSize: 13, padding: "8px 0", textAlign: "center" }}>هیچ کتابی ثبت نشده</div>
-              ) : (
-                enrolledBooks.map((book: any) => {
-                  const isExpanded = expandedMenuBook === book.id;
-                  const bookUnlocks = new Set(allUnlocks.filter((u: any) => u.bookId === book.id).map((u: any) => u.lessonId));
-                  const maxUnlocked = bookUnlocks.size > 0 ? Math.max(...bookUnlocks) : 0;
-                  const bookProgress = new Set(progress.filter(p => p.completed && p.bookId === book.id).map(p => p.lessonId));
-                  return (
-                    <div key={book.id} style={{ marginBottom: 8, background: "rgba(30,18,60,0.6)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 12, overflow: "hidden" }}>
-                      <button onClick={() => setExpandedMenuBook(isExpanded ? null : book.id)} style={{ width: "100%", padding: "11px 14px", background: "transparent", border: "none", cursor: "pointer", fontFamily: "Vazirmatn", textAlign: "right", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <div>
-                          <div style={{ fontWeight: 600, color: "#f8f5ff", fontSize: 13 }}>{book.title}</div>
-                          <div style={{ fontSize: 11, color: "#8b5cf6" }}>{book.completedLessons}/{book.lessonCount} درس</div>
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <button onClick={e => { e.stopPropagation(); setSelectedBook(book); setScreen("lesson"); setMenuOpen(false); setCurrentLesson(1); }} style={{ padding: "3px 8px", background: `${accent}33`, border: `1px solid ${accent}55`, borderRadius: 6, color: accentLight, fontSize: 10, cursor: "pointer", fontFamily: "Vazirmatn" }}>شروع</button>
-                          {isExpanded ? <ChevronDown size={14} style={{ color: "#8b5cf6" }} /> : <ChevronRight size={14} style={{ color: "#8b5cf6", transform: "rotate(180deg)" }} />}
-                        </div>
-                      </button>
-                      {isExpanded && (
-                        <div style={{ padding: "0 12px 12px", borderTop: "1px solid rgba(139,92,246,0.1)" }}>
-                          <div style={{ display: "flex", flexWrap: "wrap", gap: 4, paddingTop: 8 }}>
-                            {Array.from({ length: book.lessonCount }, (_, i) => i + 1).map(lessonId => {
-                              const isUnlocked = bookUnlocks.has(lessonId) || maxUnlocked >= lessonId;
-                              const isCompleted = bookProgress.has(lessonId);
-                              return (
-                                <button key={lessonId} disabled={!isUnlocked} onClick={() => { if (isUnlocked) { setSelectedBook(book); setCurrentLesson(lessonId); setScreen("lesson"); setMenuOpen(false); } }} style={{ width: 32, height: 32, borderRadius: 8, cursor: isUnlocked ? "pointer" : "not-allowed", fontFamily: "Vazirmatn", fontSize: 11, fontWeight: 600, background: isCompleted ? "rgba(34,197,94,0.2)" : isUnlocked ? `${accent}22` : "rgba(100,100,100,0.15)", border: `1px solid ${isCompleted ? "rgba(34,197,94,0.5)" : isUnlocked ? `${accent}55` : "rgba(100,100,100,0.3)"}`, color: isCompleted ? "#4ade80" : isUnlocked ? accentLight : "#6b7280", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                  {isCompleted ? "✓" : isUnlocked ? lessonId : <Lock size={8} />}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
+      {/* ── Notification drawer (bell) ── */}
+      <div style={{ position: "fixed", top: 0, left: notifOpen ? 0 : "-100%", width: 300, height: "100vh", background: "rgba(13,10,26,0.97)", backdropFilter: "blur(20px)", border: `1px solid ${accent}33`, zIndex: 500, transition: "left 0.3s ease", overflowY: "auto", boxShadow: notifOpen ? `20px 0 60px rgba(0,0,0,0.8)` : "none" }}>
+        <div style={{ padding: "20px 16px" }}>
+          {/* Header */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+            <button onClick={() => setNotifOpen(false)} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer", padding: 4 }}><X size={20} /></button>
+            <div style={{ fontWeight: 800, fontSize: 17, color: "#f8f5ff", display: "flex", alignItems: "center", gap: 8 }}>
+              <Bell size={17} color={accentLight} /> اعلانات
+            </div>
+          </div>
+          {/* Sub-tabs */}
+          <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+            <button onClick={() => setNotifTab("received")} style={{ flex: 1, padding: "7px 0", borderRadius: 9, border: `1px solid ${notifTab === "received" ? "#f59e0b" : "rgba(139,92,246,0.2)"}`, background: notifTab === "received" ? "rgba(245,158,11,0.15)" : "transparent", color: notifTab === "received" ? "#fbbf24" : "#8b5cf6", fontSize: 11, fontFamily: "Vazirmatn", cursor: "pointer" }}>
+              🔔 دریافتی {receivedNotifs.length > 0 && `(${receivedNotifs.length})`}
+            </button>
+            <button onClick={() => setNotifTab("sent")} style={{ flex: 1, padding: "7px 0", borderRadius: 9, border: `1px solid ${notifTab === "sent" ? accent : "rgba(139,92,246,0.2)"}`, background: notifTab === "sent" ? `${accent}22` : "transparent", color: notifTab === "sent" ? accentLight : "#8b5cf6", fontSize: 11, fontFamily: "Vazirmatn", cursor: "pointer" }}>
+              ✉️ ارسالی {sentNotifs.length > 0 && `(${sentNotifs.length})`}
+            </button>
+          </div>
+          {/* Send button */}
+          <button onClick={() => setShowNotifForm(v => !v)} style={{ width: "100%", marginBottom: 10, padding: "9px 0", background: `${accent}22`, border: `1px solid ${accent}44`, borderRadius: 10, color: accentLight, fontFamily: "Vazirmatn", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+            <Plus size={13} /> پیام جدید
+          </button>
+          {/* Send form */}
+          {showNotifForm && (
+            <div style={{ background: "rgba(30,18,60,0.8)", border: `1px solid ${accent}33`, borderRadius: 12, padding: 12, marginBottom: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#f8f5ff" }}>ارسال پیام ✉️</div>
+                <button onClick={() => setShowNotifForm(false)} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer" }}><X size={14} /></button>
+              </div>
+              <div style={{ display: "grid", gap: 8 }}>
+                <select value={notifForm.targetRole} onChange={e => setNotifForm({ ...notifForm, targetRole: e.target.value })} style={{ width: "100%", background: "rgba(20,12,45,0.9)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 8, color: "#f8f5ff", padding: "7px 10px", fontSize: 12, fontFamily: "Vazirmatn", direction: "rtl" }}>
+                  <option value="teacher">معلم</option>
+                  <option value="school_manager">مدیر مدرسه</option>
+                </select>
+                <input value={notifForm.title} onChange={e => setNotifForm({ ...notifForm, title: e.target.value })} placeholder="موضوع..." style={{ width: "100%", background: "rgba(20,12,45,0.9)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 8, color: "#f8f5ff", padding: "7px 10px", fontSize: 12, fontFamily: "Vazirmatn", direction: "rtl", outline: "none", boxSizing: "border-box" as const }} />
+                <textarea value={notifForm.body} onChange={e => setNotifForm({ ...notifForm, body: e.target.value })} rows={3} placeholder="متن پیام..." style={{ width: "100%", background: "rgba(20,12,45,0.9)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 8, color: "#f8f5ff", padding: "7px 10px", fontSize: 12, fontFamily: "Vazirmatn", direction: "rtl", outline: "none", resize: "vertical", boxSizing: "border-box" as const }} />
+                <button onClick={handleNotifSend} disabled={!notifForm.title.trim() || !notifForm.body.trim() || createNotifMut.isPending}
+                  style={{ width: "100%", padding: "9px 0", background: `linear-gradient(135deg, ${accent}, ${accentLight})`, border: "none", borderRadius: 8, color: "white", fontFamily: "Vazirmatn", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, opacity: (!notifForm.title.trim() || !notifForm.body.trim()) ? 0.5 : 1 }}>
+                  <SendIcon size={12} /> {createNotifMut.isPending ? "در حال ارسال..." : "ارسال"}
+                </button>
+              </div>
+            </div>
+          )}
+          {/* Notification list */}
+          {(notifTab === "received" ? receivedNotifs : sentNotifs).map((n: any) => {
+            const isExpanded = expandedNotifIds.has(n.id);
+            const isSent = notifTab === "sent";
+            return (
+              <div key={n.id} style={{ background: "rgba(30,18,60,0.6)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 12, marginBottom: 8, overflow: "hidden" }}>
+                <div style={{ padding: "10px 12px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, color: "#f8f5ff", fontSize: 12, marginBottom: 3 }}>{n.title}</div>
+                      <div style={{ fontSize: 11, color: "#c4b5fd", lineHeight: 1.5 }}>{n.body}</div>
+                      {isSent && n.targetRole && (
+                        <span style={{ display: "inline-block", marginTop: 4, background: `${accent}22`, border: `1px solid ${accent}44`, borderRadius: 999, padding: "1px 7px", fontSize: 10, color: accentLight }}>
+                          به: {n.targetRole === "school_manager" ? "مدیر" : "معلم"}
+                        </span>
                       )}
+                      {n.createdAt && <div style={{ fontSize: 10, color: "#8b5cf6", marginTop: 3 }}>{new Date(n.createdAt).toLocaleDateString("fa-IR")}</div>}
                     </div>
-                  );
-                })
-              )}
-            </div>
-          )}
-
-          {/* My School Section — Exam Schedule */}
-          {menuSection === "school" && (
-            <div>
-              <div style={{ fontSize: 12, color: "#a855f7", marginBottom: 10, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
-                <Calendar size={12} /> تقویم امتحانی
-              </div>
-              {examSchedule.length === 0 ? (
-                <div style={{ color: "#8b5cf6", fontSize: 12, padding: "8px 0", textAlign: "center" }}>امتحانی ثبت نشده</div>
-              ) : (
-                examSchedule.map((exam: any) => (
-                  <div key={exam.id} style={{ background: "rgba(30,18,60,0.6)", borderRadius: 10, padding: "10px 12px", marginBottom: 6, display: "flex", justifyContent: "space-between", alignItems: "center", borderRight: "2px solid #a855f7" }}>
-                    <div style={{ fontWeight: 600, color: "#f8f5ff", fontSize: 12 }}>{exam.subject ?? exam.title ?? "امتحان"}</div>
-                    {exam.examDate && <div style={{ fontSize: 10, color: "#a855f7", background: "rgba(168,85,247,0.15)", padding: "3px 8px", borderRadius: 6 }}>{new Date(exam.examDate).toLocaleDateString("fa-IR")}</div>}
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-
-          {/* Notifications Section */}
-          {menuSection === "notifs" && (
-            <div>
-              {/* Sub-tabs */}
-              <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
-                <button onClick={() => setNotifTab("received")} style={{ flex: 1, padding: "7px 0", borderRadius: 9, border: `1px solid ${notifTab === "received" ? "#f59e0b" : "rgba(139,92,246,0.2)"}`, background: notifTab === "received" ? "rgba(245,158,11,0.15)" : "transparent", color: notifTab === "received" ? "#fbbf24" : "#8b5cf6", fontSize: 11, fontFamily: "Vazirmatn", cursor: "pointer" }}>
-                  🔔 دریافتی {receivedNotifs.length > 0 && `(${receivedNotifs.length})`}
-                </button>
-                <button onClick={() => setNotifTab("sent")} style={{ flex: 1, padding: "7px 0", borderRadius: 9, border: `1px solid ${notifTab === "sent" ? accent : "rgba(139,92,246,0.2)"}`, background: notifTab === "sent" ? `${accent}22` : "transparent", color: notifTab === "sent" ? accentLight : "#8b5cf6", fontSize: 11, fontFamily: "Vazirmatn", cursor: "pointer" }}>
-                  ✉️ ارسالی {sentNotifs.length > 0 && `(${sentNotifs.length})`}
-                </button>
-              </div>
-
-              {/* Send button */}
-              <button onClick={() => setShowNotifForm(v => !v)} style={{ width: "100%", marginBottom: 10, padding: "9px 0", background: `${accent}22`, border: `1px solid ${accent}44`, borderRadius: 10, color: accentLight, fontFamily: "Vazirmatn", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                <Plus size={13} /> پیام جدید
-              </button>
-
-              {/* Send form */}
-              {showNotifForm && (
-                <div style={{ background: "rgba(30,18,60,0.8)", border: `1px solid ${accent}33`, borderRadius: 12, padding: 12, marginBottom: 12 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: "#f8f5ff" }}>ارسال پیام ✉️</div>
-                    <button onClick={() => setShowNotifForm(false)} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer" }}><X size={14} /></button>
-                  </div>
-                  <div style={{ display: "grid", gap: 8 }}>
-                    <select value={notifForm.targetRole} onChange={e => setNotifForm({ ...notifForm, targetRole: e.target.value })} style={{ width: "100%", background: "rgba(20,12,45,0.9)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 8, color: "#f8f5ff", padding: "7px 10px", fontSize: 12, fontFamily: "Vazirmatn", direction: "rtl" }}>
-                      <option value="teacher">معلم</option>
-                      <option value="school_manager">مدیر مدرسه</option>
-                    </select>
-                    <input value={notifForm.title} onChange={e => setNotifForm({ ...notifForm, title: e.target.value })} placeholder="موضوع..." style={{ width: "100%", background: "rgba(20,12,45,0.9)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 8, color: "#f8f5ff", padding: "7px 10px", fontSize: 12, fontFamily: "Vazirmatn", direction: "rtl", outline: "none", boxSizing: "border-box" as const }} />
-                    <textarea value={notifForm.body} onChange={e => setNotifForm({ ...notifForm, body: e.target.value })} rows={3} placeholder="متن پیام..." style={{ width: "100%", background: "rgba(20,12,45,0.9)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 8, color: "#f8f5ff", padding: "7px 10px", fontSize: 12, fontFamily: "Vazirmatn", direction: "rtl", outline: "none", resize: "vertical", boxSizing: "border-box" as const }} />
-                    <button onClick={handleNotifSend} disabled={!notifForm.title.trim() || !notifForm.body.trim() || createNotifMut.isPending}
-                      style={{ width: "100%", padding: "9px 0", background: `linear-gradient(135deg, ${accent}, ${accentLight})`, border: "none", borderRadius: 8, color: "white", fontFamily: "Vazirmatn", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, opacity: (!notifForm.title.trim() || !notifForm.body.trim()) ? 0.5 : 1 }}>
-                      <SendIcon size={12} /> {createNotifMut.isPending ? "در حال ارسال..." : "ارسال"}
+                    <button onClick={() => toggleNotifExpand(n.id)} style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 3, padding: "4px 7px", background: isExpanded ? `${accent}22` : "rgba(139,92,246,0.1)", border: `1px solid ${accent}33`, borderRadius: 7, color: accentLight, cursor: "pointer", fontSize: 10, fontFamily: "Vazirmatn" }}>
+                      <MessageCircle size={11} />
+                      {isExpanded ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
                     </button>
                   </div>
                 </div>
-              )}
-
-              {/* Notification list */}
-              {(notifTab === "received" ? receivedNotifs : sentNotifs).map((n: any) => {
-                const isExpanded = expandedNotifIds.has(n.id);
-                const isSent = notifTab === "sent";
-                return (
-                  <div key={n.id} style={{ background: "rgba(30,18,60,0.6)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 12, marginBottom: 8, overflow: "hidden" }}>
-                    <div style={{ padding: "10px 12px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontWeight: 700, color: "#f8f5ff", fontSize: 12, marginBottom: 3 }}>{n.title}</div>
-                          <div style={{ fontSize: 11, color: "#c4b5fd", lineHeight: 1.5 }}>{n.body}</div>
-                          {isSent && n.targetRole && (
-                            <span style={{ display: "inline-block", marginTop: 4, background: `${accent}22`, border: `1px solid ${accent}44`, borderRadius: 999, padding: "1px 7px", fontSize: 10, color: accentLight }}>
-                              به: {n.targetRole === "school_manager" ? "مدیر" : "معلم"}
-                            </span>
-                          )}
-                          {n.createdAt && <div style={{ fontSize: 10, color: "#8b5cf6", marginTop: 3 }}>{new Date(n.createdAt).toLocaleDateString("fa-IR")}</div>}
-                        </div>
-                        <button onClick={() => toggleNotifExpand(n.id)} style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 3, padding: "4px 7px", background: isExpanded ? `${accent}22` : "rgba(139,92,246,0.1)", border: `1px solid ${accent}33`, borderRadius: 7, color: accentLight, cursor: "pointer", fontSize: 10, fontFamily: "Vazirmatn" }}>
-                          <MessageCircle size={11} />
-                          {isExpanded ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
-                        </button>
-                      </div>
-                    </div>
-                    {isExpanded && (
-                      <div style={{ borderTop: `1px solid ${accent}22`, padding: "8px 12px" }}>
-                        <NotificationThread
-                          notifId={n.id}
-                          currentUserId={user?.id ?? 0}
-                          currentUserName={user?.name ?? ""}
-                          currentUserRole="student"
-                        />
-                      </div>
-                    )}
+                {isExpanded && (
+                  <div style={{ borderTop: `1px solid ${accent}22`, padding: "8px 12px" }}>
+                    <NotificationThread notifId={n.id} currentUserId={user?.id ?? 0} currentUserName={user?.name ?? ""} currentUserRole="student" />
                   </div>
-                );
-              })}
-              {(notifTab === "received" ? receivedNotifs : sentNotifs).length === 0 && (
-                <div style={{ textAlign: "center", padding: "24px 0", color: "#8b5cf6", fontSize: 12 }}>
-                  <Bell size={28} style={{ marginBottom: 8, opacity: 0.4, display: "block", margin: "0 auto 8px" }} />
-                  {notifTab === "received" ? "اعلانی وجود ندارد" : "پیامی ارسال نکرده‌اید"}
-                </div>
-              )}
+                )}
+              </div>
+            );
+          })}
+          {(notifTab === "received" ? receivedNotifs : sentNotifs).length === 0 && (
+            <div style={{ textAlign: "center", padding: "24px 0", color: "#8b5cf6", fontSize: 12 }}>
+              <Bell size={28} style={{ marginBottom: 8, opacity: 0.4, display: "block", margin: "0 auto 8px" }} />
+              {notifTab === "received" ? "اعلانی وجود ندارد" : "پیامی ارسال نکرده‌اید"}
             </div>
           )}
         </div>
       </div>
-      {menuOpen && <div onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 499 }} />}
+      {notifOpen && <div onClick={() => setNotifOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 499 }} />}
 
       {/* HOME */}
       {screen === "home" && (
