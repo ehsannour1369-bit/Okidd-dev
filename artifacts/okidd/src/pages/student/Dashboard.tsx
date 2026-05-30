@@ -207,7 +207,7 @@ export default function StudentDashboard() {
   const completedProgressIds = new Set(progress.filter(p => p.completed && p.bookId === selectedBook?.id).map(p => p.lessonId));
 
   return (
-    <div style={{ position: "relative", minHeight: "calc(100vh - 60px)", overflow: "hidden", background: "linear-gradient(135deg, #0d0a1a 0%, #1a0a2e 50%, #0a1a2e 100%)" }}>
+    <div style={{ position: "relative", minHeight: "100vh", overflow: "hidden", background: "linear-gradient(135deg, #0d0a1a 0%, #1a0a2e 50%, #0a1a2e 100%)" }}>
 
       {/* Balloons */}
       {balloons.filter(b => !b.popped).map(balloon => (

@@ -177,7 +177,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const accentColor = isGirl ? "#ec4899" : "#7c3aed";
   const accentLight = isGirl ? "#f472b6" : "#a855f7";
 
-  const collapsible = !isAdmin;
+  const collapsible = !isAdmin && user.role !== "student";
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", direction: "rtl" }}>
@@ -478,11 +478,14 @@ export default function Layout({ children }: { children: ReactNode }) {
         marginRight: isAdmin ? 240 : 0,
         flex: 1, minHeight: "100vh", position: "relative",
       }}>
-        {/* Topbar */}
+        {/* Topbar — hidden for student (they have their own dashboard UI) */}
         <div style={{
-          height: 60, background: "rgba(18,14,42,0.98)",
+          height: user.role === "student" ? 0 : 60,
+          overflow: "hidden",
+          background: "rgba(18,14,42,0.98)",
           borderBottom: "1px solid rgba(139,92,246,0.2)",
-          display: "flex", alignItems: "center", justifyContent: "space-between",
+          display: user.role === "student" ? "none" : "flex",
+          alignItems: "center", justifyContent: "space-between",
           padding: "0 24px", position: "sticky", top: 0, zIndex: 40,
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
