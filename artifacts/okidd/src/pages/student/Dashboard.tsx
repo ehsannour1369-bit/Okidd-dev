@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Menu, X, Lock, CheckCircle, ChevronRight, ChevronDown, Bell, Calendar } from "lucide-react";
+import { Menu, X, Lock, CheckCircle, ChevronRight, ChevronDown, Bell, Calendar, Home, BookOpen, Trophy, Gamepad2 } from "lucide-react";
 
 interface BalloonItem {
   id: number; x: number; y: number; dx: number; dy: number;
@@ -39,6 +39,15 @@ function createBalloon(id: number, isGirl: boolean): BalloonItem {
 type Screen = "home" | "books" | "lesson";
 type MenuSection = "books" | "school";
 
+const menuItems = [
+  { icon: Home, label: "خانه", action: "home", color: "#22c55e", bg: "rgba(34,197,94,0.15)" },
+  { icon: BookOpen, label: "کتاب من", action: "books", color: "#3b82f6", bg: "rgba(59,130,246,0.15)" },
+  { icon: Bell, label: "اعلانات", action: "notifs", color: "#f59e0b", bg: "rgba(245,158,11,0.15)" },
+  { icon: Trophy, label: "رتبه من", action: "rank", color: "#a855f7", bg: "rgba(168,85,247,0.15)" },
+  { icon: Gamepad2, label: "بازی‌ها", action: "games", color: "#ec4899", bg: "rgba(236,72,153,0.15)" },
+  { icon: Calendar, label: "مدرسه من", action: "school", color: "#06b6d4", bg: "rgba(6,182,212,0.15)" },
+];
+
 export default function StudentDashboard() {
   const { user } = useAuthStore();
   const qc = useQueryClient();
@@ -49,6 +58,7 @@ export default function StudentDashboard() {
   const [screen, setScreen] = useState<Screen>("home");
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuSection, setMenuSection] = useState<MenuSection>("books");
+  const [notifPanel, setNotifPanel] = useState(false);
   const [selectedBook, setSelectedBook] = useState<any>(null);
   const [currentLesson, setCurrentLesson] = useState(1);
   const [expandedMenuBook, setExpandedMenuBook] = useState<number | null>(null);
@@ -208,115 +218,102 @@ export default function StudentDashboard() {
         <Menu size={22} />
       </button>
 
+      {/* Bell with badge */}
+      <button onClick={() => setNotifPanel(true)} style={{ position: "absolute", top: 16, right: 58, zIndex: 20, background: "rgba(30,18,60,0.8)", border: `1px solid ${accent}44`, borderRadius: 12, padding: 10, cursor: "pointer", color: accentLight }}>
+        <Bell size={22} />
+        {schoolNotifs.length > 0 && (
+          <div style={{ position: "absolute", top: -3, right: -3, width: 16, height: 16, background: "#ef4444", borderRadius: "50%", fontSize: 9, color: "white", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {schoolNotifs.length}
+          </div>
+        )}
+      </button>
+
       {/* Slide-out menu */}
-      <div style={{ position: "fixed", top: 0, right: menuOpen ? 0 : "-100%", width: 300, height: "100vh", background: "rgba(18,14,42,0.98)", border: `1px solid ${accent}33`, zIndex: 500, transition: "right 0.3s ease", overflowY: "auto", boxShadow: menuOpen ? `-20px 0 60px rgba(0,0,0,0.8)` : "none" }}>
+      <div style={{ position: "fixed", top: 0, right: menuOpen ? 0 : "-100%", width: 280, height: "100vh", zIndex: 500, transition: "right 0.3s ease", overflowY: "auto", boxShadow: menuOpen ? `-20px 0 60px rgba(0,0,0,0.8)` : "none", background: screen === "home" ? (isGirl ? "linear-gradient(135deg, #d946ef 0%, #a855f7 30%, #6366f1 60%, #0ea5e9 100%)" : "linear-gradient(135deg, #2563eb 0%, #7c3aed 40%, #9333ea 70%, #db2777 100%)") : "#1a1238", border: `1px solid ${accent}33` }}>
         <div style={{ padding: 18 }}>
           {/* Header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
             <div style={{ fontWeight: 800, fontSize: 18, color: "#f8f5ff" }}>منو</div>
-            <button onClick={() => setMenuOpen(false)} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer" }}><X size={20} /></button>
+            <button onClick={() => setMenuOpen(false)} style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 10, padding: 6, color: "#fff", cursor: "pointer" }}><X size={18} /></button>
           </div>
 
-          {/* Profile */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20, padding: "12px 14px", background: `${accent}22`, borderRadius: 14, border: `1px solid ${accent}33` }}>
-            <div style={{ fontSize: 32 }}>{isGirl ? "👧" : "👦"}</div>
+          {/* Profile card */}
+          <div style={{ marginBottom: 20, padding: "14px 16px", background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", borderRadius: 16, border: "1px solid rgba(255,255,255,0.25)", display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ fontSize: 40 }}>{isGirl ? "👧" : "👦"}</div>
             <div>
-              <div style={{ fontWeight: 700, color: "#f8f5ff" }}>{user?.name}</div>
-              <div style={{ fontSize: 12, color: "#8b5cf6" }}>دانش‌آموز</div>
+              <div style={{ fontWeight: 700, color: "#ffffff", fontSize: 14 }}>{user?.name}</div>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)" }}>دانش‌آموز</div>
             </div>
           </div>
 
-          {/* Section Tabs */}
-          <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
-            <button onClick={() => setMenuSection("books")} style={{ flex: 1, padding: "8px 0", borderRadius: 10, border: `1px solid ${menuSection === "books" ? accent : "rgba(139,92,246,0.2)"}`, background: menuSection === "books" ? `${accent}22` : "transparent", color: menuSection === "books" ? accentLight : "#8b5cf6", fontSize: 12, fontFamily: "Vazirmatn", cursor: "pointer" }}>📚 کتاب‌هام</button>
-            <button onClick={() => setMenuSection("school")} style={{ flex: 1, padding: "8px 0", borderRadius: 10, border: `1px solid ${menuSection === "school" ? accent : "rgba(139,92,246,0.2)"}`, background: menuSection === "school" ? `${accent}22` : "transparent", color: menuSection === "school" ? accentLight : "#8b5cf6", fontSize: 12, fontFamily: "Vazirmatn", cursor: "pointer" }}>🏫 مدرسه‌ام</button>
+          {/* Menu cards */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {menuItems.map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <button key={i} onClick={() => {
+                  if (item.action === "home") { setScreen("home"); setMenuOpen(false); }
+                  if (item.action === "books") { setScreen("books"); setMenuOpen(false); }
+                  if (item.action === "school") { setMenuSection("school"); }
+                  if (item.action === "notifs") { setNotifPanel(true); setMenuOpen(false); }
+                  if (item.action === "rank" || item.action === "games") { setMenuOpen(false); }
+                }} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 16px", background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 14, cursor: "pointer", fontFamily: "Vazirmatn", transition: "all 0.2s", width: "100%" }}
+                  onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.22)"; (e.currentTarget as HTMLElement).style.transform = "translateX(-4px)"; }}
+                  onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.12)"; (e.currentTarget as HTMLElement).style.transform = "translateX(0)"; }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: item.bg, display: "flex", alignItems: "center", justifyContent: "center", color: item.color, border: `1px solid ${item.color}44` }}>
+                    <Icon size={20} />
+                  </div>
+                  <div style={{ color: "#ffffff", fontWeight: 600, fontSize: 14 }}>{item.label}</div>
+                </button>
+              );
+            })}
           </div>
 
-          {/* My Books Section */}
-          {menuSection === "books" && (
-            <div>
-              {enrolledBooks.length === 0 ? (
-                <div style={{ color: "#8b5cf6", fontSize: 13, padding: "8px 0", textAlign: "center" }}>هیچ کتابی ثبت نشده</div>
-              ) : (
-                enrolledBooks.map((book: any) => {
-                  const isExpanded = expandedMenuBook === book.id;
-                  const bookUnlocks = new Set(allUnlocks.filter((u: any) => u.bookId === book.id).map((u: any) => u.lessonId));
-                  const maxUnlocked = bookUnlocks.size > 0 ? Math.max(...bookUnlocks) : 0;
-                  const bookProgress = new Set(progress.filter(p => p.completed && p.bookId === book.id).map(p => p.lessonId));
-                  return (
-                    <div key={book.id} style={{ marginBottom: 8, background: "rgba(30,18,60,0.6)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 12, overflow: "hidden" }}>
-                      <button onClick={() => setExpandedMenuBook(isExpanded ? null : book.id)} style={{ width: "100%", padding: "11px 14px", background: "transparent", border: "none", cursor: "pointer", fontFamily: "Vazirmatn", textAlign: "right", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <div>
-                          <div style={{ fontWeight: 600, color: "#f8f5ff", fontSize: 13 }}>{book.title}</div>
-                          <div style={{ fontSize: 11, color: "#8b5cf6" }}>{book.completedLessons}/{book.lessonCount} درس</div>
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <button onClick={e => { e.stopPropagation(); setSelectedBook(book); setScreen("lesson"); setMenuOpen(false); setCurrentLesson(1); }} style={{ padding: "3px 8px", background: `${accent}33`, border: `1px solid ${accent}55`, borderRadius: 6, color: accentLight, fontSize: 10, cursor: "pointer", fontFamily: "Vazirmatn" }}>شروع</button>
-                          {isExpanded ? <ChevronDown size={14} style={{ color: "#8b5cf6" }} /> : <ChevronRight size={14} style={{ color: "#8b5cf6", transform: "rotate(180deg)" }} />}
-                        </div>
-                      </button>
-                      {isExpanded && (
-                        <div style={{ padding: "0 12px 12px", borderTop: "1px solid rgba(139,92,246,0.1)" }}>
-                          <div style={{ display: "flex", flexWrap: "wrap", gap: 4, paddingTop: 8 }}>
-                            {Array.from({ length: book.lessonCount }, (_, i) => i + 1).map(lessonId => {
-                              const isUnlocked = bookUnlocks.has(lessonId) || maxUnlocked >= lessonId;
-                              const isCompleted = bookProgress.has(lessonId);
-                              return (
-                                <button key={lessonId} disabled={!isUnlocked} onClick={() => { if (isUnlocked) { setSelectedBook(book); setCurrentLesson(lessonId); setScreen("lesson"); setMenuOpen(false); } }} style={{ width: 32, height: 32, borderRadius: 8, cursor: isUnlocked ? "pointer" : "not-allowed", fontFamily: "Vazirmatn", fontSize: 11, fontWeight: 600, background: isCompleted ? "rgba(34,197,94,0.2)" : isUnlocked ? `${accent}22` : "rgba(100,100,100,0.15)", border: `1px solid ${isCompleted ? "rgba(34,197,94,0.5)" : isUnlocked ? `${accent}55` : "rgba(100,100,100,0.3)"}`, color: isCompleted ? "#4ade80" : isUnlocked ? accentLight : "#6b7280", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                  {isCompleted ? "✓" : isUnlocked ? lessonId : <Lock size={8} />}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          )}
-
-          {/* My School Section */}
+          {/* Expanded school section */}
           {menuSection === "school" && (
-            <div>
-              {/* Notifications */}
-              <div style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 12, color: "#f59e0b", marginBottom: 8, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
-                  <Bell size={12} /> اعلانات مدرسه
-                </div>
-                {schoolNotifs.length === 0 ? (
-                  <div style={{ color: "#8b5cf6", fontSize: 12 }}>اعلانی وجود ندارد</div>
-                ) : (
-                  schoolNotifs.slice(0, 4).map((n: any) => (
-                    <div key={n.id} style={{ background: "rgba(30,18,60,0.6)", borderRadius: 10, padding: "8px 12px", marginBottom: 6, borderRight: "2px solid #f59e0b" }}>
-                      <div style={{ fontWeight: 600, color: "#f8f5ff", fontSize: 12, marginBottom: 2 }}>{n.title}</div>
-                      <div style={{ fontSize: 11, color: "#c4b5fd" }}>{n.message}</div>
-                    </div>
-                  ))
-                )}
+            <div style={{ marginTop: 14, background: "rgba(255,255,255,0.08)", borderRadius: 14, border: "1px solid rgba(255,255,255,0.15)", padding: 12 }}>
+              <div style={{ fontWeight: 700, fontSize: 13, color: "#ffffff", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+                <Calendar size={14} /> تقویم امتحانی
               </div>
-              {/* Exam Schedule */}
-              <div>
-                <div style={{ fontSize: 12, color: "#a855f7", marginBottom: 8, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
-                  <Calendar size={12} /> تقویم امتحانی
-                </div>
-                {examSchedule.length === 0 ? (
-                  <div style={{ color: "#8b5cf6", fontSize: 12 }}>امتحانی ثبت نشده</div>
-                ) : (
-                  examSchedule.slice(0, 4).map((exam: any) => (
-                    <div key={exam.id} style={{ background: "rgba(30,18,60,0.6)", borderRadius: 10, padding: "8px 12px", marginBottom: 6, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <div style={{ fontWeight: 600, color: "#f8f5ff", fontSize: 12 }}>{exam.subject ?? exam.title ?? "امتحان"}</div>
-                      {exam.examDate && <div style={{ fontSize: 10, color: "#a855f7" }}>{new Date(exam.examDate).toLocaleDateString("fa-IR")}</div>}
-                    </div>
-                  ))
-                )}
-              </div>
+              {examSchedule.length === 0 ? (
+                <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, textAlign: "center" }}>امتحانی ثبت نشده</div>
+              ) : (
+                examSchedule.slice(0, 4).map((exam: any) => (
+                  <div key={exam.id} style={{ background: "rgba(255,255,255,0.08)", borderRadius: 8, padding: "6px 10px", marginBottom: 5, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ fontWeight: 600, color: "#ffffff", fontSize: 12 }}>{exam.subject ?? exam.title ?? "امتحان"}</div>
+                    {exam.examDate && <div style={{ fontSize: 10, color: "#a855f7" }}>{new Date(exam.examDate).toLocaleDateString("fa-IR")}</div>}
+                  </div>
+                ))
+              )}
             </div>
           )}
         </div>
       </div>
-      {menuOpen && <div onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 499 }} />}
+      {menuOpen && <div onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 499, background: "rgba(0,0,0,0.4)" }} />}
+
+      {/* Notification panel */}
+      {notifPanel && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 600, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ background: "#1a1238", border: `2px solid ${accent}44`, borderRadius: 20, padding: 24, width: "90%", maxWidth: 400, maxHeight: "70vh", overflowY: "auto", boxShadow: `0 0 60px ${accent}44` }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
+              <div style={{ fontWeight: 800, fontSize: 18, color: "#f8f5ff", display: "flex", alignItems: "center", gap: 8 }}>
+                <Bell size={20} color={accent} /> اعلانات
+              </div>
+              <button onClick={() => setNotifPanel(false)} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer" }}><X size={20} /></button>
+            </div>
+            {schoolNotifs.length === 0 ? (
+              <div style={{ color: "#8b5cf6", fontSize: 14, textAlign: "center", padding: "24px 0" }}>اعلانی وجود ندارد</div>
+            ) : (
+              schoolNotifs.map((n: any) => (
+                <div key={n.id} style={{ background: "rgba(30,18,60,0.6)", borderRadius: 12, padding: "10px 14px", marginBottom: 8, borderRight: `3px solid ${accent}` }}>
+                  <div style={{ fontWeight: 600, color: "#f8f5ff", fontSize: 13, marginBottom: 3 }}>{n.title}</div>
+                  <div style={{ fontSize: 11, color: "#c4b5fd" }}>{n.message}</div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
 
       {/* HOME */}
       {screen === "home" && (
