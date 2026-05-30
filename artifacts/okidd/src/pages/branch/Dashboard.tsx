@@ -46,7 +46,7 @@ function StatCard({ label, value, icon, color, link }: { label: string; value: n
       <div style={{ fontSize: 13, color: "#c4b5fd" }}>{label}</div>
     </div>
   );
-  if (link) return <Link href={link}><a style={{ textDecoration: "none" }}>{inner}</a></Link>;
+  if (link) return <Link href={link} style={{ textDecoration: "none" }}>{inner}</Link>;
   return inner;
 }
 
