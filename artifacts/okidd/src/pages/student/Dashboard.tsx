@@ -158,7 +158,7 @@ export default function StudentDashboard() {
   const completedProgressIds = new Set(progress.filter(p => p.completed && p.bookId === selectedBook?.id).map(p => p.lessonId));
 
   return (
-    <div style={{ position: "relative", minHeight: "calc(100vh - 60px)", overflow: "hidden", background: "linear-gradient(135deg, #0d0a1a 0%, #1a0a2e 50%, #0a1a2e 100%)" }}>
+    <div style={{ position: "relative", minHeight: "calc(100vh - 60px)", overflow: "hidden", background: screen === "home" ? "transparent" : "linear-gradient(135deg, #0d0a1a 0%, #1a0a2e 50%, #0a1a2e 100%)" }}>
 
       {/* Balloons */}
       {balloons.filter(b => !b.popped).map(balloon => (
@@ -321,17 +321,39 @@ export default function StudentDashboard() {
 
       {/* HOME */}
       {screen === "home" && (
-        <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 10, pointerEvents: "none" }}>
-          <div style={{ pointerEvents: "all", textAlign: "center" }}>
-            <div style={{ fontSize: 28, color: "#f8f5ff", fontWeight: 800, marginBottom: 8 }}>سلام {user?.name}! {isGirl ? "🌸" : "🚀"}</div>
-            <div style={{ fontSize: 14, color: "#8b5cf6", marginBottom: 40 }}>{isGirl ? "امروز هم عالی یاد بگیر!" : "بزن بریم یاد بگیریم!"}</div>
-            <button onClick={() => setScreen("books")} style={{ width: 160, height: 160, borderRadius: "50%", background: `radial-gradient(circle at 40% 35%, ${accentLight}, ${accent})`, border: "none", cursor: "pointer", boxShadow: `0 0 60px ${accent}88, 0 0 120px ${accent}44, inset 0 0 40px rgba(255,255,255,0.1)`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "Vazirmatn, sans-serif", color: "white", animation: "pulse 2s ease-in-out infinite", transition: "transform 0.2s" }}
+        <div style={{
+          position: "absolute", inset: 0, zIndex: 10,
+          backgroundImage: `url(${isGirl ? "/girl-bg.png" : "/boy-bg.png"})`,
+          backgroundSize: "cover", backgroundPosition: "center",
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        }}>
+          <div style={{ textAlign: "center", pointerEvents: "all" }}>
+            <div style={{
+              fontSize: 28, color: "#f8f5ff", fontWeight: 800, marginBottom: 8,
+              textShadow: "0 2px 20px rgba(0,0,0,0.5), 0 0 40px rgba(0,0,0,0.3)",
+            }}>سلام {user?.name}! {isGirl ? "🌸" : "🚀"}</div>
+            <div style={{
+              fontSize: 14, color: "#f8f5ff", marginBottom: 40,
+              textShadow: "0 1px 10px rgba(0,0,0,0.4)",
+            }}>{isGirl ? "امروز هم عالی یاد بگیر!" : "بزن بریم یاد بگیریم!"}</div>
+            <button onClick={() => setScreen("books")} style={{
+              width: 160, height: 160, borderRadius: "50%",
+              background: "rgba(255,255,255,0.2)",
+              backdropFilter: "blur(12px)",
+              border: "2px solid rgba(255,255,255,0.35)",
+              cursor: "pointer",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.25), inset 0 0 20px rgba(255,255,255,0.1)",
+              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+              fontFamily: "Vazirmatn, sans-serif", color: "white",
+              transition: "transform 0.2s",
+              textShadow: "0 1px 8px rgba(0,0,0,0.3)",
+            }}
               onMouseOver={e => (e.currentTarget.style.transform = "scale(1.08)")}
               onMouseOut={e => (e.currentTarget.style.transform = "scale(1)")}>
-              <div style={{ fontSize: 48, lineHeight: 1 }}>▶</div>
-              <div style={{ fontWeight: 800, fontSize: 18, marginTop: 6 }}>بازی!</div>
+              <div style={{ fontSize: 40, marginBottom: 6 }}>✨</div>
+              <div style={{ fontWeight: 800, fontSize: 15 }}>شروع یادگیری</div>
             </button>
-            <div style={{ marginTop: 20, fontSize: 13, color: "#6b5cf6" }}>روی دکمه کلیک کن</div>
+            <div style={{ marginTop: 20, fontSize: 13, color: "rgba(255,255,255,0.8)", textShadow: "0 1px 8px rgba(0,0,0,0.3)" }}>برای شروع کلیک کن</div>
           </div>
         </div>
       )}
