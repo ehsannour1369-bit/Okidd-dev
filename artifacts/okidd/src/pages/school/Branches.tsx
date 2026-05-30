@@ -330,17 +330,7 @@ export default function SchoolBranches() {
       {/* Add Grade Level Modal */}
       {addGLFor !== null && (
         <Modal title="افزودن مقطع تحصیلی" onClose={() => setAddGLFor(null)}>
-          <Lbl label="مقطع تحصیلی">
-            <select value={glForm.name} onChange={e => setGLForm({ name: e.target.value })} style={{ ...IS, appearance: "none" }}>
-              <option value="">انتخاب مقطع</option>
-              <option value="پیش‌دبستانی">پیش‌دبستانی</option>
-              <option value="دبستان">دبستان</option>
-              <option value="متوسطه اول">متوسطه اول</option>
-              <option value="متوسطه دوم">متوسطه دوم</option>
-              <option value="هنرستان">هنرستان</option>
-              <option value="دانشگاه">دانشگاه</option>
-            </select>
-          </Lbl>
+          <Lbl label="نام مقطع"><input value={glForm.name} onChange={e => setGLForm({ name: e.target.value })} style={IS} placeholder="مثال: دبستان، متوسطه اول" /></Lbl>
           <SaveBtn onClick={() => addGLMut.mutate({ branchId: addGLFor, name: glForm.name })} disabled={!glForm.name} />
         </Modal>
       )}
@@ -348,23 +338,7 @@ export default function SchoolBranches() {
       {/* Add Grade Modal */}
       {addGradeFor !== null && (
         <Modal title="افزودن پایه تحصیلی" onClose={() => setAddGradeFor(null)}>
-          <Lbl label="پایه تحصیلی">
-            <select value={grForm.name} onChange={e => setGrForm({ name: e.target.value })} style={{ ...IS, appearance: "none" }}>
-              <option value="">انتخاب پایه</option>
-              <option value="پایه اول">پایه اول</option>
-              <option value="پایه دوم">پایه دوم</option>
-              <option value="پایه سوم">پایه سوم</option>
-              <option value="پایه چهارم">پایه چهارم</option>
-              <option value="پایه پنجم">پایه پنجم</option>
-              <option value="پایه ششم">پایه ششم</option>
-              <option value="پایه هفتم">پایه هفتم</option>
-              <option value="پایه هشتم">پایه هشتم</option>
-              <option value="پایه نهم">پایه نهم</option>
-              <option value="پایه دهم">پایه دهم</option>
-              <option value="پایه یازدهم">پایه یازدهم</option>
-              <option value="پایه دوازدهم">پایه دوازدهم</option>
-            </select>
-          </Lbl>
+          <Lbl label="نام پایه"><input value={grForm.name} onChange={e => setGrForm({ name: e.target.value })} style={IS} placeholder="مثال: پایه اول، پایه دوم" /></Lbl>
           <SaveBtn onClick={() => addGradeMut.mutate({ gradeLevelId: addGradeFor, name: grForm.name })} disabled={!grForm.name} />
         </Modal>
       )}
@@ -372,16 +346,7 @@ export default function SchoolBranches() {
       {/* Add Class Modal */}
       {addClassFor !== null && (
         <Modal title="افزودن کلاس" onClose={() => setAddClassFor(null)}>
-          <Lbl label="نام کلاس">
-            <select value={clForm.name} onChange={e => setClForm({ ...clForm, name: e.target.value })} style={{ ...IS, appearance: "none" }}>
-              <option value="">انتخاب کلاس</option>
-              <option value="A">A</option>
-              <option value="B">B</option>
-              <option value="C">C</option>
-              <option value="D">D</option>
-              <option value="E">E</option>
-            </select>
-          </Lbl>
+          <Lbl label="نام کلاس"><input value={clForm.name} onChange={e => setClForm({ ...clForm, name: e.target.value })} style={IS} placeholder="مثال: الف، ب، ج" /></Lbl>
           <Lbl label="ظرفیت (تعداد دانش‌آموز)"><input value={clForm.capacity} onChange={e => setClForm({ ...clForm, capacity: e.target.value })} type="number" style={IS} /></Lbl>
           <SaveBtn onClick={() => addClassMut.mutate({ gradeId: addClassFor, name: clForm.name, capacity: parseInt(clForm.capacity) || 30 })} disabled={!clForm.name} />
         </Modal>

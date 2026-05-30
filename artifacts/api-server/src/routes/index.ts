@@ -4,7 +4,6 @@ import authRouter from "./auth";
 import usersRouter from "./users";
 import schoolsRouter from "./schools";
 import branchesRouter from "./branches";
-import branchManagersRouter from "./branchManagers";
 import gradeLevelsRouter from "./gradeLevels";
 import gradesRouter from "./grades";
 import classesRouter from "./classes";
@@ -18,9 +17,6 @@ import notificationsRouter from "./notifications";
 import examScheduleRouter from "./examSchedule";
 import progressChartRouter from "./progressChart";
 import studentProgressRouter from "./studentProgress";
-import consultantsRouter from "./consultants";
-import consultationsRouter from "./consultations";
-import gameScoresRouter from "./gameScores";
 
 const router: IRouter = Router();
 
@@ -29,7 +25,6 @@ router.use(authRouter);
 router.use(usersRouter);
 router.use(schoolsRouter);
 router.use(branchesRouter);
-router.use(branchManagersRouter);
 router.use(gradeLevelsRouter);
 router.use(gradesRouter);
 router.use(classesRouter);
@@ -43,8 +38,5 @@ router.use(notificationsRouter);
 router.use(examScheduleRouter);
 router.use(progressChartRouter);
 router.use(studentProgressRouter);
-router.use(consultantsRouter);
-router.use(consultationsRouter);
-router.use(gameScoresRouter);
 
 export default router;

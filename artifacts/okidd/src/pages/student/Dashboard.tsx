@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useLocation } from "wouter";
 import { Menu, X, Lock, CheckCircle, ChevronRight, ChevronDown, Bell, Calendar } from "lucide-react";
 
 interface BalloonItem {
@@ -43,7 +42,6 @@ type MenuSection = "books" | "school";
 export default function StudentDashboard() {
   const { user } = useAuthStore();
   const qc = useQueryClient();
-  const [location, navigate] = useLocation();
   const isGirl = user?.gender === "female";
   const accent = isGirl ? "#ec4899" : "#7c3aed";
   const accentLight = isGirl ? "#f472b6" : "#a855f7";
@@ -327,18 +325,11 @@ export default function StudentDashboard() {
           <div style={{ pointerEvents: "all", textAlign: "center" }}>
             <div style={{ fontSize: 28, color: "#f8f5ff", fontWeight: 800, marginBottom: 8 }}>سلام {user?.name}! {isGirl ? "🌸" : "🚀"}</div>
             <div style={{ fontSize: 14, color: "#8b5cf6", marginBottom: 40 }}>{isGirl ? "امروز هم عالی یاد بگیر!" : "بزن بریم یاد بگیریم!"}</div>
-            <button onClick={() => {
-              if (enrolledBooks.length > 0) {
-                const firstBook = enrolledBooks[0];
-                navigate(`/student/lesson-player?bookId=${firstBook.id}&lessonId=0`);
-              } else {
-                setScreen("books");
-              }
-            }} style={{ width: 160, height: 160, borderRadius: "50%", background: `radial-gradient(circle at 40% 35%, ${accentLight}, ${accent})`, border: "none", cursor: "pointer", boxShadow: `0 0 60px ${accent}88, 0 0 120px ${accent}44, inset 0 0 40px rgba(255,255,255,0.1)`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "Vazirmatn, sans-serif", color: "white", animation: "pulse 2s ease-in-out infinite", transition: "transform 0.2s" }}
+            <button onClick={() => setScreen("books")} style={{ width: 160, height: 160, borderRadius: "50%", background: `radial-gradient(circle at 40% 35%, ${accentLight}, ${accent})`, border: "none", cursor: "pointer", boxShadow: `0 0 60px ${accent}88, 0 0 120px ${accent}44, inset 0 0 40px rgba(255,255,255,0.1)`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "Vazirmatn, sans-serif", color: "white", animation: "pulse 2s ease-in-out infinite", transition: "transform 0.2s" }}
               onMouseOver={e => (e.currentTarget.style.transform = "scale(1.08)")}
               onMouseOut={e => (e.currentTarget.style.transform = "scale(1)")}>
               <div style={{ fontSize: 48, lineHeight: 1 }}>▶</div>
-              <div style={{ fontWeight: 800, fontSize: 18, marginTop: 6 }}>شروع یادگیری!</div>
+              <div style={{ fontWeight: 800, fontSize: 18, marginTop: 6 }}>بازی!</div>
             </button>
             <div style={{ marginTop: 20, fontSize: 13, color: "#6b5cf6" }}>روی دکمه کلیک کن</div>
           </div>

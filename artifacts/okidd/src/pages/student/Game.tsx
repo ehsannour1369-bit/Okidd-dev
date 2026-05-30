@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuthStore } from "../../store/auth";
-import { api } from "../../lib/api";
-import { useQuery } from "@tanstack/react-query";
 
 interface Balloon {
   id: number; x: number; size: number; color: string; points: number;
@@ -24,15 +22,6 @@ export default function StudentGame() {
   const nextId = useRef(0);
   const spawnInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerInterval = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const { data: savedScores = [] } = useQuery<any[]>({
-    queryKey: ["game-scores", user?.id],
-    queryFn: () => api.get(`/game-scores?studentId=${user?.id}`),
-    enabled: !!user?.id,
-  });
-
-  const bestSavedScore = savedScores.length > 0 ? Math.max(...savedScores.map((s: any) => s.score)) : 0;
-  const overallBest = Math.max(highScore, bestSavedScore);
 
   const spawnBalloon = useCallback(() => {
     const id = nextId.current++;
@@ -60,17 +49,13 @@ export default function StudentGame() {
     }, 1000);
   }
 
-  async function endGame() {
+  function endGame() {
     setGameRunning(false);
     if (spawnInterval.current) clearInterval(spawnInterval.current);
     if (timerInterval.current) clearInterval(timerInterval.current);
     setBalloons([]);
     setScore(s => {
       if (s > highScore) { setHighScore(s); localStorage.setItem("okidd-highscore", String(s)); }
-      // Save to server
-      if (user?.id) {
-        api.post("/game-scores", { studentId: user.id, gameType: "balloon", score: s }).catch(() => {});
-      }
       return s;
     });
   }
@@ -97,7 +82,7 @@ export default function StudentGame() {
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f8f5ff", margin: 0 }}>
           {isGirl ? "🎀 بازی بادکنک" : "🎮 بازی بادکنک"}
         </h1>
-        <div style={{ fontSize: 13, color: "#8b5cf6" }}>رکورد: {overallBest} امتیاز</div>
+        <div style={{ fontSize: 13, color: "#8b5cf6" }}>رکورد: {highScore} امتیاز</div>
       </div>
 
       <div style={{
@@ -151,7 +136,7 @@ export default function StudentGame() {
                 <div style={{ fontSize: 48, marginBottom: 8 }}>{isGirl ? "🎀" : "🎉"}</div>
                 <h2 style={{ color: "#f8f5ff", fontSize: 24, fontWeight: 800, marginBottom: 8 }}>بازی تمام شد!</h2>
                 <div style={{ fontSize: 32, fontWeight: 800, color: accentLight, marginBottom: 4 }}>{score} امتیاز</div>
-                {score >= overallBest && score > 0 && <div style={{ color: "#fbbf24", fontSize: 14, marginBottom: 20 }}>🏆 رکورد جدید!</div>}
+                {score >= highScore && <div style={{ color: "#fbbf24", fontSize: 14, marginBottom: 20 }}>🏆 رکورد جدید!</div>}
                 <button onClick={startGame} style={{ padding: "12px 32px", background: `linear-gradient(135deg, ${accent}, ${accentLight})`, border: "none", borderRadius: 12, color: "white", fontSize: 16, fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>دوباره بازی کن</button>
               </div>
             ) : (

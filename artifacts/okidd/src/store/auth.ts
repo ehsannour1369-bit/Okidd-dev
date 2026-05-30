@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type UserRole = "admin" | "school_manager" | "branch_manager" | "teacher" | "parent" | "student" | "consultant";
+export type UserRole = "admin" | "school" | "teacher" | "parent" | "student";
 
 export interface AuthUser {
   id: number;
@@ -9,7 +9,6 @@ export interface AuthUser {
   email: string;
   role: UserRole;
   schoolId?: number | null;
-  branchId?: number | null;
   gender?: string | null;
   status: string;
 }

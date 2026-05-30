@@ -7,23 +7,12 @@ interface Book { id: number; title: string; lessonCount: number; monthlyFee: num
 
 const inputStyle = { width: "100%", background: "rgba(13,10,26,0.5)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#f8f5ff", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
 
-const GRADES = [
-  { value: "1", label: "اول" }, { value: "2", label: "دوم" }, { value: "3", label: "سوم" },
-  { value: "4", label: "چهارم" }, { value: "5", label: "پنجم" }, { value: "6", label: "ششم" },
-  { value: "7", label: "هفتم" }, { value: "8", label: "هشتم" }, { value: "9", label: "نهم" },
-  { value: "10", label: "دهم" }, { value: "11", label: "یازدهم" }, { value: "12", label: "دوازدهم" },
+const GRADE_LEVELS = [
+  "پیش‌دبستانی", "اول ابتدایی", "دوم ابتدایی", "سوم ابتدایی", "چهارم ابتدایی", "پنجم ابتدایی", "ششم ابتدایی",
+  "هفتم", "هشتم", "نهم", "دهم", "یازدهم", "دوازدهم",
 ];
 
 const ACADEMIC_STAGES = ["پیش‌دبستانی", "ابتدایی", "متوسطه اول", "متوسطه دوم"];
-
-const STAGE_GRADES: Record<string, string[]> = {
-  "پیش‌دبستانی": ["1"],
-  "ابتدایی": ["1", "2", "3", "4", "5", "6"],
-  "متوسطه اول": ["7", "8", "9"],
-  "متوسطه دوم": ["10", "11", "12"],
-};
-
-function gradeLabel(v: string) { return GRADES.find(g => g.value === v)?.label ?? v; }
 
 function Modal({ title, onClose, children }: any) {
   return (
@@ -43,38 +32,21 @@ export default function AdminBooks() {
   const qc = useQueryClient();
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Book | null>(null);
-  const [form, setForm] = useState({ title: "", lessonCount: 0, monthlyFee: 0, grade: "", academicStage: "", isPreset: false });
+  const [form, setForm] = useState({ title: "", lessonCount: 0, monthlyFee: 0, gradeLevel: "", academicStage: "", isPreset: false });
 
   const { data: books = [] } = useQuery<Book[]>({ queryKey: ["books"], queryFn: () => api.get("/books") });
   const createMut = useMutation({ mutationFn: (d: any) => api.post("/books", d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["books"] }); setShowModal(false); } });
   const updateMut = useMutation({ mutationFn: ({ id, d }: any) => api.put(`/books/${id}`, d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["books"] }); setShowModal(false); } });
   const deleteMut = useMutation({ mutationFn: (id: number) => api.delete(`/books/${id}`), onSuccess: () => qc.invalidateQueries({ queryKey: ["books"] }) });
 
-  const gradesForStage = form.academicStage && STAGE_GRADES[form.academicStage]
-    ? STAGE_GRADES[form.academicStage]
-    : GRADES.map(g => g.value);
-
-  function openCreate() { setEditing(null); setForm({ title: "", lessonCount: 0, monthlyFee: 0, grade: "", academicStage: "", isPreset: false }); setShowModal(true); }
-  function openEdit(b: Book) {
-    setEditing(b);
-    const g = GRADES.find(x => x.label === b.gradeLevel)?.value ?? "";
-    setForm({ title: b.title, lessonCount: b.lessonCount, monthlyFee: b.monthlyFee, grade: g, academicStage: b.academicStage ?? "", isPreset: b.isPreset });
-    setShowModal(true);
-  }
+  function openCreate() { setEditing(null); setForm({ title: "", lessonCount: 0, monthlyFee: 0, gradeLevel: "", academicStage: "", isPreset: false }); setShowModal(true); }
+  function openEdit(b: Book) { setEditing(b); setForm({ title: b.title, lessonCount: b.lessonCount, monthlyFee: b.monthlyFee, gradeLevel: b.gradeLevel ?? "", academicStage: b.academicStage ?? "", isPreset: b.isPreset }); setShowModal(true); }
   function handleSave() {
-    if (!form.title || !form.grade || !form.academicStage) {
+    if (!form.title || !form.gradeLevel || !form.academicStage) {
       alert("لطفاً تمام فیلدهای الزامی را پر کنید");
       return;
     }
-    const payload = {
-      title: form.title,
-      lessonCount: form.lessonCount,
-      monthlyFee: form.monthlyFee,
-      gradeLevel: gradeLabel(form.grade),
-      academicStage: form.academicStage,
-      isPreset: form.isPreset,
-    };
-    editing ? updateMut.mutate({ id: editing.id, d: payload }) : createMut.mutate(payload);
+    editing ? updateMut.mutate({ id: editing.id, d: form }) : createMut.mutate(form);
   }
 
   return (
@@ -136,9 +108,9 @@ export default function AdminBooks() {
           </div>
           <div style={{ marginBottom: 14 }}>
             <label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 5 }}>پایه تحصیلی <span style={{ color: "#f87171" }}>*</span></label>
-            <select value={form.grade} onChange={e => setForm({ ...form, grade: e.target.value })} style={{ ...inputStyle, appearance: "none" }}>
+            <select value={form.gradeLevel} onChange={e => setForm({ ...form, gradeLevel: e.target.value })} style={{ ...inputStyle, appearance: "none" }}>
               <option value="">انتخاب کنید</option>
-              {gradesForStage.map(g => <option key={g} value={g}>{gradeLabel(g)}</option>)}
+              {GRADE_LEVELS.map(g => <option key={g} value={g}>{g}</option>)}
             </select>
           </div>
           <div style={{ marginBottom: 14 }}>

@@ -1,7 +1,6 @@
 export * from "./users";
 export * from "./schools";
 export * from "./branches";
-export * from "./branchManagers";
 export * from "./gradeLevels";
 export * from "./grades";
 export * from "./classes";
@@ -14,6 +13,3 @@ export * from "./notifications";
 export * from "./examSchedule";
 export * from "./progressChart";
 export * from "./studentProgress";
-export * from "./consultants";
-export * from "./consultations";
-export * from "./gameScores";
