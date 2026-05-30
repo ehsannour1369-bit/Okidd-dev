@@ -13,3 +13,5 @@ export * from "./notifications";
 export * from "./examSchedule";
 export * from "./progressChart";
 export * from "./studentProgress";
+export * from "./gameScores";
+export * from "./notificationReplies";

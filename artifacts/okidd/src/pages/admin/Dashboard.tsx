@@ -43,7 +43,7 @@ function StatCard({ label, value, icon, color, link }: {
       <div style={{ fontSize: 13, color: "#c4b5fd", fontWeight: 500 }}>{label}</div>
     </div>
   );
-  if (link) return <Link href={link}><a style={{ textDecoration: "none" }}>{content}</a></Link>;
+  if (link) return <Link href={link} style={{ textDecoration: "none" }}>{content}</Link>;
   return content;
 }
 
@@ -80,9 +80,7 @@ export default function AdminDashboard() {
       }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
           <h2 style={{ fontSize: 16, fontWeight: 700, color: "#f8f5ff", margin: 0 }}>آخرین تراکنش‌ها</h2>
-          <Link href="/admin/transactions">
-            <a style={{ color: "#a855f7", fontSize: 13, textDecoration: "none" }}>مشاهده همه</a>
-          </Link>
+          <Link href="/admin/transactions" style={{ color: "#a855f7", fontSize: 13, textDecoration: "none" }}>مشاهده همه</Link>
         </div>
         {stats.recentTransactions.length === 0 ? (
           <p style={{ color: "#8b5cf6", textAlign: "center", padding: 20 }}>هیچ تراکنشی ثبت نشده است</p>

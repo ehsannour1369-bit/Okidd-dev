@@ -17,6 +17,7 @@ import notificationsRouter from "./notifications";
 import examScheduleRouter from "./examSchedule";
 import progressChartRouter from "./progressChart";
 import studentProgressRouter from "./studentProgress";
+import gameScoresRouter from "./gameScores";
 
 const router: IRouter = Router();
 
@@ -38,5 +39,6 @@ router.use(notificationsRouter);
 router.use(examScheduleRouter);
 router.use(progressChartRouter);
 router.use(studentProgressRouter);
+router.use(gameScoresRouter);
 
 export default router;

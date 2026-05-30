@@ -35,6 +35,9 @@ const schoolNav: NavItem[] = [
 
 const teacherNav: NavItem[] = [
   { label: "داشبورد", path: "/teacher", icon: <LayoutDashboard size={18} /> },
+  { label: "مدارس من", path: "/teacher/schools", icon: <School size={18} /> },
+  { label: "کلاس‌های من", path: "/teacher/classes", icon: <BookMarked size={18} /> },
+  { label: "پیشرفت", path: "/teacher/progress", icon: <ClipboardList size={18} /> },
 ];
 
 const parentNav: NavItem[] = [
@@ -48,6 +51,8 @@ const studentNav: NavItem[] = [
   { label: "کتاب‌هایم", path: "/student/books", icon: <BookOpen size={18} /> },
   { label: "رتبه‌بندی", path: "/student/ranking", icon: <Star size={18} /> },
   { label: "بازی", path: "/student/game", icon: <Package size={18} /> },
+  { label: "اعلانات", path: "/student/notifications", icon: <Bell size={18} /> },
+  { label: "معلم من", path: "/student/teacher", icon: <GraduationCap size={18} /> },
 ];
 
 function getNav(role: string) {
@@ -106,20 +111,18 @@ export default function Layout({ children }: { children: ReactNode }) {
           {nav.map(item => {
             const active = location === item.path || (item.path !== "/" && location.startsWith(item.path));
             return (
-              <Link key={item.path} href={item.path}>
-                <a style={{
-                  display: "flex", alignItems: "center", gap: 10,
-                  padding: "10px 12px", borderRadius: 10, marginBottom: 4,
-                  color: active ? accentLight : "#c4b5fd",
-                  background: active ? `linear-gradient(135deg, ${accentColor}33, ${accentLight}22)` : "transparent",
-                  border: active ? `1px solid ${accentColor}44` : "1px solid transparent",
-                  fontWeight: active ? 600 : 400, fontSize: 14,
-                  textDecoration: "none", transition: "all 0.2s ease",
-                  cursor: "pointer",
-                }}>
-                  {item.icon}
-                  {item.label}
-                </a>
+              <Link key={item.path} href={item.path} style={{
+                display: "flex", alignItems: "center", gap: 10,
+                padding: "10px 12px", borderRadius: 10, marginBottom: 4,
+                color: active ? accentLight : "#c4b5fd",
+                background: active ? `linear-gradient(135deg, ${accentColor}33, ${accentLight}22)` : "transparent",
+                border: active ? `1px solid ${accentColor}44` : "1px solid transparent",
+                fontWeight: active ? 600 : 400, fontSize: 14,
+                textDecoration: "none", transition: "all 0.2s ease",
+                cursor: "pointer",
+              }}>
+                {item.icon}
+                {item.label}
               </Link>
             );
           })}

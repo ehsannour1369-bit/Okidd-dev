@@ -37,36 +37,34 @@ export default function SchoolClasses() {
                     {glGrades.map(grade => {
                       const gradeClasses = classes.filter(c => c.gradeId === grade.id);
                       return gradeClasses.map(cls => (
-                        <Link key={cls.id} href={`/school/classes/${cls.id}`}>
-                          <a style={{ textDecoration: "none" }}>
-                            <div style={{
-                              background: "rgba(30,18,60,0.85)", border: "1px solid rgba(139,92,246,0.2)",
-                              borderRadius: 14, padding: 18, transition: "all 0.3s ease", cursor: "pointer",
-                            }}
-                              onMouseOver={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "#7c3aed"; el.style.boxShadow = "0 0 20px rgba(124,58,237,0.2)"; el.style.transform = "translateY(-2px)"; }}
-                              onMouseOut={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "rgba(139,92,246,0.2)"; el.style.boxShadow = "none"; el.style.transform = "translateY(0)"; }}
-                            >
-                              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                                <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg, #7c3aed, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                  <BookMarked size={18} color="white" />
-                                </div>
-                                <div>
-                                  <div style={{ fontWeight: 700, color: "#f8f5ff", fontSize: 14 }}>{cls.name}</div>
-                                  <div style={{ fontSize: 11, color: "#8b5cf6" }}>{grade.name}</div>
-                                </div>
+                        <Link key={cls.id} href={`/school/classes/${cls.id}`} style={{ textDecoration: "none" }}>
+                          <div style={{
+                            background: "rgba(30,18,60,0.85)", border: "1px solid rgba(139,92,246,0.2)",
+                            borderRadius: 14, padding: 18, transition: "all 0.3s ease", cursor: "pointer",
+                          }}
+                            onMouseOver={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "#7c3aed"; el.style.boxShadow = "0 0 20px rgba(124,58,237,0.2)"; el.style.transform = "translateY(-2px)"; }}
+                            onMouseOut={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "rgba(139,92,246,0.2)"; el.style.boxShadow = "none"; el.style.transform = "translateY(0)"; }}
+                          >
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                              <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg, #7c3aed, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                <BookMarked size={18} color="white" />
                               </div>
-                              <div style={{ display: "flex", gap: 8 }}>
-                                <div style={{ flex: 1, background: "rgba(59,130,246,0.1)", borderRadius: 8, padding: "6px 8px", textAlign: "center" }}>
-                                  <Users size={12} style={{ color: "#60a5fa", marginBottom: 2 }} />
-                                  <div style={{ fontSize: 14, fontWeight: 700, color: "#60a5fa" }}>{cls.studentCount}</div>
-                                </div>
-                                <div style={{ flex: 1, background: "rgba(245,158,11,0.1)", borderRadius: 8, padding: "6px 8px", textAlign: "center" }}>
-                                  <GraduationCap size={12} style={{ color: "#fbbf24", marginBottom: 2 }} />
-                                  <div style={{ fontSize: 14, fontWeight: 700, color: "#fbbf24" }}>{cls.teacherCount}</div>
-                                </div>
+                              <div>
+                                <div style={{ fontWeight: 700, color: "#f8f5ff", fontSize: 14 }}>{cls.name}</div>
+                                <div style={{ fontSize: 11, color: "#8b5cf6" }}>{grade.name}</div>
                               </div>
                             </div>
-                          </a>
+                            <div style={{ display: "flex", gap: 8 }}>
+                              <div style={{ flex: 1, background: "rgba(59,130,246,0.1)", borderRadius: 8, padding: "6px 8px", textAlign: "center" }}>
+                                <Users size={12} style={{ color: "#60a5fa", marginBottom: 2 }} />
+                                <div style={{ fontSize: 14, fontWeight: 700, color: "#60a5fa" }}>{cls.studentCount}</div>
+                              </div>
+                              <div style={{ flex: 1, background: "rgba(245,158,11,0.1)", borderRadius: 8, padding: "6px 8px", textAlign: "center" }}>
+                                <GraduationCap size={12} style={{ color: "#fbbf24", marginBottom: 2 }} />
+                                <div style={{ fontSize: 14, fontWeight: 700, color: "#fbbf24" }}>{cls.teacherCount}</div>
+                              </div>
+                            </div>
+                          </div>
                         </Link>
                       ));
                     })}

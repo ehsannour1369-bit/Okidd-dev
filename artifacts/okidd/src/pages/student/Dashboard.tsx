@@ -2,7 +2,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Menu, X, Lock, CheckCircle, ChevronRight, ChevronDown, Bell, Calendar, Home, BookOpen, Trophy, Gamepad2 } from "lucide-react";
+import { useLocation } from "wouter";
+import { Lock, CheckCircle, ChevronRight } from "lucide-react";
 
 interface BalloonItem {
   id: number; x: number; y: number; dx: number; dy: number;
@@ -22,6 +23,14 @@ const QUESTIONS = [
   { text: "۱۰ - ۴ = ؟", choices: ["۶", "۷"] as [string, string], correct: 0 as 0 | 1 },
 ];
 
+const GLASS = {
+  background: "rgba(255,255,255,0.35)",
+  backdropFilter: "blur(14px)",
+  WebkitBackdropFilter: "blur(14px)",
+  border: "1px solid rgba(255,255,255,0.6)",
+  boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+} as React.CSSProperties;
+
 function createBalloon(id: number, isGirl: boolean): BalloonItem {
   const hasQ = Math.random() < 0.3;
   const q = hasQ ? QUESTIONS[Math.floor(Math.random() * QUESTIONS.length)] : undefined;
@@ -37,31 +46,18 @@ function createBalloon(id: number, isGirl: boolean): BalloonItem {
 }
 
 type Screen = "home" | "books" | "lesson";
-type MenuSection = "books" | "school";
-
-const menuItems = [
-  { icon: Home, label: "خانه", action: "home", color: "#22c55e", bg: "rgba(34,197,94,0.15)" },
-  { icon: BookOpen, label: "کتاب من", action: "books", color: "#3b82f6", bg: "rgba(59,130,246,0.15)" },
-  { icon: Bell, label: "اعلانات", action: "notifs", color: "#f59e0b", bg: "rgba(245,158,11,0.15)" },
-  { icon: Trophy, label: "رتبه من", action: "rank", color: "#a855f7", bg: "rgba(168,85,247,0.15)" },
-  { icon: Gamepad2, label: "بازی‌ها", action: "games", color: "#ec4899", bg: "rgba(236,72,153,0.15)" },
-  { icon: Calendar, label: "مدرسه من", action: "school", color: "#06b6d4", bg: "rgba(6,182,212,0.15)" },
-];
 
 export default function StudentDashboard() {
   const { user } = useAuthStore();
   const qc = useQueryClient();
+  const [, navigate] = useLocation();
   const isGirl = user?.gender === "female";
   const accent = isGirl ? "#ec4899" : "#7c3aed";
   const accentLight = isGirl ? "#f472b6" : "#a855f7";
 
   const [screen, setScreen] = useState<Screen>("home");
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [menuSection, setMenuSection] = useState<MenuSection>("books");
-  const [notifPanel, setNotifPanel] = useState(false);
   const [selectedBook, setSelectedBook] = useState<any>(null);
   const [currentLesson, setCurrentLesson] = useState(1);
-  const [expandedMenuBook, setExpandedMenuBook] = useState<number | null>(null);
   const [balloons, setBalloons] = useState<BalloonItem[]>(() =>
     Array.from({ length: 10 }, (_, i) => createBalloon(i, user?.gender === "female"))
   );
@@ -91,28 +87,23 @@ export default function StudentDashboard() {
     enabled: !!selectedBook?.id,
   });
 
-  const { data: schoolNotifs = [] } = useQuery<any[]>({
-    queryKey: ["notifications", user?.schoolId],
-    queryFn: () => api.get(`/notifications?schoolId=${user?.schoolId}`),
-    enabled: !!user?.schoolId,
-  });
-
-  const { data: examSchedule = [] } = useQuery<any[]>({
-    queryKey: ["exam-schedule-student", user?.schoolId],
-    queryFn: () => api.get(`/exam-schedule?schoolId=${user?.schoolId}`),
-    enabled: !!user?.schoolId,
-  });
-
-  // All unlocks for menu book review (not just selected book)
-  const { data: allUnlocks = [] } = useQuery<any[]>({
-    queryKey: ["lesson-unlocks-all-student", user?.id],
-    queryFn: () => api.get(`/lesson-unlocks`),
+  const { data: gameScores = [] } = useQuery<any[]>({
+    queryKey: ["game-scores", user?.id],
+    queryFn: () => api.get(`/game-scores?studentId=${user?.id}`),
     enabled: !!user?.id,
   });
+
+  const dbScore = gameScores.reduce((sum, g) => sum + (g.score || 0), 0);
+  useEffect(() => { setScore(dbScore); }, [dbScore]);
 
   const completeLessonMut = useMutation({
     mutationFn: (data: any) => api.post("/student-progress", data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["student-progress", user?.id] }),
+  });
+
+  const saveGameScoreMut = useMutation({
+    mutationFn: (data: any) => api.post("/game-scores", data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["game-scores", user?.id] }),
   });
 
   const animate = useCallback(() => {
@@ -153,7 +144,11 @@ export default function StudentDashboard() {
 
   function popBalloon(id: number, correct: boolean) {
     setBalloons(prev => prev.map(b => b.id === id ? { ...b, popped: true } : b));
-    if (correct) setScore(s => s + 5);
+    if (correct) {
+      const newScore = score + 5;
+      setScore(newScore);
+      if (user?.id) saveGameScoreMut.mutate({ studentId: user.id, gameType: "balloon", score: 5 });
+    }
     setPopFeedback({ id, correct });
     setTimeout(() => setPopFeedback(null), 1000);
   }
@@ -168,15 +163,24 @@ export default function StudentDashboard() {
   const completedProgressIds = new Set(progress.filter(p => p.completed && p.bookId === selectedBook?.id).map(p => p.lessonId));
 
   return (
-    <div style={{ position: "relative", minHeight: "calc(100vh - 60px)", overflow: "hidden", background: screen === "home" ? (isGirl ? "linear-gradient(135deg, #d946ef 0%, #a855f7 30%, #6366f1 60%, #0ea5e9 100%)" : "linear-gradient(135deg, #2563eb 0%, #7c3aed 40%, #9333ea 70%, #db2777 100%)") : "linear-gradient(135deg, #0d0a1a 0%, #1a0a2e 50%, #0a1a2e 100%)" }}>
+    <div style={{ position: "relative", minHeight: "calc(100vh - 60px)", overflow: "hidden" }}>
 
-      {/* Balloons — glassmorphism style on gradient */}
-      {screen === "home" && balloons.filter(b => !b.popped).map(balloon => (
-        <div key={balloon.id} onClick={() => handleBalloonClick(balloon)} style={{ position: "absolute", left: `${balloon.x}%`, top: `${balloon.y}%`, width: balloon.size, height: balloon.size, cursor: "pointer", userSelect: "none", transition: "none", zIndex: 5, display: "flex", alignItems: "center", justifyContent: "center", filter: popFeedback?.id === balloon.id ? "brightness(2) saturate(2)" : "none" }}>
-          <div style={{ width: balloon.size, height: balloon.size, borderRadius: "50%", background: "rgba(255,255,255,0.22)", backdropFilter: "blur(6px)", border: "1.5px solid rgba(255,255,255,0.35)", boxShadow: "0 4px 20px rgba(0,0,0,0.12), inset 0 0 12px rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: balloon.size * 0.42, position: "relative" }}>
+      {/* Floating decorative bubbles */}
+      <div style={{ position: "absolute", top: "5%", left: "8%", width: 120, height: 120, borderRadius: "50%", background: "rgba(255,255,255,0.25)", backdropFilter: "blur(8px)", pointerEvents: "none", border: "1px solid rgba(255,255,255,0.4)" }} />
+      <div style={{ position: "absolute", top: "15%", right: "5%", width: 80, height: 80, borderRadius: "50%", background: "rgba(255,255,255,0.2)", pointerEvents: "none", border: "1px solid rgba(255,255,255,0.35)" }} />
+      <div style={{ position: "absolute", bottom: "20%", left: "3%", width: 100, height: 100, borderRadius: "50%", background: "rgba(255,255,255,0.18)", pointerEvents: "none", border: "1px solid rgba(255,255,255,0.3)" }} />
+      <div style={{ position: "absolute", bottom: "10%", right: "8%", width: 60, height: 60, borderRadius: "50%", background: "rgba(255,255,255,0.22)", pointerEvents: "none", border: "1px solid rgba(255,255,255,0.38)" }} />
+      <div style={{ position: "absolute", top: "40%", left: "12%", width: 45, height: 45, borderRadius: "50%", background: "rgba(255,255,255,0.15)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", top: "60%", right: "15%", width: 70, height: 70, borderRadius: "50%", background: "rgba(255,255,255,0.2)", pointerEvents: "none", border: "1px solid rgba(255,255,255,0.3)" }} />
+
+      {/* Balloons */}
+      {balloons.filter(b => !b.popped).map(balloon => (
+        <div key={balloon.id} onClick={() => handleBalloonClick(balloon)} style={{ position: "absolute", left: `${balloon.x}%`, top: `${balloon.y}%`, width: balloon.size, height: balloon.size * 1.2, cursor: "pointer", userSelect: "none", transition: "none", zIndex: 5, display: "flex", flexDirection: "column", alignItems: "center", filter: popFeedback?.id === balloon.id ? "brightness(1.5) saturate(2)" : "none" }}>
+          <div style={{ width: balloon.size, height: balloon.size, borderRadius: "50% 50% 50% 50% / 60% 60% 40% 40%", background: `radial-gradient(circle at 35% 35%, ${balloon.color}99, ${balloon.color})`, boxShadow: `0 4px ${balloon.size * 0.3}px ${balloon.color}55, inset 0 0 ${balloon.size * 0.2}px rgba(255,255,255,0.35)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: balloon.size * 0.4, position: "relative" }}>
             {balloon.question ? "❓" : balloon.emoji}
-            {balloon.question && <div style={{ position: "absolute", top: -3, right: -3, width: 16, height: 16, background: "#f59e0b", borderRadius: "50%", fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 6px rgba(0,0,0,0.2)" }}>!</div>}
+            {balloon.question && <div style={{ position: "absolute", top: -4, right: -4, width: 14, height: 14, background: "#f59e0b", borderRadius: "50%", fontSize: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>!</div>}
           </div>
+          <div style={{ width: 1, height: balloon.size * 0.3, background: `${balloon.color}66` }} />
         </div>
       ))}
 
@@ -189,192 +193,50 @@ export default function StudentDashboard() {
 
       {/* Question modal */}
       {askQuestion && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ background: "#1a1238", border: `2px solid ${accent}`, borderRadius: 24, padding: 32, maxWidth: 340, width: "90%", textAlign: "center", boxShadow: `0 0 60px ${accent}66` }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(139,92,246,0.25)", backdropFilter: "blur(10px)", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ ...GLASS, borderRadius: 28, padding: 32, maxWidth: 340, width: "90%", textAlign: "center" }}>
             <div style={{ fontSize: 56, marginBottom: 16 }}>{askQuestion.emoji}</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "#f8f5ff", marginBottom: 24 }}>{askQuestion.question!.text}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#2d1b69", marginBottom: 24 }}>{askQuestion.question!.text}</div>
             <div style={{ display: "flex", gap: 12 }}>
               {askQuestion.question!.choices.map((choice, i) => (
-                <button key={i} onClick={() => answerQuestion(askQuestion, i as 0 | 1)} style={{ flex: 1, padding: "14px 16px", background: `${accent}22`, border: `1px solid ${accent}55`, borderRadius: 14, color: "#f8f5ff", fontFamily: "Vazirmatn", fontSize: 16, fontWeight: 700, cursor: "pointer", transition: "all 0.2s" }}
-                  onMouseOver={e => (e.currentTarget.style.background = `${accent}55`)}
-                  onMouseOut={e => (e.currentTarget.style.background = `${accent}22`)}>
+                <button key={i} onClick={() => answerQuestion(askQuestion, i as 0 | 1)} style={{ flex: 1, padding: "14px 16px", background: "rgba(255,255,255,0.5)", border: `2px solid ${accent}66`, borderRadius: 16, color: "#2d1b69", fontFamily: "Vazirmatn", fontSize: 16, fontWeight: 700, cursor: "pointer", transition: "all 0.2s" }}
+                  onMouseOver={e => (e.currentTarget.style.background = `${accent}22`)}
+                  onMouseOut={e => (e.currentTarget.style.background = "rgba(255,255,255,0.5)")}>
                   {choice}
                 </button>
               ))}
             </div>
-            <button onClick={() => setAskQuestion(null)} style={{ marginTop: 12, background: "none", border: "none", color: "#8b5cf6", fontSize: 12, cursor: "pointer", fontFamily: "Vazirmatn" }}>رد کردن</button>
+            <button onClick={() => setAskQuestion(null)} style={{ marginTop: 14, background: "none", border: "none", color: "#7c3aed", fontSize: 12, cursor: "pointer", fontFamily: "Vazirmatn" }}>رد کردن</button>
           </div>
         </div>
       )}
 
-      {/* Score display */}
-      <div style={{ position: "absolute", top: 16, left: 16, zIndex: 20, background: "rgba(245,158,11,0.15)", border: "1px solid rgba(245,158,11,0.4)", borderRadius: 12, padding: "8px 14px", display: "flex", alignItems: "center", gap: 6 }}>
+      {/* Score badge */}
+      <div style={{ position: "absolute", top: 16, left: 16, zIndex: 20, ...GLASS, borderRadius: 14, padding: "8px 14px", display: "flex", alignItems: "center", gap: 6 }}>
         <span style={{ fontSize: 16 }}>⭐</span>
-        <span style={{ color: "#fbbf24", fontWeight: 700 }}>{score.toLocaleString("fa-IR")}</span>
+        <span style={{ color: "#d97706", fontWeight: 800, fontSize: 15 }}>{score.toLocaleString("fa-IR")}</span>
       </div>
-
-      {/* Hamburger */}
-      <button onClick={() => setMenuOpen(true)} style={{ position: "absolute", top: 16, right: 16, zIndex: 20, background: "rgba(30,18,60,0.8)", border: `1px solid ${accent}44`, borderRadius: 12, padding: 10, cursor: "pointer", color: accentLight }}>
-        <Menu size={22} />
-      </button>
-
-      {/* Bell with badge */}
-      <button onClick={() => setNotifPanel(true)} style={{ position: "absolute", top: 16, right: 58, zIndex: 20, background: "rgba(30,18,60,0.8)", border: `1px solid ${accent}44`, borderRadius: 12, padding: 10, cursor: "pointer", color: accentLight }}>
-        <Bell size={22} />
-        {schoolNotifs.length > 0 && (
-          <div style={{ position: "absolute", top: -3, right: -3, width: 16, height: 16, background: "#ef4444", borderRadius: "50%", fontSize: 9, color: "white", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            {schoolNotifs.length}
-          </div>
-        )}
-      </button>
-
-      {/* Slide-out menu */}
-      <div style={{ position: "fixed", top: 0, right: menuOpen ? 0 : "-100%", width: 280, height: "100vh", zIndex: 500, transition: "right 0.3s ease", overflowY: "auto", boxShadow: menuOpen ? `-20px 0 60px rgba(0,0,0,0.8)` : "none", background: screen === "home" ? (isGirl ? "linear-gradient(135deg, #d946ef 0%, #a855f7 30%, #6366f1 60%, #0ea5e9 100%)" : "linear-gradient(135deg, #2563eb 0%, #7c3aed 40%, #9333ea 70%, #db2777 100%)") : "#1a1238", border: `1px solid ${accent}33` }}>
-        <div style={{ padding: 18 }}>
-          {/* Header */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-            <div style={{ fontWeight: 800, fontSize: 18, color: "#f8f5ff" }}>منو</div>
-            <button onClick={() => setMenuOpen(false)} style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 10, padding: 6, color: "#fff", cursor: "pointer" }}><X size={18} /></button>
-          </div>
-
-          {/* Profile card */}
-          <div style={{ marginBottom: 20, padding: "14px 16px", background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", borderRadius: 16, border: "1px solid rgba(255,255,255,0.25)", display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ fontSize: 40 }}>{isGirl ? "👧" : "👦"}</div>
-            <div>
-              <div style={{ fontWeight: 700, color: "#ffffff", fontSize: 14 }}>{user?.name}</div>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)" }}>دانش‌آموز</div>
-            </div>
-          </div>
-
-          {/* Menu cards */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {menuItems.map((item, i) => {
-              const Icon = item.icon;
-              return (
-                <button key={i} onClick={() => {
-                  if (item.action === "home") { setScreen("home"); setMenuOpen(false); }
-                  if (item.action === "books") { setScreen("books"); setMenuOpen(false); }
-                  if (item.action === "school") { setMenuSection("school"); }
-                  if (item.action === "notifs") { setNotifPanel(true); setMenuOpen(false); }
-                  if (item.action === "rank" || item.action === "games") { setMenuOpen(false); }
-                }} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 16px", background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 14, cursor: "pointer", fontFamily: "Vazirmatn", transition: "all 0.2s", width: "100%" }}
-                  onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.22)"; (e.currentTarget as HTMLElement).style.transform = "translateX(-4px)"; }}
-                  onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.12)"; (e.currentTarget as HTMLElement).style.transform = "translateX(0)"; }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 12, background: item.bg, display: "flex", alignItems: "center", justifyContent: "center", color: item.color, border: `1px solid ${item.color}44` }}>
-                    <Icon size={20} />
-                  </div>
-                  <div style={{ color: "#ffffff", fontWeight: 600, fontSize: 14 }}>{item.label}</div>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Expanded school section */}
-          {menuSection === "school" && (
-            <div style={{ marginTop: 14, background: "rgba(255,255,255,0.08)", borderRadius: 14, border: "1px solid rgba(255,255,255,0.15)", padding: 12 }}>
-              <div style={{ fontWeight: 700, fontSize: 13, color: "#ffffff", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
-                <Calendar size={14} /> تقویم امتحانی
-              </div>
-              {examSchedule.length === 0 ? (
-                <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, textAlign: "center" }}>امتحانی ثبت نشده</div>
-              ) : (
-                examSchedule.slice(0, 4).map((exam: any) => (
-                  <div key={exam.id} style={{ background: "rgba(255,255,255,0.08)", borderRadius: 8, padding: "6px 10px", marginBottom: 5, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ fontWeight: 600, color: "#ffffff", fontSize: 12 }}>{exam.subject ?? exam.title ?? "امتحان"}</div>
-                    {exam.examDate && <div style={{ fontSize: 10, color: "#a855f7" }}>{new Date(exam.examDate).toLocaleDateString("fa-IR")}</div>}
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-      {menuOpen && <div onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 499, background: "rgba(0,0,0,0.4)" }} />}
-
-      {/* Notification panel */}
-      {notifPanel && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 600, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ background: "#1a1238", border: `2px solid ${accent}44`, borderRadius: 20, padding: 24, width: "90%", maxWidth: 400, maxHeight: "70vh", overflowY: "auto", boxShadow: `0 0 60px ${accent}44` }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
-              <div style={{ fontWeight: 800, fontSize: 18, color: "#f8f5ff", display: "flex", alignItems: "center", gap: 8 }}>
-                <Bell size={20} color={accent} /> اعلانات
-              </div>
-              <button onClick={() => setNotifPanel(false)} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer" }}><X size={20} /></button>
-            </div>
-            {schoolNotifs.length === 0 ? (
-              <div style={{ color: "#8b5cf6", fontSize: 14, textAlign: "center", padding: "24px 0" }}>اعلانی وجود ندارد</div>
-            ) : (
-              schoolNotifs.map((n: any) => (
-                <div key={n.id} style={{ background: "rgba(30,18,60,0.6)", borderRadius: 12, padding: "10px 14px", marginBottom: 8, borderRight: `3px solid ${accent}` }}>
-                  <div style={{ fontWeight: 600, color: "#f8f5ff", fontSize: 13, marginBottom: 3 }}>{n.title}</div>
-                  <div style={{ fontSize: 11, color: "#c4b5fd" }}>{n.message}</div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      )}
 
       {/* HOME */}
       {screen === "home" && (
-        <div style={{ position: "absolute", inset: 0, zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-          {/* Floating icon bubbles */}
-          {[
-            { icon: "⭐", x: 8, y: 15, size: 56, delay: 0 },
-            { icon: "🎵", x: 18, y: 55, size: 48, delay: 1.2 },
-            { icon: "✏️", x: 12, y: 75, size: 52, delay: 0.6 },
-            { icon: "😊", x: 82, y: 12, size: 60, delay: 0.8 },
-            { icon: "🏆", x: 72, y: 48, size: 50, delay: 1.5 },
-            { icon: "🧠", x: 85, y: 65, size: 54, delay: 0.3 },
-            { icon: "❤️", x: 78, y: 82, size: 46, delay: 1.0 },
-            { icon: "🌟", x: 88, y: 35, size: 44, delay: 1.8 },
-          ].map((b, i) => (
-            <div key={i} style={{
-              position: "absolute", left: `${b.x}%`, top: `${b.y}%`,
-              width: b.size, height: b.size, borderRadius: "50%",
-              background: "rgba(255,255,255,0.15)",
-              backdropFilter: "blur(8px)",
-              border: "1px solid rgba(255,255,255,0.25)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: b.size * 0.42,
-              boxShadow: "0 4px 20px rgba(0,0,0,0.15), inset 0 0 10px rgba(255,255,255,0.1)",
-              animation: `floatBubble ${3 + b.delay * 0.5}s ease-in-out infinite`,
-              animationDelay: `${b.delay}s`,
-              zIndex: 1, pointerEvents: "none",
-            }}>
-              {b.icon}
-            </div>
-          ))}
-
-          {/* Central content */}
-          <div style={{ textAlign: "center", pointerEvents: "all", zIndex: 5 }}>
-            <div style={{
-              fontSize: 30, color: "#ffffff", fontWeight: 800, marginBottom: 10,
-              textShadow: "0 2px 16px rgba(0,0,0,0.3)", letterSpacing: 0.5,
-            }}>سلام {user?.name}! {isGirl ? "🌸" : "🚀"}</div>
-            <div style={{
-              fontSize: 15, color: "rgba(255,255,255,0.85)", marginBottom: 48,
-              textShadow: "0 1px 8px rgba(0,0,0,0.2)",
-            }}>{isGirl ? "امروز هم عالی یاد بگیر!" : "بزن بریم یاد بگیریم!"}</div>
-
-            <button onClick={() => setScreen("books")} style={{
-              width: 170, height: 170, borderRadius: "50%",
-              background: "rgba(255,255,255,0.18)",
-              backdropFilter: "blur(14px)",
-              border: "2px solid rgba(255,255,255,0.35)",
-              cursor: "pointer",
-              boxShadow: "0 8px 40px rgba(0,0,0,0.2), inset 0 0 30px rgba(255,255,255,0.08)",
-              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-              fontFamily: "Vazirmatn, sans-serif", color: "white",
-              transition: "transform 0.2s",
-              textShadow: "0 1px 6px rgba(0,0,0,0.2)",
-            }}
+        <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 10, pointerEvents: "none" }}>
+          <div style={{ pointerEvents: "all", textAlign: "center" }}>
+            <div style={{ fontSize: 28, color: "#2d1b69", fontWeight: 800, marginBottom: 8, textShadow: "0 1px 4px rgba(255,255,255,0.6)" }}>سلام {user?.name}! {isGirl ? "🌸" : "🚀"}</div>
+            <div style={{ fontSize: 14, color: "#5b21b6", marginBottom: 40, fontWeight: 500 }}>{isGirl ? "امروز هم عالی یاد بگیر!" : "بزن بریم یاد بگیریم!"}</div>
+            <button onClick={() => {
+              if (enrolledBooks.length > 0) {
+                const firstBook = enrolledBooks[0];
+                navigate(`/student/lesson-player?bookId=${firstBook.id}&lessonId=0`);
+              } else {
+                setScreen("books");
+              }
+            }} style={{ width: 170, height: 170, borderRadius: "50%", background: `radial-gradient(circle at 40% 35%, ${accentLight}, ${accent})`, border: "4px solid rgba(255,255,255,0.6)", cursor: "pointer", boxShadow: `0 0 50px ${accent}66, 0 0 100px ${accent}33, inset 0 0 40px rgba(255,255,255,0.15)`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "Vazirmatn, sans-serif", color: "white", animation: "pulse 2s ease-in-out infinite", transition: "transform 0.2s" }}
               onMouseOver={e => (e.currentTarget.style.transform = "scale(1.08)")}
               onMouseOut={e => (e.currentTarget.style.transform = "scale(1)")}>
-              <div style={{ fontSize: 44, marginBottom: 4 }}>✨</div>
-              <div style={{ fontWeight: 800, fontSize: 14 }}>شروع یادگیری</div>
+              <div style={{ fontSize: 52, lineHeight: 1 }}>▶</div>
+              <div style={{ fontWeight: 800, fontSize: 17, marginTop: 8 }}>شروع یادگیری!</div>
             </button>
-            <div style={{ marginTop: 18, fontSize: 13, color: "rgba(255,255,255,0.7)", textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>برای شروع کلیک کن</div>
+            <div style={{ marginTop: 22, fontSize: 13, color: "#7c3aed", fontWeight: 500 }}>روی دکمه کلیک کن</div>
           </div>
         </div>
       )}
@@ -382,26 +244,26 @@ export default function StudentDashboard() {
       {/* BOOKS */}
       {screen === "books" && (
         <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 10, padding: 24 }}>
-          <div style={{ background: "rgba(18,14,42,0.95)", border: `1px solid ${accent}44`, borderRadius: 24, padding: 32, width: "100%", maxWidth: 480, backdropFilter: "blur(10px)", boxShadow: `0 0 60px ${accent}33` }}>
+          <div style={{ ...GLASS, borderRadius: 28, padding: 32, width: "100%", maxWidth: 480 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-              <button onClick={() => setScreen("home")} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer", padding: 4 }}><ChevronRight size={20} /></button>
-              <div style={{ fontWeight: 800, fontSize: 20, color: "#f8f5ff" }}>📚 کدام کتاب؟</div>
+              <button onClick={() => setScreen("home")} style={{ background: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.7)", borderRadius: 10, color: "#5b21b6", cursor: "pointer", padding: 6 }}><ChevronRight size={20} /></button>
+              <div style={{ fontWeight: 800, fontSize: 20, color: "#2d1b69" }}>📚 کدام کتاب؟</div>
             </div>
             {enrolledBooks.length === 0 ? (
               <div style={{ textAlign: "center", padding: 40 }}>
                 <div style={{ fontSize: 40, marginBottom: 12 }}>📭</div>
-                <div style={{ color: "#8b5cf6" }}>هنوز به هیچ کتابی دسترسی ندارید</div>
+                <div style={{ color: "#5b21b6" }}>هنوز به هیچ کتابی دسترسی ندارید</div>
               </div>
             ) : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 12 }}>
                 {enrolledBooks.map((book: any) => (
-                  <button key={book.id} onClick={() => { setSelectedBook(book); setCurrentLesson(1); setScreen("lesson"); }} style={{ padding: "20px 12px", background: `${accent}11`, border: `2px solid ${accent}33`, borderRadius: 16, cursor: "pointer", fontFamily: "Vazirmatn", transition: "all 0.2s", textAlign: "center" }}
-                    onMouseOver={e => { (e.currentTarget as HTMLElement).style.borderColor = accent; (e.currentTarget as HTMLElement).style.background = `${accent}22`; (e.currentTarget as HTMLElement).style.transform = "scale(1.03)"; }}
-                    onMouseOut={e => { (e.currentTarget as HTMLElement).style.borderColor = `${accent}33`; (e.currentTarget as HTMLElement).style.background = `${accent}11`; (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}>
+                  <button key={book.id} onClick={() => { setSelectedBook(book); setCurrentLesson(1); setScreen("lesson"); }} style={{ padding: "20px 12px", background: "rgba(255,255,255,0.45)", border: "2px solid rgba(255,255,255,0.7)", borderRadius: 18, cursor: "pointer", fontFamily: "Vazirmatn", transition: "all 0.2s", textAlign: "center" }}
+                    onMouseOver={e => { const el = e.currentTarget as HTMLElement; el.style.background = "rgba(255,255,255,0.65)"; el.style.transform = "scale(1.04)"; }}
+                    onMouseOut={e => { const el = e.currentTarget as HTMLElement; el.style.background = "rgba(255,255,255,0.45)"; el.style.transform = "scale(1)"; }}>
                     <div style={{ fontSize: 36, marginBottom: 10 }}>📖</div>
-                    <div style={{ fontWeight: 700, color: "#f8f5ff", fontSize: 13, marginBottom: 6 }}>{book.title}</div>
-                    <div style={{ fontSize: 11, color: "#8b5cf6" }}>{book.completedLessons}/{book.lessonCount} درس</div>
-                    <div style={{ height: 4, background: "rgba(139,92,246,0.2)", borderRadius: 999, marginTop: 8, overflow: "hidden" }}>
+                    <div style={{ fontWeight: 700, color: "#2d1b69", fontSize: 13, marginBottom: 6 }}>{book.title}</div>
+                    <div style={{ fontSize: 11, color: "#5b21b6" }}>{book.completedLessons}/{book.lessonCount} درس</div>
+                    <div style={{ height: 4, background: "rgba(139,92,246,0.15)", borderRadius: 999, marginTop: 8, overflow: "hidden" }}>
                       <div style={{ height: "100%", width: `${book.lessonCount > 0 ? Math.round((book.completedLessons / book.lessonCount) * 100) : 0}%`, background: `linear-gradient(90deg, ${accent}, ${accentLight})`, borderRadius: 999 }} />
                     </div>
                   </button>
@@ -415,39 +277,36 @@ export default function StudentDashboard() {
       {/* LESSON */}
       {screen === "lesson" && selectedBook && (
         <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 10, padding: 24 }}>
-          <div style={{ background: "rgba(18,14,42,0.97)", border: `1px solid ${accent}44`, borderRadius: 24, padding: 28, width: "100%", maxWidth: 480, backdropFilter: "blur(10px)", boxShadow: `0 0 60px ${accent}33` }}>
+          <div style={{ ...GLASS, borderRadius: 28, padding: 28, width: "100%", maxWidth: 480 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-              <button onClick={() => setScreen("books")} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer", padding: 4 }}><ChevronRight size={20} /></button>
-              <div style={{ fontWeight: 800, fontSize: 18, color: "#f8f5ff", flex: 1 }}>{selectedBook.title}</div>
+              <button onClick={() => setScreen("books")} style={{ background: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.7)", borderRadius: 10, color: "#5b21b6", cursor: "pointer", padding: 6 }}><ChevronRight size={20} /></button>
+              <div style={{ fontWeight: 800, fontSize: 18, color: "#2d1b69", flex: 1 }}>{selectedBook.title}</div>
             </div>
             <div style={{ maxHeight: 420, overflowY: "auto" }}>
               {Array.from({ length: selectedBook.lessonCount }, (_, i) => i + 1).map(lessonId => {
                 const isUnlocked = unlocks.some((u: any) => u.lessonId === lessonId) || maxUnlockedLesson >= lessonId;
                 const isCompleted = completedProgressIds.has(lessonId);
-                // Conditional next: previous lesson must be completed
                 const prevCompleted = lessonId === 1 || completedProgressIds.has(lessonId - 1);
                 const isAccessible = isUnlocked && prevCompleted;
                 const isCurrent = lessonId === currentLesson;
                 return (
-                  <div key={lessonId} onClick={() => isAccessible && setCurrentLesson(lessonId)} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", marginBottom: 8, background: isCurrent ? `${accent}22` : "rgba(13,10,26,0.4)", border: `1px solid ${isCurrent ? accent : "rgba(139,92,246,0.15)"}`, borderRadius: 14, cursor: isAccessible ? "pointer" : "not-allowed", opacity: isUnlocked ? (isAccessible ? 1 : 0.6) : 0.4, transition: "all 0.2s" }}
-                    onMouseOver={e => isAccessible && ((e.currentTarget as HTMLElement).style.borderColor = accent)}
-                    onMouseOut={e => !isCurrent && ((e.currentTarget as HTMLElement).style.borderColor = "rgba(139,92,246,0.15)")}>
-                    <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0, background: isCompleted ? "rgba(34,197,94,0.2)" : isAccessible ? `${accent}22` : "rgba(100,100,100,0.2)", border: `2px solid ${isCompleted ? "#22c55e" : isAccessible ? accent : "#4b5563"}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      {isCompleted ? <CheckCircle size={18} color="#22c55e" /> : isAccessible ? <span style={{ color: accentLight, fontWeight: 700, fontSize: 13 }}>{lessonId}</span> : <Lock size={14} color="#6b7280" />}
+                  <div key={lessonId} onClick={() => isAccessible && setCurrentLesson(lessonId)} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", marginBottom: 8, background: isCurrent ? `${accent}22` : "rgba(255,255,255,0.4)", border: `1px solid ${isCurrent ? accent : "rgba(255,255,255,0.6)"}`, borderRadius: 14, cursor: isAccessible ? "pointer" : "not-allowed", opacity: isUnlocked ? (isAccessible ? 1 : 0.6) : 0.4, transition: "all 0.2s" }}>
+                    <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0, background: isCompleted ? "rgba(34,197,94,0.2)" : isAccessible ? `${accent}22` : "rgba(100,100,100,0.15)", border: `2px solid ${isCompleted ? "#22c55e" : isAccessible ? accent : "#d1d5db"}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {isCompleted ? <CheckCircle size={18} color="#22c55e" /> : isAccessible ? <span style={{ color: accent, fontWeight: 700, fontSize: 13 }}>{lessonId}</span> : <Lock size={14} color="#9ca3af" />}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ color: isAccessible ? "#f8f5ff" : "#6b7280", fontWeight: 600, fontSize: 14 }}>درس {lessonId}</div>
-                      <div style={{ color: "#8b5cf6", fontSize: 12 }}>
+                      <div style={{ color: isAccessible ? "#2d1b69" : "#9ca3af", fontWeight: 600, fontSize: 14 }}>درس {lessonId}</div>
+                      <div style={{ color: "#5b21b6", fontSize: 12 }}>
                         {isCompleted ? "✅ تکمیل شده" : isAccessible ? "باز شده" : isUnlocked ? "🔒 درس قبلی را تکمیل کنید" : "🔒 قفل"}
                       </div>
                     </div>
                     {isCurrent && isAccessible && !isCompleted && (
-                      <button onClick={e => { e.stopPropagation(); completeLessonMut.mutate({ studentId: user?.id, lessonId, bookId: selectedBook.id, completed: true, score: 10 }); }} style={{ padding: "6px 14px", background: `linear-gradient(135deg, ${accent}, ${accentLight})`, border: "none", borderRadius: 8, color: "white", fontFamily: "Vazirmatn", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                      <button onClick={e => { e.stopPropagation(); completeLessonMut.mutate({ studentId: user?.id, lessonId, bookId: selectedBook.id, completed: true, score: 10 }); }} style={{ padding: "6px 14px", background: `linear-gradient(135deg, ${accent}, ${accentLight})`, border: "none", borderRadius: 10, color: "white", fontFamily: "Vazirmatn", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
                         تکمیل ✓
                       </button>
                     )}
                     {isCurrent && isAccessible && isCompleted && lessonId < selectedBook.lessonCount && (
-                      <button onClick={e => { e.stopPropagation(); const next = lessonId + 1; const nextAccessible = unlocks.some((u: any) => u.lessonId === next) || maxUnlockedLesson >= next; if (nextAccessible) setCurrentLesson(next); }} style={{ padding: "6px 14px", background: "rgba(34,197,94,0.2)", border: "1px solid rgba(34,197,94,0.4)", borderRadius: 8, color: "#4ade80", fontFamily: "Vazirmatn", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                      <button onClick={e => { e.stopPropagation(); const next = lessonId + 1; const nextAccessible = unlocks.some((u: any) => u.lessonId === next) || maxUnlockedLesson >= next; if (nextAccessible) setCurrentLesson(next); }} style={{ padding: "6px 14px", background: "rgba(34,197,94,0.2)", border: "1px solid rgba(34,197,94,0.5)", borderRadius: 10, color: "#16a34a", fontFamily: "Vazirmatn", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
                         بعدی ←
                       </button>
                     )}
@@ -461,16 +320,12 @@ export default function StudentDashboard() {
 
       <style>{`
         @keyframes pulse {
-          0%, 100% { box-shadow: 0 0 60px ${accent}88, 0 0 120px ${accent}44; }
-          50% { box-shadow: 0 0 80px ${accent}cc, 0 0 160px ${accent}66; }
+          0%, 100% { box-shadow: 0 0 50px ${accent}66, 0 0 100px ${accent}33; }
+          50% { box-shadow: 0 0 70px ${accent}aa, 0 0 140px ${accent}55; }
         }
         @keyframes fadeOut {
           0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
           100% { opacity: 0; transform: translate(-50%, -100%) scale(1.5); }
-        }
-        @keyframes floatBubble {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-12px); }
         }
       `}</style>
     </div>

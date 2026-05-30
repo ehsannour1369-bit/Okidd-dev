@@ -34,6 +34,10 @@ import StudentDashboard from "./pages/student/Dashboard";
 import StudentBooks from "./pages/student/Books";
 import StudentRanking from "./pages/student/Ranking";
 import StudentGame from "./pages/student/Game";
+import StudentNotifications from "./pages/student/Notifications";
+import StudentTeacher from "./pages/student/Teacher";
+import StudentLessonPlayer from "./pages/student/LessonPlayer";
+import StudentGamePlayer from "./pages/student/GamePlayer";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -114,6 +118,10 @@ function AppRouter() {
       <Route path="/student/books"><LayoutRoute component={StudentBooks} roles={["student"]} /></Route>
       <Route path="/student/ranking"><LayoutRoute component={StudentRanking} roles={["student"]} /></Route>
       <Route path="/student/game"><LayoutRoute component={StudentGame} roles={["student"]} /></Route>
+      <Route path="/student/notifications"><LayoutRoute component={StudentNotifications} roles={["student"]} /></Route>
+      <Route path="/student/teacher"><LayoutRoute component={StudentTeacher} roles={["student"]} /></Route>
+      <Route path="/student/lesson-player"><LayoutRoute component={StudentLessonPlayer} roles={["student"]} /></Route>
+      <Route path="/student/game-player"><LayoutRoute component={StudentGamePlayer} roles={["student"]} /></Route>
 
       <Route component={NotFound} />
     </Switch>
