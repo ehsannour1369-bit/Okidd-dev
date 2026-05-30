@@ -12,6 +12,11 @@ import AdminBooks from "./pages/admin/Books";
 import AdminPackages from "./pages/admin/Packages";
 import AdminTransactions from "./pages/admin/Transactions";
 import AdminContent from "./pages/admin/Content";
+import AdminBranches from "./pages/admin/Branches";
+import AdminTeachers from "./pages/admin/Teachers";
+import AdminStudents from "./pages/admin/Students";
+import AdminClasses from "./pages/admin/Classes";
+import AdminConsultants from "./pages/admin/Consultants";
 
 import SchoolDashboard from "./pages/school/Dashboard";
 import SchoolBranches from "./pages/school/Branches";
@@ -21,6 +26,13 @@ import SchoolStudents from "./pages/school/Students";
 import SchoolNotifications from "./pages/school/Notifications";
 import SchoolExams from "./pages/school/Exams";
 
+import BranchDashboard from "./pages/branch/Dashboard";
+import BranchClasses from "./pages/branch/Classes";
+import BranchStudents from "./pages/school/Students";
+import BranchTeachers from "./pages/school/Teachers";
+import BranchNotifications from "./pages/school/Notifications";
+import BranchExams from "./pages/school/Exams";
+
 import TeacherDashboard from "./pages/teacher/Dashboard";
 import TeacherMySchools from "./pages/teacher/MySchools";
 import TeacherClasses from "./pages/teacher/Classes";
@@ -28,32 +40,37 @@ import TeacherProgress from "./pages/teacher/Progress";
 
 import ParentDashboard from "./pages/parent/Dashboard";
 import ParentChildren from "./pages/parent/Children";
+import ParentConsultations from "./pages/parent/Consultations";
 import ParentNotifications from "./pages/parent/Notifications";
+
+import ConsultantDashboard from "./pages/consultant/Dashboard";
+import ConsultantSchedule from "./pages/consultant/Schedule";
 
 import StudentDashboard from "./pages/student/Dashboard";
 import StudentBooks from "./pages/student/Books";
 import StudentRanking from "./pages/student/Ranking";
 import StudentGame from "./pages/student/Game";
-import StudentNotifications from "./pages/student/Notifications";
-import StudentTeacher from "./pages/student/Teacher";
-import StudentLessonPlayer from "./pages/student/LessonPlayer";
-import StudentGamePlayer from "./pages/student/GamePlayer";
+import GamePlayer from "./pages/student/GamePlayer";
+import LessonPlayer from "./pages/student/LessonPlayer";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
 });
 
+function roleHome(role: string) {
+  if (role === "admin") return "/admin";
+  if (role === "school_manager") return "/school";
+  if (role === "branch_manager") return "/branch";
+  if (role === "teacher") return "/teacher";
+  if (role === "parent") return "/parent";
+  if (role === "consultant") return "/consultant";
+  return "/student";
+}
+
 function AuthGuard({ children, allowedRoles }: { children: React.ReactNode; allowedRoles: string[] }) {
   const { user } = useAuthStore();
-  const [, navigate] = useLocation();
   if (!user) return <Redirect to="/login" />;
-  if (!allowedRoles.includes(user.role)) {
-    if (user.role === "admin") return <Redirect to="/admin" />;
-    if (user.role === "school") return <Redirect to="/school" />;
-    if (user.role === "teacher") return <Redirect to="/teacher" />;
-    if (user.role === "parent") return <Redirect to="/parent" />;
-    return <Redirect to="/student" />;
-  }
+  if (!allowedRoles.includes(user.role)) return <Redirect to={roleHome(user.role)} />;
   return <>{children}</>;
 }
 
@@ -72,15 +89,10 @@ function AppRouter() {
     <Switch>
       <Route path="/login" component={Login} />
 
-      {/* Root redirect */}
       <Route path="/">
         {() => {
           if (!user) return <Redirect to="/login" />;
-          if (user.role === "admin") return <Redirect to="/admin" />;
-          if (user.role === "school") return <Redirect to="/school" />;
-          if (user.role === "teacher") return <Redirect to="/teacher" />;
-          if (user.role === "parent") return <Redirect to="/parent" />;
-          return <Redirect to="/student" />;
+          return <Redirect to={roleHome(user.role)} />;
         }}
       </Route>
 
@@ -92,15 +104,28 @@ function AppRouter() {
       <Route path="/admin/packages"><LayoutRoute component={AdminPackages} roles={["admin"]} /></Route>
       <Route path="/admin/transactions"><LayoutRoute component={AdminTransactions} roles={["admin"]} /></Route>
       <Route path="/admin/content"><LayoutRoute component={AdminContent} roles={["admin"]} /></Route>
+      <Route path="/admin/branches"><LayoutRoute component={AdminBranches} roles={["admin"]} /></Route>
+      <Route path="/admin/teachers"><LayoutRoute component={AdminTeachers} roles={["admin"]} /></Route>
+      <Route path="/admin/students"><LayoutRoute component={AdminStudents} roles={["admin"]} /></Route>
+      <Route path="/admin/classes"><LayoutRoute component={AdminClasses} roles={["admin"]} /></Route>
+      <Route path="/admin/consultants"><LayoutRoute component={AdminConsultants} roles={["admin"]} /></Route>
 
-      {/* School */}
-      <Route path="/school"><LayoutRoute component={SchoolDashboard} roles={["school"]} /></Route>
-      <Route path="/school/branches"><LayoutRoute component={SchoolBranches} roles={["school"]} /></Route>
-      <Route path="/school/classes"><LayoutRoute component={SchoolClasses} roles={["school"]} /></Route>
-      <Route path="/school/teachers"><LayoutRoute component={SchoolTeachers} roles={["school"]} /></Route>
-      <Route path="/school/students"><LayoutRoute component={SchoolStudents} roles={["school"]} /></Route>
-      <Route path="/school/notifications"><LayoutRoute component={SchoolNotifications} roles={["school"]} /></Route>
-      <Route path="/school/exams"><LayoutRoute component={SchoolExams} roles={["school"]} /></Route>
+      {/* School Manager */}
+      <Route path="/school"><LayoutRoute component={SchoolDashboard} roles={["school_manager"]} /></Route>
+      <Route path="/school/branches"><LayoutRoute component={SchoolBranches} roles={["school_manager"]} /></Route>
+      <Route path="/school/classes"><LayoutRoute component={SchoolClasses} roles={["school_manager"]} /></Route>
+      <Route path="/school/teachers"><LayoutRoute component={SchoolTeachers} roles={["school_manager"]} /></Route>
+      <Route path="/school/students"><LayoutRoute component={SchoolStudents} roles={["school_manager"]} /></Route>
+      <Route path="/school/notifications"><LayoutRoute component={SchoolNotifications} roles={["school_manager"]} /></Route>
+      <Route path="/school/exams"><LayoutRoute component={SchoolExams} roles={["school_manager"]} /></Route>
+
+      {/* Branch Manager */}
+      <Route path="/branch"><LayoutRoute component={BranchDashboard} roles={["branch_manager"]} /></Route>
+      <Route path="/branch/classes"><LayoutRoute component={BranchClasses} roles={["branch_manager"]} /></Route>
+      <Route path="/branch/students"><LayoutRoute component={BranchStudents} roles={["branch_manager"]} /></Route>
+      <Route path="/branch/teachers"><LayoutRoute component={BranchTeachers} roles={["branch_manager"]} /></Route>
+      <Route path="/branch/notifications"><LayoutRoute component={BranchNotifications} roles={["branch_manager"]} /></Route>
+      <Route path="/branch/exams"><LayoutRoute component={BranchExams} roles={["branch_manager"]} /></Route>
 
       {/* Teacher */}
       <Route path="/teacher"><LayoutRoute component={TeacherDashboard} roles={["teacher"]} /></Route>
@@ -111,17 +136,20 @@ function AppRouter() {
       {/* Parent */}
       <Route path="/parent"><LayoutRoute component={ParentDashboard} roles={["parent"]} /></Route>
       <Route path="/parent/children"><LayoutRoute component={ParentChildren} roles={["parent"]} /></Route>
+      <Route path="/parent/consultations"><LayoutRoute component={ParentConsultations} roles={["parent"]} /></Route>
       <Route path="/parent/notifications"><LayoutRoute component={ParentNotifications} roles={["parent"]} /></Route>
+
+      {/* Consultant */}
+      <Route path="/consultant"><LayoutRoute component={ConsultantDashboard} roles={["consultant"]} /></Route>
+      <Route path="/consultant/schedule"><LayoutRoute component={ConsultantSchedule} roles={["consultant"]} /></Route>
 
       {/* Student */}
       <Route path="/student"><LayoutRoute component={StudentDashboard} roles={["student"]} /></Route>
       <Route path="/student/books"><LayoutRoute component={StudentBooks} roles={["student"]} /></Route>
       <Route path="/student/ranking"><LayoutRoute component={StudentRanking} roles={["student"]} /></Route>
       <Route path="/student/game"><LayoutRoute component={StudentGame} roles={["student"]} /></Route>
-      <Route path="/student/notifications"><LayoutRoute component={StudentNotifications} roles={["student"]} /></Route>
-      <Route path="/student/teacher"><LayoutRoute component={StudentTeacher} roles={["student"]} /></Route>
-      <Route path="/student/lesson-player"><LayoutRoute component={StudentLessonPlayer} roles={["student"]} /></Route>
-      <Route path="/student/game-player"><LayoutRoute component={StudentGamePlayer} roles={["student"]} /></Route>
+      <Route path="/student/game-player"><AuthGuard allowedRoles={["student"]}><GamePlayer /></AuthGuard></Route>
+      <Route path="/student/lesson-player"><AuthGuard allowedRoles={["student"]}><LessonPlayer /></AuthGuard></Route>
 
       <Route component={NotFound} />
     </Switch>

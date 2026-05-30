@@ -11,7 +11,6 @@ export * from "./packages";
 export * from "./transactions";
 export * from "./content";
 export * from "./notifications";
-export * from "./notificationReplies";
 export * from "./examSchedule";
 export * from "./progressChart";
 export * from "./studentProgress";

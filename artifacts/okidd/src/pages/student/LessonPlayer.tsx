@@ -110,7 +110,7 @@ export default function LessonPlayer() {
         if (user?.id) {
           api.post("/game-scores", {
             studentId: user.id,
-            gameName: currentContent?.id ? `content-${currentContent.id}` : "game",
+            gameType: currentContent?.id ? `content-${currentContent.id}` : "game",
             score,
           }).then(() => {
             setSavedScore(true);
@@ -327,33 +327,16 @@ export default function LessonPlayer() {
         <div style={{ height: "100%", width: `${((currentContentIndex + 1) / content.length) * 100}%`, background: `linear-gradient(90deg, ${accent}, ${accentLight})`, transition: "width 0.3s ease" }} />
       </div>
 
-      {/* Content display */}
+      {/* Content iframe */}
       <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
         {contentUrl ? (
-          (currentContent.type === "animation" || currentContent.type === "video") ? (
-            <video
-              key={currentContent.id}
-              src={contentUrl}
-              style={{ width: "100%", height: "100%", background: "#0d0a1a", objectFit: "contain" }}
-              controls
-              autoPlay
-              playsInline
-              muted
-              onEnded={() => {
-                setContentCompleted(true);
-                setTimeout(() => advanceContent(), 1500);
-              }}
-              onError={() => setError("خطا در پخش ویدیو")}
-            />
-          ) : (
-            <iframe
-              ref={iframeRef}
-              src={contentUrl}
-              style={{ width: "100%", height: "100%", border: "none", background: "#0d0a1a" }}
-              sandbox="allow-scripts allow-same-origin allow-popups"
-              allow="fullscreen"
-            />
-          )
+          <iframe
+            ref={iframeRef}
+            src={contentUrl}
+            style={{ width: "100%", height: "100%", border: "none", background: "#0d0a1a" }}
+            sandbox="allow-scripts allow-same-origin allow-popups"
+            allow="fullscreen"
+          />
         ) : (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#8b5cf6" }}>
             <div style={{ textAlign: "center" }}>

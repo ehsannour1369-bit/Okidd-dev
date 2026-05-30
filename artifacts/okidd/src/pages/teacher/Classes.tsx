@@ -20,7 +20,8 @@ export default function TeacherClasses() {
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16 }}>
         {classes.map(cls => (
-          <Link key={cls.id} href={`/teacher/classes/${cls.id}`} style={{ textDecoration: "none" }}>
+          <Link key={cls.id} href={`/teacher/classes/${cls.id}`}>
+            <a style={{ textDecoration: "none" }}>
               <div style={{ background: "rgba(30,18,60,0.85)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, padding: 22, transition: "all 0.3s ease", cursor: "pointer" }}
                 onMouseOver={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "#7c3aed"; el.style.boxShadow = "0 0 20px rgba(124,58,237,0.2)"; el.style.transform = "translateY(-3px)"; }}
                 onMouseOut={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "rgba(139,92,246,0.2)"; el.style.boxShadow = "none"; el.style.transform = "translateY(0)"; }}
@@ -38,6 +39,7 @@ export default function TeacherClasses() {
                   </div>
                 </div>
               </div>
+            </a>
           </Link>
         ))}
         {classes.length === 0 && (

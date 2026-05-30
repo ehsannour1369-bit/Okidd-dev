@@ -23,7 +23,7 @@ export default function GamePlayer() {
         if (user?.id) {
           api.post("/game-scores", {
             studentId: user.id,
-            gameName: contentId ? `content-${contentId}` : "game",
+            gameType: contentId ? `content-${contentId}` : "game",
             score,
           }).then(() => setSaved(true)).catch(() => {});
         }

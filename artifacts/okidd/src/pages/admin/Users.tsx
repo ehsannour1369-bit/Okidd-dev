@@ -6,8 +6,12 @@ import { Plus, Power, Edit2, Search, Download, FileText, Eye, X, BookOpen, Clock
 interface User { id: number; name: string; email: string; role: string; status: string; schoolName?: string; gender?: string; nationalId?: string; }
 
 const ROLES = [
-  { value: "admin", label: "مدیر کل" }, { value: "school", label: "مدیر مدرسه" },
-  { value: "teacher", label: "معلم" }, { value: "parent", label: "والدین" }, { value: "student", label: "دانش‌آموز" },
+  { value: "admin", label: "مدیر کل" },
+  { value: "school_manager", label: "مدیر مدرسه" },
+  { value: "branch_manager", label: "مدیر شعبه" },
+  { value: "teacher", label: "معلم" },
+  { value: "parent", label: "والدین" },
+  { value: "student", label: "دانش‌آموز" },
 ];
 
 function Modal({ title, onClose, children, wide }: any) {

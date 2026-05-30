@@ -63,7 +63,8 @@ export default function TeacherMySchools() {
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10 }}>
                 {sClasses.map((cls: any) => (
-                  <Link key={cls.id} href={`/teacher/classes/${cls.id}`} style={{ textDecoration: "none" }}>
+                  <Link key={cls.id} href={`/teacher/classes/${cls.id}`}>
+                    <a style={{ textDecoration: "none" }}>
                       <div style={{ background: "rgba(13,10,26,0.5)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 10, padding: 14, transition: "all 0.2s ease" }}
                         onMouseOver={e => { (e.currentTarget as HTMLElement).style.borderColor = "#7c3aed"; (e.currentTarget as HTMLElement).style.boxShadow = "0 0 12px rgba(124,58,237,0.2)"; }}
                         onMouseOut={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(139,92,246,0.2)"; (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
@@ -71,6 +72,7 @@ export default function TeacherMySchools() {
                         <div style={{ fontWeight: 600, color: "#f8f5ff", marginBottom: 6 }}>{cls.name}</div>
                         <div style={{ fontSize: 12, color: "#60a5fa" }}><Users size={11} style={{ display: "inline", verticalAlign: "middle", marginLeft: 3 }} />{cls.studentCount} دانش‌آموز</div>
                       </div>
+                    </a>
                   </Link>
                 ))}
               </div>
