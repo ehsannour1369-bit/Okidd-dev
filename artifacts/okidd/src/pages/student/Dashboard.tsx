@@ -3,7 +3,8 @@ import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
-import { Menu, X, Lock, CheckCircle, ChevronRight, ChevronDown, Bell, Calendar } from "lucide-react";
+import { Menu, X, Lock, CheckCircle, ChevronRight, ChevronDown, ChevronUp, Bell, Calendar, Plus, Send as SendIcon, MessageCircle } from "lucide-react";
+import NotificationThread from "../../components/NotificationThread";
 
 interface BalloonItem {
   id: number; x: number; y: number; dx: number; dy: number;
@@ -38,7 +39,8 @@ function createBalloon(id: number, isGirl: boolean): BalloonItem {
 }
 
 type Screen = "home" | "books" | "lesson";
-type MenuSection = "books" | "school";
+type MenuSection = "books" | "school" | "notifs";
+type NotifTab = "received" | "sent";
 
 export default function StudentDashboard() {
   const { user } = useAuthStore();
@@ -54,6 +56,10 @@ export default function StudentDashboard() {
   const [selectedBook, setSelectedBook] = useState<any>(null);
   const [currentLesson, setCurrentLesson] = useState(1);
   const [expandedMenuBook, setExpandedMenuBook] = useState<number | null>(null);
+  const [notifTab, setNotifTab] = useState<NotifTab>("received");
+  const [showNotifForm, setShowNotifForm] = useState(false);
+  const [notifForm, setNotifForm] = useState({ title: "", body: "", targetRole: "teacher" });
+  const [expandedNotifIds, setExpandedNotifIds] = useState<Set<number>>(new Set());
   const [balloons, setBalloons] = useState<BalloonItem[]>(() =>
     Array.from({ length: 10 }, (_, i) => createBalloon(i, user?.gender === "female"))
   );
@@ -101,6 +107,47 @@ export default function StudentDashboard() {
     queryFn: () => api.get(`/lesson-unlocks`),
     enabled: !!user?.id,
   });
+
+  const { data: receivedNotifs = [] } = useQuery<any[]>({
+    queryKey: ["notifications", user?.schoolId, "student"],
+    queryFn: () => api.get(`/notifications?schoolId=${user?.schoolId}&targetRole=student`),
+    enabled: !!user?.schoolId,
+  });
+
+  const { data: sentNotifs = [] } = useQuery<any[]>({
+    queryKey: ["notifications", "student-sent", user?.id],
+    queryFn: () => api.get(`/notifications?fromUserId=${user?.id}`),
+    enabled: !!user?.id,
+  });
+
+  const createNotifMut = useMutation({
+    mutationFn: (d: any) => api.post("/notifications", d),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+      setShowNotifForm(false);
+      setNotifForm({ title: "", body: "", targetRole: "teacher" });
+    },
+  });
+
+  function handleNotifSend() {
+    if (!notifForm.title.trim() || !notifForm.body.trim()) return;
+    createNotifMut.mutate({
+      title: notifForm.title.trim(),
+      body: notifForm.body.trim(),
+      targetRole: notifForm.targetRole,
+      schoolId: user?.schoolId,
+      fromUserId: user?.id,
+      fromRole: "student",
+      fromName: user?.name ?? "دانش‌آموز",
+      recipientStudentIds: null, recipientTeacherIds: null,
+      recipientClassIds: null, recipientBranchIds: null,
+      recipientGrades: null, recipientGradeLevels: null,
+    });
+  }
+
+  function toggleNotifExpand(id: number) {
+    setExpandedNotifIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  }
 
   const completeLessonMut = useMutation({
     mutationFn: (data: any) => api.post("/student-progress", data),
@@ -209,6 +256,9 @@ export default function StudentDashboard() {
       {/* Hamburger */}
       <button onClick={() => setMenuOpen(true)} style={{ position: "absolute", top: 16, right: 16, zIndex: 20, background: "rgba(30,18,60,0.8)", border: `1px solid ${accent}44`, borderRadius: 12, padding: 10, cursor: "pointer", color: accentLight }}>
         <Menu size={22} />
+        {receivedNotifs.length > 0 && (
+          <span style={{ position: "absolute", top: 6, right: 6, width: 8, height: 8, background: "#f59e0b", borderRadius: "50%", border: "1px solid rgba(0,0,0,0.5)" }} />
+        )}
       </button>
 
       {/* Slide-out menu */}
@@ -230,9 +280,16 @@ export default function StudentDashboard() {
           </div>
 
           {/* Section Tabs */}
-          <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
-            <button onClick={() => setMenuSection("books")} style={{ flex: 1, padding: "8px 0", borderRadius: 10, border: `1px solid ${menuSection === "books" ? accent : "rgba(139,92,246,0.2)"}`, background: menuSection === "books" ? `${accent}22` : "transparent", color: menuSection === "books" ? accentLight : "#8b5cf6", fontSize: 12, fontFamily: "Vazirmatn", cursor: "pointer" }}>📚 کتاب‌هام</button>
-            <button onClick={() => setMenuSection("school")} style={{ flex: 1, padding: "8px 0", borderRadius: 10, border: `1px solid ${menuSection === "school" ? accent : "rgba(139,92,246,0.2)"}`, background: menuSection === "school" ? `${accent}22` : "transparent", color: menuSection === "school" ? accentLight : "#8b5cf6", fontSize: 12, fontFamily: "Vazirmatn", cursor: "pointer" }}>🏫 مدرسه‌ام</button>
+          <div style={{ display: "flex", gap: 5, marginBottom: 16 }}>
+            {([["books", "📚", "کتاب‌هام"], ["school", "🏫", "مدرسه"], ["notifs", "🔔", "اعلانات"]] as const).map(([sec, emoji, label]) => (
+              <button key={sec} onClick={() => setMenuSection(sec)} style={{ flex: 1, padding: "7px 0", borderRadius: 10, border: `1px solid ${menuSection === sec ? accent : "rgba(139,92,246,0.2)"}`, background: menuSection === sec ? `${accent}22` : "transparent", color: menuSection === sec ? accentLight : "#8b5cf6", fontSize: 11, fontFamily: "Vazirmatn", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, position: "relative" }}>
+                <span style={{ fontSize: 14 }}>{emoji}</span>
+                <span>{label}</span>
+                {sec === "notifs" && receivedNotifs.length > 0 && (
+                  <span style={{ position: "absolute", top: 4, right: 4, width: 7, height: 7, background: "#f59e0b", borderRadius: "50%" }} />
+                )}
+              </button>
+            ))}
           </div>
 
           {/* My Books Section */}
@@ -280,41 +337,108 @@ export default function StudentDashboard() {
             </div>
           )}
 
-          {/* My School Section */}
+          {/* My School Section — Exam Schedule */}
           {menuSection === "school" && (
             <div>
-              {/* Notifications */}
-              <div style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 12, color: "#f59e0b", marginBottom: 8, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
-                  <Bell size={12} /> اعلانات مدرسه
-                </div>
-                {schoolNotifs.length === 0 ? (
-                  <div style={{ color: "#8b5cf6", fontSize: 12 }}>اعلانی وجود ندارد</div>
-                ) : (
-                  schoolNotifs.slice(0, 4).map((n: any) => (
-                    <div key={n.id} style={{ background: "rgba(30,18,60,0.6)", borderRadius: 10, padding: "8px 12px", marginBottom: 6, borderRight: "2px solid #f59e0b" }}>
-                      <div style={{ fontWeight: 600, color: "#f8f5ff", fontSize: 12, marginBottom: 2 }}>{n.title}</div>
-                      <div style={{ fontSize: 11, color: "#c4b5fd" }}>{n.message}</div>
-                    </div>
-                  ))
-                )}
+              <div style={{ fontSize: 12, color: "#a855f7", marginBottom: 10, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
+                <Calendar size={12} /> تقویم امتحانی
               </div>
-              {/* Exam Schedule */}
-              <div>
-                <div style={{ fontSize: 12, color: "#a855f7", marginBottom: 8, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
-                  <Calendar size={12} /> تقویم امتحانی
-                </div>
-                {examSchedule.length === 0 ? (
-                  <div style={{ color: "#8b5cf6", fontSize: 12 }}>امتحانی ثبت نشده</div>
-                ) : (
-                  examSchedule.slice(0, 4).map((exam: any) => (
-                    <div key={exam.id} style={{ background: "rgba(30,18,60,0.6)", borderRadius: 10, padding: "8px 12px", marginBottom: 6, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <div style={{ fontWeight: 600, color: "#f8f5ff", fontSize: 12 }}>{exam.subject ?? exam.title ?? "امتحان"}</div>
-                      {exam.examDate && <div style={{ fontSize: 10, color: "#a855f7" }}>{new Date(exam.examDate).toLocaleDateString("fa-IR")}</div>}
-                    </div>
-                  ))
-                )}
+              {examSchedule.length === 0 ? (
+                <div style={{ color: "#8b5cf6", fontSize: 12, padding: "8px 0", textAlign: "center" }}>امتحانی ثبت نشده</div>
+              ) : (
+                examSchedule.map((exam: any) => (
+                  <div key={exam.id} style={{ background: "rgba(30,18,60,0.6)", borderRadius: 10, padding: "10px 12px", marginBottom: 6, display: "flex", justifyContent: "space-between", alignItems: "center", borderRight: "2px solid #a855f7" }}>
+                    <div style={{ fontWeight: 600, color: "#f8f5ff", fontSize: 12 }}>{exam.subject ?? exam.title ?? "امتحان"}</div>
+                    {exam.examDate && <div style={{ fontSize: 10, color: "#a855f7", background: "rgba(168,85,247,0.15)", padding: "3px 8px", borderRadius: 6 }}>{new Date(exam.examDate).toLocaleDateString("fa-IR")}</div>}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {/* Notifications Section */}
+          {menuSection === "notifs" && (
+            <div>
+              {/* Sub-tabs */}
+              <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+                <button onClick={() => setNotifTab("received")} style={{ flex: 1, padding: "7px 0", borderRadius: 9, border: `1px solid ${notifTab === "received" ? "#f59e0b" : "rgba(139,92,246,0.2)"}`, background: notifTab === "received" ? "rgba(245,158,11,0.15)" : "transparent", color: notifTab === "received" ? "#fbbf24" : "#8b5cf6", fontSize: 11, fontFamily: "Vazirmatn", cursor: "pointer" }}>
+                  🔔 دریافتی {receivedNotifs.length > 0 && `(${receivedNotifs.length})`}
+                </button>
+                <button onClick={() => setNotifTab("sent")} style={{ flex: 1, padding: "7px 0", borderRadius: 9, border: `1px solid ${notifTab === "sent" ? accent : "rgba(139,92,246,0.2)"}`, background: notifTab === "sent" ? `${accent}22` : "transparent", color: notifTab === "sent" ? accentLight : "#8b5cf6", fontSize: 11, fontFamily: "Vazirmatn", cursor: "pointer" }}>
+                  ✉️ ارسالی {sentNotifs.length > 0 && `(${sentNotifs.length})`}
+                </button>
               </div>
+
+              {/* Send button */}
+              <button onClick={() => setShowNotifForm(v => !v)} style={{ width: "100%", marginBottom: 10, padding: "9px 0", background: `${accent}22`, border: `1px solid ${accent}44`, borderRadius: 10, color: accentLight, fontFamily: "Vazirmatn", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                <Plus size={13} /> پیام جدید
+              </button>
+
+              {/* Send form */}
+              {showNotifForm && (
+                <div style={{ background: "rgba(30,18,60,0.8)", border: `1px solid ${accent}33`, borderRadius: 12, padding: 12, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "#f8f5ff" }}>ارسال پیام ✉️</div>
+                    <button onClick={() => setShowNotifForm(false)} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer" }}><X size={14} /></button>
+                  </div>
+                  <div style={{ display: "grid", gap: 8 }}>
+                    <select value={notifForm.targetRole} onChange={e => setNotifForm({ ...notifForm, targetRole: e.target.value })} style={{ width: "100%", background: "rgba(20,12,45,0.9)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 8, color: "#f8f5ff", padding: "7px 10px", fontSize: 12, fontFamily: "Vazirmatn", direction: "rtl" }}>
+                      <option value="teacher">معلم</option>
+                      <option value="school_manager">مدیر مدرسه</option>
+                    </select>
+                    <input value={notifForm.title} onChange={e => setNotifForm({ ...notifForm, title: e.target.value })} placeholder="موضوع..." style={{ width: "100%", background: "rgba(20,12,45,0.9)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 8, color: "#f8f5ff", padding: "7px 10px", fontSize: 12, fontFamily: "Vazirmatn", direction: "rtl", outline: "none", boxSizing: "border-box" as const }} />
+                    <textarea value={notifForm.body} onChange={e => setNotifForm({ ...notifForm, body: e.target.value })} rows={3} placeholder="متن پیام..." style={{ width: "100%", background: "rgba(20,12,45,0.9)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 8, color: "#f8f5ff", padding: "7px 10px", fontSize: 12, fontFamily: "Vazirmatn", direction: "rtl", outline: "none", resize: "vertical", boxSizing: "border-box" as const }} />
+                    <button onClick={handleNotifSend} disabled={!notifForm.title.trim() || !notifForm.body.trim() || createNotifMut.isPending}
+                      style={{ width: "100%", padding: "9px 0", background: `linear-gradient(135deg, ${accent}, ${accentLight})`, border: "none", borderRadius: 8, color: "white", fontFamily: "Vazirmatn", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, opacity: (!notifForm.title.trim() || !notifForm.body.trim()) ? 0.5 : 1 }}>
+                      <SendIcon size={12} /> {createNotifMut.isPending ? "در حال ارسال..." : "ارسال"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Notification list */}
+              {(notifTab === "received" ? receivedNotifs : sentNotifs).map((n: any) => {
+                const isExpanded = expandedNotifIds.has(n.id);
+                const isSent = notifTab === "sent";
+                return (
+                  <div key={n.id} style={{ background: "rgba(30,18,60,0.6)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 12, marginBottom: 8, overflow: "hidden" }}>
+                    <div style={{ padding: "10px 12px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 700, color: "#f8f5ff", fontSize: 12, marginBottom: 3 }}>{n.title}</div>
+                          <div style={{ fontSize: 11, color: "#c4b5fd", lineHeight: 1.5 }}>{n.body}</div>
+                          {isSent && n.targetRole && (
+                            <span style={{ display: "inline-block", marginTop: 4, background: `${accent}22`, border: `1px solid ${accent}44`, borderRadius: 999, padding: "1px 7px", fontSize: 10, color: accentLight }}>
+                              به: {n.targetRole === "school_manager" ? "مدیر" : "معلم"}
+                            </span>
+                          )}
+                          {n.createdAt && <div style={{ fontSize: 10, color: "#8b5cf6", marginTop: 3 }}>{new Date(n.createdAt).toLocaleDateString("fa-IR")}</div>}
+                        </div>
+                        <button onClick={() => toggleNotifExpand(n.id)} style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 3, padding: "4px 7px", background: isExpanded ? `${accent}22` : "rgba(139,92,246,0.1)", border: `1px solid ${accent}33`, borderRadius: 7, color: accentLight, cursor: "pointer", fontSize: 10, fontFamily: "Vazirmatn" }}>
+                          <MessageCircle size={11} />
+                          {isExpanded ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+                        </button>
+                      </div>
+                    </div>
+                    {isExpanded && (
+                      <div style={{ borderTop: `1px solid ${accent}22`, padding: "8px 12px" }}>
+                        <NotificationThread
+                          notifId={n.id}
+                          currentUserId={user?.id ?? 0}
+                          currentUserName={user?.name ?? ""}
+                          currentUserRole="student"
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              {(notifTab === "received" ? receivedNotifs : sentNotifs).length === 0 && (
+                <div style={{ textAlign: "center", padding: "24px 0", color: "#8b5cf6", fontSize: 12 }}>
+                  <Bell size={28} style={{ marginBottom: 8, opacity: 0.4, display: "block", margin: "0 auto 8px" }} />
+                  {notifTab === "received" ? "اعلانی وجود ندارد" : "پیامی ارسال نکرده‌اید"}
+                </div>
+              )}
             </div>
           )}
         </div>
