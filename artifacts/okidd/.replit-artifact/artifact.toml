@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "oKidd Educational Platform"
+version = "1.0.0"
+id = "artifacts/okidd"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24048
+
+[services.development]
+run = "pnpm --filter @workspace/okidd run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/okidd", "run", "build" ]
+publicDir = "artifacts/okidd/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24048"
+BASE_PATH = "/"
