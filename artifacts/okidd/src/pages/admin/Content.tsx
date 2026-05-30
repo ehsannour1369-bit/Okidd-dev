@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
+import { showToast } from "../../lib/toast";
 import { Plus, Edit2, Trash2, Upload, Film, Gamepad2, ClipboardCheck, PenLine, X } from "lucide-react";
 
 interface Content {
@@ -301,11 +302,11 @@ export default function AdminContent() {
   const [editing, setEditing] = useState<Content | null>(null);
 
   const { data: content = [] } = useQuery<Content[]>({ queryKey: ["content"], queryFn: () => api.get("/content") });
-  const deleteMut = useMutation({ mutationFn: (id: number) => api.delete(`/content/${id}`), onSuccess: () => qc.invalidateQueries({ queryKey: ["content"] }) });
+  const deleteMut = useMutation({ mutationFn: (id: number) => api.delete(`/content/${id}`), onSuccess: () => { qc.invalidateQueries({ queryKey: ["content"] }); showToast("محتوا حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
 
   function openCreate() { setEditing(null); setShowModal(true); }
   function openEdit(c: Content) { setEditing(c); setShowModal(true); }
-  function onSuccess() { qc.invalidateQueries({ queryKey: ["content"] }); }
+  function onSuccess() { qc.invalidateQueries({ queryKey: ["content"] }); showToast("محتوا با موفقیت ذخیره شد ✓"); }
 
   return (
     <div>

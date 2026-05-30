@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
+import { showToast } from "../../lib/toast";
 import { Plus, Edit2, Trash2, Users, Calculator } from "lucide-react";
 
 interface Package { id: number; title: string; totalPrice: number; studentCount: number; bookIds: number[]; schoolId?: number; }
@@ -42,15 +43,18 @@ export default function AdminPackages() {
 
   const createMut = useMutation({
     mutationFn: (d: any) => api.post("/packages", d),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["packages"] }); setShowModal(false); }
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["packages"] }); setShowModal(false); showToast("پکیج با موفقیت ثبت شد ✓"); },
+    onError: (e: any) => showToast(e?.message ?? "خطا در ثبت پکیج", "error"),
   });
   const updateMut = useMutation({
     mutationFn: ({ id, d }: any) => api.put(`/packages/${id}`, d),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["packages"] }); setShowModal(false); }
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["packages"] }); setShowModal(false); showToast("پکیج بروزرسانی شد ✓"); },
+    onError: (e: any) => showToast(e?.message ?? "خطا در بروزرسانی", "error"),
   });
   const deleteMut = useMutation({
     mutationFn: (id: number) => api.delete(`/packages/${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["packages"] })
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["packages"] }); showToast("پکیج حذف شد"); },
+    onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error"),
   });
 
   function openCreate() { setEditing(null); setForm({ title: "", studentCount: 0, bookIds: [] }); setShowModal(true); }

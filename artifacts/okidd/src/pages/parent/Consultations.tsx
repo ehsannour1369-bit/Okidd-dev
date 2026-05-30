@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
+import { showToast } from "../../lib/toast";
 import { Plus, X, Calendar, Clock, MessageSquare, UserCheck, CheckCircle, Clock4, XCircle } from "lucide-react";
 
 const IS = { width: "100%", background: "rgba(13,10,26,0.5)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#f8f5ff", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
@@ -70,7 +71,9 @@ export default function ParentConsultations() {
       qc.invalidateQueries({ queryKey: ["consultations", user?.id] });
       setShowModal(false);
       setForm({ topic: "", description: "", consultantId: "", scheduledDate: "", scheduledTime: "", duration: "30" });
+      showToast("درخواست مشاوره با موفقیت ثبت شد ✓");
     },
+    onError: (e: any) => showToast(e?.message ?? "خطا در ثبت درخواست", "error"),
   });
 
   return (

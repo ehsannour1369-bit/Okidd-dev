@@ -3,6 +3,7 @@ import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { showToast } from "../../lib/toast";
 import { Lock, Unlock } from "lucide-react";
 
 export default function TeacherProgress() {
@@ -16,8 +17,8 @@ export default function TeacherProgress() {
   const { data: lessons = [] } = useQuery<any[]>({ queryKey: ["lessons", selectedBook?.id], queryFn: () => api.get(`/lessons?bookId=${selectedBook?.id}`), enabled: !!selectedBook });
   const { data: unlocks = [] } = useQuery<any[]>({ queryKey: ["lesson-unlocks", selectedClass?.id, selectedBook?.id], queryFn: () => api.get(`/lesson-unlocks?classId=${selectedClass?.id}&bookId=${selectedBook?.id}`), enabled: !!selectedClass && !!selectedBook });
 
-  const unlockMut = useMutation({ mutationFn: (d: any) => api.post("/lesson-unlocks", d), onSuccess: () => qc.invalidateQueries({ queryKey: ["lesson-unlocks"] }) });
-  const lockMut = useMutation({ mutationFn: (id: number) => api.delete(`/lesson-unlocks/${id}`), onSuccess: () => qc.invalidateQueries({ queryKey: ["lesson-unlocks"] }) });
+  const unlockMut = useMutation({ mutationFn: (d: any) => api.post("/lesson-unlocks", d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["lesson-unlocks"] }); showToast("درس باز شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا", "error") });
+  const lockMut = useMutation({ mutationFn: (id: number) => api.delete(`/lesson-unlocks/${id}`), onSuccess: () => { qc.invalidateQueries({ queryKey: ["lesson-unlocks"] }); showToast("درس قفل شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا", "error") });
 
   const unlockedIds = new Set(unlocks.map((u: any) => u.lessonId));
 

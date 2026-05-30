@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
+import { showToast } from "../../lib/toast";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
 interface Book { id: number; title: string; lessonCount: number; monthlyFee: number; gradeLevel?: string; academicStage?: string; isPreset: boolean; }
@@ -46,9 +47,9 @@ export default function AdminBooks() {
   const [form, setForm] = useState({ title: "", lessonCount: 0, monthlyFee: 0, grade: "", academicStage: "", isPreset: false });
 
   const { data: books = [] } = useQuery<Book[]>({ queryKey: ["books"], queryFn: () => api.get("/books") });
-  const createMut = useMutation({ mutationFn: (d: any) => api.post("/books", d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["books"] }); setShowModal(false); } });
-  const updateMut = useMutation({ mutationFn: ({ id, d }: any) => api.put(`/books/${id}`, d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["books"] }); setShowModal(false); } });
-  const deleteMut = useMutation({ mutationFn: (id: number) => api.delete(`/books/${id}`), onSuccess: () => qc.invalidateQueries({ queryKey: ["books"] }) });
+  const createMut = useMutation({ mutationFn: (d: any) => api.post("/books", d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["books"] }); setShowModal(false); showToast("کتاب با موفقیت ثبت شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا در ثبت کتاب", "error") });
+  const updateMut = useMutation({ mutationFn: ({ id, d }: any) => api.put(`/books/${id}`, d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["books"] }); setShowModal(false); showToast("کتاب با موفقیت بروزرسانی شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا در بروزرسانی", "error") });
+  const deleteMut = useMutation({ mutationFn: (id: number) => api.delete(`/books/${id}`), onSuccess: () => { qc.invalidateQueries({ queryKey: ["books"] }); showToast("کتاب حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
 
   const gradesForStage = form.academicStage && STAGE_GRADES[form.academicStage]
     ? STAGE_GRADES[form.academicStage]

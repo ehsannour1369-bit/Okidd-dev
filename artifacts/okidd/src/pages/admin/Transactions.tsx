@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
+import { showToast } from "../../lib/toast";
 import { Plus, Download, Edit2, Trash2 } from "lucide-react";
 
 interface Transaction { id: number; schoolId: number; packageId: number; amount: number; discount: number; balance?: number; paymentDate: string; paymentMethod: string; notes?: string; status: string; schoolName?: string; packageName?: string; }
@@ -54,9 +55,9 @@ export default function AdminTransactions() {
   const { data: schools = [] } = useQuery<School[]>({ queryKey: ["schools"], queryFn: () => api.get("/schools") });
   const { data: packages = [] } = useQuery<Package[]>({ queryKey: ["packages"], queryFn: () => api.get("/packages") });
 
-  const createMut = useMutation({ mutationFn: (d: any) => api.post("/transactions", d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["transactions"] }); setShowModal(false); } });
-  const updateMut = useMutation({ mutationFn: ({ id, d }: any) => api.put(`/transactions/${id}`, d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["transactions"] }); setShowModal(false); } });
-  const deleteMut = useMutation({ mutationFn: (id: number) => api.delete(`/transactions/${id}`), onSuccess: () => qc.invalidateQueries({ queryKey: ["transactions"] }) });
+  const createMut = useMutation({ mutationFn: (d: any) => api.post("/transactions", d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["transactions"] }); setShowModal(false); showToast("تراکنش با موفقیت ثبت شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا در ثبت تراکنش", "error") });
+  const updateMut = useMutation({ mutationFn: ({ id, d }: any) => api.put(`/transactions/${id}`, d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["transactions"] }); setShowModal(false); showToast("تراکنش بروزرسانی شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا در بروزرسانی", "error") });
+  const deleteMut = useMutation({ mutationFn: (id: number) => api.delete(`/transactions/${id}`), onSuccess: () => { qc.invalidateQueries({ queryKey: ["transactions"] }); showToast("تراکنش حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
 
   function openCreate() { setEditing(null); setForm({ schoolId: schools[0]?.id ?? 0, packageId: packages[0]?.id ?? 0, amount: 0, discount: 0, balance: 0, paymentDate: new Date().toISOString().split("T")[0], paymentMethod: "cash", notes: "", status: "pending" }); setShowModal(true); }
   function openEdit(t: Transaction) { setEditing(t); setForm({ schoolId: t.schoolId, packageId: t.packageId, amount: t.amount, discount: t.discount, balance: t.balance ?? 0, paymentDate: t.paymentDate?.split("T")[0] ?? "", paymentMethod: t.paymentMethod, notes: t.notes ?? "", status: t.status }); setShowModal(true); }

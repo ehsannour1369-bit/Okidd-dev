@@ -4,6 +4,7 @@ import { useAuthStore } from "./store/auth";
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import NotFound from "./pages/not-found";
+import ToastContainer from "./components/ToastContainer";
 
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminSchools from "./pages/admin/Schools";
@@ -162,6 +163,7 @@ export default function App() {
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <AppRouter />
       </WouterRouter>
+      <ToastContainer />
     </QueryClientProvider>
   );
 }

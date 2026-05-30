@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
+import { showToast } from "../../lib/toast";
 import { Plus, ChevronDown, ChevronUp, Trash2, BookOpen, Users, GraduationCap, X } from "lucide-react";
 
 const IS = { width: "100%", background: "rgba(13,10,26,0.5)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#f8f5ff", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
@@ -71,21 +72,21 @@ export default function SchoolBranches() {
 
   const inv = (keys: string[][]) => keys.forEach(k => qc.invalidateQueries({ queryKey: k }));
 
-  const addBranchMut = useMutation({ mutationFn: (d: any) => api.post("/branches", { ...d, schoolId }), onSuccess: () => { inv([["branches", String(schoolId)]]); setAddBranchOpen(false); setBForm({ name: "", address: "" }); } });
-  const delBranchMut = useMutation({ mutationFn: (id: number) => api.delete(`/branches/${id}`), onSuccess: () => inv([["branches", String(schoolId)]]) });
-  const addGLMut = useMutation({ mutationFn: (d: any) => api.post("/grade-levels", d), onSuccess: () => { inv([["grade-levels"]]); setAddGLFor(null); setGLForm({ name: "" }); } });
-  const delGLMut = useMutation({ mutationFn: (id: number) => api.delete(`/grade-levels/${id}`), onSuccess: () => inv([["grade-levels"]]) });
-  const addGradeMut = useMutation({ mutationFn: (d: any) => api.post("/grades", d), onSuccess: () => { inv([["grades"]]); setAddGradeFor(null); setGrForm({ name: "" }); } });
-  const delGradeMut = useMutation({ mutationFn: (id: number) => api.delete(`/grades/${id}`), onSuccess: () => inv([["grades"]]) });
-  const addClassMut = useMutation({ mutationFn: (d: any) => api.post("/classes", d), onSuccess: () => { inv([["classes"]]); setAddClassFor(null); setClForm({ name: "", capacity: "30" }); } });
-  const delClassMut = useMutation({ mutationFn: (id: number) => api.delete(`/classes/${id}`), onSuccess: () => inv([["classes"]]) });
+  const addBranchMut = useMutation({ mutationFn: (d: any) => api.post("/branches", { ...d, schoolId }), onSuccess: () => { inv([["branches", String(schoolId)]]); setAddBranchOpen(false); setBForm({ name: "", address: "" }); showToast("شعبه با موفقیت ایجاد شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا در ایجاد شعبه", "error") });
+  const delBranchMut = useMutation({ mutationFn: (id: number) => api.delete(`/branches/${id}`), onSuccess: () => { inv([["branches", String(schoolId)]]); showToast("شعبه حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
+  const addGLMut = useMutation({ mutationFn: (d: any) => api.post("/grade-levels", d), onSuccess: () => { inv([["grade-levels"]]); setAddGLFor(null); setGLForm({ name: "" }); showToast("مقطع تحصیلی اضافه شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا", "error") });
+  const delGLMut = useMutation({ mutationFn: (id: number) => api.delete(`/grade-levels/${id}`), onSuccess: () => { inv([["grade-levels"]]); showToast("مقطع حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
+  const addGradeMut = useMutation({ mutationFn: (d: any) => api.post("/grades", d), onSuccess: () => { inv([["grades"]]); setAddGradeFor(null); setGrForm({ name: "" }); showToast("پایه اضافه شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا", "error") });
+  const delGradeMut = useMutation({ mutationFn: (id: number) => api.delete(`/grades/${id}`), onSuccess: () => { inv([["grades"]]); showToast("پایه حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
+  const addClassMut = useMutation({ mutationFn: (d: any) => api.post("/classes", d), onSuccess: () => { inv([["classes"]]); setAddClassFor(null); setClForm({ name: "", capacity: "30" }); showToast("کلاس ایجاد شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا", "error") });
+  const delClassMut = useMutation({ mutationFn: (id: number) => api.delete(`/classes/${id}`), onSuccess: () => { inv([["classes"]]); showToast("کلاس حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
 
-  const addBookMut = useMutation({ mutationFn: ({ cid, bid }: any) => api.post(`/classes/${cid}/books`, { bookId: parseInt(bid) }), onSuccess: () => { inv([["class-books", String(classManage?.id)]]); setAddBookId(""); } });
-  const delBookMut = useMutation({ mutationFn: ({ cid, bid }: any) => api.delete(`/classes/${cid}/books/${bid}`), onSuccess: () => inv([["class-books", String(classManage?.id)]]) });
-  const addStudMut = useMutation({ mutationFn: ({ cid, sid }: any) => api.post(`/classes/${cid}/students`, { studentId: parseInt(sid) }), onSuccess: () => { inv([["class-students", String(classManage?.id)]]); setAddStudentId(""); } });
-  const delStudMut = useMutation({ mutationFn: ({ cid, sid }: any) => api.delete(`/classes/${cid}/students/${sid}`), onSuccess: () => inv([["class-students", String(classManage?.id)]]) });
-  const addTeachMut = useMutation({ mutationFn: ({ cid, tid }: any) => api.post(`/classes/${cid}/teachers`, { teacherId: parseInt(tid) }), onSuccess: () => { inv([["class-teachers", String(classManage?.id)]]); setAddTeacherId(""); } });
-  const delTeachMut = useMutation({ mutationFn: ({ cid, tid }: any) => api.delete(`/classes/${cid}/teachers/${tid}`), onSuccess: () => inv([["class-teachers", String(classManage?.id)]]) });
+  const addBookMut = useMutation({ mutationFn: ({ cid, bid }: any) => api.post(`/classes/${cid}/books`, { bookId: parseInt(bid) }), onSuccess: () => { inv([["class-books", String(classManage?.id)]]); setAddBookId(""); showToast("کتاب اضافه شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا", "error") });
+  const delBookMut = useMutation({ mutationFn: ({ cid, bid }: any) => api.delete(`/classes/${cid}/books/${bid}`), onSuccess: () => { inv([["class-books", String(classManage?.id)]]); showToast("کتاب حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
+  const addStudMut = useMutation({ mutationFn: ({ cid, sid }: any) => api.post(`/classes/${cid}/students`, { studentId: parseInt(sid) }), onSuccess: () => { inv([["class-students", String(classManage?.id)]]); setAddStudentId(""); showToast("دانش‌آموز اضافه شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا", "error") });
+  const delStudMut = useMutation({ mutationFn: ({ cid, sid }: any) => api.delete(`/classes/${cid}/students/${sid}`), onSuccess: () => { inv([["class-students", String(classManage?.id)]]); showToast("دانش‌آموز حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
+  const addTeachMut = useMutation({ mutationFn: ({ cid, tid }: any) => api.post(`/classes/${cid}/teachers`, { teacherId: parseInt(tid) }), onSuccess: () => { inv([["class-teachers", String(classManage?.id)]]); setAddTeacherId(""); showToast("معلم اضافه شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا", "error") });
+  const delTeachMut = useMutation({ mutationFn: ({ cid, tid }: any) => api.delete(`/classes/${cid}/teachers/${tid}`), onSuccess: () => { inv([["class-teachers", String(classManage?.id)]]); showToast("معلم حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
 
   function toggle<T>(set: Set<T>, item: T) {
     const next = new Set(set);

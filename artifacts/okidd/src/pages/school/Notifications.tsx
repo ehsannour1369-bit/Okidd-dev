@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
+import { showToast } from "../../lib/toast";
 import { Plus, Trash2, Bell } from "lucide-react";
 
 interface Notification { id: number; title: string; body: string; targetRole: string; createdAt?: string; }
@@ -21,9 +22,10 @@ export default function SchoolNotifications() {
 
   const createMut = useMutation({
     mutationFn: (d: any) => api.post("/notifications", { ...d, schoolId: user?.schoolId }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["notifications"] }); setShowForm(false); setForm({ title: "", body: "", targetRole: "student" }); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["notifications"] }); setShowForm(false); setForm({ title: "", body: "", targetRole: "student" }); showToast("اعلان با موفقیت ارسال شد ✓"); },
+    onError: (e: any) => showToast(e?.message ?? "خطا در ارسال اعلان", "error"),
   });
-  const deleteMut = useMutation({ mutationFn: (id: number) => api.delete(`/notifications/${id}`), onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }) });
+  const deleteMut = useMutation({ mutationFn: (id: number) => api.delete(`/notifications/${id}`), onSuccess: () => { qc.invalidateQueries({ queryKey: ["notifications"] }); showToast("اعلان حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
 
   const roleLabel = (r: string) => ({ student: "دانش‌آموز", teacher: "معلم", parent: "والدین" } as any)[r] ?? r;
 

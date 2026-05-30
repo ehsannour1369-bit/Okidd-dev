@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
+import { showToast } from "../../lib/toast";
 import { GraduationCap, Mail, Phone, Plus, X } from "lucide-react";
 
 const IS = { width: "100%", background: "rgba(13,10,26,0.5)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#f8f5ff", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
@@ -20,7 +21,8 @@ export default function SchoolTeachers() {
 
   const createMut = useMutation({
     mutationFn: (d: any) => api.post("/users", { ...d, role: "teacher", schoolId: user?.schoolId, status: "active" }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["users", "teacher", user?.schoolId] }); setShowModal(false); setForm({ name: "", email: "", password: "", gender: "male", phone: "" }); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["users", "teacher", user?.schoolId] }); setShowModal(false); setForm({ name: "", email: "", password: "", gender: "male", phone: "" }); showToast("معلم با موفقیت ایجاد شد ✓"); },
+    onError: (e: any) => showToast(e?.message ?? "خطا در ایجاد معلم", "error"),
   });
 
   function Lbl({ label, children }: any) {

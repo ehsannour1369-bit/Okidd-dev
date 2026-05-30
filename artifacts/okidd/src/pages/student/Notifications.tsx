@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
+import { showToast } from "../../lib/toast";
 import { Bell, Calendar, Plus, X, MessageCircle, ChevronDown, ChevronUp, Send as SendIcon } from "lucide-react";
 import NotificationThread from "../../components/NotificationThread";
 
@@ -63,7 +64,9 @@ export default function StudentNotifications() {
       qc.invalidateQueries({ queryKey: ["notifications"] });
       setShowForm(false);
       setForm({ title: "", body: "", targetRole: "teacher" });
+      showToast("پیام با موفقیت ارسال شد ✓");
     },
+    onError: (e: any) => showToast(e?.message ?? "خطا در ارسال پیام", "error"),
   });
 
   function handleSend() {

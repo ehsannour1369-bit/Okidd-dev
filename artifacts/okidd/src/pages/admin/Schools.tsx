@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
+import { showToast } from "../../lib/toast";
 import { Plus, Power, Edit2, Search, ChevronDown, ChevronUp, GitBranch, Users, Package, X } from "lucide-react";
 
 interface BranchDetail {
@@ -413,9 +414,11 @@ function SchoolModal({ editing, onClose, onSuccess }: {
       } else {
         onSuccess();
         onClose();
+        showToast(editing ? "مدرسه بروزرسانی شد ✓" : "مدرسه با موفقیت ثبت شد ✓");
       }
     } catch (e: any) {
       setError(e.message ?? "خطا در ذخیره");
+      showToast(e.message ?? "خطا در ذخیره مدرسه", "error");
     } finally {
       setLoading(false);
     }
@@ -481,7 +484,8 @@ export default function AdminSchools() {
 
   const toggleMutation = useMutation({
     mutationFn: (id: number) => api.patch(`/schools/${id}/toggle-status`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["schools"] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["schools"] }); showToast("وضعیت مدرسه تغییر کرد ✓"); },
+    onError: (e: any) => showToast(e?.message ?? "خطا در تغییر وضعیت", "error"),
   });
 
   function refresh() { qc.invalidateQueries({ queryKey: ["schools"] }); }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
+import { showToast } from "../../lib/toast";
 import { Plus, Trash2, ClipboardList } from "lucide-react";
 
 interface ExamEntry { id: number; lessonName: string; examDate: string; examPages?: string; examTime?: string; }
@@ -18,8 +19,8 @@ export default function SchoolExams() {
     queryKey: ["exam-schedule", user?.schoolId],
     queryFn: () => api.get(`/exam-schedule?schoolId=${user?.schoolId}`),
   });
-  const createMut = useMutation({ mutationFn: (d: any) => api.post("/exam-schedule", { ...d, schoolId: user?.schoolId }), onSuccess: () => { qc.invalidateQueries({ queryKey: ["exam-schedule"] }); setShowForm(false); setForm({ lessonName: "", examDate: "", examPages: "", examTime: "" }); } });
-  const deleteMut = useMutation({ mutationFn: (id: number) => api.delete(`/exam-schedule/${id}`), onSuccess: () => qc.invalidateQueries({ queryKey: ["exam-schedule"] }) });
+  const createMut = useMutation({ mutationFn: (d: any) => api.post("/exam-schedule", { ...d, schoolId: user?.schoolId }), onSuccess: () => { qc.invalidateQueries({ queryKey: ["exam-schedule"] }); setShowForm(false); setForm({ lessonName: "", examDate: "", examPages: "", examTime: "" }); showToast("امتحان با موفقیت ثبت شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا در ثبت امتحان", "error") });
+  const deleteMut = useMutation({ mutationFn: (id: number) => api.delete(`/exam-schedule/${id}`), onSuccess: () => { qc.invalidateQueries({ queryKey: ["exam-schedule"] }); showToast("امتحان حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
 
   return (
     <div>

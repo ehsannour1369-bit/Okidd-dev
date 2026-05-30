@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
+import { showToast } from "../../lib/toast";
 import { UserCheck, X, Plus, Trash2, School, Mail, Phone } from "lucide-react";
 
 const IS = { width: "100%", background: "rgba(13,10,26,0.5)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#f8f5ff", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
@@ -51,17 +52,20 @@ export default function AdminConsultants() {
 
   const createMut = useMutation({
     mutationFn: (d: any) => api.post("/users", { ...d, role: "consultant", schoolId: selectedSchoolId, status: "active" }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["users", "all"] }); setShowModal(false); setForm({ name: "", email: "", password: "", gender: "male", phone: "", specialty: "", about: "" }); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["users", "all"] }); setShowModal(false); setForm({ name: "", email: "", password: "", gender: "male", phone: "", specialty: "", about: "" }); showToast("مشاور با موفقیت ایجاد شد ✓"); },
+    onError: (e: any) => showToast(e?.message ?? "خطا در ایجاد مشاور", "error"),
   });
 
   const assignMut = useMutation({
     mutationFn: (d: any) => api.post("/consultants", d),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["consultants", selectedSchoolId] }); setShowAssignModal(false); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["consultants", selectedSchoolId] }); setShowAssignModal(false); showToast("مشاور با موفقیت تخصیص داده شد ✓"); },
+    onError: (e: any) => showToast(e?.message ?? "خطا در تخصیص", "error"),
   });
 
   const delConsultantMut = useMutation({
     mutationFn: (id: number) => api.delete(`/consultants/${id}`),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["consultants", selectedSchoolId] }); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["consultants", selectedSchoolId] }); showToast("مشاور حذف شد"); },
+    onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error"),
   });
 
   return (
