@@ -72,9 +72,7 @@ Multi-role educational management platform supporting:
 
 ## User preferences
 
-- Persian (RTL) UI with Vazirmatn font
-- Student themes: male = purple, female = pink
-- Demo accounts password = national ID
+_Populate as you build — explicit user instructions worth remembering across sessions._
 
 ## Gotchas
 
@@ -83,7 +81,7 @@ Multi-role educational management platform supporting:
 - Frontend uses `@workspace/api-client-react` for all API calls (not raw fetch)
 - All pages are RTL — use `dir="rtl"` and Vazirmatn font
 - `branch_manager` login response includes `branchId` (from branch_managers table); `school_manager` branchId is null
-- Role was renamed from `school` -> `school_manager`; `branch_manager` is a new role
+- Role was renamed from `school` → `school_manager`; `branch_manager` is a new role
 
 ## Pointers
 
