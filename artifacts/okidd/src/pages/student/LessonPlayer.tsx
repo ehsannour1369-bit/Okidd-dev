@@ -147,15 +147,15 @@ export default function LessonPlayer() {
   useEffect(() => { advanceContentRef.current = advanceContent; });
 
   /* ── Auto-advance: در حالت قفل، پس از تکمیل محتوا خودکار به بعدی می‌رود ──
-     برای بازی: علاوه بر contentCompleted، savedScore هم باید true باشد       */
+     بازی: هرگز auto-advance ندارد — کاربر باید دکمه «بعدی/تکمیل» را بزند    */
   useEffect(() => {
     if (freeMode) return;
     if (!contentCompleted) return;
     const isGame = currentContent?.type === "game";
-    if (isGame && !savedScore) return; /* بازی باید امتیاز ارسال کرده باشد */
+    if (isGame) return; /* بازی فقط با دکمه دستی جلو می‌رود */
     const timer = setTimeout(() => advanceContentRef.current(), 2000);
     return () => clearTimeout(timer);
-  }, [contentCompleted, savedScore, freeMode, currentContent?.type]);
+  }, [contentCompleted, freeMode, currentContent?.type]);
 
   function replayContent() {
     if (videoRef.current) {
@@ -495,17 +495,22 @@ export default function LessonPlayer() {
               style={{ height: 40, padding: "0 22px", background: nextDisabled ? "rgba(0,0,0,0.06)" : `linear-gradient(135deg,${accent},${accentLight})`, border: nextDisabled ? "1.5px solid rgba(0,0,0,0.08)" : "none", borderRadius: 11, color: nextDisabled ? "#94a3b8" : "white", fontFamily: "Vazirmatn", fontSize: 14, fontWeight: 700, cursor: nextDisabled ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 6, boxShadow: nextDisabled ? "none" : `0 4px 14px ${accentBorder}`, transition: "all 0.2s" }}>
               {isLastContent ? <><CheckCircle2 size={14} /> تکمیل</> : <>بعدی <ChevronLeft size={15} /></>}
             </button>
-          ) : isLastContent && contentCompleted && (currentContent?.type !== "game" || savedScore) ? (
-            /* حالت قفل — آخرین محتوا واقعاً کامل شده: دکمه تکمیل درس
-               برای بازی: علاوه بر contentCompleted، savedScore هم لازم است */
+          ) : isGame && savedScore ? (
+            /* حالت قفل — بازی امتیاز فرستاده: دکمه دستی بعدی / تکمیل درس */
+            <button onClick={advanceContent}
+              style={{ height: 40, padding: "0 22px", background: `linear-gradient(135deg,${accent},${accentLight})`, border: "none", borderRadius: 11, color: "white", fontFamily: "Vazirmatn", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, boxShadow: `0 4px 14px ${accentBorder}` }}>
+              {isLastContent ? <><CheckCircle2 size={14} /> تکمیل درس</> : <>بعدی <ChevronLeft size={15} /></>}
+            </button>
+          ) : !isGame && isLastContent && contentCompleted ? (
+            /* حالت قفل — آخرین محتوای غیر-بازی کامل شد */
             <button onClick={advanceContent}
               style={{ height: 40, padding: "0 22px", background: `linear-gradient(135deg,${accent},${accentLight})`, border: "none", borderRadius: 11, color: "white", fontFamily: "Vazirmatn", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, boxShadow: `0 4px 14px ${accentBorder}` }}>
               <CheckCircle2 size={14} /> تکمیل درس
             </button>
           ) : (
-            /* حالت قفل — محتوا در حال پخش یا بازی تکمیل نشده */
+            /* حالت قفل — در انتظار تکمیل محتوا */
             <div style={{ height: 40, padding: "0 18px", background: "rgba(0,0,0,0.04)", border: "1.5px solid rgba(0,0,0,0.08)", borderRadius: 11, color: "#9ca3af", display: "flex", alignItems: "center", gap: 6, fontSize: 13 }}>
-              {contentCompleted && currentContent?.type !== "game"
+              {contentCompleted && !isGame
                 ? <><span style={{ fontSize: 12 }}>⏩</span> چند لحظه...</>
                 : <><Lock size={13} /> {isGame ? "بازی را تکمیل کنید" : "تکمیل کنید"}</>}
             </div>
