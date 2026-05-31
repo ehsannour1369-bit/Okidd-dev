@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { BookOpen, CheckCircle2, Play, FileText, Film, Gamepad2, ClipboardCheck, PenLine } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const TYPE_ICONS: Record<string, any> = {
   animation: Film,
@@ -13,6 +13,16 @@ const TYPE_ICONS: Record<string, any> = {
   pdf: FileText,
 };
 
+// Points earned per content type (saved once per session per content item)
+const CONTENT_SCORES: Record<string, number> = {
+  animation: 3,
+  video: 3,
+  game: 5,
+  quiz: 10,
+  exercise: 10,
+  pdf: 2,
+};
+
 const GLASS: React.CSSProperties = {
   background: "rgba(255,255,255,0.28)",
   backdropFilter: "blur(18px)",
@@ -21,7 +31,7 @@ const GLASS: React.CSSProperties = {
   boxShadow: "0 8px 32px rgba(80,40,120,0.1)",
 };
 
-function ContentItem({ c, accent, accentDark }: { c: any; accent: string; accentDark: string }) {
+function ContentItem({ c, accent, accentDark, onAccess }: { c: any; accent: string; accentDark: string; onAccess: (c: any) => void }) {
   const Icon = TYPE_ICONS[c.type] ?? FileText;
   const isGame = c.type === "game";
   const url = isGame
@@ -29,15 +39,19 @@ function ContentItem({ c, accent, accentDark }: { c: any; accent: string; accent
     : c.url;
   return (
     <div style={{ ...GLASS, background: "rgba(255,255,255,0.35)", display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12 }}>
-      <div style={{ width: 34, height: 34, borderRadius: 10, background: `${accent}22`, border: `1px solid ${accent}40`, display: "flex", alignItems: "center", justifyContent: "center", color: accentDark }}>
+      <div style={{ width: 34, height: 34, borderRadius: 10, background: `${accent}20`, border: `1px solid ${accent}38`, display: "flex", alignItems: "center", justifyContent: "center", color: accentDark, flexShrink: 0 }}>
         <Icon size={16} />
       </div>
       <div style={{ flex: 1 }}>
         <div style={{ fontWeight: 600, color: "#1e1b4b", fontSize: 13 }}>{c.title}</div>
+        {CONTENT_SCORES[c.type] && (
+          <div style={{ fontSize: 10, color: "#5b21b6", marginTop: 1 }}>+{CONTENT_SCORES[c.type]} امتیاز</div>
+        )}
       </div>
       {c.url && (
         <a href={url} target={isGame ? "_self" : "_blank"} rel="noreferrer"
-          style={{ display: "flex", alignItems: "center", gap: 4, padding: "6px 12px", background: `linear-gradient(135deg, ${accent}, ${accentDark})`, borderRadius: 8, color: "#fff", fontSize: 12, fontWeight: 700, textDecoration: "none", boxShadow: `0 3px 10px ${accent}40`, whiteSpace: "nowrap" }}>
+          onClick={() => onAccess(c)}
+          style={{ display: "flex", alignItems: "center", gap: 4, padding: "6px 12px", background: `linear-gradient(135deg, ${accent}, ${accentDark})`, borderRadius: 8, color: "#fff", fontSize: 12, fontWeight: 700, textDecoration: "none", boxShadow: `0 3px 10px ${accent}38`, whiteSpace: "nowrap", flexShrink: 0 }}>
           <Play size={12} /> {isGame ? "بازی" : "نمایش"}
         </a>
       )}
@@ -52,6 +66,7 @@ export default function StudentBooks() {
   const accentDark = isGirl ? "#c026d3" : "#4f46e5";
   const [selectedBook, setSelectedBook] = useState<any>(null);
   const [selectedLesson, setSelectedLesson] = useState<number | null>(null);
+  const scoredContentRef = useRef<Set<number>>(new Set());
 
   const { data: books = [] } = useQuery<any[]>({
     queryKey: ["enrolled-books", user?.id],
@@ -76,6 +91,14 @@ export default function StudentBooks() {
 
   const completedLessonIds = new Set(progress.filter(p => p.completed).map(p => p.lessonId));
 
+  // Track content access and award points (once per content per session)
+  function handleContentAccess(content: any) {
+    if (!user?.id || scoredContentRef.current.has(content.id)) return;
+    scoredContentRef.current.add(content.id);
+    const pts = CONTENT_SCORES[content.type] ?? 2;
+    api.post("/game-scores", { studentId: user.id, gameType: content.type ?? "other", score: pts }).catch(() => {});
+  }
+
   return (
     <div style={{ padding: "24px 20px", minHeight: "100vh", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
       <h1 style={{ fontSize: 22, fontWeight: 800, color: "white", marginBottom: 24, textShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>
@@ -89,15 +112,15 @@ export default function StudentBooks() {
               style={{ ...GLASS, borderRadius: 20, padding: 22, cursor: "pointer", transition: "all 0.25s ease" }}
               onMouseOver={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-4px)"; el.style.background = "rgba(255,255,255,0.42)"; el.style.boxShadow = "0 16px 40px rgba(80,40,120,0.16)"; }}
               onMouseOut={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(0)"; el.style.background = "rgba(255,255,255,0.28)"; el.style.boxShadow = "0 8px 32px rgba(80,40,120,0.1)"; }}>
-              <div style={{ width: 54, height: 54, borderRadius: 16, background: `${accent}25`, border: `1.5px solid ${accent}45`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
+              <div style={{ width: 54, height: 54, borderRadius: 16, background: `${accent}22`, border: `1.5px solid ${accent}40`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
                 <BookOpen size={28} style={{ color: accentDark }} />
               </div>
               <h3 style={{ color: "#1e1b4b", fontWeight: 700, fontSize: 15, marginTop: 0, marginBottom: 10 }}>{book.title}</h3>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 {book.gradeLevel && (
-                  <span style={{ background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.25)", borderRadius: 999, padding: "2px 9px", fontSize: 11, color: "#4f46e5" }}>{book.gradeLevel}</span>
+                  <span style={{ background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.22)", borderRadius: 999, padding: "2px 9px", fontSize: 11, color: "#4f46e5" }}>{book.gradeLevel}</span>
                 )}
-                <span style={{ background: `${accent}15`, border: `1px solid ${accent}30`, borderRadius: 999, padding: "2px 9px", fontSize: 11, color: accentDark }}>{book.lessonCount} درس</span>
+                <span style={{ background: `${accent}14`, border: `1px solid ${accent}28`, borderRadius: 999, padding: "2px 9px", fontSize: 11, color: accentDark }}>{book.lessonCount} درس</span>
               </div>
             </div>
           ))}
@@ -124,19 +147,21 @@ export default function StudentBooks() {
                   <div key={lesson.id}>
                     <div onClick={() => setSelectedLesson(isSelected ? null : lesson.id)}
                       style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 16px", background: done ? "rgba(34,197,94,0.18)" : isSelected ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.3)", backdropFilter: "blur(8px)", border: `1.5px solid ${done ? "rgba(34,197,94,0.4)" : isSelected ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.5)"}`, borderRadius: 14, transition: "all 0.2s ease", cursor: "pointer" }}>
-                      <div style={{ width: 34, height: 34, borderRadius: "50%", background: done ? "rgba(34,197,94,0.2)" : isSelected ? `${accent}25` : "rgba(255,255,255,0.4)", border: `2px solid ${done ? "rgba(34,197,94,0.5)" : isSelected ? `${accent}55` : "rgba(255,255,255,0.65)"}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <div style={{ width: 34, height: 34, borderRadius: "50%", background: done ? "rgba(34,197,94,0.2)" : isSelected ? `${accent}22` : "rgba(255,255,255,0.4)", border: `2px solid ${done ? "rgba(34,197,94,0.5)" : isSelected ? `${accent}50` : "rgba(255,255,255,0.65)"}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         {done ? <CheckCircle2 size={18} style={{ color: "#22c55e" }} /> : <span style={{ fontSize: 12, fontWeight: 700, color: isSelected ? accentDark : "#5b21b6" }}>{i + 1}</span>}
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 600, color: "#1e1b4b", fontSize: 14 }}>{lesson.title}</div>
                         {lesson.description && <div style={{ color: "#5b21b6", fontSize: 12, opacity: 0.8 }}>{lesson.description}</div>}
                       </div>
-                      <span style={{ color: "#5b21b6", fontSize: 11 }}>{isSelected ? "▲" : "▼"}</span>
+                      <span style={{ color: "rgba(91,33,182,0.7)", fontSize: 11 }}>{isSelected ? "▲" : "▼"}</span>
                     </div>
                     {isSelected && (
                       <div style={{ padding: "10px 12px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
                         {lessonContent.length > 0 ? (
-                          lessonContent.map((c: any) => <ContentItem key={c.id} c={c} accent={accent} accentDark={accentDark} />)
+                          lessonContent.map((c: any) => (
+                            <ContentItem key={c.id} c={c} accent={accent} accentDark={accentDark} onAccess={handleContentAccess} />
+                          ))
                         ) : (
                           <div style={{ ...GLASS, background: "rgba(255,255,255,0.3)", borderRadius: 12, color: "#5b21b6", fontSize: 12, textAlign: "center", padding: "14px 0" }}>محتوایی برای این درس ثبت نشده</div>
                         )}

@@ -1,0 +1,1 @@
+- [game_scores DB mismatch](game-scores-schema.md) — DB column was `game_name` (text), schema expects `game_type` (varchar 50); fixed via ALTER TABLE RENAME.

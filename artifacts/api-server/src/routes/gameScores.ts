@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { db, gameScoresTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
 
 const router = Router();
 
@@ -12,21 +13,21 @@ router.post("/game-scores", async (req, res) => {
   res.status(201).json(entry);
 });
 
-// Get scores for a student
+// Get scores for a student (optional gameType filter)
 router.get("/game-scores", async (req, res) => {
-  const { studentId } = req.query as Record<string, string>;
+  const { studentId, gameType } = req.query as Record<string, string>;
   let rows = await db.select().from(gameScoresTable);
   if (studentId) rows = rows.filter(r => r.studentId === parseInt(studentId));
+  if (gameType) rows = rows.filter(r => r.gameType === gameType);
   rows.sort((a, b) => b.playedAt.getTime() - a.playedAt.getTime());
   res.json(rows.map(r => ({ ...r, playedAt: r.playedAt.toISOString() })));
 });
 
-// Get top scores (leaderboard)
+// Leaderboard
 router.get("/game-scores/leaderboard", async (req, res) => {
   const { studentId } = req.query as Record<string, string>;
   let rows = await db.select().from(gameScoresTable);
   if (studentId) rows = rows.filter(r => r.studentId === parseInt(studentId));
-  // Group by studentId and get best score
   const bestScores = new Map<number, { score: number; playedAt: Date }>();
   for (const r of rows) {
     const existing = bestScores.get(r.studentId);
@@ -35,7 +36,7 @@ router.get("/game-scores/leaderboard", async (req, res) => {
     }
   }
   const result = Array.from(bestScores.entries())
-    .map(([studentId, data]) => ({ studentId, score: data.score, playedAt: data.playedAt.toISOString() }))
+    .map(([sid, data]) => ({ studentId: sid, score: data.score, playedAt: data.playedAt.toISOString() }))
     .sort((a, b) => b.score - a.score);
   res.json(result);
 });

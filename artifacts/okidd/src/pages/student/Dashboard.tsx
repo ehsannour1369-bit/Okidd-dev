@@ -72,6 +72,7 @@ export default function StudentDashboard() {
     Array.from({ length: 10 }, (_, i) => createBalloon(i, user?.gender === "female"))
   );
   const [score, setScore] = useState(0);
+  const [scoreLoaded, setScoreLoaded] = useState(false);
   const [popFeedback, setPopFeedback] = useState<{ id: number; correct: boolean } | null>(null);
   const [askQuestion, setAskQuestion] = useState<BalloonItem | null>(null);
   const rafRef = useRef<number>(0);
@@ -103,6 +104,26 @@ export default function StudentDashboard() {
     queryKey: ["notifications", "student-sent", user?.id],
     queryFn: () => api.get(`/notifications?fromUserId=${user?.id}`),
     enabled: !!user?.id,
+  });
+
+  // Load persisted balloon score from DB
+  const { data: balloonScoreData } = useQuery<any[]>({
+    queryKey: ["game-scores-balloon", user?.id],
+    queryFn: () => api.get(`/game-scores?studentId=${user?.id}&gameType=balloon`),
+    enabled: !!user?.id,
+  });
+
+  useEffect(() => {
+    if (balloonScoreData && !scoreLoaded) {
+      const total = (balloonScoreData as any[]).reduce((sum, gs) => sum + (gs.score ?? 0), 0);
+      setScore(total);
+      setScoreLoaded(true);
+    }
+  }, [balloonScoreData, scoreLoaded]);
+
+  const saveBalloonMut = useMutation({
+    mutationFn: (pts: number) => api.post("/game-scores", { studentId: user?.id, gameType: "balloon", score: pts }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["game-scores-balloon", user?.id] }),
   });
 
   const createNotifMut = useMutation({
@@ -173,7 +194,10 @@ export default function StudentDashboard() {
 
   function popBalloon(id: number, correct: boolean) {
     setBalloons(prev => prev.map(b => b.id === id ? { ...b, popped: true } : b));
-    if (correct) setScore(s => s + 5);
+    if (correct) {
+      setScore(s => s + 5);
+      saveBalloonMut.mutate(5);
+    }
     setPopFeedback({ id, correct });
     setTimeout(() => setPopFeedback(null), 1000);
   }
