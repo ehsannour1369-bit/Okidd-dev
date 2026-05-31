@@ -47,8 +47,12 @@ export default function LessonPlayer() {
   const [savedScore, setSavedScore]             = useState(false);
   const [contentCompleted, setContentCompleted] = useState(false);
   const [muted, setMuted]                       = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const videoRef  = useRef<HTMLVideoElement>(null);
+  const iframeRef          = useRef<HTMLIFrameElement>(null);
+  const videoRef           = useRef<HTMLVideoElement>(null);
+  /* زمان شروع نمایش محتوای جاری — برای جلوگیری از سیگنال‌های زودهنگام بازی هنگام load */
+  const contentLoadTimeRef = useRef<number>(Date.now());
+  /* همیشه آخرین نسخه advanceContent رو نگه می‌داره تا timer از stale closure مصون بمونه */
+  const advanceContentRef  = useRef<() => void>(() => {});
 
   useEffect(() => {
     if (!bookId) return;
@@ -87,20 +91,30 @@ export default function LessonPlayer() {
 
   useEffect(() => {
     if (!currentContent) return;
+    /* ریست وضعیت تکمیل + ثبت زمان شروع نمایش محتوا */
     setContentCompleted(false);
-    if (currentContent.type === "game") setSavedScore(false);
-  }, [currentContent?.id, currentContent?.type, currentContentIndex]);
+    setSavedScore(false);
+    contentLoadTimeRef.current = Date.now();
+  }, [currentContent?.id, currentContentIndex]);
 
   useEffect(() => {
     const handler = (e: MessageEvent) => {
-      const type = e.data?.type;
-      if (type === "game-score" && typeof e.data.score === "number") {
+      const msgType = e.data?.type;
+
+      /* حداقل ۴ ثانیه از load محتوا گذشته باشد تا سیگنال بازی پذیرفته شود */
+      const elapsed = Date.now() - contentLoadTimeRef.current;
+      const isIframeContent = currentContent?.type === "game"
+        || currentContent?.type === "quiz"
+        || currentContent?.type === "exercise";
+      if (isIframeContent && elapsed < 4000) return;
+
+      if (msgType === "game-score" && typeof e.data.score === "number") {
         const score = e.data.score;
         if (user?.id) {
           api.post("/game-scores", { studentId: user.id, gameType: currentContent?.id ? `content-${currentContent.id}` : "game", score })
             .then(() => { setSavedScore(true); setContentCompleted(true); }).catch(() => {});
         }
-      } else if (["content-complete","animation-complete","video-ended","video-complete"].includes(type)) {
+      } else if (["content-complete","animation-complete","video-ended","video-complete"].includes(msgType)) {
         setContentCompleted(true);
       }
     };
@@ -118,13 +132,19 @@ export default function LessonPlayer() {
     }
   }
 
-  /* ── Auto-advance: in locked mode, move to next content automatically ── */
+  /* همیشه آخرین نسخه advanceContent رو در ref نگه می‌دارد */
+  useEffect(() => { advanceContentRef.current = advanceContent; });
+
+  /* ── Auto-advance: در حالت قفل، پس از تکمیل محتوا خودکار به بعدی می‌رود ──
+     برای بازی: علاوه بر contentCompleted، savedScore هم باید true باشد       */
   useEffect(() => {
-    if (!contentCompleted || freeMode) return;
-    const timer = setTimeout(() => advanceContent(), 1800);
+    if (freeMode) return;
+    if (!contentCompleted) return;
+    const isGame = currentContent?.type === "game";
+    if (isGame && !savedScore) return; /* بازی باید امتیاز ارسال کرده باشد */
+    const timer = setTimeout(() => advanceContentRef.current(), 2000);
     return () => clearTimeout(timer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contentCompleted, freeMode]);
+  }, [contentCompleted, savedScore, freeMode, currentContent?.type]);
 
   function replayContent() {
     if (videoRef.current) {
@@ -458,16 +478,19 @@ export default function LessonPlayer() {
               style={{ height: 40, padding: "0 22px", background: nextDisabled ? "rgba(0,0,0,0.06)" : `linear-gradient(135deg,${accent},${accentLight})`, border: nextDisabled ? "1.5px solid rgba(0,0,0,0.08)" : "none", borderRadius: 11, color: nextDisabled ? "#94a3b8" : "white", fontFamily: "Vazirmatn", fontSize: 14, fontWeight: 700, cursor: nextDisabled ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 6, boxShadow: nextDisabled ? "none" : `0 4px 14px ${accentBorder}`, transition: "all 0.2s" }}>
               {isLastContent ? <><CheckCircle2 size={14} /> تکمیل</> : <>بعدی <ChevronLeft size={15} /></>}
             </button>
-          ) : isLastContent && contentCompleted ? (
-            /* حالت قفل — آخرین محتوا کامل شده: دکمه تکمیل درس */
+          ) : isLastContent && contentCompleted && (currentContent?.type !== "game" || savedScore) ? (
+            /* حالت قفل — آخرین محتوا واقعاً کامل شده: دکمه تکمیل درس
+               برای بازی: علاوه بر contentCompleted، savedScore هم لازم است */
             <button onClick={advanceContent}
               style={{ height: 40, padding: "0 22px", background: `linear-gradient(135deg,${accent},${accentLight})`, border: "none", borderRadius: 11, color: "white", fontFamily: "Vazirmatn", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, boxShadow: `0 4px 14px ${accentBorder}` }}>
               <CheckCircle2 size={14} /> تکمیل درس
             </button>
           ) : (
-            /* حالت قفل — محتوا در حال پخش: نوار انتظار خودکار */
+            /* حالت قفل — محتوا در حال پخش یا بازی تکمیل نشده */
             <div style={{ height: 40, padding: "0 18px", background: "rgba(0,0,0,0.04)", border: "1.5px solid rgba(0,0,0,0.08)", borderRadius: 11, color: "#9ca3af", display: "flex", alignItems: "center", gap: 6, fontSize: 13 }}>
-              {contentCompleted ? <><span style={{ fontSize: 12 }}>⏩</span> بعدی به‌زودی...</> : <><Lock size={13} /> تکمیل کنید</>}
+              {contentCompleted && currentContent?.type !== "game"
+                ? <><span style={{ fontSize: 12 }}>⏩</span> چند لحظه...</>
+                : <><Lock size={13} /> {isGame ? "بازی را تکمیل کنید" : "تکمیل کنید"}</>}
             </div>
           )}
         </div>

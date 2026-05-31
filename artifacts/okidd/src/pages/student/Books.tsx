@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
-import { BookOpen, CheckCircle2, Play, FileText, Film, Gamepad2, ClipboardCheck, PenLine } from "lucide-react";
+import { BookOpen, CheckCircle2, Play, FileText, Film, Gamepad2, ClipboardCheck, PenLine, PlayCircle } from "lucide-react";
 import { useState, useRef } from "react";
+import { useLocation } from "wouter";
 
 const TYPE_ICONS: Record<string, any> = {
   animation: Film,
@@ -61,6 +62,7 @@ function ContentItem({ c, accent, accentDark, onAccess }: { c: any; accent: stri
 
 export default function StudentBooks() {
   const { user } = useAuthStore();
+  const [, navigate] = useLocation();
   const isGirl = user?.gender === "female";
   const accent = isGirl ? "#e879f9" : "#818cf8";
   const accentDark = isGirl ? "#c026d3" : "#4f46e5";
@@ -145,16 +147,27 @@ export default function StudentBooks() {
                 const isSelected = selectedLesson === lesson.id;
                 return (
                   <div key={lesson.id}>
-                    <div onClick={() => setSelectedLesson(isSelected ? null : lesson.id)}
-                      style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 16px", background: done ? "rgba(34,197,94,0.18)" : isSelected ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.3)", backdropFilter: "blur(8px)", border: `1.5px solid ${done ? "rgba(34,197,94,0.4)" : isSelected ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.5)"}`, borderRadius: 14, transition: "all 0.2s ease", cursor: "pointer" }}>
-                      <div style={{ width: 34, height: 34, borderRadius: "50%", background: done ? "rgba(34,197,94,0.2)" : isSelected ? `${accent}22` : "rgba(255,255,255,0.4)", border: `2px solid ${done ? "rgba(34,197,94,0.5)" : isSelected ? `${accent}50` : "rgba(255,255,255,0.65)"}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        {done ? <CheckCircle2 size={18} style={{ color: "#22c55e" }} /> : <span style={{ fontSize: 12, fontWeight: 700, color: isSelected ? accentDark : "#5b21b6" }}>{i + 1}</span>}
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div onClick={() => setSelectedLesson(isSelected ? null : lesson.id)}
+                        style={{ flex: 1, display: "flex", alignItems: "center", gap: 14, padding: "12px 16px", background: done ? "rgba(34,197,94,0.18)" : isSelected ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.3)", backdropFilter: "blur(8px)", border: `1.5px solid ${done ? "rgba(34,197,94,0.4)" : isSelected ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.5)"}`, borderRadius: 14, transition: "all 0.2s ease", cursor: "pointer" }}>
+                        <div style={{ width: 34, height: 34, borderRadius: "50%", background: done ? "rgba(34,197,94,0.2)" : isSelected ? `${accent}22` : "rgba(255,255,255,0.4)", border: `2px solid ${done ? "rgba(34,197,94,0.5)" : isSelected ? `${accent}50` : "rgba(255,255,255,0.65)"}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          {done ? <CheckCircle2 size={18} style={{ color: "#22c55e" }} /> : <span style={{ fontSize: 12, fontWeight: 700, color: isSelected ? accentDark : "#5b21b6" }}>{i + 1}</span>}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 600, color: "#1e1b4b", fontSize: 14 }}>{lesson.title}</div>
+                          {lesson.description && <div style={{ color: "#5b21b6", fontSize: 12, opacity: 0.8 }}>{lesson.description}</div>}
+                        </div>
+                        <span style={{ color: "rgba(91,33,182,0.7)", fontSize: 11 }}>{isSelected ? "▲" : "▼"}</span>
                       </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 600, color: "#1e1b4b", fontSize: 14 }}>{lesson.title}</div>
-                        {lesson.description && <div style={{ color: "#5b21b6", fontSize: 12, opacity: 0.8 }}>{lesson.description}</div>}
-                      </div>
-                      <span style={{ color: "rgba(91,33,182,0.7)", fontSize: 11 }}>{isSelected ? "▲" : "▼"}</span>
+                      {/* دکمه پخش در پلیر — فقط برای درس‌های تکمیل‌شده در حالت مرور آزاد */}
+                      {done && (
+                        <button
+                          onClick={() => navigate(`/student/lesson-player?bookId=${selectedBook.id}&lessonId=${lesson.id}&free=1`)}
+                          title="پخش در پلیر (مرور آزاد)"
+                          style={{ width: 40, height: 40, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: `${accent}18`, border: `1.5px solid ${accent}40`, borderRadius: 12, color: accentDark, cursor: "pointer" }}>
+                          <PlayCircle size={18} />
+                        </button>
+                      )}
                     </div>
                     {isSelected && (
                       <div style={{ padding: "10px 12px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
