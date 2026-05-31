@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
-import { Plus, Power, Edit2, Search, Download, FileText, Eye, X, BookOpen, Clock, Star, Users } from "lucide-react";
+import { Plus, Power, Edit2, Search, Download, FileText, Eye, X, BookOpen, Clock, Star, Users, Trash2 } from "lucide-react";
 
 interface User { id: number; name: string; email: string; role: string; status: string; schoolName?: string; gender?: string; nationalId?: string; }
 
@@ -222,9 +222,16 @@ export default function AdminUsers() {
 
   const { data: users = [] } = useQuery<User[]>({ queryKey: ["users"], queryFn: () => api.get("/users") });
 
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+
   const createMut = useMutation({ mutationFn: (d: any) => api.post("/users", d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["users"] }); setShowModal(false); } });
   const updateMut = useMutation({ mutationFn: ({ id, d }: any) => api.put(`/users/${id}`, d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["users"] }); setShowModal(false); setEditing(null); } });
   const toggleMut = useMutation({ mutationFn: (id: number) => api.patch(`/users/${id}/toggle-status`), onSuccess: () => qc.invalidateQueries({ queryKey: ["users"] }) });
+  const deleteMut = useMutation({
+    mutationFn: (id: number) => api.delete(`/users/${id}`),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["users"] }); setDeleteConfirmId(null); },
+    onError: () => setDeleteConfirmId(null),
+  });
 
   function openCreate() { setEditing(null); setForm({ name: "", email: "", password: "", role: "student", gender: "male", nationalId: "" }); setShowModal(true); }
   function openEdit(u: User) { setEditing(u); setForm({ name: u.name, email: u.email, password: "", role: u.role, gender: u.gender ?? "male", nationalId: u.nationalId ?? "" }); setShowModal(true); }
@@ -297,6 +304,7 @@ export default function AdminUsers() {
                     )}
                     <button onClick={() => openEdit(u)} style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.3)", borderRadius: 8, color: "#a855f7", padding: "6px 10px", cursor: "pointer" }}><Edit2 size={14} /></button>
                     <button onClick={() => toggleMut.mutate(u.id)} style={{ background: u.status === "active" ? "rgba(248,113,113,0.15)" : "rgba(34,197,94,0.15)", border: `1px solid ${u.status === "active" ? "rgba(248,113,113,0.3)" : "rgba(34,197,94,0.3)"}`, borderRadius: 8, color: u.status === "active" ? "#f87171" : "#4ade80", padding: "6px 10px", cursor: "pointer" }}><Power size={14} /></button>
+                    <button onClick={() => setDeleteConfirmId(u.id)} title="حذف کاربر" style={{ background: "rgba(248,113,113,0.12)", border: "1px solid rgba(248,113,113,0.3)", borderRadius: 8, color: "#f87171", padding: "6px 10px", cursor: "pointer" }}><Trash2 size={14} /></button>
                   </div>
                 </td>
               </tr>
@@ -305,6 +313,36 @@ export default function AdminUsers() {
         </table>
         {filtered.length === 0 && <p style={{ color: "#8b5cf6", textAlign: "center", padding: 30 }}>کاربری یافت نشد</p>}
       </div>
+
+      {/* Delete confirm dialog */}
+      {deleteConfirmId !== null && (() => {
+        const target = users.find(u => u.id === deleteConfirmId);
+        return (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(4px)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+            <div style={{ background: "#1a1238", border: "1px solid rgba(248,113,113,0.5)", borderRadius: 20, padding: 28, width: "100%", maxWidth: 420, boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}>
+              <div style={{ textAlign: "center", marginBottom: 20 }}>
+                <div style={{ fontSize: 40, marginBottom: 12 }}>🗑️</div>
+                <h3 style={{ margin: "0 0 8px", color: "#f8f5ff", fontSize: 18, fontWeight: 700 }}>حذف کاربر</h3>
+                <p style={{ margin: 0, color: "#c4b5fd", fontSize: 14 }}>
+                  آیا مطمئن هستید که می‌خواهید کاربر<br />
+                  <strong style={{ color: "#f87171" }}>«{target?.name}»</strong> را حذف کنید؟
+                </p>
+                <p style={{ margin: "10px 0 0", color: "#f87171", fontSize: 12 }}>این عملیات قابل بازگشت نیست.</p>
+              </div>
+              <div style={{ display: "flex", gap: 10 }}>
+                <button onClick={() => deleteMut.mutate(deleteConfirmId!)} disabled={deleteMut.isPending}
+                  style={{ flex: 1, padding: "11px 0", background: deleteMut.isPending ? "rgba(248,113,113,0.3)" : "linear-gradient(135deg, #dc2626, #f87171)", border: "none", borderRadius: 10, color: "white", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: deleteMut.isPending ? "not-allowed" : "pointer", fontSize: 14 }}>
+                  {deleteMut.isPending ? "در حال حذف..." : "بله، حذف شود"}
+                </button>
+                <button onClick={() => setDeleteConfirmId(null)}
+                  style={{ flex: 1, padding: "11px 0", background: "transparent", border: "1px solid rgba(124,58,237,0.5)", borderRadius: 10, color: "#a855f7", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14 }}>
+                  انصراف
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {viewDetailId && <UserDetailModal userId={viewDetailId} onClose={() => setViewDetailId(null)} />}
 

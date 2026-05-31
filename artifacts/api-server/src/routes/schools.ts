@@ -180,6 +180,21 @@ router.patch("/schools/:id/toggle-status", async (req, res) => {
   res.json({ ...school, ...counts, totalPackages, branchDetails });
 });
 
+// ─── Delete ───────────────────────────────────────────────────────────────────
+router.delete("/schools/:id", async (req, res) => {
+  const id = parseInt(req.params.id);
+  const [school] = await db.select().from(schoolsTable).where(eq(schoolsTable.id, id));
+  if (!school) { res.status(404).json({ error: "Not found" }); return; }
+  // Reset manager user's role/schoolId before deleting
+  if (school.managerUserId) {
+    await db.update(usersTable)
+      .set({ role: "student", schoolId: null } as any)
+      .where(eq(usersTable.id, school.managerUserId));
+  }
+  await db.delete(schoolsTable).where(eq(schoolsTable.id, id));
+  res.status(204).end();
+});
+
 // ─── Assign existing user as manager ─────────────────────────────────────────
 router.patch("/schools/:id/assign-manager", async (req, res) => {
   const id = parseInt(req.params.id);
