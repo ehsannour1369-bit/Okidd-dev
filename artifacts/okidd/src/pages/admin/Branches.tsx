@@ -83,7 +83,15 @@ export default function AdminBranches() {
   const [bSelectedMgrId, setBSelectedMgrId] = useState<number | null>(null);
   const [bLoading, setBLoading] = useState(false);
   const [bError, setBError] = useState("");
-  const [glForm, setGLForm] = useState({ name: "" });
+  const GRADE_DEFAULTS: Record<string, string[]> = {
+    "پیش‌دبستانی": ["پیش‌دبستانی ۱", "پیش‌دبستانی ۲"],
+    "دبستان": ["پایه اول", "پایه دوم", "پایه سوم", "پایه چهارم", "پایه پنجم", "پایه ششم"],
+    "متوسطه اول": ["پایه هفتم", "پایه هشتم", "پایه نهم"],
+    "متوسطه دوم": ["پایه دهم", "پایه یازدهم", "پایه دوازدهم"],
+    "هنرستان": ["پایه دهم", "پایه یازدهم", "پایه دوازدهم"],
+    "دانشگاه": [],
+  };
+  const [glForm, setGLForm] = useState({ name: "", selectedGrades: [] as string[] });
   const [grForm, setGrForm] = useState({ name: "" });
   const [clForm, setClForm] = useState({ name: "", capacity: "30" });
   const [addStudentId, setAddStudentId] = useState("");
@@ -125,7 +133,25 @@ export default function AdminBranches() {
 
   const addBranchMut = useMutation({ mutationFn: (d: any) => api.post("/branches", { ...d, schoolId: selectedSchoolId }), onSuccess: () => { inv([["branches", String(selectedSchoolId)]]); setAddBranchOpen(false); setBForm(emptyBForm); showToast("شعبه با موفقیت ایجاد شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا در ایجاد شعبه", "error") });
   const delBranchMut = useMutation({ mutationFn: (id: number) => api.delete(`/branches/${id}`), onSuccess: () => { inv([["branches", String(selectedSchoolId)]]); showToast("شعبه حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
-  const addGLMut = useMutation({ mutationFn: (d: any) => api.post("/grade-levels", d), onSuccess: () => { inv([["grade-levels"]]); setAddGLFor(null); setGLForm({ name: "" }); showToast("مقطع تحصیلی اضافه شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا", "error") });
+  const addGLMut = useMutation({ mutationFn: (d: any) => api.post("/grade-levels", d), onSuccess: () => { inv([["grade-levels"]]); setAddGLFor(null); setGLForm({ name: "", selectedGrades: [] }); showToast("مقطع تحصیلی اضافه شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا", "error") });
+
+  const [glLoading, setGLLoading] = useState(false);
+  async function handleAddGL() {
+    if (!glForm.name || addGLFor === null) return;
+    setGLLoading(true);
+    try {
+      const gl: any = await api.post("/grade-levels", { name: glForm.name, branchId: addGLFor });
+      const gradeLevelId = gl?.id ?? gl?.gradeLevelId;
+      if (gradeLevelId && glForm.selectedGrades.length > 0) {
+        await Promise.all(glForm.selectedGrades.map(g => api.post("/grades", { name: g, gradeLevelId, branchId: addGLFor })));
+      }
+      inv([["grade-levels"], ["grades"]]);
+      setAddGLFor(null);
+      setGLForm({ name: "", selectedGrades: [] });
+      showToast(`مقطع ${glForm.name} با ${glForm.selectedGrades.length} پایه ایجاد شد ✓`);
+    } catch (e: any) { showToast(e?.message ?? "خطا در ثبت مقطع", "error"); }
+    finally { setGLLoading(false); }
+  }
   const delGLMut = useMutation({ mutationFn: (id: number) => api.delete(`/grade-levels/${id}`), onSuccess: () => { inv([["grade-levels"]]); showToast("مقطع حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
   const addGradeMut = useMutation({ mutationFn: (d: any) => api.post("/grades", d), onSuccess: () => { inv([["grades"]]); setAddGradeFor(null); setGrForm({ name: "" }); showToast("پایه اضافه شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا", "error") });
   const delGradeMut = useMutation({ mutationFn: (id: number) => api.delete(`/grades/${id}`), onSuccess: () => { inv([["grades"]]); showToast("پایه حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
@@ -371,19 +397,51 @@ export default function AdminBranches() {
 
       {/* Add Grade Level Modal */}
       {addGLFor !== null && (
-        <Modal title="افزودن مقطع" onClose={() => setAddGLFor(null)}>
+        <Modal title="افزودن مقطع تحصیلی" onClose={() => { setAddGLFor(null); setGLForm({ name: "", selectedGrades: [] }); }}>
           <Lbl label="مقطع تحصیلی">
-            <select value={glForm.name} onChange={e => setGLForm({ ...glForm, name: e.target.value })} style={{ ...IS, appearance: "none" }}>
+            <select value={glForm.name} onChange={e => {
+              const lvl = e.target.value;
+              setGLForm({ name: lvl, selectedGrades: GRADE_DEFAULTS[lvl] ? [...GRADE_DEFAULTS[lvl]] : [] });
+            }} style={{ ...IS, appearance: "none" }}>
               <option value="">انتخاب مقطع</option>
-              <option value="پیش‌دبستانی">پیش‌دبستانی</option>
-              <option value="دبستان">دبستان</option>
-              <option value="متوسطه اول">متوسطه اول</option>
-              <option value="متوسطه دوم">متوسطه دوم</option>
-              <option value="هنرستان">هنرستان</option>
-              <option value="دانشگاه">دانشگاه</option>
+              {Object.keys(GRADE_DEFAULTS).map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
             </select>
           </Lbl>
-          <SaveBtn onClick={() => addGLMut.mutate({ name: glForm.name, branchId: addGLFor })} disabled={!glForm.name} />
+
+          {glForm.name && GRADE_DEFAULTS[glForm.name] && GRADE_DEFAULTS[glForm.name].length > 0 && (
+            <div style={{ marginTop: 4 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <span style={{ color: "#a78bfa", fontSize: 13, fontWeight: 600 }}>پایه‌های این مقطع</span>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button type="button" onClick={() => setGLForm(prev => ({ ...prev, selectedGrades: [...GRADE_DEFAULTS[prev.name]] }))}
+                    style={{ fontSize: 11, color: "#60a5fa", background: "none", border: "none", cursor: "pointer", fontFamily: "Vazirmatn" }}>انتخاب همه</button>
+                  <button type="button" onClick={() => setGLForm(prev => ({ ...prev, selectedGrades: [] }))}
+                    style={{ fontSize: 11, color: "#f87171", background: "none", border: "none", cursor: "pointer", fontFamily: "Vazirmatn" }}>حذف انتخاب</button>
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, background: "rgba(13,10,26,0.5)", borderRadius: 10, padding: "10px 12px", border: "1px solid rgba(139,92,246,0.2)" }}>
+                {GRADE_DEFAULTS[glForm.name].map(grade => {
+                  const checked = glForm.selectedGrades.includes(grade);
+                  return (
+                    <label key={grade} style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", padding: "4px 2px" }}>
+                      <div onClick={() => setGLForm(prev => ({ ...prev, selectedGrades: checked ? prev.selectedGrades.filter(g => g !== grade) : [...prev.selectedGrades, grade] }))}
+                        style={{ width: 18, height: 18, borderRadius: 5, border: `2px solid ${checked ? "#7c3aed" : "rgba(139,92,246,0.4)"}`, background: checked ? "#7c3aed" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "all 0.15s" }}>
+                        {checked && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                      </div>
+                      <span style={{ color: checked ? "#e9d5ff" : "#c4b5fd", fontSize: 14, fontFamily: "Vazirmatn", userSelect: "none" }}>{grade}</span>
+                    </label>
+                  );
+                })}
+              </div>
+              {glForm.selectedGrades.length > 0 && (
+                <p style={{ color: "#a78bfa", fontSize: 12, margin: "6px 0 0", textAlign: "left" }}>
+                  {glForm.selectedGrades.length} پایه انتخاب شده
+                </p>
+              )}
+            </div>
+          )}
+
+          <SaveBtn onClick={handleAddGL} disabled={!glForm.name || glLoading} label={glLoading ? "در حال ثبت..." : "ثبت مقطع"} />
         </Modal>
       )}
 
