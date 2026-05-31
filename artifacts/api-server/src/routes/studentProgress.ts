@@ -109,50 +109,90 @@ router.get("/student-scores-breakdown", async (req, res) => {
 });
 
 // Rankings — supports classId, bookId, gradeId filters
+// Strategy: first determine the eligible student set, then aggregate scores from both tables.
 router.get("/rankings", async (req, res) => {
   const { classId, bookId, gradeId } = req.query as Record<string, string>;
 
-  let rows = await db.select().from(studentProgressTable);
-  if (classId) rows = rows.filter(p => p.classId === parseInt(classId));
-  if (bookId) rows = rows.filter(p => p.bookId === parseInt(bookId));
+  const studentScores = new Map<number, number>();
 
-  // gradeId: find all students in classes of that grade
-  if (gradeId) {
-    const gradeClasses = await db.select({ id: classesTable.id })
+  // ── 1. Determine eligible student IDs ─────────────────────────────────────
+  let eligibleStudentIds: number[] | null = null; // null = no filter (global)
+
+  if (classId) {
+    // All students enrolled in this class
+    const rows = await db
+      .select({ studentId: classStudentsTable.studentId })
+      .from(classStudentsTable)
+      .where(eq(classStudentsTable.classId, parseInt(classId)));
+    eligibleStudentIds = rows.map(r => r.studentId);
+  } else if (gradeId) {
+    // All students in any class of this grade
+    const gradeClasses = await db
+      .select({ id: classesTable.id })
       .from(classesTable)
       .where(eq(classesTable.gradeId, parseInt(gradeId)));
     const classIds = gradeClasses.map(c => c.id);
+    if (classIds.length === 0) {
+      res.json([]); return;
+    }
+    const rows = await db
+      .select({ studentId: classStudentsTable.studentId })
+      .from(classStudentsTable)
+      .where(inArray(classStudentsTable.classId, classIds));
+    eligibleStudentIds = rows.map(r => r.studentId);
+  } else if (bookId) {
+    // Students in classes that have this book unlocked
+    const unlocks = await db
+      .select({ classId: lessonUnlocksTable.classId })
+      .from(lessonUnlocksTable)
+      .where(eq(lessonUnlocksTable.bookId, parseInt(bookId)));
+    const classIds = [...new Set(unlocks.map(u => u.classId).filter(Boolean) as number[])];
     if (classIds.length > 0) {
-      const classStudents = await db.select({ studentId: classStudentsTable.studentId })
+      const rows = await db
+        .select({ studentId: classStudentsTable.studentId })
         .from(classStudentsTable)
         .where(inArray(classStudentsTable.classId, classIds));
-      const studentIds = classStudents.map(s => s.studentId);
-      rows = rows.filter(p => studentIds.includes(p.studentId));
+      eligibleStudentIds = rows.map(r => r.studentId);
     } else {
-      rows = [];
+      // Fallback: any student who has progress for this book
+      const progressRows = await db.select().from(studentProgressTable);
+      eligibleStudentIds = [
+        ...new Set(
+          progressRows.filter(p => p.bookId === parseInt(bookId)).map(p => p.studentId)
+        ),
+      ];
     }
   }
+  // eligibleStudentIds === null → global, no filter
 
-  // Also include balloon / activity game scores in total
+  // Initialise map so students with 0 total still appear
+  if (eligibleStudentIds !== null) {
+    for (const sid of eligibleStudentIds) studentScores.set(sid, 0);
+  }
+
+  if (eligibleStudentIds !== null && eligibleStudentIds.length === 0) {
+    res.json([]); return;
+  }
+
+  // ── 2. Add lesson-completion scores from student_progress ─────────────────
+  const allProgress = await db.select().from(studentProgressTable);
+  for (const p of allProgress) {
+    // For bookId filter, only count progress for that specific book
+    if (bookId && p.bookId !== parseInt(bookId)) continue;
+    if (eligibleStudentIds !== null && !studentScores.has(p.studentId)) continue;
+    studentScores.set(p.studentId, (studentScores.get(p.studentId) ?? 0) + p.score);
+  }
+
+  // ── 3. Add game / activity scores from game_scores ────────────────────────
   const allGameScores = await db.select().from(gameScoresTable);
-
-  const studentScores = new Map<number, number>();
-  for (const r of rows) {
-    studentScores.set(r.studentId, (studentScores.get(r.studentId) ?? 0) + r.score);
-  }
-
-  // Add game scores to total (scoped to same students found in progress)
   for (const gs of allGameScores) {
-    if (studentScores.has(gs.studentId)) {
-      studentScores.set(gs.studentId, studentScores.get(gs.studentId)! + gs.score);
-    } else if (!classId && !bookId && !gradeId) {
-      // Global ranking: include students who only have game scores
-      studentScores.set(gs.studentId, (studentScores.get(gs.studentId) ?? 0) + gs.score);
-    }
+    if (eligibleStudentIds !== null && !studentScores.has(gs.studentId)) continue;
+    studentScores.set(gs.studentId, (studentScores.get(gs.studentId) ?? 0) + gs.score);
   }
 
   if (studentScores.size === 0) { res.json([]); return; }
 
+  // ── 4. Resolve names & build ranking ──────────────────────────────────────
   const studentIds = Array.from(studentScores.keys());
   const students = await db.select().from(usersTable).where(inArray(usersTable.id, studentIds));
   const studentMap = Object.fromEntries(students.map(s => [s.id, s.name]));
