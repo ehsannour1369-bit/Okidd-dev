@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { api } from "../../lib/api";
 import { showToast } from "../../lib/toast";
-import { Plus, Power, Edit2, Search, ChevronDown, ChevronUp, GitBranch, Users, Package, X, Trash2 } from "lucide-react";
+import { Plus, Power, Edit2, Search, ChevronDown, ChevronUp, GitBranch, Users, Package, X, Trash2, Settings2 } from "lucide-react";
 
 interface BranchDetail {
   branchId: number; branchName: string; studentCount: number;
@@ -496,6 +497,8 @@ export default function AdminSchools() {
     onError: (e: any) => { showToast(e?.message ?? "خطا در حذف مدرسه", "error"); setDeleteConfirmId(null); },
   });
 
+  const [, navigate] = useLocation();
+
   function refresh() { qc.invalidateQueries({ queryKey: ["schools"] }); }
   function openCreate() { setEditing(null); setShowSchoolModal(true); }
   function openEdit(s: School) { setEditing(s); setShowSchoolModal(true); }
@@ -618,6 +621,10 @@ export default function AdminSchools() {
                       <button onClick={() => setBranchTarget(school)} title="افزودن شعبه"
                         style={{ background: "rgba(52,211,153,0.12)", border: "1px solid rgba(52,211,153,0.3)", borderRadius: 8, color: "#34d399", padding: "6px 8px", cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
                         <GitBranch size={14} /> <span style={{ fontSize: 11 }}>شعبه</span>
+                      </button>
+                      <button onClick={() => navigate(`/admin/branches?school=${school.id}`)} title="مدیریت ساختار (مقطع، پایه، کلاس)"
+                        style={{ background: "rgba(96,165,250,0.12)", border: "1px solid rgba(96,165,250,0.3)", borderRadius: 8, color: "#60a5fa", padding: "6px 8px", cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                        <Settings2 size={14} /> <span style={{ fontSize: 11 }}>ساختار</span>
                       </button>
                       <button onClick={() => toggleMutation.mutate(school.id)} title={school.status === "active" ? "غیرفعال کردن" : "فعال کردن"}
                         style={{

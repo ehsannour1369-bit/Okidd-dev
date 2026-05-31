@@ -4,6 +4,27 @@ import { api } from "../../lib/api";
 import { showToast } from "../../lib/toast";
 import { Plus, ChevronDown, ChevronUp, Trash2, BookOpen, Users, GraduationCap, X, GitBranch, School } from "lucide-react";
 
+function ConfirmDialog({ title, name, onConfirm, onCancel, loading }: { title: string; name: string; onConfirm: () => void; onCancel: () => void; loading?: boolean }) {
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(4px)", zIndex: 400, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div style={{ background: "#1a1238", border: "1px solid rgba(248,113,113,0.5)", borderRadius: 20, padding: 28, width: "100%", maxWidth: 400, boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}>
+        <div style={{ textAlign: "center", marginBottom: 20 }}>
+          <div style={{ fontSize: 36, marginBottom: 10 }}>🗑️</div>
+          <h3 style={{ margin: "0 0 8px", color: "#f8f5ff", fontSize: 17, fontWeight: 700 }}>{title}</h3>
+          <p style={{ margin: 0, color: "#c4b5fd", fontSize: 14 }}>«<strong style={{ color: "#f87171" }}>{name}</strong>» حذف خواهد شد.</p>
+          <p style={{ margin: "8px 0 0", color: "#f87171", fontSize: 12 }}>این عملیات قابل بازگشت نیست.</p>
+        </div>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button onClick={onConfirm} disabled={loading} style={{ flex: 1, padding: "11px 0", background: loading ? "rgba(248,113,113,0.3)" : "linear-gradient(135deg, #dc2626, #f87171)", border: "none", borderRadius: 10, color: "white", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: loading ? "not-allowed" : "pointer", fontSize: 14 }}>
+            {loading ? "در حال حذف..." : "بله، حذف شود"}
+          </button>
+          <button onClick={onCancel} style={{ flex: 1, padding: "11px 0", background: "transparent", border: "1px solid rgba(124,58,237,0.5)", borderRadius: 10, color: "#a855f7", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14 }}>انصراف</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const IS = { width: "100%", background: "rgba(13,10,26,0.5)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#f8f5ff", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
 
 function Modal({ title, onClose, children }: any) {
@@ -34,9 +55,13 @@ function SaveBtn({ onClick, disabled, label = "ذخیره" }: any) {
 
 type Tab = "books" | "students" | "teachers";
 
+type DeleteTarget = { type: "branch" | "gl" | "grade" | "class"; id: number; name: string } | null;
+
 export default function AdminBranches() {
   const qc = useQueryClient();
-  const [selectedSchoolId, setSelectedSchoolId] = useState<number | null>(null);
+  const initId = parseInt(new URLSearchParams(window.location.search).get("school") ?? "") || null;
+  const [selectedSchoolId, setSelectedSchoolId] = useState<number | null>(initId);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget>(null);
 
   const [expBranch, setExpBranch] = useState(new Set<number>());
   const [expGL, setExpGL] = useState(new Set<number>());
@@ -156,7 +181,7 @@ export default function AdminBranches() {
                     <span style={{ fontWeight: 700, color: "#f8f5ff", fontSize: 15 }}>{branch.name}</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <button onClick={(e) => { e.stopPropagation(); if (confirm("حذف شعبه؟")) delBranchMut.mutate(branch.id); }} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", padding: 4 }}>
+                    <button onClick={(e) => { e.stopPropagation(); setDeleteTarget({ type: "branch", id: branch.id, name: branch.name }); }} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", padding: 4 }}>
                       <Trash2 size={14} />
                     </button>
                   </div>
@@ -176,7 +201,7 @@ export default function AdminBranches() {
                           onClick={() => setExpGL(toggle(expGL, gl.id))}>
                           <span style={{ color: "#c4b5fd", fontSize: 14, fontWeight: 600 }}>{gl.name}</span>
                           <div style={{ display: "flex", gap: 8 }}>
-                            <button onClick={(e) => { e.stopPropagation(); if (confirm("حذف مقطع؟")) delGLMut.mutate(gl.id); }} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer" }}>
+                            <button onClick={(e) => { e.stopPropagation(); setDeleteTarget({ type: "gl", id: gl.id, name: gl.name }); }} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer" }}>
                               <Trash2 size={13} />
                             </button>
                             <button onClick={(e) => { e.stopPropagation(); setAddGradeFor(gl.id); }} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer" }}>
@@ -191,7 +216,7 @@ export default function AdminBranches() {
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                                   <span style={{ color: "#f8f5ff", fontSize: 14, fontWeight: 600 }}>{grade.name}</span>
                                   <div style={{ display: "flex", gap: 6 }}>
-                                    <button onClick={() => { if (confirm("حذف پایه؟")) delGradeMut.mutate(grade.id); }} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer" }}>
+                                    <button onClick={() => setDeleteTarget({ type: "grade", id: grade.id, name: grade.name })} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer" }}>
                                       <Trash2 size={12} />
                                     </button>
                                     <button onClick={() => setAddClassFor(grade.id)} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer" }}>
@@ -204,7 +229,7 @@ export default function AdminBranches() {
                                     <div key={cls.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 8px", background: "rgba(13,10,26,0.3)", borderRadius: 6, cursor: "pointer" }}
                                       onClick={() => setClassManage(cls)}>
                                       <span style={{ color: "#c4b5fd", fontSize: 13 }}>{cls.name}</span>
-                                      <button onClick={(e) => { e.stopPropagation(); if (confirm("حذف کلاس؟")) delClassMut.mutate(cls.id); }} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer" }}>
+                                      <button onClick={(e) => { e.stopPropagation(); setDeleteTarget({ type: "class", id: cls.id, name: cls.name }); }} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer" }}>
                                         <Trash2 size={12} />
                                       </button>
                                     </div>
@@ -391,6 +416,23 @@ export default function AdminBranches() {
             </div>
           )}
         </Modal>
+      )}
+
+      {/* Delete confirm dialog */}
+      {deleteTarget && (
+        <ConfirmDialog
+          title={deleteTarget.type === "branch" ? "حذف شعبه" : deleteTarget.type === "gl" ? "حذف مقطع" : deleteTarget.type === "grade" ? "حذف پایه" : "حذف کلاس"}
+          name={deleteTarget.name}
+          loading={delBranchMut.isPending || delGLMut.isPending || delGradeMut.isPending || delClassMut.isPending}
+          onCancel={() => setDeleteTarget(null)}
+          onConfirm={() => {
+            const id = deleteTarget.id;
+            if (deleteTarget.type === "branch") delBranchMut.mutate(id, { onSettled: () => setDeleteTarget(null) });
+            else if (deleteTarget.type === "gl") delGLMut.mutate(id, { onSettled: () => setDeleteTarget(null) });
+            else if (deleteTarget.type === "grade") delGradeMut.mutate(id, { onSettled: () => setDeleteTarget(null) });
+            else if (deleteTarget.type === "class") delClassMut.mutate(id, { onSettled: () => setDeleteTarget(null) });
+          }}
+        />
       )}
     </div>
   );
