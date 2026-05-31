@@ -405,11 +405,28 @@ export default function Layout({ children }: { children: ReactNode }) {
               </div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <div style={{
-                background: `${accentColor}22`, border: `1px solid ${accentColor}44`,
-                borderRadius: 20, padding: "4px 10px", fontSize: isMobile ? 11 : 12, color: accentLight,
-                whiteSpace: "nowrap",
-              }}>{getRoleLabel(user.role)}</div>
+              {!isMobile && (
+                <div style={{
+                  background: `${accentColor}22`, border: `1px solid ${accentColor}44`,
+                  borderRadius: 20, padding: "4px 10px", fontSize: 12, color: accentLight,
+                  whiteSpace: "nowrap",
+                }}>{getRoleLabel(user.role)}</div>
+              )}
+              <button onClick={logout} title="خروج" style={{
+                display: "flex", alignItems: "center", gap: 5,
+                padding: isMobile ? "7px 10px" : "7px 14px",
+                borderRadius: 10,
+                background: "rgba(248,113,113,0.12)",
+                border: "1px solid rgba(248,113,113,0.3)", color: "#f87171",
+                cursor: "pointer", fontSize: 13, fontFamily: "Vazirmatn, sans-serif",
+                fontWeight: 600, transition: "all 0.2s ease", whiteSpace: "nowrap",
+              }}
+                onMouseOver={e => { e.currentTarget.style.background = "rgba(248,113,113,0.25)"; }}
+                onMouseOut={e => { e.currentTarget.style.background = "rgba(248,113,113,0.12)"; }}
+              >
+                <LogOut size={15} />
+                {!isMobile && "خروج"}
+              </button>
             </div>
           </div>
         )}

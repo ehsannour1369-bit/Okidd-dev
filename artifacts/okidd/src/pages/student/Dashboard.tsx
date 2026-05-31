@@ -3,7 +3,7 @@ import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
-import { Menu, X, Lock, CheckCircle, ChevronRight, ChevronDown, ChevronUp, Bell, Plus, Send as SendIcon, MessageCircle, Home, GraduationCap, BookOpen, Star } from "lucide-react";
+import { Menu, X, Lock, CheckCircle, ChevronRight, ChevronDown, ChevronUp, Bell, Plus, Send as SendIcon, MessageCircle, Home, GraduationCap, BookOpen, Star, LogOut } from "lucide-react";
 import NotificationThread from "../../components/NotificationThread";
 
 interface BalloonItem {
@@ -49,7 +49,7 @@ const GLASS: React.CSSProperties = {
 };
 
 export default function StudentDashboard() {
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const qc = useQueryClient();
   const [, navigate] = useLocation();
   const isGirl = user?.gender === "female";
@@ -308,6 +308,12 @@ export default function StudentDashboard() {
               </button>
             ))}
           </div>
+          <button onClick={() => { logout(); setMenuOpen(false); }}
+            style={{ marginTop: 16, width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "12px 0", background: "rgba(248,113,113,0.12)", border: "1.5px solid rgba(248,113,113,0.35)", borderRadius: 14, color: "#ef4444", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 700, cursor: "pointer", transition: "all 0.2s ease" }}
+            onMouseOver={e => { e.currentTarget.style.background = "rgba(248,113,113,0.22)"; }}
+            onMouseOut={e => { e.currentTarget.style.background = "rgba(248,113,113,0.12)"; }}>
+            <LogOut size={16} /> خروج از حساب
+          </button>
         </div>
       </div>
       {menuOpen && <div onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 499 }} />}
