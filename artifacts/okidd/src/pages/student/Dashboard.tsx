@@ -240,10 +240,10 @@ export default function StudentDashboard() {
       )}
 
       {/* Top bar */}
-      <div style={{ position: "absolute", top: 16, left: 0, right: 0, zIndex: 20, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 16px" }}>
+      <div style={{ position: "absolute", top: 16, left: 0, right: 0, zIndex: 20, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 16px", direction: "ltr" }}>
         <button onClick={() => setNotifOpen(true)} style={{ position: "relative", width: 46, height: 46, borderRadius: "50%", background: "rgba(255,255,255,0.3)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1.5px solid rgba(255,255,255,0.65)", boxShadow: "0 4px 18px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "white" }}>
           <Bell size={20} />
-          {receivedNotifs.length > 0 && <span style={{ position: "absolute", top: 9, left: 9, width: 8, height: 8, background: "#fbbf24", borderRadius: "50%", border: "2px solid white" }} />}
+          {receivedNotifs.length > 0 && <span style={{ position: "absolute", top: 9, right: 9, width: 8, height: 8, background: "#fbbf24", borderRadius: "50%", border: "2px solid white" }} />}
         </button>
         <div style={{ background: "rgba(255,255,255,0.28)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1.5px solid rgba(255,255,255,0.6)", borderRadius: 999, padding: "8px 18px", display: "flex", alignItems: "center", gap: 6, boxShadow: "0 4px 16px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.7)" }}>
           <span style={{ fontSize: 16 }}>⭐</span>
