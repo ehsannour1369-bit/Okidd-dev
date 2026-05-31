@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
-import { Trophy, Star, Users, BookOpen, GraduationCap } from "lucide-react";
+import { Trophy, Star, Users, BookOpen, GraduationCap, TrendingUp } from "lucide-react";
 import { useState } from "react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from "recharts";
 
 interface RankingEntry { studentId: number; studentName: string; score: number; rank: number; }
+interface LessonScore { lessonId: number; lessonTitle: string; lessonIndex: number; score: number; completed: boolean; }
 
 const GLASS: React.CSSProperties = {
   background: "rgba(255,255,255,0.28)",
@@ -26,6 +28,23 @@ const BREAKDOWN_ITEMS = [
 
 type RankTab = "class" | "grade" | "book";
 
+function CustomTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{ background: "rgba(255,255,255,0.95)", border: "1.5px solid rgba(99,102,241,0.25)", borderRadius: 12, padding: "10px 14px", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", boxShadow: "0 8px 24px rgba(80,40,160,0.15)" }}>
+      <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 15, fontWeight: 800, color: "#4f46e5" }}>
+        ⭐ {(payload[0]?.value ?? 0).toLocaleString("fa-IR")} امتیاز
+      </div>
+      {payload[1] && (
+        <div style={{ fontSize: 12, color: "#10b981", fontWeight: 600, marginTop: 2 }}>
+          مجموع: {(payload[1]?.value ?? 0).toLocaleString("fa-IR")}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function StudentRanking() {
   const { user } = useAuthStore();
   const isGirl = user?.gender === "female";
@@ -34,8 +53,8 @@ export default function StudentRanking() {
   const medals = ["🥇", "🥈", "🥉"];
   const [tab, setTab] = useState<RankTab>("class");
   const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
+  const [chartBookId, setChartBookId] = useState<number | null>(null);
 
-  // Student's class info
   const { data: classes = [] } = useQuery<any[]>({
     queryKey: ["student-classes-rank", user?.id],
     queryFn: () => api.get(`/classes?studentId=${user?.id}`),
@@ -45,21 +64,18 @@ export default function StudentRanking() {
   const classId = myClass?.id ?? null;
   const gradeId = myClass?.gradeId ?? null;
 
-  // Score breakdown
   const { data: breakdown } = useQuery<Record<string, number>>({
     queryKey: ["score-breakdown", user?.id],
     queryFn: () => api.get(`/student-scores-breakdown?studentId=${user?.id}`),
     enabled: !!user?.id,
   });
 
-  // Enrolled books (for book-level ranking tab)
   const { data: books = [] } = useQuery<any[]>({
     queryKey: ["enrolled-books-rank", user?.id],
     queryFn: () => api.get(`/users/${user?.id}/enrolled-books`),
     enabled: !!user?.id,
   });
 
-  // Rankings based on active tab
   const rankingsQuery = useQuery<RankingEntry[]>({
     queryKey: ["rankings", tab, classId, gradeId, selectedBookId],
     queryFn: () => {
@@ -70,9 +86,28 @@ export default function StudentRanking() {
     },
     enabled: tab === "class" ? !!classId : tab === "grade" ? !!gradeId : !!selectedBookId,
   });
+
+  const { data: lessonScores = [] } = useQuery<LessonScore[]>({
+    queryKey: ["student-lesson-scores", user?.id, chartBookId],
+    queryFn: () => api.get(`/student-lesson-scores?studentId=${user?.id}&bookId=${chartBookId}`),
+    enabled: !!user?.id && !!chartBookId,
+  });
+
   const rankings: RankingEntry[] = rankingsQuery.data ?? [];
   const myRank = rankings.find(r => r.studentId === user?.id);
   const totalScore = breakdown?.total ?? 0;
+
+  // Build chart data with cumulative score
+  const chartData = lessonScores.map((ls, i) => {
+    const cumulative = lessonScores.slice(0, i + 1).reduce((s, x) => s + x.score, 0);
+    return {
+      name: ls.lessonTitle.length > 8 ? ls.lessonTitle.slice(0, 8) + "…" : ls.lessonTitle,
+      fullName: ls.lessonTitle,
+      score: ls.score,
+      cumulative,
+      completed: ls.completed,
+    };
+  });
 
   return (
     <div style={{ padding: "24px 20px 40px", minHeight: "100vh", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
@@ -100,6 +135,101 @@ export default function StudentRanking() {
             );
           })}
         </div>
+      </div>
+
+      {/* ── Line chart: پیشرفت درس‌ها ── */}
+      <div style={{ ...GLASS, background: "rgba(255,255,255,0.38)", borderRadius: 22, padding: 20, marginBottom: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+          <TrendingUp size={18} style={{ color: accentDark }} />
+          <div style={{ fontWeight: 800, color: "#1e1b4b", fontSize: 15 }}>نمودار پیشرفت درس‌ها</div>
+        </div>
+
+        {/* Book selector for chart */}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+          {books.map((book: any) => (
+            <button key={book.id} onClick={() => setChartBookId(book.id)}
+              style={{ padding: "6px 14px", borderRadius: 10, border: `1.5px solid ${chartBookId === book.id ? accentDark : "rgba(0,0,0,0.12)"}`, background: chartBookId === book.id ? `${accentDark}18` : "rgba(255,255,255,0.55)", color: chartBookId === book.id ? accentDark : "#374151", fontFamily: "Vazirmatn", fontSize: 12, fontWeight: chartBookId === book.id ? 700 : 500, cursor: "pointer" }}>
+              {book.title}
+            </button>
+          ))}
+          {books.length === 0 && <span style={{ fontSize: 12, color: "#5b21b6" }}>کتابی یافت نشد</span>}
+        </div>
+
+        {!chartBookId ? (
+          <div style={{ textAlign: "center", padding: "28px 0", color: "#9ca3af", fontSize: 13 }}>
+            یک کتاب را انتخاب کنید
+          </div>
+        ) : lessonScores.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "28px 0", color: "#9ca3af", fontSize: 13 }}>
+            هنوز امتیازی در این کتاب ثبت نشده
+          </div>
+        ) : (
+          <>
+            <ResponsiveContainer width="100%" height={200}>
+              <AreaChart data={chartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={accentDark} stopOpacity={0.25} />
+                    <stop offset="95%" stopColor={accentDark} stopOpacity={0.03} />
+                  </linearGradient>
+                  <linearGradient id="cumGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.03} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                <XAxis dataKey="name" tick={{ fontFamily: "Vazirmatn", fontSize: 10, fill: "#6b7280" }} />
+                <YAxis tick={{ fontFamily: "Vazirmatn", fontSize: 10, fill: "#6b7280" }} />
+                <Tooltip content={<CustomTooltip />} />
+                <Area type="monotone" dataKey="score" stroke={accentDark} strokeWidth={2.5}
+                  fill="url(#scoreGrad)" dot={{ r: 4, fill: accentDark, strokeWidth: 0 }}
+                  activeDot={{ r: 6 }} name="امتیاز درس" />
+                <Area type="monotone" dataKey="cumulative" stroke="#10b981" strokeWidth={2}
+                  fill="url(#cumGrad)" dot={false} strokeDasharray="5 3" name="مجموع تجمعی" />
+              </AreaChart>
+            </ResponsiveContainer>
+
+            {/* Legend */}
+            <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "#6b7280" }}>
+                <div style={{ width: 20, height: 3, background: accentDark, borderRadius: 2 }} />
+                امتیاز هر درس
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "#6b7280" }}>
+                <div style={{ width: 20, height: 2, background: "#10b981", borderRadius: 2, borderTop: "2px dashed #10b981" }} />
+                پیشرفت تجمعی
+              </div>
+            </div>
+
+            {/* Per-lesson score table */}
+            <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 6 }}>
+              {lessonScores.map((ls, i) => {
+                const maxScore = Math.max(...lessonScores.map(x => x.score), 1);
+                const pct = Math.round((ls.score / maxScore) * 100);
+                return (
+                  <div key={ls.lessonId} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 22, textAlign: "center", fontSize: 11, color: "#9ca3af", flexShrink: 0 }}>
+                      {i + 1}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: "#1e1b4b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {ls.completed ? "✅ " : "⭕ "}{ls.lessonTitle}
+                        </span>
+                        <span style={{ fontSize: 12, fontWeight: 800, color: ls.score > 0 ? accentDark : "#9ca3af", flexShrink: 0, marginRight: 6 }}>
+                          {ls.score.toLocaleString("fa-IR")}
+                        </span>
+                      </div>
+                      <div style={{ height: 5, background: "rgba(0,0,0,0.07)", borderRadius: 99, overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: `${pct}%`, background: ls.score > 0 ? `linear-gradient(90deg,${accent},${accentDark})` : "transparent", borderRadius: 99, transition: "width 0.5s ease" }} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
 
       {/* My rank banner */}

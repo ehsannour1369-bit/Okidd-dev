@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, studentProgressTable, lessonUnlocksTable, presenceLogTable, usersTable, classesTable, classStudentsTable, gameScoresTable } from "@workspace/db";
+import { db, studentProgressTable, lessonUnlocksTable, presenceLogTable, usersTable, classesTable, classStudentsTable, gameScoresTable, contentTable, lessonsTable } from "@workspace/db";
 import { eq, inArray } from "drizzle-orm";
 
 const router = Router();
@@ -88,6 +88,23 @@ router.get("/student-scores-breakdown", async (req, res) => {
 
   const lessonScore = progress.filter(p => p.completed).reduce((sum, p) => sum + p.score, 0);
 
+  const KNOWN_TYPES = new Set(["balloon", "animation", "video", "game", "quiz", "exercise"]);
+
+  // Collect content-* ids that need type lookup
+  const contentIds = gameScores
+    .filter(gs => gs.gameType.startsWith("content-"))
+    .map(gs => parseInt(gs.gameType.replace("content-", "")))
+    .filter(id => !isNaN(id));
+
+  const contentTypeMap = new Map<number, string>();
+  if (contentIds.length > 0) {
+    const contents = await db
+      .select({ id: contentTable.id, type: contentTable.type })
+      .from(contentTable)
+      .where(inArray(contentTable.id, contentIds));
+    for (const c of contents) contentTypeMap.set(c.id, c.type);
+  }
+
   const breakdown: Record<string, number> = {
     lesson: lessonScore,
     balloon: 0,
@@ -99,13 +116,88 @@ router.get("/student-scores-breakdown", async (req, res) => {
   };
 
   for (const gs of gameScores) {
-    const type = gs.gameType;
-    if (type in breakdown) breakdown[type] = (breakdown[type] ?? 0) + gs.score;
-    else breakdown[type] = (breakdown[type] ?? 0) + gs.score;
+    let type = gs.gameType;
+    // Map old content-{id} format to proper type
+    if (type.startsWith("content-")) {
+      const cid = parseInt(type.replace("content-", ""));
+      type = contentTypeMap.get(cid) ?? "game";
+    }
+    // Only accumulate known types (ignore anything else)
+    if (KNOWN_TYPES.has(type)) {
+      breakdown[type] = (breakdown[type] ?? 0) + gs.score;
+    }
   }
 
+  // Total = sum of known categories only (no stray types)
   const total = Object.values(breakdown).reduce((s, v) => s + v, 0);
   res.json({ ...breakdown, total });
+});
+
+// Per-lesson score breakdown for a student's book
+router.get("/student-lesson-scores", async (req, res) => {
+  const { studentId, bookId } = req.query as Record<string, string>;
+  if (!studentId || !bookId) { res.status(400).json({ error: "studentId and bookId required" }); return; }
+  const sid = parseInt(studentId);
+  const bid = parseInt(bookId);
+
+  // Get lessons for this book
+  const lessons = await db.select().from(lessonsTable).where(eq(lessonsTable.bookId, bid));
+  lessons.sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
+
+  // Get all content items for these lessons
+  const lessonIds = lessons.map(l => l.id);
+  const allContent = lessonIds.length > 0
+    ? await db.select().from(contentTable).where(inArray(contentTable.lessonId, lessonIds))
+    : [];
+
+  // Build: contentId → {lessonId, type}
+  const contentLessonMap = new Map<number, { lessonId: number; type: string }>();
+  for (const c of allContent) {
+    if (c.lessonId) contentLessonMap.set(c.id, { lessonId: c.lessonId, type: c.type });
+  }
+
+  // Get student's game scores and progress
+  const [gameScores, progress] = await Promise.all([
+    db.select().from(gameScoresTable).where(eq(gameScoresTable.studentId, sid)),
+    db.select().from(studentProgressTable).where(eq(studentProgressTable.studentId, sid)),
+  ]);
+
+  // Accumulate scores per lesson
+  const lessonScores = new Map<number, number>();
+  const lessonCompleted = new Map<number, boolean>();
+  for (const l of lessons) { lessonScores.set(l.id, 0); lessonCompleted.set(l.id, false); }
+
+  // Add lesson completion bonus from student_progress
+  for (const p of progress) {
+    if (p.bookId === bid && p.completed && lessonScores.has(p.lessonId)) {
+      lessonScores.set(p.lessonId, (lessonScores.get(p.lessonId) ?? 0) + p.score);
+      lessonCompleted.set(p.lessonId, true);
+    }
+  }
+
+  // Add game scores mapped to lessons via content
+  for (const gs of gameScores) {
+    let lessonId: number | null = null;
+    if (gs.gameType.startsWith("content-")) {
+      const cid = parseInt(gs.gameType.replace("content-", ""));
+      lessonId = contentLessonMap.get(cid)?.lessonId ?? null;
+    }
+    // For type-based scores (game/animation/video/etc.) we can't easily map to a lesson
+    // without a contentId — skip those for lesson breakdown
+    if (lessonId && lessonScores.has(lessonId)) {
+      lessonScores.set(lessonId, (lessonScores.get(lessonId) ?? 0) + gs.score);
+    }
+  }
+
+  const result = lessons.map((l, i) => ({
+    lessonId: l.id,
+    lessonTitle: l.title,
+    lessonIndex: i + 1,
+    score: lessonScores.get(l.id) ?? 0,
+    completed: lessonCompleted.get(l.id) ?? false,
+  }));
+
+  res.json(result);
 });
 
 // Rankings — supports classId, bookId, gradeId filters

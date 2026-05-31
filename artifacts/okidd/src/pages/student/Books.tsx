@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { BookOpen, CheckCircle2, Play, FileText, Film, Gamepad2, ClipboardCheck, PenLine, PlayCircle } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 
 const TYPE_ICONS: Record<string, any> = {
