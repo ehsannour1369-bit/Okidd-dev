@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useAuthStore } from "../../store/auth";
 import { api } from "../../lib/api";
 import { useLocation } from "wouter";
-import { ChevronLeft, ChevronRight, Film, Gamepad2, ClipboardCheck, PenLine, FileText, CheckCircle2, Trophy, AlertCircle, RotateCcw, X, BookOpen, Volume2, VolumeX, Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Film, Gamepad2, ClipboardCheck, PenLine, FileText, CheckCircle2, Trophy, AlertCircle, RotateCcw, X, BookOpen, Volume2, VolumeX, Maximize2, Lock } from "lucide-react";
 
 const VIDEO_TYPES = new Set(["video", "animation"]);
 
@@ -32,8 +32,10 @@ export default function LessonPlayer() {
   };
 
   const queryParams = new URLSearchParams(window.location.search);
-  const bookId      = parseInt(queryParams.get("bookId") ?? "0");
+  const bookId        = parseInt(queryParams.get("bookId") ?? "0");
   const startLessonId = parseInt(queryParams.get("lessonId") ?? "0");
+  /* free=1 → مرور آزاد (از کتاب‌هایم)، بدون ثبت امتیاز */
+  const freeMode      = queryParams.get("free") === "1";
 
   const [lessons, setLessons]                   = useState<any[]>([]);
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
@@ -116,6 +118,14 @@ export default function LessonPlayer() {
     }
   }
 
+  /* ── Auto-advance: in locked mode, move to next content automatically ── */
+  useEffect(() => {
+    if (!contentCompleted || freeMode) return;
+    const timer = setTimeout(() => advanceContent(), 1800);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contentCompleted, freeMode]);
+
   function replayContent() {
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
@@ -139,7 +149,8 @@ export default function LessonPlayer() {
   }
 
   function completeAndNext() {
-    if (user?.id && currentLesson?.id) {
+    /* در حالت مرور آزاد امتیاز ثبت نمی‌شود */
+    if (!freeMode && user?.id && currentLesson?.id) {
       api.post("/student-progress", { studentId: user.id, lessonId: currentLesson.id, bookId, completed: true, score: 10 }).catch(() => {});
     }
     goToNextLesson();
@@ -200,6 +211,7 @@ export default function LessonPlayer() {
     <div style={{ ...GLASS, borderRadius: 0, padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexShrink: 0, borderBottom: "1px solid rgba(255,255,255,0.6)" }}>
       {/* Lesson nav */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
+        {/* در حالت قفل، فقط درس قبلی مجاز است (نه جلو زدن به درس نخوانده) */}
         <button onClick={goToPrevLesson} disabled={currentLessonIndex === 0}
           style={{ width: 34, height: 34, borderRadius: 10, background: currentLessonIndex === 0 ? "rgba(0,0,0,0.05)" : accentBg, border: `1.5px solid ${currentLessonIndex === 0 ? "rgba(0,0,0,0.08)" : accentBorder}`, color: currentLessonIndex === 0 ? "#94a3b8" : accent, cursor: currentLessonIndex === 0 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <ChevronRight size={16} />
@@ -208,11 +220,24 @@ export default function LessonPlayer() {
           <div style={{ fontWeight: 800, color: "#1e1b4b", fontSize: 15, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{currentLesson.title}</div>
           <div style={{ fontSize: 12, color: "#6b7280" }}>درس {currentLessonIndex + 1} از {lessons.length}</div>
         </div>
-        <button onClick={goToNextLesson} disabled={isLastLesson}
-          style={{ width: 34, height: 34, borderRadius: 10, background: isLastLesson ? "rgba(0,0,0,0.05)" : accentBg, border: `1.5px solid ${isLastLesson ? "rgba(0,0,0,0.08)" : accentBorder}`, color: isLastLesson ? "#94a3b8" : accent, cursor: isLastLesson ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <ChevronLeft size={16} />
-        </button>
+        {/* در حالت آزاد می‌توان به درس بعدی رفت؛ در حالت قفل خیر */}
+        {freeMode ? (
+          <button onClick={goToNextLesson} disabled={isLastLesson}
+            style={{ width: 34, height: 34, borderRadius: 10, background: isLastLesson ? "rgba(0,0,0,0.05)" : accentBg, border: `1.5px solid ${isLastLesson ? "rgba(0,0,0,0.08)" : accentBorder}`, color: isLastLesson ? "#94a3b8" : accent, cursor: isLastLesson ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <ChevronLeft size={16} />
+          </button>
+        ) : (
+          <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(0,0,0,0.04)", border: "1.5px solid rgba(0,0,0,0.07)", display: "flex", alignItems: "center", justifyContent: "center", color: "#cbd5e1" }}>
+            <Lock size={14} />
+          </div>
+        )}
       </div>
+      {/* Free mode badge */}
+      {freeMode && (
+        <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", background: "rgba(34,197,94,0.1)", border: "1.5px solid rgba(34,197,94,0.3)", borderRadius: 20, color: "#16a34a", fontSize: 12, fontWeight: 700, flexShrink: 0 }}>
+          📖 مرور آزاد
+        </div>
+      )}
       {/* Close */}
       <button onClick={() => navigate("/student")}
         style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 16px", borderRadius: 10, background: "rgba(239,68,68,0.08)", border: "1.5px solid rgba(239,68,68,0.2)", color: "#ef4444", cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 600, flexShrink: 0 }}>
@@ -289,8 +314,9 @@ export default function LessonPlayer() {
         <div style={{ height: "100%", width: `${progress}%`, background: `linear-gradient(90deg,${accent},${accentLight})`, transition: "width 0.4s ease" }} />
       </div>
 
-      {/* ── Content type tab pills — full width ── */}
-      {content.length > 1 && (
+      {/* ── محتوا: حالت آزاد = تب، حالت قفل = نمایشگر مراحل ── */}
+      {content.length > 1 && freeMode && (
+        /* تب‌های قابل کلیک فقط در حالت مرور آزاد */
         <div style={{ display: "flex", gap: 6, overflowX: "auto", flexShrink: 0, padding: "8px 20px 0", ...GLASS, borderRadius: 0, borderBottom: "1px solid rgba(255,255,255,0.5)" }}>
           {content.map((c, i) => {
             const CIcon = TYPE_ICONS[c.type] ?? FileText;
@@ -301,6 +327,29 @@ export default function LessonPlayer() {
                 <CIcon size={12} />
                 {TYPE_LABELS[c.type] ?? c.type}
               </button>
+            );
+          })}
+        </div>
+      )}
+      {content.length > 1 && !freeMode && (
+        /* نمایشگر مراحل در حالت قفل — غیرقابل کلیک */
+        <div style={{ ...GLASS, borderRadius: 0, borderBottom: "1px solid rgba(255,255,255,0.5)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "10px 20px" }}>
+          {content.map((c, i) => {
+            const CIcon = TYPE_ICONS[c.type] ?? FileText;
+            const done   = i < currentContentIndex || (i === currentContentIndex && contentCompleted);
+            const active = i === currentContentIndex && !contentCompleted;
+            return (
+              <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+                  <div style={{ width: 30, height: 30, borderRadius: "50%", background: done ? "#22c55e" : active ? `linear-gradient(135deg,${accent},${accentLight})` : "rgba(0,0,0,0.07)", border: `2px solid ${done ? "#22c55e" : active ? accent : "rgba(0,0,0,0.1)"}`, display: "flex", alignItems: "center", justifyContent: "center", color: done || active ? "white" : "#9ca3af", transition: "all 0.3s" }}>
+                    {done ? <CheckCircle2 size={14} /> : <CIcon size={13} />}
+                  </div>
+                  <span style={{ fontSize: 9, color: active ? accent : done ? "#16a34a" : "#9ca3af", fontWeight: active ? 700 : 500 }}>{TYPE_LABELS[c.type] ?? c.type}</span>
+                </div>
+                {i < content.length - 1 && (
+                  <div style={{ width: 28, height: 2, background: i < currentContentIndex ? "#22c55e" : "rgba(0,0,0,0.1)", borderRadius: 99, marginBottom: 14, transition: "background 0.3s" }} />
+                )}
+              </div>
             );
           })}
         </div>
@@ -377,6 +426,7 @@ export default function LessonPlayer() {
 
       {/* ── Full-width bottom control bar ── */}
       <div style={{ ...GLASS, borderRadius: 0, borderTop: "1px solid rgba(255,255,255,0.6)", padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexShrink: 0 }}>
+        {/* اطلاعات محتوای جاری */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
           <div style={{ width: 38, height: 38, borderRadius: 11, background: accentBg, border: `1.5px solid ${accentBorder}`, display: "flex", alignItems: "center", justifyContent: "center", color: accent, flexShrink: 0 }}>
             <Icon size={18} />
@@ -384,22 +434,42 @@ export default function LessonPlayer() {
           <div style={{ minWidth: 0 }}>
             <div style={{ fontWeight: 700, color: "#1e1b4b", fontSize: 14, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{currentContent.title}</div>
             <div style={{ fontSize: 12, color: "#6b7280" }}>
-              {nextDisabled && isGame  && "🎮 بازی را کامل کنید"}
-              {nextDisabled && !isGame && "⏳ در حال پخش..."}
-              {!nextDisabled && savedScore && "⭐ امتیاز ثبت شد"}
-              {!nextDisabled && !savedScore && "✅ آماده ادامه"}
+              {!contentCompleted && isGame  && "🎮 بازی را کامل کنید"}
+              {!contentCompleted && !isGame && "⏳ در حال پخش..."}
+              {contentCompleted && !freeMode && !isLastContent && "⏩ چند لحظه دیگر..."}
+              {contentCompleted && (freeMode || isLastContent) && savedScore && "⭐ امتیاز ثبت شد"}
+              {contentCompleted && (freeMode || isLastContent) && !savedScore && "✅ آماده ادامه"}
             </div>
           </div>
         </div>
+
+        {/* دکمه‌های کنترل */}
         <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+          {/* تکرار — همیشه فعال */}
           <button onClick={replayContent}
             style={{ width: 40, height: 40, borderRadius: 11, background: accentBg, border: `1.5px solid ${accentBorder}`, color: accent, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <RotateCcw size={16} />
           </button>
-          <button onClick={advanceContent} disabled={nextDisabled}
-            style={{ height: 40, padding: "0 22px", background: nextDisabled ? "rgba(0,0,0,0.06)" : `linear-gradient(135deg,${accent},${accentLight})`, border: nextDisabled ? "1.5px solid rgba(0,0,0,0.08)" : "none", borderRadius: 11, color: nextDisabled ? "#94a3b8" : "white", fontFamily: "Vazirmatn", fontSize: 14, fontWeight: 700, cursor: nextDisabled ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 6, boxShadow: nextDisabled ? "none" : `0 4px 14px ${accentBorder}`, transition: "all 0.2s" }}>
-            {isLastContent ? <><CheckCircle2 size={14} /> تکمیل</> : <>بعدی <ChevronLeft size={15} /></>}
-          </button>
+
+          {/* در حالت قفل: دکمه «بعدی» فقط برای آخرین محتوا یا وقتی کامل شده نمایش می‌یابد */}
+          {freeMode ? (
+            /* حالت آزاد: دکمه بعدی دستی */
+            <button onClick={advanceContent} disabled={nextDisabled}
+              style={{ height: 40, padding: "0 22px", background: nextDisabled ? "rgba(0,0,0,0.06)" : `linear-gradient(135deg,${accent},${accentLight})`, border: nextDisabled ? "1.5px solid rgba(0,0,0,0.08)" : "none", borderRadius: 11, color: nextDisabled ? "#94a3b8" : "white", fontFamily: "Vazirmatn", fontSize: 14, fontWeight: 700, cursor: nextDisabled ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 6, boxShadow: nextDisabled ? "none" : `0 4px 14px ${accentBorder}`, transition: "all 0.2s" }}>
+              {isLastContent ? <><CheckCircle2 size={14} /> تکمیل</> : <>بعدی <ChevronLeft size={15} /></>}
+            </button>
+          ) : isLastContent && contentCompleted ? (
+            /* حالت قفل — آخرین محتوا کامل شده: دکمه تکمیل درس */
+            <button onClick={advanceContent}
+              style={{ height: 40, padding: "0 22px", background: `linear-gradient(135deg,${accent},${accentLight})`, border: "none", borderRadius: 11, color: "white", fontFamily: "Vazirmatn", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, boxShadow: `0 4px 14px ${accentBorder}` }}>
+              <CheckCircle2 size={14} /> تکمیل درس
+            </button>
+          ) : (
+            /* حالت قفل — محتوا در حال پخش: نوار انتظار خودکار */
+            <div style={{ height: 40, padding: "0 18px", background: "rgba(0,0,0,0.04)", border: "1.5px solid rgba(0,0,0,0.08)", borderRadius: 11, color: "#9ca3af", display: "flex", alignItems: "center", gap: 6, fontSize: 13 }}>
+              {contentCompleted ? <><span style={{ fontSize: 12 }}>⏩</span> بعدی به‌زودی...</> : <><Lock size={13} /> تکمیل کنید</>}
+            </div>
+          )}
         </div>
       </div>
 

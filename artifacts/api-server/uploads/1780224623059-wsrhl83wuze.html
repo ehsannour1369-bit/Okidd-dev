@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Letter C Game – Akid</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --pink:#FF4D8D;--purple:#7C3AED;--blue:#2563EB;--cyan:#06B6D4;
+  --green:#10B981;--orange:#F59E0B;--yellow:#FDE047;
+  --bg:#0F0A1E;--card:#1A1035;--card2:#231545;
+}
+html,body{width:100%;min-height:100vh;background:var(--bg);font-family:'Nunito',sans-serif;overflow-x:hidden}
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+.screen{display:none;flex-direction:column;align-items:center;min-height:100vh;padding:16px 16px 24px;position:relative;z-index:1}
+.screen.active{display:flex}
+
+/* BUDDY */
+#buddy-wrap{position:relative;width:110px;height:130px;margin:0 auto 2px;flex-shrink:0}
+#buddy-wrap svg{width:110px;height:130px}
+.buddy-bubble{position:absolute;left:112px;top:10px;background:#fff;border-radius:16px 16px 16px 4px;padding:7px 11px;font-size:12px;font-weight:800;color:#333;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,0.25);opacity:0;transform:scale(0.6) translateX(-10px);transition:all 0.3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;max-width:160px;white-space:normal;line-height:1.4}
+.buddy-bubble.show{opacity:1;transform:scale(1) translateX(0)}
+.buddy-bubble::before{content:'';position:absolute;right:100%;top:12px;border:7px solid transparent;border-right-color:#fff}
+@keyframes buddyFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes buddyHappy{0%,100%{transform:rotate(0) scale(1)}25%{transform:rotate(-8deg) scale(1.08)}75%{transform:rotate(8deg) scale(1.08)}}
+@keyframes buddySad{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}60%{transform:translateX(6px)}}
+#buddy-svg{animation:buddyFloat 3s ease-in-out infinite;transform-origin:center bottom}
+#buddy-svg.happy{animation:buddyHappy 0.6s ease both}
+#buddy-svg.sad{animation:buddySad 0.5s ease both}
+
+/* HOME */
+.home-header{width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;padding:0 2px}
+.score-pill{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:50px;padding:6px 13px;font-size:12px;font-weight:800;color:#fff;display:flex;align-items:center;gap:5px}
+.score-pill .sp-val{color:var(--yellow)}
+.letter-hero{width:130px;height:130px;margin:4px auto 4px;position:relative;display:flex;align-items:center;justify-content:center}
+.letter-hero-bg{position:absolute;inset:0;border-radius:32px;background:linear-gradient(135deg,#7C3AED,#2563EB,#06B6D4);animation:heroSpin 8s linear infinite}
+.letter-hero-inner{position:absolute;inset:4px;border-radius:28px;background:var(--card);display:flex;align-items:center;justify-content:center}
+.letter-hero-char{font-family:'Fredoka',cursive;font-size:88px;font-weight:700;background:linear-gradient(135deg,#FF4D8D,#F59E0B,#FDE047);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px rgba(255,77,141,0.5));animation:charFloat 3s ease-in-out infinite}
+@keyframes heroSpin{0%{filter:hue-rotate(0deg)}100%{filter:hue-rotate(360deg)}}
+@keyframes charFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.home-title{font-family:'Fredoka',cursive;font-size:24px;font-weight:700;color:#fff;text-align:center;margin-bottom:1px}
+.home-sub{font-size:12px;color:rgba(255,255,255,0.45);text-align:center;margin-bottom:10px}
+.stars-row{display:flex;gap:4px;justify-content:center;margin-bottom:10px}
+.star-gem{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);transition:all 0.3s}
+.star-gem.earned{background:linear-gradient(135deg,#F59E0B,#FDE047);border-color:#F59E0B;box-shadow:0 0 12px #F59E0B66}
+.modes-grid{width:100%;max-width:340px;display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:0}
+.mode-card{border-radius:18px;padding:14px 10px;cursor:pointer;position:relative;overflow:hidden;border:1.5px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;align-items:center;gap:5px;transition:transform 0.18s;background:var(--card)}
+.mode-card:active{transform:scale(0.93)}
+.mc-accent{position:absolute;top:0;left:0;right:0;height:3px;border-radius:18px 18px 0 0}
+.mc1{border-color:#FF4D8D33}.mc1 .mc-accent{background:linear-gradient(90deg,#FF4D8D,#F59E0B)}
+.mc2{border-color:#06B6D433}.mc2 .mc-accent{background:linear-gradient(90deg,#06B6D4,#7C3AED)}
+.mc3{border-color:#10B98133}.mc3 .mc-accent{background:linear-gradient(90deg,#10B981,#06B6D4)}
+.mc4{border-color:#F59E0B33}.mc4 .mc-accent{background:linear-gradient(90deg,#F59E0B,#FF4D8D)}
+.mc-icon{font-size:30px;line-height:1;margin-top:3px}
+.mc-title{font-size:12px;font-weight:800;color:#fff}
+.mc-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;color:rgba(255,255,255,0.55);background:rgba(255,255,255,0.07)}
+
+/* GAME HEADER */
+.g-header{width:100%;max-width:360px;display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.back-btn{width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.g-title-wrap{flex:1}
+.g-title{font-family:'Fredoka',cursive;font-size:16px;font-weight:600;color:#fff;line-height:1}
+.g-subtitle{font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px}
+.g-score-pill{background:linear-gradient(135deg,#7C3AED,#2563EB);border-radius:50px;padding:5px 12px;font-size:12px;font-weight:800;color:#fff;white-space:nowrap}
+.prog-bar-wrap{width:100%;max-width:360px;height:5px;background:rgba(255,255,255,0.07);border-radius:50px;margin-bottom:12px;overflow:hidden}
+.prog-bar{height:100%;border-radius:50px;background:linear-gradient(90deg,#FF4D8D,#F59E0B,#FDE047);transition:width 0.4s ease}
+
+/* BUDDY IN GAME */
+.buddy-game-row{display:flex;align-items:flex-end;gap:8px;width:100%;max-width:340px;margin-bottom:8px}
+.buddy-game-wrap{position:relative;width:70px;height:82px;flex-shrink:0}
+.buddy-game-wrap svg{width:70px;height:82px}
+.buddy-speech{flex:1;background:var(--card2);border:1px solid rgba(255,255,255,0.08);border-radius:14px 14px 14px 4px;padding:8px 12px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.8);line-height:1.5;min-height:42px;display:flex;align-items:center;transition:all 0.3s}
+
+/* GAME 1 */
+.find-card{width:100%;max-width:340px;border-radius:22px;background:var(--card);border:1px solid rgba(255,255,255,0.06);padding:16px;margin-bottom:12px;text-align:center}
+.find-q{font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:6px;font-weight:600}
+.find-big{font-family:'Fredoka',cursive;font-size:68px;font-weight:700;background:linear-gradient(135deg,#FF4D8D,#F59E0B,#FDE047);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.find-hint{font-size:10px;color:rgba(255,255,255,0.2);margin-top:6px}
+.letter-grid{width:100%;max-width:340px;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:8px}
+.lg-btn{height:68px;border-radius:16px;background:var(--card);border:1.5px solid rgba(255,255,255,0.07);font-family:'Fredoka',cursive;font-size:36px;font-weight:700;color:#fff;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center}
+.lg-btn:active{transform:scale(0.88)}
+.lg-btn.correct{background:linear-gradient(135deg,#10B981,#059669);border-color:#10B981;animation:popBig 0.35s}
+.lg-btn.wrong{background:linear-gradient(135deg,#EF4444,#DC2626);border-color:#EF4444;animation:shakeX 0.35s}
+@keyframes popBig{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
+@keyframes shakeX{0%,100%{transform:translateX(0)}25%{transform:translateX(-9px)}75%{transform:translateX(9px)}}
+
+/* GAME 2 */
+.pic-instr{width:100%;max-width:340px;border-radius:18px;background:var(--card);border:1px solid rgba(6,182,212,0.18);padding:10px 13px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.pic-instr-letter{width:42px;height:42px;border-radius:12px;flex-shrink:0;background:linear-gradient(135deg,#06B6D4,#2563EB);display:flex;align-items:center;justify-content:center;font-family:'Fredoka',cursive;font-size:26px;font-weight:700;color:#fff}
+.pic-instr-text{font-size:12px;font-weight:700;color:rgba(255,255,255,0.75);line-height:1.5}
+.pic-grid{width:100%;max-width:340px;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.pic-card{border-radius:18px;padding:14px 8px;background:var(--card);border:2px solid rgba(255,255,255,0.05);cursor:pointer;transition:all 0.18s;display:flex;flex-direction:column;align-items:center;gap:5px}
+.pic-card:active{transform:scale(0.92)}
+.pic-card .pc-emoji{font-size:38px;line-height:1}
+.pic-card .pc-label{font-size:11px;font-weight:700;color:rgba(255,255,255,0.45)}
+.pic-card.sel{border-color:#06B6D4;background:rgba(6,182,212,0.1);box-shadow:0 0 18px rgba(6,182,212,0.2)}
+.pic-card.right{border-color:#10B981;background:rgba(16,185,129,0.12)}
+.pic-card.wrong-sel{border-color:#EF4444;background:rgba(239,68,68,0.1)}
+
+/* GAME 3 */
+#trace-canvas{display:block;width:100%;max-width:310px;background:var(--card);border-radius:22px;border:1.5px solid rgba(124,58,237,0.3);cursor:crosshair;touch-action:none;box-shadow:0 0 36px rgba(124,58,237,0.14)}
+.trace-btns{display:flex;gap:8px;margin-top:8px;width:100%;max-width:310px}
+
+/* GAME 4 */
+.match-container{width:100%;max-width:340px}
+.match-row{display:grid;grid-template-columns:72px 1fr;gap:8px;margin-bottom:7px;align-items:center}
+.ml-chip{height:56px;border-radius:15px;background:var(--card);border:2px solid rgba(255,255,255,0.07);font-family:'Fredoka',cursive;font-size:28px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.18s;color:#fff}
+.ml-chip:active{transform:scale(0.88)}
+.ml-chip.sel{border-color:#F59E0B;background:rgba(245,158,11,0.12);box-shadow:0 0 16px rgba(245,158,11,0.25)}
+.ml-chip.matched{border-color:#10B981;background:rgba(16,185,129,0.12);cursor:default}
+.mw-chip{height:56px;border-radius:15px;background:var(--card);border:2px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:9px;padding:0 12px;cursor:pointer;transition:all 0.18s}
+.mw-chip:active{transform:scale(0.95)}
+.mw-chip .mwc-emoji{font-size:24px}
+.mw-chip .mwc-word{font-size:13px;font-weight:800;color:#fff}
+.mw-chip.sel{border-color:#7C3AED;background:rgba(124,58,237,0.12);box-shadow:0 0 16px rgba(124,58,237,0.25)}
+.mw-chip.matched{border-color:#10B981;background:rgba(16,185,129,0.12);cursor:default}
+
+/* BUTTONS */
+.btn-main{width:100%;max-width:340px;height:50px;border-radius:15px;border:none;background:linear-gradient(135deg,#FF4D8D,#7C3AED);color:#fff;font-size:15px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;transition:transform 0.15s;box-shadow:0 7px 20px rgba(255,77,141,0.3);display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-main:active{transform:scale(0.95)}
+.btn-sec{flex:1;height:44px;border-radius:13px;border:1.5px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6);font-size:13px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;transition:all 0.15s}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.78);align-items:center;justify-content:center;padding:16px}
+.modal-overlay.show{display:flex}
+.modal-box{background:var(--card2);border-radius:26px;padding:26px 22px;text-align:center;width:100%;max-width:280px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 28px 60px rgba(0,0,0,0.5);animation:modalIn 0.4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes modalIn{from{transform:scale(0.4) translateY(40px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.modal-buddy{width:90px;height:106px;margin:0 auto 6px;display:block}
+.modal-buddy svg{width:90px;height:106px}
+.modal-title{font-family:'Fredoka',cursive;font-size:26px;font-weight:700;color:#fff;margin-bottom:3px}
+.modal-pts{font-size:13px;font-weight:800;color:var(--yellow);margin-bottom:16px;min-height:18px}
+.modal-btn{width:100%;height:48px;border-radius:13px;border:none;background:linear-gradient(135deg,#10B981,#059669);color:#fff;font-size:15px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;box-shadow:0 5px 16px rgba(16,185,129,0.3)}
+
+/* PARTICLES */
+.particle{position:fixed;pointer-events:none;z-index:300;font-size:19px;animation:pFly 1.2s forwards}
+@keyframes pFly{0%{transform:translateY(0) scale(1) rotate(0deg);opacity:1}100%{transform:translateY(-120px) scale(0) rotate(200deg);opacity:0}}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+
+<svg style="display:none">
+  <symbol id="buddy" viewBox="0 0 110 130">
+    <ellipse cx="55" cy="124" rx="28" ry="5" fill="rgba(0,0,0,0.25)"/>
+    <rect x="22" y="78" width="66" height="46" rx="16" fill="#1a1a2e"/>
+    <rect x="22" y="78" width="66" height="20" rx="0" fill="#1a1a2e"/>
+    <rect x="43" y="70" width="24" height="16" rx="8" fill="#F5C5A3"/>
+    <ellipse cx="55" cy="52" rx="34" ry="34" fill="#F5C5A3"/>
+    <ellipse cx="31" cy="60" rx="9" ry="7" fill="#FFAAAA" opacity="0.6"/>
+    <ellipse cx="79" cy="60" rx="9" ry="7" fill="#FFAAAA" opacity="0.6"/>
+    <ellipse cx="21" cy="54" rx="7" ry="8" fill="#F5C5A3"/>
+    <ellipse cx="89" cy="54" rx="7" ry="8" fill="#F5C5A3"/>
+    <ellipse cx="21" cy="54" rx="4" ry="5" fill="#FFBBAA" opacity="0.5"/>
+    <ellipse cx="89" cy="54" rx="4" ry="5" fill="#FFBBAA" opacity="0.5"/>
+    <ellipse cx="55" cy="24" rx="34" ry="18" fill="#1a1a2e"/>
+    <ellipse cx="55" cy="18" rx="22" ry="14" fill="#111827"/>
+    <path d="M30 28 Q25 10 35 8 Q40 6 38 18" fill="#111827"/>
+    <path d="M80 28 Q85 10 75 8 Q70 6 72 18" fill="#111827"/>
+    <path d="M42 16 Q48 4 55 6 Q62 4 68 16" fill="#1a1a2e"/>
+    <g id="eyes-happy">
+      <ellipse cx="40" cy="52" rx="10" ry="11" fill="white"/>
+      <ellipse cx="70" cy="52" rx="10" ry="11" fill="white"/>
+      <ellipse cx="41" cy="53" rx="6" ry="6.5" fill="#5C3317"/>
+      <ellipse cx="71" cy="53" rx="6" ry="6.5" fill="#5C3317"/>
+      <ellipse cx="41" cy="53" rx="3.5" ry="3.5" fill="#1a0a00"/>
+      <ellipse cx="71" cy="53" rx="3.5" ry="3.5" fill="#1a0a00"/>
+      <ellipse cx="43" cy="50" rx="1.5" ry="1.5" fill="white"/>
+      <ellipse cx="73" cy="50" rx="1.5" ry="1.5" fill="white"/>
+    </g>
+    <g id="eyes-sad" display="none">
+      <ellipse cx="40" cy="53" rx="10" ry="10" fill="white"/>
+      <ellipse cx="70" cy="53" rx="10" ry="10" fill="white"/>
+      <ellipse cx="41" cy="54" rx="6" ry="6" fill="#5C3317"/>
+      <ellipse cx="71" cy="54" rx="6" ry="6" fill="#5C3317"/>
+      <ellipse cx="41" cy="54" rx="3.5" ry="3.5" fill="#1a0a00"/>
+      <ellipse cx="71" cy="54" rx="3.5" ry="3.5" fill="#1a0a00"/>
+      <path d="M32 43 Q40 48 48 43" stroke="#5C3317" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M62 43 Q70 48 78 43" stroke="#5C3317" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    </g>
+    <g id="eyes-excited" display="none">
+      <path d="M31 48 Q40 40 49 48" stroke="#5C3317" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M61 48 Q70 40 79 48" stroke="#5C3317" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <ellipse cx="40" cy="54" rx="9.5" ry="10" fill="white"/>
+      <ellipse cx="70" cy="54" rx="9.5" ry="10" fill="white"/>
+      <ellipse cx="40" cy="55" rx="6" ry="6.5" fill="#5C3317"/>
+      <ellipse cx="70" cy="55" rx="6" ry="6.5" fill="#5C3317"/>
+      <ellipse cx="40" cy="55" rx="3.5" ry="3.5" fill="#1a0a00"/>
+      <ellipse cx="70" cy="55" rx="3.5" ry="3.5" fill="#1a0a00"/>
+      <ellipse cx="42" cy="52" rx="1.5" ry="1.5" fill="white"/>
+      <ellipse cx="72" cy="52" rx="1.5" ry="1.5" fill="white"/>
+    </g>
+    <path id="mouth-smile" d="M44 68 Q55 76 66 68" stroke="#C47A5A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path id="mouth-sad" d="M44 72 Q55 65 66 72" stroke="#C47A5A" stroke-width="2.5" fill="none" stroke-linecap="round" display="none"/>
+    <path id="mouth-wow" d="M44 68 Q55 80 66 68" stroke="#C47A5A" stroke-width="2.5" fill="none" stroke-linecap="round" display="none"/>
+    <rect x="10" y="82" width="16" height="30" rx="8" fill="#1a1a2e"/>
+    <rect x="84" y="82" width="16" height="30" rx="8" fill="#1a1a2e"/>
+    <g id="sparkles" display="none">
+      <text x="3" y="30" font-size="12" fill="#FDE047">✨</text>
+      <text x="90" y="25" font-size="14" fill="#FF4D8D">⭐</text>
+    </g>
+  </symbol>
+</svg>
+
+<!-- HOME -->
+<div class="screen active" id="s-home">
+  <div class="home-header" style="margin-top:4px">
+    <div class="score-pill">⭐ <span class="sp-val" id="h-score">0</span></div>
+    <div class="score-pill">🏆 <span class="sp-val" id="h-stars">0</span> ستاره</div>
+  </div>
+  <div id="buddy-wrap">
+    <svg id="buddy-svg"><use href="#buddy"/></svg>
+    <div class="buddy-bubble" id="home-bubble">سلام! بریم حرف C رو یاد بگیریم؟ 🎉</div>
+  </div>
+  <div class="letter-hero">
+    <div class="letter-hero-bg"></div>
+    <div class="letter-hero-inner"><span class="letter-hero-char">C</span></div>
+  </div>
+  <div class="home-title">حرف C رو یاد بگیریم!</div>
+  <div class="home-sub">Cat · Car · Cake · Cow</div>
+  <div class="stars-row">
+    <div class="star-gem" id="sg0">⭐</div><div class="star-gem" id="sg1">⭐</div>
+    <div class="star-gem" id="sg2">⭐</div><div class="star-gem" id="sg3">⭐</div>
+    <div class="star-gem" id="sg4">⭐</div>
+  </div>
+  <div class="modes-grid">
+    <div class="mode-card mc1" onclick="startGame(1)"><div class="mc-accent"></div><span class="mc-icon">🔤</span><span class="mc-title">حرف‌یاب!</span><span class="mc-badge">شناخت حروف</span></div>
+    <div class="mode-card mc2" onclick="startGame(2)"><div class="mc-accent"></div><span class="mc-icon">🍎</span><span class="mc-title">تصویریاب!</span><span class="mc-badge">کلمات با A</span></div>
+    <div class="mode-card mc3" onclick="startGame(3)"><div class="mc-accent"></div><span class="mc-icon">✏️</span><span class="mc-title">نقاش‌کوچولو!</span><span class="mc-badge">نوشتن حرف</span></div>
+    <div class="mode-card mc4" onclick="startGame(4)"><div class="mc-accent"></div><span class="mc-icon">🔗</span><span class="mc-title">جورچین!</span><span class="mc-badge">جور کردن</span></div>
+  </div>
+</div>
+
+<!-- GAME 1 -->
+<div class="screen" id="s-g1">
+  <div class="g-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="g-title-wrap"><div class="g-title">🔤 حرف‌یاب!</div><div class="g-subtitle">حرف A رو پیدا کن</div></div>
+    <div class="g-score-pill">⭐ <span id="g1-sc">0</span></div>
+  </div>
+  <div class="prog-bar-wrap"><div class="prog-bar" id="g1-prog" style="width:0%"></div></div>
+  <div class="buddy-game-row">
+    <div class="buddy-game-wrap"><svg><use href="#buddy"/></svg></div>
+    <div class="buddy-speech" id="g1-speech">حرف C رو پیدا کن! 👀</div>
+  </div>
+  <div class="find-card">
+    <div class="find-q">این حرف کدومه؟</div>
+    <div class="find-big" id="g1-target">C</div>
+    <div class="find-hint">یکی رو لمس کن 👇</div>
+  </div>
+  <div class="letter-grid" id="g1-opts"></div>
+</div>
+
+<!-- GAME 2 -->
+<div class="screen" id="s-g2">
+  <div class="g-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="g-title-wrap"><div class="g-title">🍎 تصویریاب!</div><div class="g-subtitle">کلمات با حرف A</div></div>
+    <div class="g-score-pill">⭐ <span id="g2-sc">0</span></div>
+  </div>
+  <div class="prog-bar-wrap"><div class="prog-bar" id="g2-prog" style="width:0%"></div></div>
+  <div class="buddy-game-row">
+    <div class="buddy-game-wrap"><svg><use href="#buddy"/></svg></div>
+    <div class="buddy-speech" id="g2-speech">کدوم‌ها با C شروع می‌شن؟ 🤔</div>
+  </div>
+  <div class="pic-instr">
+    <div class="pic-instr-letter">C</div>
+    <div class="pic-instr-text">همه چیزایی که با <b style="color:#06B6D4">C</b> شروع می‌شن رو لمس کن! ☝️</div>
+  </div>
+  <div class="pic-grid" id="g2-opts"></div>
+  <button class="btn-main" id="g2-check-btn" style="display:none;margin-top:4px" onclick="checkPics()">بررسی کن ✓</button>
+</div>
+
+<!-- GAME 3 -->
+<div class="screen" id="s-g3">
+  <div class="g-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="g-title-wrap"><div class="g-title">✏️ نقاش‌کوچولو!</div><div class="g-subtitle">حرف A رو بنویس</div></div>
+    <div class="g-score-pill">⭐ <span id="g3-sc">0</span></div>
+  </div>
+  <div class="buddy-game-row">
+    <div class="buddy-game-wrap"><svg><use href="#buddy"/></svg></div>
+    <div class="buddy-speech" id="g3-speech">روی حرف کم‌رنگ با انگشتت بکش! ✍️</div>
+  </div>
+  <canvas id="trace-canvas" width="310" height="270"></canvas>
+  <div class="trace-btns">
+    <button class="btn-sec" onclick="clearTrace()">🗑️ پاک کن</button>
+    <button class="btn-sec" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3);color:#10B981" onclick="submitTrace()">✓ تموم شد!</button>
+  </div>
+</div>
+
+<!-- GAME 4 -->
+<div class="screen" id="s-g4">
+  <div class="g-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="g-title-wrap"><div class="g-title">🔗 جورچین!</div><div class="g-subtitle">حرف رو با تصویرش وصل کن</div></div>
+    <div class="g-score-pill">⭐ <span id="g4-sc">0</span></div>
+  </div>
+  <div class="buddy-game-row">
+    <div class="buddy-game-wrap"><svg><use href="#buddy"/></svg></div>
+    <div class="buddy-speech" id="g4-speech">حرف رو با تصویرش جور کن! 🔗</div>
+  </div>
+  <div class="match-container" id="g4-pairs"></div>
+  <button class="btn-main" onclick="checkMatch()" style="margin-top:8px">بررسی کن ✓</button>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-buddy"><svg id="modal-buddy-svg"><use href="#buddy"/></svg></div>
+    <div class="modal-title" id="m-title">آفرین!</div>
+    <div class="modal-pts" id="m-pts">+10 امتیاز</div>
+    <button class="modal-btn" onclick="nextRound()">ادامه 🚀</button>
+  </div>
+</div>
+
+<script>
+/* BG */
+(function(){
+  const c=document.getElementById('bg-canvas'),ctx=c.getContext('2d');
+  let W,H,dots=[];
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  for(let i=0;i<55;i++)dots.push({x:Math.random()*1400,y:Math.random()*900,r:Math.random()*2+0.5,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,ci:Math.floor(Math.random()*6)});
+  const cols=['#FF4D8D55','#7C3AED44','#06B6D455','#10B98144','#F59E0B44','#FDE04744'];
+  function draw(){ctx.clearRect(0,0,W,H);dots.forEach(d=>{d.x+=d.vx;d.y+=d.vy;if(d.x<0||d.x>W)d.vx*=-1;if(d.y<0||d.y>H)d.vy*=-1;ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);ctx.fillStyle=cols[d.ci];ctx.fill();});requestAnimationFrame(draw);}
+  draw();
+})();
+
+/* HELPERS */
+function shuffle(a){let b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+/* BUDDY */
+function setMood(mood){
+  ['happy','sad','excited'].forEach(m=>document.getElementById('eyes-'+m).setAttribute('display',m===mood?'':'none'));
+  document.getElementById('mouth-smile').setAttribute('display',mood==='happy'?'':'none');
+  document.getElementById('mouth-sad').setAttribute('display',mood==='sad'?'':'none');
+  document.getElementById('mouth-wow').setAttribute('display',mood==='excited'?'':'none');
+  document.getElementById('sparkles').setAttribute('display',mood==='excited'?'':'none');
+}
+function playAnim(name){
+  const svg=document.getElementById('buddy-svg');
+  svg.classList.remove('happy','sad');void svg.offsetWidth;svg.classList.add(name);
+  setTimeout(()=>svg.classList.remove(name),700);
+}
+function speakGame(text){
+  ['g1','g2','g3','g4'].forEach(g=>{const sp=document.getElementById(g+'-speech');if(sp)sp.innerHTML=text;});
+}
+function buddyCorrect(){
+  setMood('excited');playAnim('happy');
+  const msgs=['آفرین! عالیه! 🌟','اوهووو! درسته! 🎉','خیلی باهوشی! ✨','بِرِک! 👏'];
+  speakGame(msgs[Math.floor(Math.random()*msgs.length)]);
+}
+function buddyWrong(){
+  setMood('sad');playAnim('sad');
+  const msgs=['اشتباهه، دوباره امتحان کن 💪','نزدیک بود! تلاش کن 😊','این یکی نیست، دقت کن 👀'];
+  speakGame(msgs[Math.floor(Math.random()*msgs.length)]);
+}
+setTimeout(()=>{const b=document.getElementById('home-bubble');if(b)b.classList.add('show');},600);
+
+/* STATE */
+const S={score:0,totalStars:0,g1round:0,g2round:0};
+
+/* DATA */
+const G1=[
+  {target:'C',pool:['A','B','C','D','E','F']},
+  {target:'c',pool:['a','b','c','d','e','f']},
+  {target:'C',pool:['H','C','M','N','O','P']},
+  {target:'c',pool:['c','g','o','q','u','p']},
+  {target:'C',pool:['R','S','T','U','C','V']},
+];
+const G2=[
+  {items:[{e:'🐱',l:'Cat',ok:true},{e:'🏀',l:'Ball',ok:false},{e:'🚗',l:'Car',ok:true},{e:'🐸',l:'Frog',ok:false}]},
+  {items:[{e:'🍰',l:'Cake',ok:true},{e:'🐻',l:'Bear',ok:false},{e:'🐄',l:'Cow',ok:true},{e:'🍕',l:'Pizza',ok:false}]},
+  {items:[{e:'🕯️',l:'Candle',ok:true},{e:'🐘',l:'Elephant',ok:false},{e:'🦀',l:'Crab',ok:true},{e:'🍌',l:'Banana',ok:false}]},
+];
+const G4_DATA=[
+  {letter:'C',emoji:'🐱',word:'Cat'},
+  {letter:'E',emoji:'🐘',word:'Elephant'},
+  {letter:'G',emoji:'🍇',word:'Grape'},
+];
+
+/* SCORE + postMessage */
+function addScore(pts,elId){
+  S.score+=pts;
+  S.totalStars=Math.min(5,Math.floor(S.score/40));
+  if(elId){const el=document.getElementById(elId);el.textContent=parseInt(el.textContent||0)+pts;}
+  burst();updateHome();
+}
+function updateHome(){
+  document.getElementById('h-score').textContent=S.score;
+  document.getElementById('h-stars').textContent=S.totalStars;
+  for(let i=0;i<5;i++)document.getElementById('sg'+i).classList.toggle('earned',i<S.totalStars);
+  // ارسال امتیاز به اپ
+  window.parent.postMessage({type:'game-score',score:S.score,stars:S.totalStars,letter:'C'},'*');
+}
+function burst(){
+  const icons=['⭐','🌟','✨','💫','🎉'];
+  for(let i=0;i<5;i++){
+    const p=document.createElement('div');p.className='particle';
+    p.textContent=icons[Math.floor(Math.random()*icons.length)];
+    p.style.left=Math.random()*80+10+'vw';p.style.top=Math.random()*60+10+'vh';
+    p.style.animationDelay=(i*.1)+'s';document.body.appendChild(p);
+    setTimeout(()=>p.remove(),1500);
+  }
+}
+function goHome(){show('s-home');setMood('happy');updateHome();speakGame('سلام! بریم حرف C رو یاد بگیریم؟ 🎉');}
+
+let modalCb=null;
+function showModal(title,pts,cb,mood){
+  modalCb=cb;setMood(mood||'excited');
+  document.getElementById('m-title').textContent=title;
+  document.getElementById('m-pts').textContent=pts>0?`+${pts} امتیاز ⭐`:'';
+  document.getElementById('modal').classList.add('show');
+}
+function nextRound(){document.getElementById('modal').classList.remove('show');setMood('happy');if(modalCb)modalCb();}
+
+/* GAME START */
+function startGame(n){
+  setMood('happy');
+  if(n===1){S.g1round=0;show('s-g1');document.getElementById('g1-sc').textContent=0;speakGame('حرف C رو پیدا کن! 👀');renderG1();}
+  else if(n===2){S.g2round=0;show('s-g2');document.getElementById('g2-sc').textContent=0;speakGame('کدوم‌ها با C شروع می‌شن؟ 🤔');renderG2();}
+  else if(n===3){show('s-g3');document.getElementById('g3-sc').textContent=0;speakGame('روی حرف کم‌رنگ بکش! ✍️');initTrace();}
+  else if(n===4){show('s-g4');document.getElementById('g4-sc').textContent=0;speakGame('حرف رو با تصویرش جور کن! 🔗');initG4();}
+}
+
+/* G1 */
+function renderG1(){
+  const r=G1[S.g1round];
+  document.getElementById('g1-target').textContent=r.target;
+  document.getElementById('g1-prog').style.width=(S.g1round/G1.length*100)+'%';
+  document.getElementById('g1-opts').innerHTML=shuffle(r.pool).map(l=>`<button class="lg-btn" onclick="checkG1('${l}')">${l}</button>`).join('');
+}
+function checkG1(letter){
+  const r=G1[S.g1round];
+  document.querySelectorAll('.lg-btn').forEach(b=>{b.disabled=true;if(b.textContent===r.target)b.classList.add('correct');else if(b.textContent===letter&&letter!==r.target)b.classList.add('wrong');});
+  if(letter===r.target){
+    buddyCorrect();addScore(10,'g1-sc');
+    setTimeout(()=>{S.g1round++;if(S.g1round>=G1.length)showModal('عالیه! همه رو پیدا کردی!',50,goHome,'excited');else{setMood('happy');speakGame('حرف C رو پیدا کن! 👀');renderG1();}},750);
+  } else {
+    buddyWrong();
+    setTimeout(()=>{setMood('happy');speakGame('حرف C رو پیدا کن! 👀');document.querySelectorAll('.lg-btn').forEach(b=>{b.disabled=false;b.className='lg-btn';});},950);
+  }
+}
+
+/* G2 */
+let g2sel=new Set();
+function renderG2(){
+  const r=G2[S.g2round%G2.length];g2sel.clear();
+  document.getElementById('g2-prog').style.width=(S.g2round/G2.length*100)+'%';
+  // shuffle گزینه‌ها هر بار
+  const items=shuffle([...r.items]);
+  document.getElementById('g2-opts').innerHTML=items.map((it,i)=>`
+    <div class="pic-card" id="pc${i}" onclick="togglePic(${i})" data-ok="${it.ok}">
+      <span class="pc-emoji">${it.e}</span><span class="pc-label">${it.l}</span>
+    </div>`).join('');
+  document.getElementById('g2-check-btn').style.display='none';
+}
+function togglePic(i){
+  if(g2sel.has(i))g2sel.delete(i);else g2sel.add(i);
+  document.getElementById('pc'+i).classList.toggle('sel',g2sel.has(i));
+  document.getElementById('g2-check-btn').style.display=g2sel.size>0?'flex':'none';
+}
+function checkPics(){
+  const cards=document.querySelectorAll('#g2-opts .pic-card');
+  let ok=true;
+  cards.forEach((el,i)=>{
+    const isOk=el.dataset.ok==='true';el.style.pointerEvents='none';
+    if(isOk&&!g2sel.has(i)){el.style.borderColor='#F59E0B';ok=false;}
+    else if(!isOk&&g2sel.has(i)){el.classList.add('wrong-sel');ok=false;}
+    else if(isOk&&g2sel.has(i))el.classList.add('right');
+  });
+  if(ok){
+    buddyCorrect();addScore(15,'g2-sc');
+    setTimeout(()=>{S.g2round++;if(S.g2round>=G2.length)showModal('همه کلمه‌ها رو پیدا کردی!',60,goHome,'excited');else{setMood('happy');speakGame('کدوم‌ها با C شروع می‌شن؟ 🤔');renderG2();}},800);
+  } else {
+    buddyWrong();setTimeout(()=>{setMood('happy');speakGame('کدوم‌ها با C شروع می‌شن؟ 🤔');renderG2();},1100);
+  }
+}
+
+/* G3 */
+let isDown=false,lx=0,ly=0,strokes=0;
+function initTrace(){
+  strokes=0;const cv=document.getElementById('trace-canvas'),ctx=cv.getContext('2d');
+  drawGuide(ctx,cv);
+  cv.onpointerdown=e=>{isDown=true;[lx,ly]=getPos(e,cv);cv.setPointerCapture(e.pointerId);};
+  cv.onpointermove=e=>{
+    if(!isDown)return;const[x,y]=getPos(e,cv);
+    ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(x,y);
+    const g=ctx.createLinearGradient(lx,ly,x,y);
+    g.addColorStop(0,'#FF4D8D');g.addColorStop(1,'#7C3AED');
+    ctx.strokeStyle=g;ctx.lineWidth=8;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();
+    [lx,ly]=[x,y];strokes++;
+    if(strokes%30===0)speakGame('آفرین! ادامه بده! 💪');
+  };
+  cv.onpointerup=cv.onpointercancel=()=>isDown=false;
+}
+function getPos(e,cv){const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height];}
+function drawGuide(ctx,cv){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.save();ctx.font='bold 200px Fredoka,cursive';ctx.fillStyle='rgba(124,58,237,0.09)';
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('C',155,138);
+  ctx.strokeStyle='rgba(124,58,237,0.2)';ctx.lineWidth=2.5;ctx.setLineDash([7,9]);
+  ctx.strokeText('C',155,138);ctx.restore();
+  ctx.font='600 12px Nunito,sans-serif';ctx.fillStyle='rgba(255,255,255,0.18)';
+  ctx.textAlign='center';ctx.fillText('✍️ روی حرف بکش',155,258);
+}
+function clearTrace(){const cv=document.getElementById('trace-canvas');drawGuide(cv.getContext('2d'),cv);strokes=0;speakGame('دوباره بکش! ✏️');}
+function submitTrace(){
+  if(strokes<25){buddyWrong();speakGame('کمی بیشتر بنویس! ✏️');return;}
+  buddyCorrect();addScore(20,'g3-sc');showModal('نقاش ماهر!',20,goHome,'excited');
+}
+
+/* G4 */
+let g4lsel=null,g4wsel=null,g4matched=new Set();
+function initG4(){
+  g4lsel=null;g4wsel=null;g4matched=new Set();
+  // هر دو طرف مستقل shuffle
+  const leftOrder=shuffle(G4_DATA.map((_,i)=>i));
+  const rightOrder=shuffle(G4_DATA.map((_,i)=>i));
+  document.getElementById('g4-pairs').innerHTML=G4_DATA.map((_,row)=>`
+    <div class="match-row">
+      <div class="ml-chip" id="ml${row}" onclick="selML(${row})" data-idx="${leftOrder[row]}">${G4_DATA[leftOrder[row]].letter}</div>
+      <div class="mw-chip" id="mw${row}" onclick="selMW(${row})" data-idx="${rightOrder[row]}">
+        <span class="mwc-emoji">${G4_DATA[rightOrder[row]].emoji}</span>
+        <span class="mwc-word">${G4_DATA[rightOrder[row]].word}</span>
+      </div>
+    </div>`).join('');
+}
+function selML(i){
+  if(g4matched.has('l'+i))return;
+  document.querySelectorAll('.ml-chip').forEach(e=>e.classList.remove('sel'));
+  g4lsel=i;document.getElementById('ml'+i).classList.add('sel');tryMatch();
+}
+function selMW(i){
+  if(g4matched.has('w'+i))return;
+  document.querySelectorAll('.mw-chip').forEach(e=>e.classList.remove('sel'));
+  g4wsel=i;document.getElementById('mw'+i).classList.add('sel');tryMatch();
+}
+function tryMatch(){
+  if(g4lsel===null||g4wsel===null)return;
+  const l=g4lsel,w=g4wsel;g4lsel=null;g4wsel=null;
+  const leftIdx=parseInt(document.getElementById('ml'+l).dataset.idx);
+  const rightIdx=parseInt(document.getElementById('mw'+w).dataset.idx);
+  if(leftIdx===rightIdx){
+    document.getElementById('ml'+l).classList.replace('sel','matched');
+    document.getElementById('mw'+w).classList.replace('sel','matched');
+    g4matched.add('l'+l);g4matched.add('w'+w);
+    buddyCorrect();addScore(10,'g4-sc');
+    if(g4matched.size>=G4_DATA.length*2)setTimeout(()=>showModal('همه رو جور کردی!',30,goHome,'excited'),400);
+  } else {
+    buddyWrong();
+    setTimeout(()=>{
+      const ml=document.getElementById('ml'+l),mw=document.getElementById('mw'+w);
+      if(ml)ml.classList.remove('sel');if(mw)mw.classList.remove('sel');
+      setMood('happy');speakGame('حرف رو با تصویرش جور کن! 🔗');
+    },700);
+  }
+}
+function checkMatch(){
+  if(g4matched.size<G4_DATA.length*2)showModal('تلاش کن، نزدیکه!',0,()=>{},'sad');
+  else showModal('همه رو جور کردی!',30,goHome,'excited');
+}
+
+/* API */
+window.AkidGameAPI={
+  getScore:()=>({score:S.score,stars:S.totalStars,letter:'C'}),
+  reset:()=>{S.score=0;S.totalStars=0;updateHome();}
+};
+updateHome();
+</script>
+</body>
+</html>

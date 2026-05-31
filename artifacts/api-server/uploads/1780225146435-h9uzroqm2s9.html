@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>آزمون حرف D – Akid</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}}
+:root{{--accent:#F59E0B;--grad:linear-gradient(135deg,#F59E0B,#FF4D8D);--bg:#0F0A1E;--card:#1A1035;--card2:#231545}}
+html,body{{width:100%;min-height:100vh;background:var(--bg);font-family:'Nunito',sans-serif;overflow-x:hidden}}
+#bg-canvas{{position:fixed;inset:0;z-index:0;pointer-events:none}}
+.wrap{{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;padding:16px;min-height:100vh}}
+
+/* HEADER */
+.quiz-header{{width:100%;max-width:360px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;margin-top:4px}}
+.quiz-letter{{width:52px;height:52px;border-radius:16px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-family:'Fredoka',cursive;font-size:30px;font-weight:700;color:#fff;box-shadow:0 6px 20px rgba(0,0,0,0.3)}}
+.quiz-title-wrap .qt{{font-family:'Fredoka',cursive;font-size:18px;color:#fff;font-weight:700}}
+.quiz-title-wrap .qs{{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px}}
+.score-badge{{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:50px;padding:6px 13px;font-size:12px;font-weight:800;color:#fff}}
+.score-badge span{{color:#FDE047}}
+
+/* PROGRESS */
+.prog-wrap{{width:100%;max-width:360px;margin-bottom:16px}}
+.prog-info{{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px;font-weight:700}}
+.prog-bar-bg{{width:100%;height:8px;background:rgba(255,255,255,0.07);border-radius:50px;overflow:hidden}}
+.prog-bar{{height:100%;border-radius:50px;background:var(--grad);transition:width 0.5s ease}}
+
+/* BUDDY ROW */
+.buddy-row{{display:flex;align-items:flex-end;gap:10px;width:100%;max-width:360px;margin-bottom:12px}}
+.buddy-wrap svg{{width:65px;height:77px}}
+.speech-bubble{{flex:1;background:var(--card2);border:1px solid rgba(255,255,255,0.08);border-radius:14px 14px 14px 4px;padding:8px 12px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.8);line-height:1.5;min-height:40px;display:flex;align-items:center}}
+
+/* QUESTION CARD */
+.q-card{{width:100%;max-width:360px;background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:22px;padding:18px;margin-bottom:12px;text-align:center}}
+.q-num{{font-size:11px;font-weight:800;color:rgba(255,255,255,0.3);margin-bottom:8px;letter-spacing:1px}}
+.q-text{{font-size:15px;font-weight:800;color:#fff;line-height:1.5}}
+
+/* OPTIONS */
+.opts-grid{{width:100%;max-width:360px;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}}
+.opt-btn{{
+  background:var(--card);border:2px solid rgba(255,255,255,0.07);
+  border-radius:16px;padding:14px 10px;
+  font-size:18px;font-weight:800;color:#fff;
+  cursor:pointer;transition:all 0.18s;
+  font-family:'Nunito',sans-serif;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  line-height:1.3;
+}}
+.opt-btn .opt-emoji{{font-size:28px;line-height:1}}
+.opt-btn .opt-label{{font-size:12px;color:rgba(255,255,255,0.6);font-weight:700}}
+.opt-btn:active{{transform:scale(0.92)}}
+.opt-btn.correct{{background:linear-gradient(135deg,#10B981,#059669);border-color:#10B981;animation:popBig 0.35s}}
+.opt-btn.wrong{{background:linear-gradient(135deg,#EF4444,#DC2626);border-color:#EF4444;animation:shakeX 0.35s}}
+.opt-btn.show-correct{{background:linear-gradient(135deg,#10B981,#059669);border-color:#10B981}}
+@keyframes popBig{{0%{{transform:scale(1)}}40%{{transform:scale(1.1)}}100%{{transform:scale(1)}}}}
+@keyframes shakeX{{0%,100%{{transform:translateX(0)}}25%{{transform:translateX(-8px)}}75%{{transform:translateX(8px)}}}}
+
+/* RESULT SCREEN */
+.result-wrap{{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;padding-top:8px}}
+.result-card{{width:100%;background:var(--card2);border:1px solid rgba(255,255,255,0.08);border-radius:26px;padding:24px;text-align:center;margin-bottom:12px}}
+.result-buddy{{width:100px;height:118px;margin:0 auto 10px}}
+.result-buddy svg{{width:100px;height:118px}}
+.result-score-circle{{width:90px;height:90px;border-radius:50%;background:var(--grad);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;flex-direction:column;box-shadow:0 8px 24px rgba(0,0,0,0.3)}}
+.rsc-num{{font-family:'Fredoka',cursive;font-size:32px;font-weight:700;color:#fff;line-height:1}}
+.rsc-total{{font-size:11px;color:rgba(255,255,255,0.7);font-weight:700}}
+.result-title{{font-family:'Fredoka',cursive;font-size:26px;color:#fff;margin-bottom:4px}}
+.result-sub{{font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:16px}}
+.stars-result{{display:flex;gap:6px;justify-content:center;margin-bottom:16px;font-size:28px}}
+
+/* ANSWER REVIEW */
+.review-list{{width:100%;max-width:360px;margin-bottom:12px}}
+.review-item{{background:var(--card);border-radius:14px;padding:10px 14px;margin-bottom:7px;display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,0.05)}}
+.ri-icon{{font-size:18px;flex-shrink:0}}
+.ri-text{{flex:1}}
+.ri-q{{font-size:11px;color:rgba(255,255,255,0.5);font-weight:700;margin-bottom:2px}}
+.ri-a{{font-size:12px;color:#fff;font-weight:800}}
+.ri-correct{{font-size:11px;color:#10B981;font-weight:700;margin-top:2px}}
+
+/* BTN */
+.btn-main{{width:100%;max-width:360px;height:50px;border-radius:15px;border:none;background:var(--grad);color:#fff;font-size:15px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;box-shadow:0 7px 20px rgba(0,0,0,0.3);transition:transform 0.15s}}
+.btn-main:active{{transform:scale(0.96)}}
+
+/* PARTICLES */
+.particle{{position:fixed;pointer-events:none;z-index:300;font-size:19px;animation:pFly 1.2s forwards}}
+@keyframes pFly{{0%{{transform:translateY(0) scale(1) rotate(0deg);opacity:1}}100%{{transform:translateY(-120px) scale(0) rotate(200deg);opacity:0}}}}
+
+@keyframes buddyFloat{{0%,100%{{transform:translateY(0)}}50%{{transform:translateY(-5px)}}}}
+@keyframes buddyHappy{{0%,100%{{transform:rotate(0) scale(1)}}25%{{transform:rotate(-8deg) scale(1.08)}}75%{{transform:rotate(8deg) scale(1.08)}}}}
+@keyframes buddySad{{0%,100%{{transform:translateX(0)}}20%{{transform:translateX(-6px)}}60%{{transform:translateX(6px)}}}}
+#buddy-anim{{animation:buddyFloat 3s ease-in-out infinite;transform-origin:center bottom}}
+#buddy-anim.happy{{animation:buddyHappy 0.6s ease both}}
+#buddy-anim.sad{{animation:buddySad 0.5s ease both}}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<svg style="display:none">
+  <symbol id="buddy" viewBox="0 0 110 130">
+    <ellipse cx="55" cy="124" rx="28" ry="5" fill="rgba(0,0,0,0.25)"/>
+    <rect x="22" y="78" width="66" height="46" rx="16" fill="#1a1a2e"/>
+    <rect x="43" y="70" width="24" height="16" rx="8" fill="#F5C5A3"/>
+    <ellipse cx="55" cy="52" rx="34" ry="34" fill="#F5C5A3"/>
+    <ellipse cx="31" cy="60" rx="9" ry="7" fill="#FFAAAA" opacity="0.6"/>
+    <ellipse cx="79" cy="60" rx="9" ry="7" fill="#FFAAAA" opacity="0.6"/>
+    <ellipse cx="21" cy="54" rx="7" ry="8" fill="#F5C5A3"/>
+    <ellipse cx="89" cy="54" rx="7" ry="8" fill="#F5C5A3"/>
+    <ellipse cx="55" cy="24" rx="34" ry="18" fill="#1a1a2e"/>
+    <ellipse cx="55" cy="18" rx="22" ry="14" fill="#111827"/>
+    <path d="M30 28 Q25 10 35 8 Q40 6 38 18" fill="#111827"/>
+    <path d="M80 28 Q85 10 75 8 Q70 6 72 18" fill="#111827"/>
+    <g id="eyes-happy">
+      <ellipse cx="40" cy="52" rx="10" ry="11" fill="white"/>
+      <ellipse cx="70" cy="52" rx="10" ry="11" fill="white"/>
+      <ellipse cx="41" cy="53" rx="6" ry="6.5" fill="#5C3317"/>
+      <ellipse cx="71" cy="53" rx="6" ry="6.5" fill="#5C3317"/>
+      <ellipse cx="41" cy="53" rx="3.5" ry="3.5" fill="#1a0a00"/>
+      <ellipse cx="71" cy="53" rx="3.5" ry="3.5" fill="#1a0a00"/>
+      <ellipse cx="43" cy="50" rx="1.5" ry="1.5" fill="white"/>
+      <ellipse cx="73" cy="50" rx="1.5" ry="1.5" fill="white"/>
+    </g>
+    <g id="eyes-sad" display="none">
+      <ellipse cx="40" cy="53" rx="10" ry="10" fill="white"/>
+      <ellipse cx="70" cy="53" rx="10" ry="10" fill="white"/>
+      <ellipse cx="41" cy="54" rx="6" ry="6" fill="#5C3317"/>
+      <ellipse cx="71" cy="54" rx="6" ry="6" fill="#5C3317"/>
+      <ellipse cx="41" cy="54" rx="3.5" ry="3.5" fill="#1a0a00"/>
+      <ellipse cx="71" cy="54" rx="3.5" ry="3.5" fill="#1a0a00"/>
+      <path d="M32 43 Q40 48 48 43" stroke="#5C3317" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M62 43 Q70 48 78 43" stroke="#5C3317" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    </g>
+    <g id="eyes-excited" display="none">
+      <ellipse cx="40" cy="54" rx="9.5" ry="10" fill="white"/>
+      <ellipse cx="70" cy="54" rx="9.5" ry="10" fill="white"/>
+      <ellipse cx="40" cy="55" rx="6" ry="6.5" fill="#5C3317"/>
+      <ellipse cx="70" cy="55" rx="6" ry="6.5" fill="#5C3317"/>
+      <ellipse cx="40" cy="55" rx="3.5" ry="3.5" fill="#1a0a00"/>
+      <ellipse cx="70" cy="55" rx="3.5" ry="3.5" fill="#1a0a00"/>
+      <ellipse cx="42" cy="52" rx="1.5" ry="1.5" fill="white"/>
+      <ellipse cx="72" cy="52" rx="1.5" ry="1.5" fill="white"/>
+      <path d="M31 46 Q40 38 49 46" stroke="#5C3317" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M61 46 Q70 38 79 46" stroke="#5C3317" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </g>
+    <path id="mouth-smile" d="M44 68 Q55 76 66 68" stroke="#C47A5A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path id="mouth-sad" d="M44 72 Q55 65 66 72" stroke="#C47A5A" stroke-width="2.5" fill="none" stroke-linecap="round" display="none"/>
+    <rect x="10" y="82" width="16" height="30" rx="8" fill="#1a1a2e"/>
+    <rect x="84" y="82" width="16" height="30" rx="8" fill="#1a1a2e"/>
+    <g id="sparkles" display="none">
+      <text x="3" y="30" font-size="12" fill="#FDE047">✨</text>
+      <text x="90" y="25" font-size="14" fill="#FF4D8D">⭐</text>
+    </g>
+  </symbol>
+</svg>
+
+<div class="wrap" id="quiz-screen">
+  <div class="quiz-header">
+    <div class="quiz-letter">D</div>
+    <div class="quiz-title-wrap">
+      <div class="qt">آزمون حرف D</div>
+      <div class="qs">Dog · Duck · Drum · Deer</div>
+    </div>
+    <div class="score-badge">⭐ <span id="live-score">0</span></div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-info"><span id="q-num">سوال ۱ از ۵</span><span id="q-pct">0٪</span></div>
+    <div class="prog-bar-bg"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>
+  </div>
+  <div class="buddy-row">
+    <div class="buddy-wrap"><svg id="buddy-anim"><use href="#buddy"/></svg></div>
+    <div class="speech-bubble" id="speech">بریم شروع کنیم! 🎯</div>
+  </div>
+  <div class="q-card">
+    <div class="q-num" id="q-label">سوال ۱</div>
+    <div class="q-text" id="q-text">سوال اینجاست</div>
+  </div>
+  <div class="opts-grid" id="opts-grid"></div>
+</div>
+
+<div class="wrap" id="result-screen" style="display:none">
+  <div class="result-wrap">
+    <div class="result-card">
+      <div class="result-buddy"><svg id="result-buddy"><use href="#buddy"/></svg></div>
+      <div class="result-score-circle">
+        <div class="rsc-num" id="r-score">0</div>
+        <div class="rsc-total">از ۵</div>
+      </div>
+      <div class="result-title" id="r-title">آفرین!</div>
+      <div class="result-sub" id="r-sub">عالی بود!</div>
+      <div class="stars-result" id="r-stars"></div>
+    </div>
+    <div class="review-list" id="review-list"></div>
+    <button class="btn-main" onclick="restartQuiz()">دوباره بازی کن 🔄</button>
+  </div>
+</div>
+
+<script>
+(function(){{
+  const c=document.getElementById('bg-canvas'),ctx=c.getContext('2d');
+  let W,H,dots=[];
+  function resize(){{W=c.width=window.innerWidth;H=c.height=window.innerHeight;}}
+  resize();window.addEventListener('resize',resize);
+  for(let i=0;i<50;i++)dots.push({{x:Math.random()*1400,y:Math.random()*900,r:Math.random()*2+0.5,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,ci:Math.floor(Math.random()*4)}});
+  const cols=['#F59E0B55','#F59E0B33','#7C3AED44','#FDE04744'];
+  function draw(){{ctx.clearRect(0,0,W,H);dots.forEach(d=>{{d.x+=d.vx;d.y+=d.vy;if(d.x<0||d.x>W)d.vx*=-1;if(d.y<0||d.y>H)d.vy*=-1;ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);ctx.fillStyle=cols[d.ci];ctx.fill();}});requestAnimationFrame(draw);}}
+  draw();
+}})();
+
+const QS = [{"q": "کدوم حرف \"D\" هست؟", "type": "letter", "opts": ["B", "D", "P", "Q"], "ans": 1}, {"q": "کدوم تصویر با حرف D شروع می‌شه؟", "type": "image", "opts": ["🐱 Cat", "🍎 Apple", "🦁 Lion", "🐶 Dog"], "ans": 3}, {"q": "کدوم کلمه با حرف D شروع می‌شه؟", "type": "word", "opts": ["Duck", "Bear", "Apple", "Frog"], "ans": 0}, {"q": "حرف کوچیک D کدومه؟", "type": "letter", "opts": ["b", "p", "q", "d"], "ans": 3}, {"q": "کدوم تصویر با حرف D شروع می‌شه؟", "type": "image", "opts": ["🐬 Dolphin", "🐻 Bear", "🍕 Pizza", "🐸 Frog"], "ans": 0}];
+const NUMS = ['۱','۲','۳','۴','۵'];
+
+let cur=0, score=0, answers=[];
+
+function setMood(mood){{
+  ['happy','sad','excited'].forEach(m=>document.getElementById('eyes-'+m).setAttribute('display',m===mood?'':'none'));
+  document.getElementById('mouth-smile').setAttribute('display',mood==='happy'?'':'none');
+  document.getElementById('mouth-sad').setAttribute('display',mood==='sad'?'':'none');
+  document.getElementById('sparkles').setAttribute('display',mood==='excited'?'':'none');
+}}
+function playAnim(name){{
+  const svg=document.getElementById('buddy-anim');
+  svg.classList.remove('happy','sad');void svg.offsetWidth;svg.classList.add(name);
+  setTimeout(()=>svg.classList.remove(name),700);
+}}
+function speak(text){{document.getElementById('speech').textContent=text;}}
+
+function renderQ(){{
+  const q=QS[cur];
+  const n=cur+1;
+  document.getElementById('q-label').textContent='سوال '+NUMS[cur];
+  document.getElementById('q-num').textContent='سوال '+NUMS[cur]+' از ۵';
+  document.getElementById('q-pct').textContent=Math.round(cur/5*100)+'٪';
+  document.getElementById('prog-bar').style.width=(cur/5*100)+'%';
+  document.getElementById('live-score').textContent=score;
+  document.getElementById('q-text').textContent=q.q;
+  speak('سوال '+NUMS[cur]+' آماده‌ای؟ 🎯');
+  setMood('happy');
+
+  const grid=document.getElementById('opts-grid');
+  grid.innerHTML=q.opts.map((opt,i)=>{{
+    const parts=opt.split(' ');
+    const hasEmoji=parts.length>1 && /\p{{Emoji}}/u.test(parts[0]);
+    if(hasEmoji){{
+      return `<button class="opt-btn" onclick="answer(${{i}})">
+        <span class="opt-emoji">${{parts[0]}}</span>
+        <span class="opt-label">${{parts.slice(1).join(' ')}}</span>
+      </button>`;
+    }}
+    return `<button class="opt-btn" onclick="answer(${{i}})" style="font-family:'Fredoka',cursive;font-size:32px;justify-content:center;">${{opt}}</button>`;
+  }}).join('');
+}}
+
+function answer(i){{
+  const q=QS[cur];
+  const btns=document.querySelectorAll('.opt-btn');
+  btns.forEach(b=>b.disabled=true);
+
+  answers.push({{q:q.q, chosen:i, correct:q.ans, opts:q.opts}});
+
+  if(i===q.ans){{
+    btns[i].classList.add('correct');
+    score++;
+    document.getElementById('live-score').textContent=score;
+    setMood('excited');playAnim('happy');
+    const msgs=['آفرین! درسته! 🌟','عالیه! 🎉','بِرِک! خیلی باهوشی! ✨','اوهووو! درسته! 👏'];
+    speak(msgs[Math.floor(Math.random()*msgs.length)]);
+    burst();
+  }} else {{
+    btns[i].classList.add('wrong');
+    btns[q.ans].classList.add('show-correct');
+    setMood('sad');playAnim('sad');
+    const msgs=['اشتباهه، جواب درست اینه 👆','نزدیک بود! 💪','دقت کن! 👀'];
+    speak(msgs[Math.floor(Math.random()*msgs.length)]);
+  }}
+
+  setTimeout(()=>{{
+    cur++;
+    if(cur>=QS.length) showResult();
+    else renderQ();
+  }}, i===q.ans ? 700 : 1100);
+}}
+
+function showResult(){{
+  document.getElementById('quiz-screen').style.display='none';
+  document.getElementById('result-screen').style.display='flex';
+  document.getElementById('prog-bar').style.width='100%';
+
+  const r=document.getElementById('r-score');
+  r.textContent=score;
+
+  // عنوان و پیام
+  let title,sub,stars;
+  if(score===5){{title='عالی! نابغه‌ای! 🏆';sub='همه سوال‌ها رو درست جواب دادی!';stars='⭐⭐⭐';setMood('excited');}}
+  else if(score>=3){{title='آفرین! خوب بود! 🌟';sub='کمی تمرین کن، می‌شی عالی!';stars='⭐⭐';setMood('happy');}}
+  else{{title='تلاش کن! 💪';sub='دوباره بازی کن بهتر می‌شی!';stars='⭐';setMood('sad');}}
+
+  document.getElementById('r-title').textContent=title;
+  document.getElementById('r-sub').textContent=sub;
+  document.getElementById('r-stars').textContent=stars;
+
+  // review
+  const rv=document.getElementById('review-list');
+  rv.innerHTML=answers.map((a,i)=>{{
+    const ok=a.chosen===a.correct;
+    return `<div class="review-item">
+      <span class="ri-icon">${{ok?'✅':'❌'}}</span>
+      <div class="ri-text">
+        <div class="ri-q">سوال ${{NUMS[i]}}: ${{a.q}}</div>
+        <div class="ri-a">جواب شما: ${{a.opts[a.chosen]}}</div>
+        ${{!ok?`<div class="ri-correct">جواب درست: ${{a.opts[a.correct]}}</div>`:''}}
+      </div>
+    </div>`;
+  }}).join('');
+
+  // postMessage به اپ
+  window.parent.postMessage({{type:'game-score',score:score,stars:score>=3?score-2:1,letter:'D',quizType:'quiz'}},'*');
+  burst(score*2);
+}}
+
+function restartQuiz(){{
+  cur=0;score=0;answers=[];
+  document.getElementById('quiz-screen').style.display='flex';
+  document.getElementById('result-screen').style.display='none';
+  renderQ();
+}}
+
+function burst(){{
+  const icons=['⭐','🌟','✨','💫','🎉'];
+  for(let i=0;i<5;i++){{
+    const p=document.createElement('div');p.className='particle';
+    p.textContent=icons[Math.floor(Math.random()*icons.length)];
+    p.style.left=Math.random()*80+10+'vw';p.style.top=Math.random()*60+10+'vh';
+    p.style.animationDelay=(i*.1)+'s';document.body.appendChild(p);
+    setTimeout(()=>p.remove(),1500);
+  }}
+}}
+
+renderQ();
+</script>
+</body>
+</html>
