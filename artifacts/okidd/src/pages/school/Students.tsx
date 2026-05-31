@@ -7,6 +7,10 @@ import { Plus, X } from "lucide-react";
 
 const IS = { width: "100%", background: "rgba(13,10,26,0.5)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#f8f5ff", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
 
+function Lbl({ label, children }: any) {
+  return <div style={{ marginBottom: 12 }}><label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 5 }}>{label}</label>{children}</div>;
+}
+
 export default function SchoolStudents() {
   const { user } = useAuthStore();
   const qc = useQueryClient();
@@ -24,10 +28,6 @@ export default function SchoolStudents() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["users", "student", user?.schoolId] }); setShowModal(false); setForm({ name: "", email: "", password: "", gender: "male", nationalId: "" }); showToast("دانش‌آموز با موفقیت ایجاد شد ✓"); },
     onError: (e: any) => showToast(e?.message ?? "خطا در ایجاد دانش‌آموز", "error"),
   });
-
-  function Lbl({ label, children }: any) {
-    return <div style={{ marginBottom: 12 }}><label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 5 }}>{label}</label>{children}</div>;
-  }
 
   return (
     <div>

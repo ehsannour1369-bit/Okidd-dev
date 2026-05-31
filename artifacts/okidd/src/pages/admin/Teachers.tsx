@@ -6,6 +6,10 @@ import { GraduationCap, Mail, Phone, Plus, X, School } from "lucide-react";
 
 const IS = { width: "100%", background: "rgba(13,10,26,0.5)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#f8f5ff", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
 
+function Lbl({ label, children }: any) {
+  return <div style={{ marginBottom: 12 }}><label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 5 }}>{label}</label>{children}</div>;
+}
+
 export default function AdminTeachers() {
   const qc = useQueryClient();
   const [selectedSchoolId, setSelectedSchoolId] = useState<number | null>(null);
@@ -24,10 +28,6 @@ export default function AdminTeachers() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["users", "teacher", selectedSchoolId] }); setShowModal(false); setForm({ name: "", email: "", password: "", gender: "male", phone: "" }); showToast("معلم با موفقیت ایجاد شد ✓"); },
     onError: (e: any) => showToast(e?.message ?? "خطا در ایجاد معلم", "error"),
   });
-
-  function Lbl({ label, children }: any) {
-    return <div style={{ marginBottom: 12 }}><label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 5 }}>{label}</label>{children}</div>;
-  }
 
   return (
     <div>
