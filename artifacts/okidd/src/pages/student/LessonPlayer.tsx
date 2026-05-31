@@ -223,7 +223,7 @@ export default function LessonPlayer() {
   /* ── No content ── */
   if (content.length === 0) return (
     <div style={{ ...pageWrap }}>
-      <div style={{ width: "100%", maxWidth: 900, height: "100%", display: "flex", flexDirection: "column", padding: "16px 14px", gap: 12, boxSizing: "border-box" }}>
+      <div style={{ width: "100%", maxWidth: 480, height: "100%", display: "flex", flexDirection: "column", padding: "16px 14px", gap: 12, boxSizing: "border-box" }}>
         <Header />
         <div style={{ ...GLASS, flex: 1, borderRadius: "0 0 20px 20px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, padding: 32, textAlign: "center" }}>
           <div style={{ fontSize: 56 }}>📭</div>
@@ -247,7 +247,7 @@ export default function LessonPlayer() {
   /* ── Finished ── */
   if (finished) return (
     <div style={{ ...pageWrap }}>
-      <div style={{ width: "100%", maxWidth: 900, height: "100%", display: "flex", flexDirection: "column", padding: "16px 14px", gap: 12, boxSizing: "border-box" }}>
+      <div style={{ width: "100%", maxWidth: 480, height: "100%", display: "flex", flexDirection: "column", padding: "16px 14px", gap: 12, boxSizing: "border-box" }}>
         <Header />
         <div style={{ ...GLASS, flex: 1, borderRadius: "0 0 20px 20px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, padding: 32, textAlign: "center" }}>
           <div style={{ width: 90, height: 90, borderRadius: "50%", background: `linear-gradient(135deg,${accent},${accentLight})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 44, boxShadow: `0 8px 28px ${accentBorder}` }}>🎉</div>
@@ -279,7 +279,7 @@ export default function LessonPlayer() {
 
   return (
     <div style={{ ...pageWrap }}>
-      <div style={{ width: "100%", maxWidth: 900, height: "100%", display: "flex", flexDirection: "column", padding: "14px 14px 16px", gap: 10, boxSizing: "border-box" }}>
+      <div style={{ width: "100%", maxWidth: 480, height: "100%", display: "flex", flexDirection: "column", padding: "14px 14px 16px", gap: 10, boxSizing: "border-box" }}>
 
         {/* Header card */}
         <Header />
