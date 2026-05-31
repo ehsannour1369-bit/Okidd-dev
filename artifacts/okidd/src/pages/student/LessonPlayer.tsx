@@ -2,58 +2,48 @@ import { useEffect, useState, useRef } from "react";
 import { useAuthStore } from "../../store/auth";
 import { api } from "../../lib/api";
 import { useLocation } from "wouter";
-import { ChevronLeft, ChevronRight, Film, Gamepad2, ClipboardCheck, PenLine, FileText, CheckCircle2, Trophy, AlertCircle, RotateCcw } from "lucide-react";
+import { ChevronLeft, ChevronRight, Film, Gamepad2, ClipboardCheck, PenLine, FileText, CheckCircle2, Trophy, AlertCircle, RotateCcw, X, BookOpen } from "lucide-react";
 
-const TYPE_ORDER: Record<string, number> = {
-  animation: 1,
-  video: 2,
-  game: 3,
-  quiz: 4,
-  exercise: 5,
-  pdf: 6,
-};
-
-const TYPE_LABELS: Record<string, string> = {
-  animation: "انیمیشن",
-  video: "ویدیو",
-  game: "بازی",
-  quiz: "آزمونک",
-  exercise: "تکالیف",
-  pdf: "PDF",
-};
-
-const TYPE_ICONS: Record<string, any> = {
-  animation: Film,
-  video: Film,
-  game: Gamepad2,
-  quiz: ClipboardCheck,
-  exercise: PenLine,
-  pdf: FileText,
-};
+const TYPE_ORDER: Record<string, number> = { animation: 1, video: 2, game: 3, quiz: 4, exercise: 5, pdf: 6 };
+const TYPE_LABELS: Record<string, string> = { animation: "انیمیشن", video: "ویدیو", game: "بازی", quiz: "آزمونک", exercise: "تکالیف", pdf: "PDF" };
+const TYPE_ICONS: Record<string, any> = { animation: Film, video: Film, game: Gamepad2, quiz: ClipboardCheck, exercise: PenLine, pdf: FileText };
 
 export default function LessonPlayer() {
   const { user } = useAuthStore();
-  const [location, navigate] = useLocation();
+  const [, navigate] = useLocation();
   const isGirl = user?.gender === "female";
-  const accent = isGirl ? "#ec4899" : "#7c3aed";
-  const accentLight = isGirl ? "#f472b6" : "#a855f7";
+
+  const accent      = isGirl ? "#c026d3" : "#4f46e5";
+  const accentLight = isGirl ? "#e879f9" : "#818cf8";
+  const accentBg    = isGirl ? "rgba(192,38,211,0.10)" : "rgba(79,70,229,0.10)";
+  const accentBorder= isGirl ? "rgba(192,38,211,0.25)" : "rgba(79,70,229,0.25)";
+  const pageBg      = isGirl
+    ? "linear-gradient(145deg,#fdf4ff 0%,#fce7f3 40%,#f5f0ff 100%)"
+    : "linear-gradient(145deg,#eef2ff 0%,#ede9fe 40%,#e0f2fe 100%)";
+
+  const GLASS: React.CSSProperties = {
+    background: "rgba(255,255,255,0.72)",
+    backdropFilter: "blur(20px)",
+    WebkitBackdropFilter: "blur(20px)",
+    border: "1.5px solid rgba(255,255,255,0.85)",
+    boxShadow: "0 8px 32px rgba(80,40,160,0.10)",
+  };
 
   const queryParams = new URLSearchParams(window.location.search);
-  const bookId = parseInt(queryParams.get("bookId") ?? "0");
+  const bookId      = parseInt(queryParams.get("bookId") ?? "0");
   const startLessonId = parseInt(queryParams.get("lessonId") ?? "0");
 
-  const [lessons, setLessons] = useState<any[]>([]);
+  const [lessons, setLessons]                   = useState<any[]>([]);
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
-  const [content, setContent] = useState<any[]>([]);
+  const [content, setContent]                   = useState<any[]>([]);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [finished, setFinished] = useState(false);
-  const [savedScore, setSavedScore] = useState(false);
+  const [loading, setLoading]                   = useState(true);
+  const [error, setError]                       = useState<string | null>(null);
+  const [finished, setFinished]                 = useState(false);
+  const [savedScore, setSavedScore]             = useState(false);
   const [contentCompleted, setContentCompleted] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // Fetch lessons
   useEffect(() => {
     if (!bookId) return;
     api.get(`/lessons?bookId=${bookId}`).then((data: any) => {
@@ -65,7 +55,6 @@ export default function LessonPlayer() {
 
   const currentLesson = lessons[currentLessonIndex] ?? null;
 
-  // Fetch content for current lesson
   useEffect(() => {
     if (!currentLesson?.id) return;
     setLoading(true);
@@ -74,7 +63,7 @@ export default function LessonPlayer() {
     setSavedScore(false);
     setContentCompleted(false);
     api.get(`/content?lessonId=${currentLesson.id}`).then((data: any) => {
-      const items = (data ?? []) as any[];
+      const items  = (data ?? []) as any[];
       const sorted = [...items].sort((a: any, b: any) => {
         const oa = TYPE_ORDER[a.type] ?? 99;
         const ob = TYPE_ORDER[b.type] ?? 99;
@@ -82,43 +71,30 @@ export default function LessonPlayer() {
       });
       setContent(sorted);
       setLoading(false);
-      if (sorted.length === 0) {
-        setFinished(true);
-      }
+      if (sorted.length === 0) setFinished(true);
     }).catch(() => { setError("خطا در بارگذاری محتوا"); setLoading(false); });
   }, [currentLesson?.id]);
 
-  const currentContent = content[currentContentIndex] ?? null;
-  const isLastContent = currentContentIndex >= content.length - 1;
-  const isLastLesson = currentLessonIndex >= lessons.length - 1;
+  const currentContent  = content[currentContentIndex] ?? null;
+  const isLastContent   = currentContentIndex >= content.length - 1;
+  const isLastLesson    = currentLessonIndex >= lessons.length - 1;
 
-  // Reset completion state when content changes
   useEffect(() => {
     if (!currentContent) return;
     setContentCompleted(false);
-    if (currentContent.type === "game") {
-      setSavedScore(false);
-    }
+    if (currentContent.type === "game") setSavedScore(false);
   }, [currentContent?.id, currentContent?.type, currentContentIndex]);
 
-  // postMessage listener: content signals completion
   useEffect(() => {
     const handler = (e: MessageEvent) => {
       const type = e.data?.type;
       if (type === "game-score" && typeof e.data.score === "number") {
         const score = e.data.score;
         if (user?.id) {
-          api.post("/game-scores", {
-            studentId: user.id,
-            gameType: currentContent?.id ? `content-${currentContent.id}` : "game",
-            score,
-          }).then(() => {
-            setSavedScore(true);
-            setContentCompleted(true);
-          }).catch(() => {});
+          api.post("/game-scores", { studentId: user.id, gameType: currentContent?.id ? `content-${currentContent.id}` : "game", score })
+            .then(() => { setSavedScore(true); setContentCompleted(true); }).catch(() => {});
         }
-      } else if (type === "content-complete" || type === "animation-complete" || type === "video-ended" || type === "video-complete") {
-        // Animation/video finished playing
+      } else if (["content-complete","animation-complete","video-ended","video-complete"].includes(type)) {
         setContentCompleted(true);
       }
     };
@@ -138,295 +114,245 @@ export default function LessonPlayer() {
 
   function replayContent() {
     if (iframeRef.current) {
-      const currentSrc = iframeRef.current.src;
+      const src = iframeRef.current.src;
       iframeRef.current.src = "about:blank";
-      setTimeout(() => {
-        if (iframeRef.current) {
-          iframeRef.current.src = currentSrc;
-        }
-      }, 50);
+      setTimeout(() => { if (iframeRef.current) iframeRef.current.src = src; }, 50);
     }
     setContentCompleted(false);
     setSavedScore(false);
   }
 
   function goToNextLesson() {
-    if (currentLessonIndex < lessons.length - 1) {
-      setCurrentLessonIndex(i => i + 1);
-    } else {
-      navigate("/student");
-    }
+    if (currentLessonIndex < lessons.length - 1) setCurrentLessonIndex(i => i + 1);
+    else navigate("/student");
   }
 
   function goToPrevLesson() {
-    if (currentLessonIndex > 0) {
-      setCurrentLessonIndex(i => i - 1);
-    }
+    if (currentLessonIndex > 0) setCurrentLessonIndex(i => i - 1);
   }
 
   function completeAndNext() {
     if (user?.id && currentLesson?.id) {
-      api.post("/student-progress", {
-        studentId: user.id,
-        lessonId: currentLesson.id,
-        bookId,
-        completed: true,
-        score: 10,
-      }).catch(() => {});
+      api.post("/student-progress", { studentId: user.id, lessonId: currentLesson.id, bookId, completed: true, score: 10 }).catch(() => {});
     }
     goToNextLesson();
   }
 
-  if (!bookId) {
-    return (
-      <div style={{ direction: "rtl", padding: 40, textAlign: "center", color: "#8b5cf6" }}>
-        <AlertCircle size={48} style={{ marginBottom: 16, color: "#f59e0b" }} />
-        <h2>کتابی انتخاب نشده</h2>
-        <button onClick={() => navigate("/student")} style={{ marginTop: 20, padding: "10px 20px", background: accent, border: "none", borderRadius: 10, color: "white", fontFamily: "Vazirmatn", cursor: "pointer" }}>
-          بازگشت به صفحه اصلی
+  const progress = content.length > 0 ? Math.round(((currentContentIndex + (contentCompleted ? 1 : 0)) / content.length) * 100) : 0;
+
+  /* ── Shared full-page wrapper ── */
+  const pageWrap: React.CSSProperties = {
+    direction: "rtl",
+    minHeight: "100dvh",
+    background: pageBg,
+    fontFamily: "Vazirmatn, sans-serif",
+    display: "flex",
+    flexDirection: "column",
+  };
+
+  /* ── Error / empty states ── */
+  if (!bookId) return (
+    <div style={{ ...pageWrap, alignItems: "center", justifyContent: "center", gap: 16, padding: 32, textAlign: "center" }}>
+      <AlertCircle size={52} style={{ color: "#f59e0b" }} />
+      <h2 style={{ color: accent, margin: 0 }}>کتابی انتخاب نشده</h2>
+      <button onClick={() => navigate("/student")} style={{ padding: "12px 28px", background: `linear-gradient(135deg,${accent},${accentLight})`, border: "none", borderRadius: 14, color: "white", fontFamily: "Vazirmatn", fontSize: 14, fontWeight: 700, cursor: "pointer", boxShadow: `0 4px 14px ${accentBorder}` }}>
+        بازگشت
+      </button>
+    </div>
+  );
+
+  if (loading) return (
+    <div style={{ ...pageWrap, alignItems: "center", justifyContent: "center" }}>
+      <div style={{ ...GLASS, borderRadius: 24, padding: "48px 56px", textAlign: "center" }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>⏳</div>
+        <div style={{ color: accent, fontWeight: 700, fontSize: 15 }}>در حال بارگذاری...</div>
+      </div>
+    </div>
+  );
+
+  if (error) return (
+    <div style={{ ...pageWrap, alignItems: "center", justifyContent: "center", gap: 16, padding: 32, textAlign: "center" }}>
+      <AlertCircle size={52} style={{ color: "#f87171" }} />
+      <h2 style={{ color: "#ef4444", margin: 0 }}>{error}</h2>
+      <button onClick={() => window.location.reload()} style={{ padding: "12px 28px", background: `linear-gradient(135deg,${accent},${accentLight})`, border: "none", borderRadius: 14, color: "white", fontFamily: "Vazirmatn", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+        تلاش مجدد
+      </button>
+    </div>
+  );
+
+  if (!currentLesson) return (
+    <div style={{ ...pageWrap, alignItems: "center", justifyContent: "center", gap: 12, padding: 32, textAlign: "center" }}>
+      <BookOpen size={52} style={{ color: accent }} />
+      <h2 style={{ color: accent, margin: 0 }}>درسی یافت نشد</h2>
+    </div>
+  );
+
+  /* ── Shared header ── */
+  const Header = () => (
+    <div style={{ ...GLASS, borderRadius: "20px 20px 0 0", padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexShrink: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+        <button onClick={goToPrevLesson} disabled={currentLessonIndex === 0}
+          style={{ width: 34, height: 34, borderRadius: 10, background: currentLessonIndex === 0 ? "rgba(0,0,0,0.05)" : accentBg, border: `1.5px solid ${currentLessonIndex === 0 ? "rgba(0,0,0,0.08)" : accentBorder}`, color: currentLessonIndex === 0 ? "#94a3b8" : accent, cursor: currentLessonIndex === 0 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <ChevronRight size={16} />
+        </button>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontWeight: 800, color: "#1e1b4b", fontSize: 14, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{currentLesson.title}</div>
+          <div style={{ fontSize: 11, color: "#6b7280" }}>درس {currentLessonIndex + 1} از {lessons.length}</div>
+        </div>
+        <button onClick={goToNextLesson} disabled={isLastLesson}
+          style={{ width: 34, height: 34, borderRadius: 10, background: isLastLesson ? "rgba(0,0,0,0.05)" : accentBg, border: `1.5px solid ${isLastLesson ? "rgba(0,0,0,0.08)" : accentBorder}`, color: isLastLesson ? "#94a3b8" : accent, cursor: isLastLesson ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <ChevronLeft size={16} />
         </button>
       </div>
-    );
-  }
+      <button onClick={() => navigate("/student")}
+        style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(239,68,68,0.08)", border: "1.5px solid rgba(239,68,68,0.2)", color: "#ef4444", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <X size={16} />
+      </button>
+    </div>
+  );
 
-  if (loading) {
-    return (
-      <div style={{ direction: "rtl", display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", color: "#8b5cf6" }}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 32, marginBottom: 12 }}>⏳</div>
-          <div>در حال بارگذاری محتوا...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div style={{ direction: "rtl", padding: 40, textAlign: "center", color: "#f87171" }}>
-        <AlertCircle size={48} style={{ marginBottom: 16 }} />
-        <h2>{error}</h2>
-        <button onClick={() => window.location.reload()} style={{ marginTop: 20, padding: "10px 20px", background: accent, border: "none", borderRadius: 10, color: "white", fontFamily: "Vazirmatn", cursor: "pointer" }}>
-          تلاش مجدد
-        </button>
-      </div>
-    );
-  }
-
-  if (!currentLesson) {
-    return (
-      <div style={{ direction: "rtl", padding: 40, textAlign: "center", color: "#8b5cf6" }}>
-        <AlertCircle size={48} style={{ marginBottom: 16, color: "#f59e0b" }} />
-        <h2>درسی یافت نشد</h2>
-      </div>
-    );
-  }
-
-  // No content for this lesson
-  if (content.length === 0) {
-    return (
-      <div style={{ direction: "rtl", height: "100vh", display: "flex", flexDirection: "column", background: "#0d0a1a" }}>
-        {/* Header */}
-        <div style={{ padding: "12px 20px", background: "rgba(18,14,42,0.95)", borderBottom: `1px solid ${accent}33`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div>
-            <div style={{ fontSize: 13, color: "#8b5cf6" }}>{currentLesson.title}</div>
-            <div style={{ fontSize: 11, color: "#6b5cf6" }}>درس {currentLessonIndex + 1} از {lessons.length}</div>
-          </div>
-          <button onClick={() => navigate("/student")} style={{ background: "transparent", border: `1px solid ${accent}44`, borderRadius: 8, color: accent, padding: "6px 14px", cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 13 }}>
-            ✕ بستن
-          </button>
-        </div>
-        {/* Message */}
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ textAlign: "center", background: "rgba(30,18,60,0.6)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 20, padding: 40, maxWidth: 400 }}>
-            <div style={{ fontSize: 64, marginBottom: 16 }}>📭</div>
-            <h2 style={{ color: "#f8f5ff", fontWeight: 800, marginBottom: 8 }}>این درس محتوایی ندارد</h2>
-            <p style={{ color: "#8b5cf6", fontSize: 14, marginBottom: 24 }}>درس «{currentLesson.title}» هنوز محتوایی ثبت نشده است</p>
-            <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
-              {!isLastLesson && (
-                <button onClick={goToNextLesson} style={{ padding: "10px 20px", background: `linear-gradient(135deg, ${accent}, ${accentLight})`, border: "none", borderRadius: 10, color: "white", fontFamily: "Vazirmatn", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
-                  درس بعدی ←
-                </button>
-              )}
-              <button onClick={() => navigate("/student")} style={{ padding: "10px 20px", background: "transparent", border: `1px solid ${accent}44`, borderRadius: 10, color: accent, fontFamily: "Vazirmatn", fontSize: 14, cursor: "pointer" }}>
-                بازگشت
+  /* ── No content ── */
+  if (content.length === 0) return (
+    <div style={{ ...pageWrap }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "16px 14px", gap: 12 }}>
+        <Header />
+        <div style={{ ...GLASS, flex: 1, borderRadius: "0 0 20px 20px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, padding: 32, textAlign: "center" }}>
+          <div style={{ fontSize: 56 }}>📭</div>
+          <h2 style={{ color: "#1e1b4b", fontWeight: 800, margin: 0 }}>این درس محتوایی ندارد</h2>
+          <p style={{ color: "#6b7280", fontSize: 14, margin: 0 }}>درس «{currentLesson.title}» هنوز محتوایی ثبت نشده</p>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
+            {!isLastLesson && (
+              <button onClick={goToNextLesson} style={{ padding: "11px 24px", background: `linear-gradient(135deg,${accent},${accentLight})`, border: "none", borderRadius: 14, color: "white", fontFamily: "Vazirmatn", fontSize: 14, fontWeight: 700, cursor: "pointer", boxShadow: `0 4px 14px ${accentBorder}` }}>
+                درس بعدی ←
               </button>
-            </div>
+            )}
+            <button onClick={() => navigate("/student")} style={{ padding: "11px 24px", background: accentBg, border: `1.5px solid ${accentBorder}`, borderRadius: 14, color: accent, fontFamily: "Vazirmatn", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+              بازگشت
+            </button>
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 
-  // Finished all content for this lesson
-  if (finished) {
-    return (
-      <div style={{ direction: "rtl", height: "100vh", display: "flex", flexDirection: "column", background: "#0d0a1a" }}>
-        {/* Header */}
-        <div style={{ padding: "12px 20px", background: "rgba(18,14,42,0.95)", borderBottom: `1px solid ${accent}33`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div>
-            <div style={{ fontSize: 13, color: "#8b5cf6" }}>{currentLesson.title}</div>
-            <div style={{ fontSize: 11, color: "#6b5cf6" }}>درس {currentLessonIndex + 1} از {lessons.length}</div>
+  /* ── Finished ── */
+  if (finished) return (
+    <div style={{ ...pageWrap }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "16px 14px", gap: 12 }}>
+        <Header />
+        <div style={{ ...GLASS, flex: 1, borderRadius: "0 0 20px 20px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, padding: 32, textAlign: "center" }}>
+          <div style={{ width: 90, height: 90, borderRadius: "50%", background: `linear-gradient(135deg,${accent},${accentLight})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 44, boxShadow: `0 8px 28px ${accentBorder}` }}>🎉</div>
+          <h2 style={{ color: "#1e1b4b", fontWeight: 800, fontSize: 22, margin: 0 }}>آفرین! درس تکمیل شد</h2>
+          <p style={{ color: "#6b7280", fontSize: 14, margin: 0 }}>شما {content.length} محتوا را در این درس مشاهده کردید</p>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(251,191,36,0.12)", border: "1.5px solid rgba(251,191,36,0.3)", borderRadius: 12, padding: "8px 18px", color: "#d97706", fontSize: 14, fontWeight: 700 }}>
+            <Trophy size={16} /> +۱۰ امتیاز
           </div>
-          <button onClick={() => navigate("/student")} style={{ background: "transparent", border: `1px solid ${accent}44`, borderRadius: 8, color: accent, padding: "6px 14px", cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 13 }}>
-            ✕ بستن
-          </button>
-        </div>
-        {/* Completion */}
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ textAlign: "center", background: "rgba(30,18,60,0.6)", border: `1px solid ${accent}44`, borderRadius: 20, padding: 40, maxWidth: 420, boxShadow: `0 0 40px ${accent}33` }}>
-            <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
-            <h2 style={{ color: "#f8f5ff", fontWeight: 800, marginBottom: 8 }}>آفرین! درس تکمیل شد</h2>
-            <p style={{ color: "#8b5cf6", fontSize: 14, marginBottom: 8 }}>شما {content.length} محتوا را در این درس مشاهده کردید</p>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, color: "#fbbf24", fontSize: 14, marginBottom: 24 }}>
-              <Trophy size={16} /> +۱۰ امتیاز
-            </div>
-            <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
-              {!isLastLesson && (
-                <button onClick={completeAndNext} style={{ padding: "12px 24px", background: `linear-gradient(135deg, ${accent}, ${accentLight})`, border: "none", borderRadius: 12, color: "white", fontFamily: "Vazirmatn", fontSize: 15, fontWeight: 800, cursor: "pointer", boxShadow: `0 4px 16px ${accent}66` }}>
-                  درس بعدی ←
-                </button>
-              )}
-              <button onClick={() => navigate("/student")} style={{ padding: "12px 24px", background: "transparent", border: `1px solid ${accent}44`, borderRadius: 12, color: accent, fontFamily: "Vazirmatn", fontSize: 15, cursor: "pointer" }}>
-                بازگشت به صفحه اصلی
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
+            {!isLastLesson && (
+              <button onClick={completeAndNext} style={{ padding: "13px 28px", background: `linear-gradient(135deg,${accent},${accentLight})`, border: "none", borderRadius: 16, color: "white", fontFamily: "Vazirmatn", fontSize: 15, fontWeight: 800, cursor: "pointer", boxShadow: `0 6px 20px ${accentBorder}` }}>
+                درس بعدی ←
               </button>
-            </div>
+            )}
+            <button onClick={() => navigate("/student")} style={{ padding: "13px 28px", background: accentBg, border: `1.5px solid ${accentBorder}`, borderRadius: 16, color: accent, fontFamily: "Vazirmatn", fontSize: 15, fontWeight: 600, cursor: "pointer" }}>
+              صفحه اصلی
+            </button>
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 
+  /* ── Main player ── */
   const Icon = TYPE_ICONS[currentContent.type] ?? FileText;
   const isGame = currentContent.type === "game";
-  const contentUrl = currentContent.url;
   const nextDisabled = !contentCompleted;
 
   return (
-    <div style={{ direction: "rtl", height: "100vh", display: "flex", flexDirection: "column", background: "#0d0a1a" }}>
-      {/* Header */}
-      <div style={{ padding: "10px 20px", background: "rgba(18,14,42,0.95)", borderBottom: `1px solid ${accent}33`, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <button onClick={goToPrevLesson} disabled={currentLessonIndex === 0} style={{ background: "transparent", border: `1px solid ${accent}33`, borderRadius: 8, color: currentLessonIndex === 0 ? "#4b5563" : accent, padding: "4px 8px", cursor: currentLessonIndex === 0 ? "not-allowed" : "pointer", fontFamily: "Vazirmatn", fontSize: 12 }}>
-            <ChevronRight size={16} /> قبلی
-          </button>
-          <div>
-            <div style={{ fontSize: 13, color: "#f8f5ff", fontWeight: 700 }}>{currentLesson.title}</div>
-            <div style={{ fontSize: 11, color: "#8b5cf6" }}>درس {currentLessonIndex + 1} از {lessons.length} — {TYPE_LABELS[currentContent.type]} {currentContentIndex + 1} از {content.length}</div>
-          </div>
-          <button onClick={goToNextLesson} disabled={isLastLesson} style={{ background: "transparent", border: `1px solid ${accent}33`, borderRadius: 8, color: isLastLesson ? "#4b5563" : accent, padding: "4px 8px", cursor: isLastLesson ? "not-allowed" : "pointer", fontFamily: "Vazirmatn", fontSize: 12 }}>
-            بعدی <ChevronLeft size={16} />
-          </button>
+    <div style={{ ...pageWrap }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "14px 14px 16px", gap: 10 }}>
+
+        {/* Header card */}
+        <Header />
+
+        {/* Progress bar */}
+        <div style={{ height: 6, background: "rgba(0,0,0,0.06)", borderRadius: 99, overflow: "hidden", flexShrink: 0 }}>
+          <div style={{ height: "100%", width: `${progress}%`, background: `linear-gradient(90deg,${accent},${accentLight})`, borderRadius: 99, transition: "width 0.4s ease" }} />
         </div>
-        <button onClick={() => navigate("/student")} style={{ background: "transparent", border: `1px solid ${accent}44`, borderRadius: 8, color: accent, padding: "6px 14px", cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 13 }}>
-          ✕ بستن
-        </button>
-      </div>
 
-      {/* Progress bar */}
-      <div style={{ height: 3, background: "rgba(139,92,246,0.15)", flexShrink: 0 }}>
-        <div style={{ height: "100%", width: `${((currentContentIndex + 1) / content.length) * 100}%`, background: `linear-gradient(90deg, ${accent}, ${accentLight})`, transition: "width 0.3s ease" }} />
-      </div>
-
-      {/* Content iframe */}
-      <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
-        {contentUrl ? (
-          <iframe
-            ref={iframeRef}
-            src={contentUrl}
-            style={{ width: "100%", height: "100%", border: "none", background: "#0d0a1a" }}
-            sandbox="allow-scripts allow-same-origin allow-popups"
-            allow="fullscreen"
-          />
-        ) : (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#8b5cf6" }}>
-            <div style={{ textAlign: "center" }}>
-              <AlertCircle size={48} style={{ marginBottom: 12, color: "#f59e0b" }} />
-              <div>لینک محتوا موجود نیست</div>
-            </div>
+        {/* Content type tab pills */}
+        {content.length > 1 && (
+          <div style={{ display: "flex", gap: 6, overflowX: "auto", flexShrink: 0, paddingBottom: 2 }}>
+            {content.map((c, i) => {
+              const CIcon = TYPE_ICONS[c.type] ?? FileText;
+              const active = i === currentContentIndex;
+              return (
+                <button key={c.id} onClick={() => { setCurrentContentIndex(i); setContentCompleted(false); setSavedScore(false); }}
+                  style={{ display: "flex", alignItems: "center", gap: 5, padding: "6px 12px", borderRadius: 20, border: `1.5px solid ${active ? accent : "rgba(0,0,0,0.1)"}`, background: active ? `linear-gradient(135deg,${accent},${accentLight})` : "rgba(255,255,255,0.6)", color: active ? "white" : "#6b7280", fontFamily: "Vazirmatn", fontSize: 12, fontWeight: active ? 700 : 500, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0, backdropFilter: "blur(8px)" }}>
+                  <CIcon size={12} />
+                  {TYPE_LABELS[c.type] ?? c.type}
+                </button>
+              );
+            })}
           </div>
         )}
-      </div>
 
-      {/* Bottom control bar */}
-      <div style={{ padding: "10px 20px", background: "rgba(18,14,42,0.95)", borderTop: `1px solid ${accent}33`, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, background: `${accent}22`, display: "flex", alignItems: "center", justifyContent: "center", color: accent }}>
-            <Icon size={16} />
+        {/* Player area */}
+        <div style={{ flex: 1, borderRadius: 22, overflow: "hidden", position: "relative", boxShadow: `0 8px 40px rgba(80,40,160,0.13)`, border: "2px solid rgba(255,255,255,0.9)", background: "#fff", minHeight: 200 }}>
+          {currentContent.url ? (
+            <>
+              <iframe
+                ref={iframeRef}
+                src={currentContent.url}
+                style={{ width: "100%", height: "100%", border: "none", display: "block", borderRadius: 20 }}
+                sandbox="allow-scripts allow-same-origin allow-popups"
+                allow="fullscreen"
+              />
+              {/* Completed overlay badge */}
+              {contentCompleted && (
+                <div style={{ position: "absolute", top: 12, left: 12, background: "rgba(34,197,94,0.92)", backdropFilter: "blur(8px)", borderRadius: 20, padding: "6px 14px", display: "flex", alignItems: "center", gap: 6, color: "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 700, boxShadow: "0 4px 12px rgba(34,197,94,0.3)" }}>
+                  <CheckCircle2 size={14} /> تکمیل شد
+                </div>
+              )}
+            </>
+          ) : (
+            <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, color: "#94a3b8" }}>
+              <AlertCircle size={40} style={{ color: "#f59e0b" }} />
+              <div style={{ fontSize: 14 }}>لینک محتوا موجود نیست</div>
+            </div>
+          )}
+        </div>
+
+        {/* Bottom control bar */}
+        <div style={{ ...GLASS, borderRadius: 18, padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexShrink: 0 }}>
+          {/* Content info */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: accentBg, border: `1.5px solid ${accentBorder}`, display: "flex", alignItems: "center", justifyContent: "center", color: accent, flexShrink: 0 }}>
+              <Icon size={17} />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontWeight: 700, color: "#1e1b4b", fontSize: 13, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{currentContent.title}</div>
+              <div style={{ fontSize: 11, color: "#6b7280" }}>
+                {nextDisabled && isGame  && "🎮 بازی را کامل کنید"}
+                {nextDisabled && !isGame && "⏳ در حال پخش..."}
+                {!nextDisabled && savedScore && "⭐ امتیاز ثبت شد"}
+                {!nextDisabled && !savedScore && "✅ آماده ادامه"}
+              </div>
+            </div>
           </div>
-          <div>
-            <div style={{ fontSize: 13, color: "#f8f5ff", fontWeight: 600 }}>{currentContent.title}</div>
-            <div style={{ fontSize: 11, color: "#8b5cf6" }}>{TYPE_LABELS[currentContent.type]}</div>
+
+          {/* Action buttons */}
+          <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+            <button onClick={replayContent}
+              style={{ width: 38, height: 38, borderRadius: 11, background: accentBg, border: `1.5px solid ${accentBorder}`, color: accent, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <RotateCcw size={16} />
+            </button>
+            <button onClick={advanceContent} disabled={nextDisabled}
+              style={{ height: 38, padding: "0 18px", background: nextDisabled ? "rgba(0,0,0,0.06)" : `linear-gradient(135deg,${accent},${accentLight})`, border: nextDisabled ? "1.5px solid rgba(0,0,0,0.08)" : "none", borderRadius: 11, color: nextDisabled ? "#94a3b8" : "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 700, cursor: nextDisabled ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 5, boxShadow: nextDisabled ? "none" : `0 4px 14px ${accentBorder}`, transition: "all 0.2s" }}>
+              {isLastContent ? <><CheckCircle2 size={14} /> تکمیل</> : <>بعدی <ChevronLeft size={15} /></>}
+            </button>
           </div>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {/* Completion status */}
-          {nextDisabled && isGame && (
-            <div style={{ fontSize: 12, color: "#f59e0b", fontWeight: 600 }}>
-              🎮 بازی را کامل کنید
-            </div>
-          )}
-          {nextDisabled && !isGame && (
-            <div style={{ fontSize: 12, color: "#8b5cf6", fontWeight: 600 }}>
-              ⏳ انیمیشن در حال پخش...
-            </div>
-          )}
-          {!nextDisabled && (
-            <div style={{ fontSize: 12, color: "#22c55e", fontWeight: 700, display: "flex", alignItems: "center", gap: 4 }}>
-              <CheckCircle2 size={14} /> ✅ تکمیل شد
-            </div>
-          )}
-
-          {savedScore && (
-            <div style={{ fontSize: 12, color: "#22c55e", fontWeight: 700, display: "flex", alignItems: "center", gap: 4 }}>
-              <CheckCircle2 size={14} /> ✅ امتیاز ثبت شد
-            </div>
-          )}
-
-          {/* Replay button */}
-          <button
-            onClick={replayContent}
-            style={{
-              padding: "8px 14px",
-              background: "transparent",
-              border: `1px solid ${accent}44`,
-              borderRadius: 10,
-              color: accent,
-              fontFamily: "Vazirmatn",
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-            }}
-          >
-            <RotateCcw size={14} /> دوباره
-          </button>
-
-          {/* Next button — disabled until content is consumed */}
-          <button
-            onClick={advanceContent}
-            disabled={nextDisabled}
-            style={{
-              padding: "8px 18px",
-              background: nextDisabled ? "#4b5563" : `linear-gradient(135deg, ${accent}, ${accentLight})`,
-              border: "none",
-              borderRadius: 10,
-              color: nextDisabled ? "#9ca3af" : "white",
-              fontFamily: "Vazirmatn",
-              fontSize: 14,
-              fontWeight: 700,
-              cursor: nextDisabled ? "not-allowed" : "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              opacity: nextDisabled ? 0.6 : 1,
-            }}
-          >
-            {isLastContent ? "✓ تکمیل" : "بعدی"} <ChevronLeft size={16} />
-          </button>
-        </div>
       </div>
     </div>
   );

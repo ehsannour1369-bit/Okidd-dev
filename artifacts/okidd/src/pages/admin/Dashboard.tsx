@@ -80,8 +80,8 @@ export default function AdminDashboard() {
       }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
           <h2 style={{ fontSize: 16, fontWeight: 700, color: "#f8f5ff", margin: 0 }}>آخرین تراکنش‌ها</h2>
-          <Link href="/admin/transactions">
-            <a style={{ color: "#a855f7", fontSize: 13, textDecoration: "none" }}>مشاهده همه</a>
+          <Link href="/admin/transactions" style={{ color: "#a855f7", fontSize: 13, textDecoration: "none" }}>
+            مشاهده همه
           </Link>
         </div>
         {stats.recentTransactions.length === 0 ? (

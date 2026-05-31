@@ -74,8 +74,7 @@ export default function AdminClasses() {
                         {glGrades.map(grade => {
                           const gradeClasses = classes.filter(c => c.gradeId === grade.id);
                           return gradeClasses.map(cls => (
-                            <Link key={cls.id} href={`/admin/classes/${cls.id}`}>
-                              <a style={{ textDecoration: "none" }}>
+                            <Link key={cls.id} href={`/admin/classes/${cls.id}`} style={{ textDecoration: "none" }}>
                                 <div style={{
                                   background: "rgba(30,18,60,0.85)", border: "1px solid rgba(139,92,246,0.2)",
                                   borderRadius: 14, padding: 18, transition: "all 0.3s ease", cursor: "pointer",
@@ -103,7 +102,6 @@ export default function AdminClasses() {
                                     </div>
                                   </div>
                                 </div>
-                              </a>
                             </Link>
                           ));
                         })}
