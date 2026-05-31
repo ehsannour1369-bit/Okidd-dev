@@ -31,11 +31,13 @@ export default function LessonPlayer() {
     boxShadow: "0 8px 32px rgba(80,40,160,0.10)",
   };
 
-  const queryParams = new URLSearchParams(window.location.search);
-  const bookId        = parseInt(queryParams.get("bookId") ?? "0");
-  const startLessonId = parseInt(queryParams.get("lessonId") ?? "0");
+  const queryParams    = new URLSearchParams(window.location.search);
+  const bookId         = parseInt(queryParams.get("bookId") ?? "0");
+  const startLessonId  = parseInt(queryParams.get("lessonId") ?? "0");
+  /* contentId: اگر از کتاب‌هایم آمدیم، از این محتوا شروع می‌کنیم */
+  const startContentId = parseInt(queryParams.get("contentId") ?? "0");
   /* free=1 → مرور آزاد (از کتاب‌هایم)، بدون ثبت امتیاز */
-  const freeMode      = queryParams.get("free") === "1";
+  const freeMode       = queryParams.get("free") === "1";
 
   const [lessons, setLessons]                   = useState<any[]>([]);
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
@@ -80,6 +82,11 @@ export default function LessonPlayer() {
         return oa - ob || (a.orderIndex ?? 0) - (b.orderIndex ?? 0);
       });
       setContent(sorted);
+      /* اگر contentId مشخص شده، مستقیم از آن محتوا شروع کن */
+      if (startContentId) {
+        const idx = sorted.findIndex((c: any) => c.id === startContentId);
+        if (idx >= 0) setCurrentContentIndex(idx);
+      }
       setLoading(false);
       if (sorted.length === 0) setFinished(true);
     }).catch(() => { setError("خطا در بارگذاری محتوا"); setLoading(false); });

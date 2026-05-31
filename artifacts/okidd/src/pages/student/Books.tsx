@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { BookOpen, CheckCircle2, Play, FileText, Film, Gamepad2, ClipboardCheck, PenLine, PlayCircle } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 
 const TYPE_ICONS: Record<string, any> = {
@@ -32,12 +32,18 @@ const GLASS: React.CSSProperties = {
   boxShadow: "0 8px 32px rgba(80,40,120,0.1)",
 };
 
-function ContentItem({ c, accent, accentDark, onAccess }: { c: any; accent: string; accentDark: string; onAccess: (c: any) => void }) {
+function ContentItem({ c, accent, accentDark, bookId, lessonId, navigate }: {
+  c: any; accent: string; accentDark: string;
+  bookId: number; lessonId: number;
+  navigate: (to: string) => void;
+}) {
   const Icon = TYPE_ICONS[c.type] ?? FileText;
-  const isGame = c.type === "game";
-  const url = isGame
-    ? `/student/game-player?url=${encodeURIComponent(c.url)}&contentId=${c.id}&title=${encodeURIComponent(c.title)}`
-    : c.url;
+  const label = c.type === "game" ? "بازی" : c.type === "animation" ? "پخش" : c.type === "video" ? "پخش" : "نمایش";
+
+  function openInPlayer() {
+    navigate(`/student/lesson-player?bookId=${bookId}&lessonId=${lessonId}&contentId=${c.id}&free=1`);
+  }
+
   return (
     <div style={{ ...GLASS, background: "rgba(255,255,255,0.35)", display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12 }}>
       <div style={{ width: 34, height: 34, borderRadius: 10, background: `${accent}20`, border: `1px solid ${accent}38`, display: "flex", alignItems: "center", justifyContent: "center", color: accentDark, flexShrink: 0 }}>
@@ -50,11 +56,10 @@ function ContentItem({ c, accent, accentDark, onAccess }: { c: any; accent: stri
         )}
       </div>
       {c.url && (
-        <a href={url} target={isGame ? "_self" : "_blank"} rel="noreferrer"
-          onClick={() => onAccess(c)}
-          style={{ display: "flex", alignItems: "center", gap: 4, padding: "6px 12px", background: `linear-gradient(135deg, ${accent}, ${accentDark})`, borderRadius: 8, color: "#fff", fontSize: 12, fontWeight: 700, textDecoration: "none", boxShadow: `0 3px 10px ${accent}38`, whiteSpace: "nowrap", flexShrink: 0 }}>
-          <Play size={12} /> {isGame ? "بازی" : "نمایش"}
-        </a>
+        <button onClick={openInPlayer}
+          style={{ display: "flex", alignItems: "center", gap: 4, padding: "6px 12px", background: `linear-gradient(135deg, ${accent}, ${accentDark})`, borderRadius: 8, color: "#fff", fontSize: 12, fontWeight: 700, border: "none", boxShadow: `0 3px 10px ${accent}38`, whiteSpace: "nowrap", flexShrink: 0, cursor: "pointer", fontFamily: "Vazirmatn" }}>
+          <Play size={12} /> {label}
+        </button>
       )}
     </div>
   );
@@ -68,7 +73,6 @@ export default function StudentBooks() {
   const accentDark = isGirl ? "#c026d3" : "#4f46e5";
   const [selectedBook, setSelectedBook] = useState<any>(null);
   const [selectedLesson, setSelectedLesson] = useState<number | null>(null);
-  const scoredContentRef = useRef<Set<number>>(new Set());
 
   const { data: books = [] } = useQuery<any[]>({
     queryKey: ["enrolled-books", user?.id],
@@ -92,14 +96,6 @@ export default function StudentBooks() {
   });
 
   const completedLessonIds = new Set(progress.filter(p => p.completed).map(p => p.lessonId));
-
-  // Track content access and award points (once per content per session)
-  function handleContentAccess(content: any) {
-    if (!user?.id || scoredContentRef.current.has(content.id)) return;
-    scoredContentRef.current.add(content.id);
-    const pts = CONTENT_SCORES[content.type] ?? 2;
-    api.post("/game-scores", { studentId: user.id, gameType: content.type ?? "other", score: pts }).catch(() => {});
-  }
 
   return (
     <div style={{ padding: "24px 20px", minHeight: "100vh", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
@@ -173,7 +169,8 @@ export default function StudentBooks() {
                       <div style={{ padding: "10px 12px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
                         {lessonContent.length > 0 ? (
                           lessonContent.map((c: any) => (
-                            <ContentItem key={c.id} c={c} accent={accent} accentDark={accentDark} onAccess={handleContentAccess} />
+                            <ContentItem key={c.id} c={c} accent={accent} accentDark={accentDark}
+                              bookId={selectedBook.id} lessonId={lesson.id} navigate={navigate} />
                           ))
                         ) : (
                           <div style={{ ...GLASS, background: "rgba(255,255,255,0.3)", borderRadius: 12, color: "#5b21b6", fontSize: 12, textAlign: "center", padding: "14px 0" }}>محتوایی برای این درس ثبت نشده</div>
