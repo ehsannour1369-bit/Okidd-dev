@@ -1,8 +1,93 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "../store/auth";
 import { api } from "../lib/api";
 import { Eye, EyeOff } from "lucide-react";
+
+function InteractiveEye({ isRight = false }: { isRight?: boolean }) {
+  const eyeRef = useRef<HTMLDivElement>(null);
+  const [pupil, setPupil] = useState({ x: isRight ? 10 : -10, y: -4 });
+
+  useEffect(() => {
+    const handleMove = (e: MouseEvent) => {
+      if (!eyeRef.current) return;
+      const rect = eyeRef.current.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = e.clientX - cx;
+      const dy = e.clientY - cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const maxMove = rect.width / 2 - 20;
+      if (dist < 1) { setPupil({ x: 0, y: 0 }); return; }
+      const scale = Math.min(dist, maxMove) / dist;
+      setPupil({ x: dx * scale, y: dy * scale });
+    };
+    window.addEventListener("mousemove", handleMove);
+    return () => window.removeEventListener("mousemove", handleMove);
+  }, []);
+
+  return (
+    <div
+      ref={eyeRef}
+      style={{
+        width: 88,
+        height: 88,
+        borderRadius: "50%",
+        background: "radial-gradient(circle at 38% 38%, #f5f0ff 60%, #e9d5ff 100%)",
+        border: "3px solid rgba(139,92,246,0.55)",
+        boxShadow: "0 0 0 4px rgba(124,58,237,0.18), 0 0 28px rgba(124,58,237,0.35), inset 0 2px 8px rgba(255,255,255,0.4)",
+        position: "relative",
+        overflow: "hidden",
+        flexShrink: 0,
+      }}
+    >
+      {/* Pupil */}
+      <div
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          width: 38,
+          height: 38,
+          borderRadius: "50%",
+          background: "radial-gradient(circle at 36% 32%, #3b0764 0%, #0d0a1a 70%)",
+          boxShadow: "0 3px 10px rgba(0,0,0,0.6)",
+          transform: `translate(-50%, -50%) translate(${pupil.x}px, ${pupil.y}px)`,
+          transition: "transform 0.06s ease-out",
+        }}
+      >
+        {/* Shine dot */}
+        <div style={{
+          position: "absolute",
+          top: 7,
+          left: 9,
+          width: 10,
+          height: 10,
+          borderRadius: "50%",
+          background: "rgba(255,255,255,0.75)",
+        }} />
+      </div>
+      {/* Subtle eyelid shadow at top */}
+      <div style={{
+        position: "absolute",
+        top: 0, left: 0, right: 0,
+        height: "32%",
+        background: "linear-gradient(to bottom, rgba(80,40,160,0.18), transparent)",
+        borderRadius: "50% 50% 0 0 / 30% 30% 0 0",
+        pointerEvents: "none",
+      }} />
+    </div>
+  );
+}
+
+function InteractiveEyes() {
+  return (
+    <div style={{ display: "flex", gap: 14, justifyContent: "center", alignItems: "center" }}>
+      <InteractiveEye isRight={false} />
+      <InteractiveEye isRight={true} />
+    </div>
+  );
+}
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -41,52 +126,27 @@ export default function Login() {
       background: "#0d0a1a", fontFamily: "Vazirmatn, sans-serif", direction: "rtl",
       position: "relative",
     }}>
-      <div style={{
-        position: "absolute", top: "20%", right: "20%", width: 300, height: 300,
-        borderRadius: "50%", background: "rgba(124,58,237,0.15)", filter: "blur(80px)",
-        pointerEvents: "none",
-      }} />
-      <div style={{
-        position: "absolute", bottom: "20%", left: "20%", width: 200, height: 200,
-        borderRadius: "50%", background: "rgba(168,85,247,0.1)", filter: "blur(60px)",
-        pointerEvents: "none",
-      }} />
+      {/* Ambient glow blobs */}
+      <div style={{ position: "absolute", top: "18%", right: "18%", width: 320, height: 320, borderRadius: "50%", background: "rgba(124,58,237,0.14)", filter: "blur(90px)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: "18%", left: "18%", width: 220, height: 220, borderRadius: "50%", background: "rgba(168,85,247,0.10)", filter: "blur(70px)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 400, height: 400, borderRadius: "50%", background: "rgba(109,40,217,0.06)", filter: "blur(100px)", pointerEvents: "none" }} />
 
       <div style={{
         width: "90%", maxWidth: 420,
-        background: "rgba(30,18,60,0.85)",
-        border: "1px solid rgba(139,92,246,0.3)",
-        borderRadius: 24, padding: 40,
-        backdropFilter: "blur(16px)",
-        boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(124,58,237,0.2)",
+        background: "rgba(30,18,60,0.88)",
+        border: "1px solid rgba(139,92,246,0.32)",
+        borderRadius: 28, padding: "40px 40px 36px",
+        backdropFilter: "blur(20px)",
+        boxShadow: "0 24px 64px rgba(0,0,0,0.55), 0 0 48px rgba(124,58,237,0.18)",
         position: "relative", zIndex: 1,
       }}>
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{
-            width: 72, height: 72, borderRadius: 20, margin: "0 auto 16px",
-            background: "linear-gradient(135deg, #7c3aed, #a855f7)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 32, fontWeight: 800, color: "white",
-            boxShadow: "0 8px 24px rgba(124,58,237,0.4)",
-          }}>K</div>
+        {/* Interactive Eyes logo */}
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <div style={{ marginBottom: 18 }}>
+            <InteractiveEyes />
+          </div>
           <h1 style={{ fontSize: 28, fontWeight: 800, color: "#f8f5ff", margin: 0 }}>اوکید</h1>
-          <p style={{ color: "#8b5cf6", fontSize: 14, marginTop: 6 }}>پلتفرم آموزشی هوشمند</p>
-        </div>
-
-        {/* Quick Login for Demo Testing */}
-        <div style={{ marginBottom: 16, display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
-          <button type="button" onClick={() => { setAuth({ id: 5, name: "علی محمدی", email: "student@okidd.com", role: "student", gender: "male", status: "active", schoolId: 1, branchId: null }, "demo"); navigate("/student"); }}
-            style={{ padding: "6px 12px", borderRadius: 8, background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.4)", color: "#a855f7", fontSize: 12, fontFamily: "Vazirmatn", cursor: "pointer" }}>
-            👦 دانش‌آموز (موبایل)
-          </button>
-          <button type="button" onClick={() => { setAuth({ id: 5, name: "فاطمه رضایی", email: "student2@okidd.com", role: "student", gender: "female", status: "active", schoolId: 1, branchId: null }, "demo"); navigate("/student"); }}
-            style={{ padding: "6px 12px", borderRadius: 8, background: "rgba(236,72,153,0.2)", border: "1px solid rgba(236,72,153,0.4)", color: "#ec4899", fontSize: 12, fontFamily: "Vazirmatn", cursor: "pointer" }}>
-            👧 دانش‌آموز (دختر)
-          </button>
-          <button type="button" onClick={() => { setAuth({ id: 1, name: "مدیر کل", email: "admin@okidd.com", role: "admin", status: "active", schoolId: null, branchId: null }, "demo"); navigate("/admin"); }}
-            style={{ padding: "6px 12px", borderRadius: 8, background: "rgba(245,158,11,0.2)", border: "1px solid rgba(245,158,11,0.4)", color: "#f59e0b", fontSize: 12, fontFamily: "Vazirmatn", cursor: "pointer" }}>
-            🛡️ ادمین
-          </button>
+          <p style={{ color: "#8b5cf6", fontSize: 14, marginTop: 6, marginBottom: 0 }}>پلتفرم آموزشی هوشمند</p>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -96,14 +156,14 @@ export default function Login() {
               value={username} onChange={e => setUsername(e.target.value)}
               placeholder="ایمیل یا شماره همراه" required
               style={{
-                width: "100%", background: "rgba(13,10,26,0.5)",
-                border: "1px solid rgba(139,92,246,0.3)", borderRadius: 12,
+                width: "100%", background: "rgba(13,10,26,0.55)",
+                border: "1px solid rgba(139,92,246,0.32)", borderRadius: 12,
                 color: "#f8f5ff", padding: "12px 14px", fontSize: 14,
                 fontFamily: "Vazirmatn, sans-serif", outline: "none",
-                direction: "ltr", textAlign: "left",
+                direction: "ltr", textAlign: "left", boxSizing: "border-box",
               }}
               onFocus={e => e.target.style.borderColor = "#7c3aed"}
-              onBlur={e => e.target.style.borderColor = "rgba(139,92,246,0.3)"}
+              onBlur={e => e.target.style.borderColor = "rgba(139,92,246,0.32)"}
             />
           </div>
           <div style={{ marginBottom: 24 }}>
@@ -113,13 +173,13 @@ export default function Login() {
                 type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)}
                 placeholder="کد ملی" required
                 style={{
-                  width: "100%", background: "rgba(13,10,26,0.5)",
-                  border: "1px solid rgba(139,92,246,0.3)", borderRadius: 12,
+                  width: "100%", background: "rgba(13,10,26,0.55)",
+                  border: "1px solid rgba(139,92,246,0.32)", borderRadius: 12,
                   color: "#f8f5ff", padding: "12px 40px 12px 14px", fontSize: 14,
-                  fontFamily: "Vazirmatn, sans-serif", outline: "none",
+                  fontFamily: "Vazirmatn, sans-serif", outline: "none", boxSizing: "border-box",
                 }}
                 onFocus={e => e.target.style.borderColor = "#7c3aed"}
-                onBlur={e => e.target.style.borderColor = "rgba(139,92,246,0.3)"}
+                onBlur={e => e.target.style.borderColor = "rgba(139,92,246,0.32)"}
               />
               <button
                 type="button"
@@ -149,7 +209,7 @@ export default function Login() {
             border: "none", borderRadius: 12, color: "white",
             fontSize: 16, fontWeight: 700, fontFamily: "Vazirmatn, sans-serif",
             cursor: loading ? "not-allowed" : "pointer",
-            boxShadow: "0 4px 15px rgba(124,58,237,0.4)", transition: "all 0.3s ease",
+            boxShadow: "0 4px 18px rgba(124,58,237,0.42)", transition: "all 0.3s ease",
           }}>
             {loading ? "در حال ورود..." : "ورود به سیستم"}
           </button>
