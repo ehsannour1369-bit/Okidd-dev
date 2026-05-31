@@ -2,7 +2,9 @@ import { useEffect, useState, useRef } from "react";
 import { useAuthStore } from "../../store/auth";
 import { api } from "../../lib/api";
 import { useLocation } from "wouter";
-import { ChevronLeft, ChevronRight, Film, Gamepad2, ClipboardCheck, PenLine, FileText, CheckCircle2, Trophy, AlertCircle, RotateCcw, X, BookOpen } from "lucide-react";
+import { ChevronLeft, ChevronRight, Film, Gamepad2, ClipboardCheck, PenLine, FileText, CheckCircle2, Trophy, AlertCircle, RotateCcw, X, BookOpen, Volume2, VolumeX, Maximize2 } from "lucide-react";
+
+const VIDEO_TYPES = new Set(["video", "animation"]);
 
 const TYPE_ORDER: Record<string, number> = { animation: 1, video: 2, game: 3, quiz: 4, exercise: 5, pdf: 6 };
 const TYPE_LABELS: Record<string, string> = { animation: "انیمیشن", video: "ویدیو", game: "بازی", quiz: "آزمونک", exercise: "تکالیف", pdf: "PDF" };
@@ -42,7 +44,9 @@ export default function LessonPlayer() {
   const [finished, setFinished]                 = useState(false);
   const [savedScore, setSavedScore]             = useState(false);
   const [contentCompleted, setContentCompleted] = useState(false);
+  const [muted, setMuted]                       = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const videoRef  = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     if (!bookId) return;
@@ -113,7 +117,10 @@ export default function LessonPlayer() {
   }
 
   function replayContent() {
-    if (iframeRef.current) {
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play().catch(() => {});
+    } else if (iframeRef.current) {
       const src = iframeRef.current.src;
       iframeRef.current.src = "about:blank";
       setTimeout(() => { if (iframeRef.current) iframeRef.current.src = src; }, 50);
@@ -264,7 +271,8 @@ export default function LessonPlayer() {
 
   /* ── Main player ── */
   const Icon = TYPE_ICONS[currentContent.type] ?? FileText;
-  const isGame = currentContent.type === "game";
+  const isGame    = currentContent.type === "game";
+  const isVideo   = VIDEO_TYPES.has(currentContent.type);
   const nextDisabled = !contentCompleted;
 
   return (
@@ -297,17 +305,61 @@ export default function LessonPlayer() {
         )}
 
         {/* Player area */}
-        <div style={{ flex: 1, borderRadius: 22, overflow: "hidden", position: "relative", boxShadow: `0 8px 40px rgba(80,40,160,0.13)`, border: "2px solid rgba(255,255,255,0.9)", background: "#fff", minHeight: 200 }}>
+        <div style={{ flex: 1, borderRadius: 22, overflow: "hidden", position: "relative", boxShadow: `0 8px 40px rgba(80,40,160,0.13)`, border: "2px solid rgba(255,255,255,0.9)", background: "#fff", minHeight: 200, display: "flex", flexDirection: "column" }}>
           {currentContent.url ? (
             <>
-              <iframe
-                ref={iframeRef}
-                src={currentContent.url}
-                style={{ width: "100%", height: "100%", border: "none", display: "block", borderRadius: 20 }}
-                sandbox="allow-scripts allow-same-origin allow-popups"
-                allow="fullscreen"
-              />
-              {/* Completed overlay badge */}
+              {isVideo ? (
+                /* ── Native video player (white bg, full control) ── */
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#fff", position: "relative" }}>
+                  <video
+                    ref={videoRef}
+                    key={currentContent.url}
+                    src={currentContent.url}
+                    muted={muted}
+                    playsInline
+                    onEnded={() => setContentCompleted(true)}
+                    onTimeUpdate={e => {
+                      const v = e.currentTarget;
+                      if (!v.duration) return;
+                      const pct = (v.currentTime / v.duration) * 100;
+                      const bar = document.getElementById("vid-progress");
+                      if (bar) bar.style.width = `${pct}%`;
+                    }}
+                    style={{ width: "100%", flex: 1, background: "#fff", display: "block", objectFit: "contain", minHeight: 0 }}
+                    controls={false}
+                    autoPlay
+                  />
+                  {/* Custom video controls overlay */}
+                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "linear-gradient(transparent, rgba(0,0,0,0.45))", padding: "24px 16px 12px", display: "flex", alignItems: "center", gap: 10 }}>
+                    <button onClick={() => setMuted(m => !m)}
+                      style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: 8, color: "white", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+                      {muted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+                    </button>
+                    <div style={{ flex: 1, height: 3, background: "rgba(255,255,255,0.3)", borderRadius: 99, cursor: "pointer" }}
+                      onClick={e => {
+                        const v = videoRef.current; if (!v || !v.duration) return;
+                        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                        v.currentTime = ((e.clientX - rect.left) / rect.width) * v.duration;
+                      }}>
+                      <div id="vid-progress" style={{ height: "100%", background: "white", borderRadius: 99, width: "0%", transition: "width 0.3s" }} />
+                    </div>
+                    <button onClick={() => videoRef.current?.requestFullscreen?.()}
+                      style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: 8, color: "white", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+                      <Maximize2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* ── Iframe for games / quiz / pdf ── */
+                <iframe
+                  ref={iframeRef}
+                  src={currentContent.url}
+                  style={{ width: "100%", flex: 1, border: "none", display: "block" }}
+                  sandbox="allow-scripts allow-same-origin allow-popups"
+                  allow="fullscreen"
+                />
+              )}
+              {/* Completed badge */}
               {contentCompleted && (
                 <div style={{ position: "absolute", top: 12, left: 12, background: "rgba(34,197,94,0.92)", backdropFilter: "blur(8px)", borderRadius: 20, padding: "6px 14px", display: "flex", alignItems: "center", gap: 6, color: "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 700, boxShadow: "0 4px 12px rgba(34,197,94,0.3)" }}>
                   <CheckCircle2 size={14} /> تکمیل شد
@@ -315,7 +367,7 @@ export default function LessonPlayer() {
               )}
             </>
           ) : (
-            <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, color: "#94a3b8" }}>
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, color: "#94a3b8" }}>
               <AlertCircle size={40} style={{ color: "#f59e0b" }} />
               <div style={{ fontSize: 14 }}>لینک محتوا موجود نیست</div>
             </div>
