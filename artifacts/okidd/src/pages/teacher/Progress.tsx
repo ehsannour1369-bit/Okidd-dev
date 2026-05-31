@@ -24,7 +24,7 @@ export default function TeacherProgress() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f8f5ff", marginBottom: 24 }}>نمودار پیشرفت</h1>
+      <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f8f5ff", marginBottom: 24 }}>Progress Chart</h1>
       <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
         <div style={{ flex: 1, minWidth: 200 }}>
           <label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 5 }}>انتخاب کلاس</label>

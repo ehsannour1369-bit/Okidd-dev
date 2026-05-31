@@ -5,7 +5,7 @@ import {
   LayoutDashboard, School, Users, BookOpen, Package, CreditCard,
   Bell, FileText, LogOut, GraduationCap,
   BookMarked, Home, Star, ClipboardList, GitBranch, UserCheck,
-  Menu, X,
+  Menu, X, BarChart2,
 } from "lucide-react";
 
 interface NavItem {
@@ -53,6 +53,7 @@ const branchManagerNav: NavItem[] = [
 
 const teacherNav: NavItem[] = [
   { label: "داشبورد", path: "/teacher", icon: <LayoutDashboard size={18} />, color: "#8b5cf6", bgGradient: "linear-gradient(135deg, #7c3aed, #a855f7)", emoji: "📊" },
+  { label: "Progress Chart", path: "/teacher/progress", icon: <BarChart2 size={18} />, color: "#3b82f6", bgGradient: "linear-gradient(135deg, #2563eb, #3b82f6)", emoji: "📈" },
 ];
 
 const parentNav: NavItem[] = [
