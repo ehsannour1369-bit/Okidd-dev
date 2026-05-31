@@ -106,7 +106,14 @@ export default function StudentDashboard() {
     enabled: !!user?.id,
   });
 
-  // Load persisted balloon score from DB
+  // Load total score breakdown (all activities)
+  const { data: scoreBreakdown } = useQuery<Record<string, number>>({
+    queryKey: ["score-breakdown-home", user?.id],
+    queryFn: () => api.get(`/student-scores-breakdown?studentId=${user?.id}`),
+    enabled: !!user?.id,
+  });
+
+  // Load persisted balloon score from DB (برای نمایش لحظه‌ای قبل از load breakdown)
   const { data: balloonScoreData } = useQuery<any[]>({
     queryKey: ["game-scores-balloon", user?.id],
     queryFn: () => api.get(`/game-scores?studentId=${user?.id}&gameType=balloon`),
@@ -121,9 +128,15 @@ export default function StudentDashboard() {
     }
   }, [balloonScoreData, scoreLoaded]);
 
+  /* امتیاز نمایش‌داده‌شده: اگر breakdown کل لود شد، آن را نشان بده؛ وگرنه فقط بادکنک */
+  const displayScore = scoreBreakdown?.total ?? score;
+
   const saveBalloonMut = useMutation({
     mutationFn: (pts: number) => api.post("/game-scores", { studentId: user?.id, gameType: "balloon", score: pts }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["game-scores-balloon", user?.id] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["game-scores-balloon", user?.id] });
+      qc.invalidateQueries({ queryKey: ["score-breakdown-home", user?.id] });
+    },
   });
 
   const createNotifMut = useMutation({
@@ -271,7 +284,7 @@ export default function StudentDashboard() {
         </button>
         <div style={{ background: "rgba(255,255,255,0.28)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1.5px solid rgba(255,255,255,0.6)", borderRadius: 999, padding: "8px 18px", display: "flex", alignItems: "center", gap: 6, boxShadow: "0 4px 16px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.7)" }}>
           <span style={{ fontSize: 16 }}>⭐</span>
-          <span style={{ color: "white", fontWeight: 800, fontSize: 15, textShadow: "0 1px 4px rgba(0,0,0,0.12)" }}>{score.toLocaleString("fa-IR")}</span>
+          <span style={{ color: "white", fontWeight: 800, fontSize: 15, textShadow: "0 1px 4px rgba(0,0,0,0.12)" }}>{displayScore.toLocaleString("fa-IR")}</span>
         </div>
         <button onClick={() => setMenuOpen(true)} style={{ width: 46, height: 46, borderRadius: "50%", background: "rgba(255,255,255,0.3)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1.5px solid rgba(255,255,255,0.65)", boxShadow: "0 4px 18px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "white" }}>
           <Menu size={22} />

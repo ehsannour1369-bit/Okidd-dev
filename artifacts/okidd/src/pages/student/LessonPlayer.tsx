@@ -110,12 +110,23 @@ export default function LessonPlayer() {
 
       if (msgType === "game-score" && typeof e.data.score === "number") {
         const score = e.data.score;
-        if (user?.id) {
-          api.post("/game-scores", { studentId: user.id, gameType: currentContent?.id ? `content-${currentContent.id}` : "game", score })
+        /* gameType باید دقیقاً نوع محتوا باشد تا در breakdown درست دسته‌بندی شود */
+        const gameType = currentContent?.type ?? "game";
+        if (user?.id && !freeMode) {
+          api.post("/game-scores", { studentId: user.id, gameType, score })
             .then(() => { setSavedScore(true); setContentCompleted(true); }).catch(() => {});
+        } else {
+          /* حالت آزاد: score ثبت نمی‌شود ولی UI کامل می‌شود */
+          setSavedScore(true);
+          setContentCompleted(true);
         }
       } else if (["content-complete","animation-complete","video-ended","video-complete"].includes(msgType)) {
         setContentCompleted(true);
+        /* برای کوییز و تمرین: ارسال امتیاز ثابت ۵ هنگام تکمیل */
+        const type = currentContent?.type;
+        if (!freeMode && user?.id && (type === "quiz" || type === "exercise")) {
+          api.post("/game-scores", { studentId: user.id, gameType: type, score: 5 }).catch(() => {});
+        }
       }
     };
     window.addEventListener("message", handler);
@@ -389,7 +400,13 @@ export default function LessonPlayer() {
                     src={currentContent.url}
                     muted={muted}
                     playsInline
-                    onEnded={() => setContentCompleted(true)}
+                    onEnded={() => {
+                      setContentCompleted(true);
+                      /* ذخیره امتیاز ۵ برای تماشای انیمیشن/ویدیو تا آخر */
+                      if (!freeMode && user?.id && currentContent?.type) {
+                        api.post("/game-scores", { studentId: user.id, gameType: currentContent.type, score: 5 }).catch(() => {});
+                      }
+                    }}
                     onTimeUpdate={e => {
                       const v = e.currentTarget;
                       if (!v.duration) return;
