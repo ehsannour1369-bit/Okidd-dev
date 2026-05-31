@@ -74,7 +74,15 @@ export default function AdminBranches() {
   const [classManage, setClassManage] = useState<any>(null);
   const [classTab, setClassTab] = useState<Tab>("books");
 
-  const [bForm, setBForm] = useState({ name: "", address: "" });
+  const ACADEMIC_YEARS = ["1401-1402","1402-1403","1403-1404","1404-1405","1405-1406","1406-1407"];
+  const EDUCATIONAL_LEVELS = ["پیش‌دبستانی","دبستان","متوسطه اول","متوسطه دوم","هنرستان"];
+
+  const emptyBForm = { name: "", address: "", phone: "", academicYear: "1403-1404", managerName: "", managerPhone: "", managerNationalId: "", educationalLevels: [] as string[] };
+  const [bForm, setBForm] = useState(emptyBForm);
+  const [bDuplicates, setBDuplicates] = useState<any[]>([]);
+  const [bSelectedMgrId, setBSelectedMgrId] = useState<number | null>(null);
+  const [bLoading, setBLoading] = useState(false);
+  const [bError, setBError] = useState("");
   const [glForm, setGLForm] = useState({ name: "" });
   const [grForm, setGrForm] = useState({ name: "" });
   const [clForm, setClForm] = useState({ name: "", capacity: "30" });
@@ -96,7 +104,26 @@ export default function AdminBranches() {
 
   const inv = (keys: string[][]) => keys.forEach(k => qc.invalidateQueries({ queryKey: k }));
 
-  const addBranchMut = useMutation({ mutationFn: (d: any) => api.post("/branches", { ...d, schoolId: selectedSchoolId }), onSuccess: () => { inv([["branches", String(selectedSchoolId)]]); setAddBranchOpen(false); setBForm({ name: "", address: "" }); showToast("شعبه با موفقیت ایجاد شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا در ایجاد شعبه", "error") });
+  async function handleAddBranch() {
+    if (!bForm.name) { setBError("نام شعبه الزامی است"); return; }
+    setBLoading(true); setBError("");
+    try {
+      const payload: any = { ...bForm, schoolId: selectedSchoolId };
+      if (bSelectedMgrId && bSelectedMgrId > 0) payload.selectedManagerUserId = bSelectedMgrId;
+      const result: any = await api.post("/branches", payload);
+      if (result?.status === "duplicate_found") {
+        setBDuplicates(result.candidates);
+      } else {
+        inv([["branches", String(selectedSchoolId)], ["schools"]]);
+        setAddBranchOpen(false);
+        setBForm(emptyBForm); setBDuplicates([]); setBSelectedMgrId(null);
+        showToast("شعبه با موفقیت ایجاد شد ✓");
+      }
+    } catch (e: any) { setBError(e.message ?? "خطا در ثبت شعبه"); }
+    finally { setBLoading(false); }
+  }
+
+  const addBranchMut = useMutation({ mutationFn: (d: any) => api.post("/branches", { ...d, schoolId: selectedSchoolId }), onSuccess: () => { inv([["branches", String(selectedSchoolId)]]); setAddBranchOpen(false); setBForm(emptyBForm); showToast("شعبه با موفقیت ایجاد شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا در ایجاد شعبه", "error") });
   const delBranchMut = useMutation({ mutationFn: (id: number) => api.delete(`/branches/${id}`), onSuccess: () => { inv([["branches", String(selectedSchoolId)]]); showToast("شعبه حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
   const addGLMut = useMutation({ mutationFn: (d: any) => api.post("/grade-levels", d), onSuccess: () => { inv([["grade-levels"]]); setAddGLFor(null); setGLForm({ name: "" }); showToast("مقطع تحصیلی اضافه شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا", "error") });
   const delGLMut = useMutation({ mutationFn: (id: number) => api.delete(`/grade-levels/${id}`), onSuccess: () => { inv([["grade-levels"]]); showToast("مقطع حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
@@ -165,7 +192,7 @@ export default function AdminBranches() {
         <>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
             <h2 style={{ color: "#f8f5ff", fontSize: 16, margin: 0 }}>شعبه‌ها</h2>
-            <button onClick={() => { setBForm({ name: "", address: "" }); setAddBranchOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "linear-gradient(135deg, #7c3aed, #a855f7)", border: "none", borderRadius: 10, color: "white", fontSize: 13, fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>
+            <button onClick={() => { setBForm(emptyBForm); setBDuplicates([]); setBSelectedMgrId(null); setBError(""); setAddBranchOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "linear-gradient(135deg, #7c3aed, #a855f7)", border: "none", borderRadius: 10, color: "white", fontSize: 13, fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>
               <Plus size={14} /> افزودن شعبه
             </button>
           </div>
@@ -265,10 +292,80 @@ export default function AdminBranches() {
 
       {/* Add Branch Modal */}
       {addBranchOpen && (
-        <Modal title="افزودن شعبه" onClose={() => setAddBranchOpen(false)}>
-          <Lbl label="نام شعبه"><input value={bForm.name} onChange={e => setBForm({ ...bForm, name: e.target.value })} style={IS} /></Lbl>
-          <Lbl label="آدرس"><input value={bForm.address} onChange={e => setBForm({ ...bForm, address: e.target.value })} style={IS} /></Lbl>
-          <SaveBtn onClick={() => addBranchMut.mutate(bForm)} disabled={!bForm.name} />
+        <Modal title={`افزودن شعبه — ${schools.find((s: any) => s.id === selectedSchoolId)?.name ?? ""}`} onClose={() => { setAddBranchOpen(false); setBForm(emptyBForm); setBDuplicates([]); setBSelectedMgrId(null); setBError(""); }}>
+
+          {/* Duplicate user warning */}
+          {bDuplicates.length > 0 && (
+            <div style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 12, padding: 14, marginBottom: 14 }}>
+              <p style={{ color: "#fbbf24", fontSize: 13, fontWeight: 600, margin: "0 0 8px" }}>⚠️ کاربری با این شماره موبایل یا کد ملی در سیستم وجود دارد.</p>
+              <p style={{ color: "#c4b5fd", fontSize: 12, margin: "0 0 10px" }}>یک کاربر انتخاب کنید یا کاربر جدید بسازید:</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 10 }}>
+                {bDuplicates.map((u: any) => (
+                  <button key={u.id} onClick={() => { setBSelectedMgrId(u.id); setBDuplicates([]); setBForm(prev => ({ ...prev, managerName: u.name, managerPhone: u.phone ?? "", managerNationalId: u.nationalId ?? "" })); }}
+                    style={{ background: "rgba(30,18,60,0.8)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, padding: "8px 12px", cursor: "pointer", textAlign: "right", fontFamily: "Vazirmatn", color: "#f8f5ff" }}>
+                    <div style={{ fontSize: 14, fontWeight: 600 }}>{u.name}</div>
+                    <div style={{ fontSize: 12, color: "#a78bfa", marginTop: 2, display: "flex", gap: 10 }}>
+                      {u.phone && <span>📱 {u.phone}</span>}
+                      {u.nationalId && <span>🪪 {u.nationalId}</span>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+              <button onClick={() => { setBDuplicates([]); setBSelectedMgrId(-1); }} style={{ width: "100%", padding: "8px 0", background: "transparent", border: "1px dashed rgba(139,92,246,0.4)", borderRadius: 10, color: "#a78bfa", fontFamily: "Vazirmatn", fontSize: 13, cursor: "pointer" }}>+ ساخت کاربر جدید</button>
+            </div>
+          )}
+
+          {bSelectedMgrId && bSelectedMgrId > 0 && (
+            <div style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.3)", borderRadius: 10, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#4ade80" }}>
+              ✓ کاربر موجود انتخاب شد — پنل جدید ساخته نمی‌شود
+            </div>
+          )}
+
+          {/* Branch info */}
+          <div style={{ borderBottom: "1px solid rgba(139,92,246,0.2)", paddingBottom: 6, marginBottom: 12 }}>
+            <span style={{ color: "#a78bfa", fontSize: 13, fontWeight: 700 }}>اطلاعات شعبه</span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 14px" }}>
+            <div style={{ gridColumn: "1/-1" }}>
+              <Lbl label="نام شعبه *"><input value={bForm.name} onChange={e => setBForm({ ...bForm, name: e.target.value })} placeholder="مثال: شعبه مرکزی" style={IS} /></Lbl>
+            </div>
+            <Lbl label="آدرس"><input value={bForm.address} onChange={e => setBForm({ ...bForm, address: e.target.value })} placeholder="آدرس کامل" style={IS} /></Lbl>
+            <Lbl label="شماره تماس"><input value={bForm.phone} onChange={e => setBForm({ ...bForm, phone: e.target.value })} type="tel" placeholder="۰۲۱..." style={IS} /></Lbl>
+            <div style={{ gridColumn: "1/-1" }}>
+              <Lbl label="سال تحصیلی">
+                <select value={bForm.academicYear} onChange={e => setBForm({ ...bForm, academicYear: e.target.value })} style={{ ...IS, appearance: "none", cursor: "pointer" }}>
+                  {ACADEMIC_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                </select>
+              </Lbl>
+            </div>
+            <div style={{ gridColumn: "1/-1" }}>
+              <Lbl label="مقاطع آموزشی">
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 2 }}>
+                  {EDUCATIONAL_LEVELS.map(lvl => (
+                    <button key={lvl} type="button" onClick={() => setBForm(prev => ({ ...prev, educationalLevels: prev.educationalLevels.includes(lvl) ? prev.educationalLevels.filter(l => l !== lvl) : [...prev.educationalLevels, lvl] }))}
+                      style={{ padding: "5px 12px", borderRadius: 20, fontSize: 13, cursor: "pointer", fontFamily: "Vazirmatn", background: bForm.educationalLevels.includes(lvl) ? "rgba(124,58,237,0.35)" : "rgba(13,10,26,0.5)", border: `1px solid ${bForm.educationalLevels.includes(lvl) ? "#7c3aed" : "rgba(139,92,246,0.3)"}`, color: bForm.educationalLevels.includes(lvl) ? "#e9d5ff" : "#a78bfa", fontWeight: bForm.educationalLevels.includes(lvl) ? 600 : 400 }}>
+                      {lvl}
+                    </button>
+                  ))}
+                </div>
+              </Lbl>
+            </div>
+          </div>
+
+          {/* Manager info */}
+          <div style={{ borderBottom: "1px solid rgba(139,92,246,0.2)", paddingBottom: 6, marginBottom: 12, marginTop: 4 }}>
+            <span style={{ color: "#a78bfa", fontSize: 13, fontWeight: 700 }}>اطلاعات مدیر شعبه</span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 14px" }}>
+            <div style={{ gridColumn: "1/-1" }}>
+              <Lbl label="نام مدیر"><input value={bForm.managerName} onChange={e => setBForm({ ...bForm, managerName: e.target.value })} placeholder="نام و نام خانوادگی" style={IS} /></Lbl>
+            </div>
+            <Lbl label="شماره همراه مدیر"><input value={bForm.managerPhone} onChange={e => setBForm({ ...bForm, managerPhone: e.target.value })} type="tel" placeholder="09..." style={IS} /></Lbl>
+            <Lbl label="کد ملی مدیر"><input value={bForm.managerNationalId} onChange={e => setBForm({ ...bForm, managerNationalId: e.target.value })} placeholder="کد ملی ۱۰ رقمی" style={IS} /></Lbl>
+          </div>
+
+          {bError && <p style={{ color: "#f87171", fontSize: 13, margin: "8px 0" }}>{bError}</p>}
+          <SaveBtn onClick={handleAddBranch} disabled={bLoading || !bForm.name} label={bLoading ? "در حال ثبت..." : "ثبت شعبه"} />
         </Modal>
       )}
 
