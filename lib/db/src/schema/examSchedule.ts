@@ -10,6 +10,9 @@ export const examScheduleTable = pgTable("exam_schedule", {
   examDate: text("exam_date").notNull(),
   examPages: text("exam_pages"),
   examTime: text("exam_time"),
+  examType: text("exam_type"),
+  examMode: text("exam_mode"),
+  description: text("description"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

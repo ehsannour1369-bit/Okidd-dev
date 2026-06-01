@@ -1,7 +1,22 @@
 import React, { useState, useRef } from "react";
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { api } from "../lib/api";
-import { ChevronRight, ChevronLeft, X, BookOpen, Clock, Calendar } from "lucide-react";
+import { ChevronRight, ChevronLeft, X, BookOpen, Clock, Calendar, Tag, Monitor, FileText, AlignLeft } from "lucide-react";
+
+/* ── exam type/mode color maps ── */
+const EXAM_TYPE_COLORS: Record<string, { bg: string; text: string }> = {
+  "میان‌ترم":    { bg: "rgba(99,102,241,0.13)",  text: "#4338ca" },
+  "پایان‌ترم":   { bg: "rgba(239,68,68,0.12)",   text: "#dc2626" },
+  "کوییز":       { bg: "rgba(245,158,11,0.13)",  text: "#d97706" },
+  "آزمایشگاهی":  { bg: "rgba(16,185,129,0.12)",  text: "#059669" },
+  "عملی":        { bg: "rgba(14,165,233,0.12)",  text: "#0284c7" },
+  "شفاهی":       { bg: "rgba(168,85,247,0.12)",  text: "#7c3aed" },
+};
+const EXAM_MODE_COLORS: Record<string, { bg: string; text: string }> = {
+  "حضوری":  { bg: "rgba(16,185,129,0.12)",  text: "#059669" },
+  "مجازی":  { bg: "rgba(99,102,241,0.12)",  text: "#4338ca" },
+  "ترکیبی": { bg: "rgba(245,158,11,0.12)",  text: "#d97706" },
+};
 
 /* ── constants ── */
 const DAY_SHORT = ["ش", "ی", "د", "س", "چ", "پ", "ج"];
@@ -281,6 +296,28 @@ export default function ParentExamCalendar({ children, TEXT, TEXT2, accent, acce
             </div>
           )}
 
+          {/* Type + Mode badges row */}
+          {(popover.event.exam.examType || popover.event.exam.examMode) && (
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+              {popover.event.exam.examType && (() => {
+                const c = EXAM_TYPE_COLORS[popover.event.exam.examType] ?? { bg: "rgba(99,102,241,0.12)", text: "#4338ca" };
+                return (
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", background: c.bg, borderRadius: 999, fontSize: 12, fontWeight: 700, color: c.text }}>
+                    <Tag size={10} /> {popover.event.exam.examType}
+                  </span>
+                );
+              })()}
+              {popover.event.exam.examMode && (() => {
+                const c = EXAM_MODE_COLORS[popover.event.exam.examMode] ?? { bg: "rgba(16,185,129,0.12)", text: "#059669" };
+                return (
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", background: c.bg, borderRadius: 999, fontSize: 12, fontWeight: 700, color: c.text }}>
+                    <Monitor size={10} /> {popover.event.exam.examMode}
+                  </span>
+                );
+              })()}
+            </div>
+          )}
+
           {/* Details */}
           <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
             <PopRow icon={<Calendar size={13} color={popover.event.color} />} color={popover.event.color}>
@@ -294,8 +331,13 @@ export default function ParentExamCalendar({ children, TEXT, TEXT2, accent, acce
               </PopRow>
             )}
             {popover.event.exam.examPages && (
-              <PopRow icon={<BookOpen size={13} color={popover.event.color} />} color={popover.event.color}>
+              <PopRow icon={<FileText size={13} color={popover.event.color} />} color={popover.event.color}>
                 صفحات {popover.event.exam.examPages}
+              </PopRow>
+            )}
+            {popover.event.exam.description && (
+              <PopRow icon={<AlignLeft size={13} color={popover.event.color} />} color={popover.event.color}>
+                {popover.event.exam.description}
               </PopRow>
             )}
           </div>
