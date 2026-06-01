@@ -2,30 +2,36 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { Link } from "wouter";
-import { School, BookMarked, Users, GraduationCap, Upload, ImageIcon, Trash2 } from "lucide-react";
-import { useRef, useState } from "react";
+import { School, BookMarked, Users, GraduationCap, Upload, ImageIcon, Trash2, LayoutDashboard } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
 
 interface SchoolStats { totalBranches: number; totalClasses: number; totalTeachers: number; totalStudents: number; totalBooks: number; }
 
-function StatCard({ label, value, icon, color, link }: { label: string; value: number; icon: any; color: string; link?: string; }) {
-  const inner = (
-    <div style={{
-      background: "rgba(30,18,60,0.85)", border: `1px solid ${color}33`, borderRadius: 16,
-      aspectRatio: "1/1", display: "flex", flexDirection: "column", alignItems: "center",
-      justifyContent: "center", transition: "all 0.3s ease", padding: 20, textAlign: "center",
-      cursor: link ? "pointer" : "default",
-    }}
-      onMouseOver={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = color; el.style.boxShadow = `0 0 24px ${color}44`; el.style.transform = "translateY(-3px)"; }}
-      onMouseOut={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = `${color}33`; el.style.boxShadow = "none"; el.style.transform = "translateY(0)"; }}
-    >
-      <div style={{ width: 52, height: 52, borderRadius: 14, background: `${color}22`, border: `1px solid ${color}44`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12, color }}>{icon}</div>
-      <div style={{ fontSize: 28, fontWeight: 800, color: "#f8f5ff", marginBottom: 4 }}>{value.toLocaleString("fa-IR")}</div>
-      <div style={{ fontSize: 13, color: "#c4b5fd" }}>{label}</div>
-    </div>
-  );
-  if (link) return <Link href={link} style={{ textDecoration: "none" }}>{inner}</Link>;
-  return inner;
+const P = "#6366f1";   // indigo
+const PD = "#4f46e5";  // indigo-dark
+const S = "#3b82f6";   // blue
+const SD = "#2563eb";  // blue-dark
+
+function glassCard(color: string, dark: string, extra?: React.CSSProperties): React.CSSProperties {
+  return {
+    background: `linear-gradient(145deg, ${color}2e, ${dark}18)`,
+    backdropFilter: "blur(18px)",
+    border: `1.5px solid ${color}55`,
+    borderRadius: 22,
+    position: "relative",
+    overflow: "hidden",
+    boxShadow: `0 8px 32px rgba(0,0,0,0.25), 0 0 0 1px ${color}18`,
+    transition: "all 0.25s cubic-bezier(0.4,0,0.2,1)",
+    ...extra,
+  };
 }
+
+const STAT_CARDS = [
+  { label: "شعبه‌ها", key: "totalBranches", icon: School, color: "#6366f1", dark: "#4f46e5", link: "/school/branches" },
+  { label: "کلاس‌ها", key: "totalClasses", icon: BookMarked, color: "#3b82f6", dark: "#2563eb", link: "/school/classes" },
+  { label: "معلمان", key: "totalTeachers", icon: GraduationCap, color: "#f59e0b", dark: "#d97706", link: "/school/teachers" },
+  { label: "دانش‌آموزان", key: "totalStudents", icon: Users, color: "#22c55e", dark: "#16a34a", link: "/school/students" },
+];
 
 export default function SchoolDashboard() {
   const { user } = useAuthStore();
@@ -33,6 +39,8 @@ export default function SchoolDashboard() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setMounted(true), 80); return () => clearTimeout(t); }, []);
 
   const { data, isLoading } = useQuery<SchoolStats>({
     queryKey: ["school-stats", user?.schoolId],
@@ -51,8 +59,7 @@ export default function SchoolDashboard() {
   async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !user?.schoolId) return;
-    setUploading(true);
-    setMsg(null);
+    setUploading(true); setMsg(null);
     try {
       const form = new FormData();
       form.append("file", file);
@@ -61,85 +68,109 @@ export default function SchoolDashboard() {
       await qc.invalidateQueries({ queryKey: ["school-info", user.schoolId] });
       await qc.invalidateQueries({ queryKey: ["school-info-student"] });
       setMsg("لوگو با موفقیت ذخیره شد");
-    } catch {
-      setMsg("خطا در آپلود لوگو");
-    } finally {
-      setUploading(false);
-      if (fileRef.current) fileRef.current.value = "";
-    }
+    } catch { setMsg("خطا در آپلود لوگو"); }
+    finally { setUploading(false); if (fileRef.current) fileRef.current.value = ""; }
   }
 
   async function handleLogoRemove() {
     if (!user?.schoolId) return;
-    setUploading(true);
-    setMsg(null);
+    setUploading(true); setMsg(null);
     try {
       await api.patch(`/schools/${user.schoolId}/logo`, { logoUrl: null });
       await qc.invalidateQueries({ queryKey: ["school-info", user.schoolId] });
       await qc.invalidateQueries({ queryKey: ["school-info-student"] });
       setMsg("لوگو حذف شد");
-    } catch {
-      setMsg("خطا در حذف لوگو");
-    } finally {
-      setUploading(false);
-    }
+    } catch { setMsg("خطا در حذف لوگو"); }
+    finally { setUploading(false); }
+  }
+
+  function cardAnim(idx: number): React.CSSProperties {
+    if (!mounted) return { opacity: 0, transform: "translateY(22px)" };
+    return { animation: `dashUp 0.5s cubic-bezier(0.16,1,0.3,1) ${idx * 0.07}s both` };
   }
 
   return (
-    <div>
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: "#f8f5ff", margin: 0 }}>داشبورد مدرسه</h1>
-        <p style={{ color: "#8b5cf6", fontSize: 14, marginTop: 4 }}>نمای کلی مدرسه</p>
-      </div>
+    <div style={{ margin: -24, padding: 24, minHeight: "calc(100vh - 60px)", background: "linear-gradient(160deg,#040d2a 0%,#07102a 40%,#040d1a 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", position: "relative", overflow: "hidden" }}>
 
-      {/* ── Logo upload section ── */}
-      <div style={{ background: "rgba(30,18,60,0.85)", border: "1px solid #7c3aed44", borderRadius: 20, padding: "24px 28px", marginBottom: 28, display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
-        {/* Logo preview */}
-        <div style={{ width: 100, height: 100, borderRadius: 18, border: "2px dashed #7c3aed66", background: "rgba(124,58,237,0.08)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
-          {schoolInfo?.logoUrl
-            ? <img src={schoolInfo.logoUrl} alt="لوگو" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-            : <ImageIcon size={36} color="#7c3aed66" />}
-        </div>
+      {/* Blobs */}
+      <div style={{ position: "absolute", top: "-15%", right: "-10%", width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle,#6366f128 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat1 9s ease-in-out infinite" }} />
+      <div style={{ position: "absolute", bottom: "5%", left: "-8%", width: 320, height: 320, borderRadius: "50%", background: "radial-gradient(circle,#3b82f622 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat2 12s ease-in-out infinite" }} />
+      <div style={{ position: "absolute", top: "40%", left: "40%", width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle,#818cf818 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat1 15s ease-in-out infinite reverse" }} />
 
-        <div style={{ flex: 1, minWidth: 200 }}>
-          <div style={{ fontWeight: 700, fontSize: 16, color: "#f8f5ff", marginBottom: 6 }}>لوگوی مدرسه</div>
-          <div style={{ fontSize: 13, color: "#a78bfa", marginBottom: 14 }}>
-            این لوگو در داشبورد دانش‌آموزان نمایش داده می‌شود. فرمت‌های PNG، JPG و SVG پشتیبانی می‌شوند.
-          </div>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-            <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleLogoUpload} />
-            <button
-              onClick={() => fileRef.current?.click()}
-              disabled={uploading}
-              style={{ display: "flex", alignItems: "center", gap: 8, padding: "9px 20px", background: "linear-gradient(135deg,#7c3aed,#6d28d9)", border: "none", borderRadius: 12, color: "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 700, cursor: uploading ? "not-allowed" : "pointer", opacity: uploading ? 0.6 : 1, boxShadow: "0 4px 14px #7c3aed44" }}>
-              <Upload size={15} />
-              {uploading ? "در حال آپلود..." : schoolInfo?.logoUrl ? "تغییر لوگو" : "آپلود لوگو"}
-            </button>
-            {schoolInfo?.logoUrl && (
-              <button
-                onClick={handleLogoRemove}
-                disabled={uploading}
-                style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 12, color: "#f87171", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 600, cursor: uploading ? "not-allowed" : "pointer" }}>
-                <Trash2 size={14} /> حذف
-              </button>
-            )}
-          </div>
-          {msg && (
-            <div style={{ marginTop: 10, fontSize: 12, color: msg.includes("خطا") ? "#f87171" : "#34d399", fontWeight: 600 }}>
-              {msg}
+      <div style={{ position: "relative", zIndex: 1 }}>
+        {/* Header */}
+        <div style={{ ...cardAnim(0), marginBottom: 28 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 48, height: 48, borderRadius: 16, background: `linear-gradient(135deg, ${P}, ${S})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 6px 20px ${P}44` }}>
+              <LayoutDashboard size={24} color="white" />
             </div>
-          )}
+            <div>
+              <h1 style={{ fontSize: 22, fontWeight: 900, color: "#eef2ff", margin: 0 }}>داشبورد مدرسه</h1>
+              <p style={{ color: `${P}cc`, fontSize: 13, margin: 0 }}>نمای کلی مدرسه</p>
+            </div>
+          </div>
         </div>
+
+        {/* Logo upload */}
+        <div style={{ ...glassCard(P, PD, { padding: "22px 24px", marginBottom: 24, display: "flex", alignItems: "center", gap: 22, flexWrap: "wrap" }), ...cardAnim(1) }}>
+          <div style={{ width: 90, height: 90, borderRadius: 16, border: `2px dashed ${P}55`, background: `${P}10`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
+            {schoolInfo?.logoUrl
+              ? <img src={schoolInfo.logoUrl} alt="لوگو" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+              : <ImageIcon size={34} color={`${P}66`} />}
+          </div>
+          <div style={{ flex: 1, minWidth: 180 }}>
+            <div style={{ fontWeight: 800, fontSize: 15, color: "#eef2ff", marginBottom: 5 }}>لوگوی مدرسه</div>
+            <div style={{ fontSize: 12, color: `${P}bb`, marginBottom: 14 }}>این لوگو در داشبورد دانش‌آموزان نمایش داده می‌شود.</div>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+              <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleLogoUpload} />
+              <button onClick={() => fileRef.current?.click()} disabled={uploading}
+                style={{ display: "flex", alignItems: "center", gap: 8, padding: "9px 18px", background: `linear-gradient(135deg,${P},${S})`, border: "none", borderRadius: 12, color: "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 700, cursor: uploading ? "not-allowed" : "pointer", opacity: uploading ? 0.6 : 1, boxShadow: `0 4px 14px ${P}44` }}>
+                <Upload size={14} /> {uploading ? "در حال آپلود..." : schoolInfo?.logoUrl ? "تغییر لوگو" : "آپلود لوگو"}
+              </button>
+              {schoolInfo?.logoUrl && (
+                <button onClick={handleLogoRemove} disabled={uploading}
+                  style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 14px", background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 12, color: "#f87171", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 600, cursor: uploading ? "not-allowed" : "pointer" }}>
+                  <Trash2 size={14} /> حذف
+                </button>
+              )}
+            </div>
+            {msg && <div style={{ marginTop: 8, fontSize: 12, color: msg.includes("خطا") ? "#f87171" : "#34d399", fontWeight: 700 }}>{msg}</div>}
+          </div>
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${P}80, ${P}20)`, borderRadius: "0 0 22px 22px" }} />
+        </div>
+
+        {/* Stats grid */}
+        {isLoading ? (
+          <div style={{ color: `${P}99`, textAlign: "center", padding: 60 }}>در حال بارگذاری...</div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 14 }}>
+            {STAT_CARDS.map((sc, idx) => {
+              const Icon = sc.icon;
+              const inner = (
+                <div
+                  style={{ ...glassCard(sc.color, sc.dark, { padding: "22px 16px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", aspectRatio: "1/1", cursor: "pointer" }), ...cardAnim(idx + 2) }}
+                  onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-5px)"; el.style.boxShadow = `0 18px 48px ${sc.color}30`; }}
+                  onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = `0 8px 32px rgba(0,0,0,0.25), 0 0 0 1px ${sc.color}18`; }}
+                >
+                  <div style={{ width: 52, height: 52, borderRadius: 16, background: `linear-gradient(135deg, ${sc.color}50, ${sc.dark}38)`, border: `1.5px solid ${sc.color}60`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12, boxShadow: `0 4px 14px ${sc.color}30` }}>
+                    <Icon size={24} color={sc.color} />
+                  </div>
+                  <div style={{ fontSize: 26, fontWeight: 900, color: "#eef2ff", marginBottom: 4 }}>{((stats as any)[sc.key] ?? 0).toLocaleString("fa-IR")}</div>
+                  <div style={{ fontSize: 12, color: `${sc.color}cc`, fontWeight: 600 }}>{sc.label}</div>
+                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${sc.color}90, ${sc.color}20)`, borderRadius: "0 0 22px 22px" }} />
+                </div>
+              );
+              return <Link key={sc.key} href={sc.link!} style={{ textDecoration: "none" }}>{inner}</Link>;
+            })}
+          </div>
+        )}
       </div>
 
-      {isLoading ? <div style={{ color: "#c4b5fd", textAlign: "center", padding: 40 }}>در حال بارگذاری...</div> : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 16 }}>
-          <StatCard label="شعبه‌ها" value={stats.totalBranches} icon={<School size={24} />} color="#7c3aed" link="/school/branches" />
-          <StatCard label="کلاس‌ها" value={stats.totalClasses} icon={<BookMarked size={24} />} color="#3b82f6" link="/school/classes" />
-          <StatCard label="معلمان" value={stats.totalTeachers} icon={<GraduationCap size={24} />} color="#f59e0b" link="/school/teachers" />
-          <StatCard label="دانش‌آموزان" value={stats.totalStudents} icon={<Users size={24} />} color="#22c55e" link="/school/students" />
-        </div>
-      )}
+      <style>{`
+        @keyframes dashUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes blobFloat1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(18px,14px) scale(1.06)} }
+        @keyframes blobFloat2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-14px,10px) scale(1.04)} }
+      `}</style>
     </div>
   );
 }
