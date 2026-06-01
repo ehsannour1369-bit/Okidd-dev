@@ -2,9 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { useNotificationReads } from "../../hooks/useNotificationReads";
+import ParentExamCalendar from "../../components/ParentExamCalendar";
 import {
-  Bell, BookOpen, Clock, Star, Calendar, ChevronDown, ChevronUp,
-  Trophy, Heart, UserRound, Users, LogOut, ChevronRight, ChevronLeft,
+  Bell, BookOpen, Clock, Star, Calendar,
+  Trophy, Heart, UserRound, Users, LogOut,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -61,7 +62,6 @@ export default function ParentDashboard() {
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
   const [mounted, setMounted]                 = useState(false);
   const [confirmLogout, setConfirmLogout]     = useState(false);
-  const [weekOffset, setWeekOffset]           = useState(0);
 
   useEffect(() => { const t = setTimeout(() => setMounted(true), 80); return () => clearTimeout(t); }, []);
 
@@ -82,11 +82,6 @@ export default function ParentDashboard() {
     queryKey: ["rankings", childSummary?.classes?.[0]?.id],
     queryFn:  () => api.get(`/rankings?classId=${childSummary?.classes?.[0]?.id}`),
     enabled:  !!childSummary?.classes?.[0]?.id,
-  });
-  const { data: examSchedule = [] } = useQuery<any[]>({
-    queryKey: ["exam-schedule", user?.schoolId],
-    queryFn:  () => api.get(`/exam-schedule?schoolId=${user?.schoolId}`),
-    enabled:  !!user?.schoolId,
   });
   const { data: notifications = [] } = useQuery<any[]>({
     queryKey: ["notifications", "parent", user?.schoolId],
@@ -132,36 +127,6 @@ export default function ParentDashboard() {
     rank:      myRank ? `${myRank.rank.toLocaleString("fa-IR")} از ${rankings.length.toLocaleString("fa-IR")}` : "—",
     lessons:   (childSummary?.books ?? []).reduce((s: number, b: any) => s + (b.completedLessons ?? 0), 0).toLocaleString("fa-IR"),
   };
-
-  /* ── Weekly calendar helpers ── */
-  const PERSIAN_DAYS = ["شنبه","یک‌شنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنج‌شنبه","جمعه"];
-  const PERSIAN_DAYS_SHORT = ["شنبه","یک","دو","سه","چهار","پنج","جمعه"];
-
-  function getWeekDays(offset: number): Date[] {
-    const today = new Date();
-    // JS getDay: 0=Sun,1=Mon,...,6=Sat — Iran week starts Saturday (6)
-    const daysBack = (today.getDay() + 1) % 7;
-    const sat = new Date(today);
-    sat.setDate(today.getDate() - daysBack + offset * 7);
-    sat.setHours(0, 0, 0, 0);
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(sat); d.setDate(sat.getDate() + i); return d;
-    });
-  }
-
-  function isSameDay(a: Date, b: Date) {
-    return a.getFullYear() === b.getFullYear() &&
-      a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-  }
-
-  const weekDays = getWeekDays(weekOffset);
-  const today = new Date(); today.setHours(0,0,0,0);
-  const weekExams = examSchedule.filter((ex: any) => {
-    if (!ex.examDate) return false;
-    const d = new Date(ex.examDate); d.setHours(0,0,0,0);
-    return d >= weekDays[0] && d <= weekDays[6];
-  });
-  const weekLabel = `${weekDays[0].toLocaleDateString("fa-IR",{month:"short",day:"numeric"})} تا ${weekDays[6].toLocaleDateString("fa-IR",{month:"short",day:"numeric"})}`;
 
   function cardAnim(idx: number): React.CSSProperties {
     if (!mounted) return { opacity: 0, transform: "translateY(22px)" };
@@ -305,122 +270,17 @@ export default function ParentDashboard() {
                 </div>
               )}
 
-              {/* Exam schedule — weekly calendar */}
-              <div style={{ ...glassCard("#f43f5e", "#e11d48", { padding: 18, marginBottom: 12 }), ...cardAnim(13) }}>
+              {/* Exam schedule — Google Calendar monthly view */}
+              <div style={{ ...glassCard("#f0abfc", "#c084fc", { padding: 18, marginBottom: 12 }), background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1.5px solid rgba(192,132,252,0.30)", ...cardAnim(13) }}>
                 <div style={shine()} />
-
-                {/* Card header + navigation */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, position: "relative", zIndex: 1 }}>
-                  <div style={{ fontWeight: 800, color: "white", fontSize: 14, display: "flex", alignItems: "center", gap: 8, textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>
-                    <Calendar size={14} /> تقویم امتحانی
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.78)", fontWeight: 600 }}>{weekLabel}</span>
-                    <button
-                      onClick={() => setWeekOffset(w => w + 1)}
-                      style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(255,255,255,0.20)", border: "1px solid rgba(255,255,255,0.35)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
-                      title="هفته قبل"
-                    >
-                      <ChevronRight size={14} color="white" />
-                    </button>
-                    <button
-                      onClick={() => setWeekOffset(w => w - 1)}
-                      style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(255,255,255,0.20)", border: "1px solid rgba(255,255,255,0.35)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
-                      title="هفته بعد"
-                    >
-                      <ChevronLeft size={14} color="white" />
-                    </button>
-                    {weekOffset !== 0 && (
-                      <button
-                        onClick={() => setWeekOffset(0)}
-                        style={{ padding: "3px 9px", borderRadius: 7, background: "rgba(255,255,255,0.22)", border: "1px solid rgba(255,255,255,0.40)", color: "white", fontFamily: "Vazirmatn", fontSize: 10, fontWeight: 700, cursor: "pointer" }}
-                      >
-                        امروز
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* 7-day grid */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 5, marginBottom: 12, position: "relative", zIndex: 1 }}>
-                  {weekDays.map((day, idx) => {
-                    const isToday = isSameDay(day, today);
-                    const dayExams = examSchedule.filter((ex: any) => {
-                      if (!ex.examDate) return false;
-                      const d = new Date(ex.examDate); d.setHours(0,0,0,0);
-                      return isSameDay(d, day);
-                    });
-                    const hasExam = dayExams.length > 0;
-                    const isFriday = idx === 6;
-                    return (
-                      <div
-                        key={idx}
-                        style={{
-                          background: isToday
-                            ? "rgba(255,255,255,0.32)"
-                            : isFriday ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.14)",
-                          border: isToday
-                            ? "2px solid rgba(255,255,255,0.70)"
-                            : "1px solid rgba(255,255,255,0.22)",
-                          borderRadius: 12,
-                          padding: "8px 4px",
-                          textAlign: "center",
-                          position: "relative",
-                        }}
-                      >
-                        <div style={{ fontSize: 9, color: isToday ? "white" : isFriday ? "rgba(255,255,255,0.50)" : "rgba(255,255,255,0.72)", fontWeight: 700, marginBottom: 3, letterSpacing: 0 }}>
-                          {PERSIAN_DAYS_SHORT[idx]}
-                        </div>
-                        <div style={{ fontSize: 13, fontWeight: 900, color: isToday ? "white" : isFriday ? "rgba(255,255,255,0.50)" : "rgba(255,255,255,0.90)" }}>
-                          {day.toLocaleDateString("fa-IR", { day: "numeric" })}
-                        </div>
-                        {hasExam && (
-                          <div style={{ display: "flex", justifyContent: "center", gap: 2, marginTop: 5, flexWrap: "wrap" }}>
-                            {dayExams.slice(0, 3).map((_: any, i: number) => (
-                              <div key={i} style={{ width: 5, height: 5, borderRadius: "50%", background: isToday ? "white" : "rgba(255,255,255,0.85)" }} />
-                            ))}
-                          </div>
-                        )}
-                        {isToday && (
-                          <div style={{ position: "absolute", top: 3, left: "50%", transform: "translateX(-50%)", width: 5, height: 5, borderRadius: "50%", background: "rgba(255,255,255,0.90)" }} />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Exams this week */}
                 <div style={{ position: "relative", zIndex: 1 }}>
-                  {weekExams.length === 0 ? (
-                    <div style={{ textAlign: "center", padding: "14px 0", color: "rgba(255,255,255,0.62)", fontSize: 13, fontWeight: 600 }}>
-                      این هفته امتحانی ندارید
-                    </div>
-                  ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-                      {weekExams.map((exam: any) => {
-                        const examDay = new Date(exam.examDate);
-                        examDay.setHours(0,0,0,0);
-                        const isExamToday = isSameDay(examDay, today);
-                        const dayIdx = weekDays.findIndex(d => isSameDay(d, examDay));
-                        return (
-                          <div key={exam.id} style={{ background: isExamToday ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.14)", borderRadius: 10, padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", border: `1px solid ${isExamToday ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.22)"}` }}>
-                            <div>
-                              <div style={{ fontWeight: 700, color: "white", fontSize: 13 }}>{exam.subject ?? exam.title ?? "امتحان"}</div>
-                              {exam.description && <div style={{ fontSize: 11, color: "rgba(255,255,255,0.70)", marginTop: 2 }}>{exam.description}</div>}
-                            </div>
-                            <div style={{ flexShrink: 0, textAlign: "center" }}>
-                              <div style={{ background: "rgba(255,255,255,0.22)", borderRadius: 8, padding: "3px 10px", fontSize: 11, color: "white", fontWeight: 700, marginBottom: 2 }}>
-                                {examDay.toLocaleDateString("fa-IR", { month: "short", day: "numeric" })}
-                              </div>
-                              {dayIdx >= 0 && (
-                                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.68)", fontWeight: 600 }}>{PERSIAN_DAYS[dayIdx]}</div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                  <ParentExamCalendar
+                    children={children}
+                    TEXT={TEXT}
+                    TEXT2={TEXT2}
+                    accent={accent}
+                    accentDark={accentDark}
+                  />
                 </div>
               </div>
 
