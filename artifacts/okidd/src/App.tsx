@@ -53,6 +53,7 @@ import StudentRanking from "./pages/student/Ranking";
 import StudentGame from "./pages/student/Game";
 import GamePlayer from "./pages/student/GamePlayer";
 import LessonPlayer from "./pages/student/LessonPlayer";
+import StudentTeacher from "./pages/student/Teacher";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -151,6 +152,7 @@ function AppRouter() {
       <Route path="/student/game"><LayoutRoute component={StudentGame} roles={["student"]} /></Route>
       <Route path="/student/game-player"><AuthGuard allowedRoles={["student"]}><GamePlayer /></AuthGuard></Route>
       <Route path="/student/lesson-player"><AuthGuard allowedRoles={["student"]}><LessonPlayer /></AuthGuard></Route>
+      <Route path="/student/teacher"><LayoutRoute component={StudentTeacher} roles={["student"]} /></Route>
 
       <Route component={NotFound} />
     </Switch>
