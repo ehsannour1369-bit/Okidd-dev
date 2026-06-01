@@ -40,6 +40,7 @@ import TeacherDashboard from "./pages/teacher/Dashboard";
 import TeacherMySchools from "./pages/teacher/MySchools";
 import TeacherClasses from "./pages/teacher/Classes";
 import TeacherProgress from "./pages/teacher/Progress";
+import TeacherNotifications from "./pages/teacher/Notifications";
 
 import ParentDashboard from "./pages/parent/Dashboard";
 import ParentChildren from "./pages/parent/Children";
@@ -138,6 +139,7 @@ function AppRouter() {
       <Route path="/teacher/schools"><LayoutRoute component={TeacherMySchools} roles={["teacher"]} /></Route>
       <Route path="/teacher/classes"><LayoutRoute component={TeacherClasses} roles={["teacher"]} /></Route>
       <Route path="/teacher/progress"><LayoutRoute component={TeacherProgress} roles={["teacher"]} /></Route>
+      <Route path="/teacher/notifications"><LayoutRoute component={TeacherNotifications} roles={["teacher"]} /></Route>
 
       {/* Parent */}
       <Route path="/parent"><LayoutRoute component={ParentDashboard} roles={["parent"]} /></Route>

@@ -11,6 +11,8 @@ export const notificationsTable = pgTable("notifications", {
   branchId: integer("branch_id"),
   gradeLevelId: integer("grade_level_id"),
   classId: integer("class_id"),
+  senderId: integer("sender_id"),
+  targetUserId: integer("target_user_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

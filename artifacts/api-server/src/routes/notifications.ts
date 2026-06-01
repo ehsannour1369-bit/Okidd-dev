@@ -5,10 +5,13 @@ import { eq } from "drizzle-orm";
 const router = Router();
 
 router.get("/notifications", async (req, res) => {
-  const { schoolId, targetRole, userId } = req.query as Record<string, string>;
+  const { schoolId, targetRole, senderId, targetUserId } = req.query as Record<string, string>;
   let rows = await db.select().from(notificationsTable);
   if (schoolId) rows = rows.filter(n => n.schoolId === parseInt(schoolId));
   if (targetRole) rows = rows.filter(n => n.targetRole === targetRole);
+  if (senderId) rows = rows.filter(n => n.senderId === parseInt(senderId));
+  if (targetUserId) rows = rows.filter(n => n.targetUserId === parseInt(targetUserId));
+  rows.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   res.json(rows);
 });
 
