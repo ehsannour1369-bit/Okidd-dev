@@ -20,6 +20,7 @@ export default function TeacherDashboard() {
   const { data: progressBooks = [] } = useQuery<any[]>({ queryKey: ["class-books", progressClass?.id], queryFn: () => api.get(`/classes/${progressClass?.id}/books`), enabled: !!progressClass?.id });
   const { data: lessonUnlocks = [] } = useQuery<any[]>({ queryKey: ["lesson-unlocks", progressClass?.id], queryFn: () => api.get(`/lesson-unlocks?classId=${progressClass?.id}`), enabled: !!progressClass?.id });
   const { data: perfData = [] } = useQuery<any[]>({ queryKey: ["class-performance", perfClass?.id], queryFn: () => api.get(`/classes/${perfClass?.id}/performance`), enabled: !!perfClass?.id });
+  const { data: progressChartDates = [] } = useQuery<any[]>({ queryKey: ["progress-chart", progressClass?.id], queryFn: () => api.get(`/progress-chart?classId=${progressClass?.id}`), enabled: !!progressClass?.id });
 
   function fmtDate(d: string | null) {
     if (!d) return "—";
@@ -129,7 +130,7 @@ export default function TeacherDashboard() {
             {progressClass && (
               <div>
                 {progressBooks.length === 0 ? <div style={{ color: "#8b5cf6", textAlign: "center", padding: 20, fontSize: 13 }}>هیچ کتابی برای این کلاس تعریف نشده</div> : (
-                  progressBooks.map((book: any) => <LessonUnlockBook key={book.id} book={book} classId={progressClass.id} unlocks={lessonUnlocks} />)
+                  progressBooks.map((book: any) => <LessonUnlockBook key={book.id} book={book} classId={progressClass.id} unlocks={lessonUnlocks} dates={progressChartDates} />)
                 )}
               </div>
             )}
@@ -223,10 +224,14 @@ export default function TeacherDashboard() {
   );
 }
 
-function LessonUnlockBook({ book, classId, unlocks }: { book: any; classId: number; unlocks: any[] }) {
+function LessonUnlockBook({ book, classId, unlocks, dates }: { book: any; classId: number; unlocks: any[]; dates: any[] }) {
   const { mutate } = useMutationUnlock(classId, book.id);
   const lessons = Array.from({ length: book.lessonCount }, (_, i) => i + 1);
   const unlockedIds = new Set(unlocks.filter(u => u.bookId === book.id).map(u => u.lessonId));
+  const dateMap: Record<number, string> = {};
+  for (const d of dates) {
+    if (d.bookId === book.id) dateMap[d.lessonId] = d.teachDate;
+  }
 
   return (
     <div style={{ background: "rgba(13,10,26,0.5)", borderRadius: 12, padding: 16, marginBottom: 12, border: "1px solid rgba(139,92,246,0.15)" }}>
@@ -235,20 +240,31 @@ function LessonUnlockBook({ book, classId, unlocks }: { book: any; classId: numb
         <span style={{ color: "#f8f5ff", fontWeight: 700, fontSize: 14 }}>{book.title}</span>
         <span style={{ color: "#8b5cf6", fontSize: 12 }}>({book.lessonCount} درس)</span>
       </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
         {lessons.map(lessonId => {
           const isUnlocked = unlockedIds.has(lessonId);
+          const date = dateMap[lessonId];
           return (
-            <button key={lessonId} onClick={() => mutate({ lessonId, unlock: !isUnlocked })} style={{
-              width: 38, height: 38, borderRadius: 10, cursor: "pointer", fontFamily: "Vazirmatn",
-              background: isUnlocked ? "rgba(34,197,94,0.2)" : "rgba(248,113,113,0.1)",
-              border: `1px solid ${isUnlocked ? "rgba(34,197,94,0.5)" : "rgba(248,113,113,0.3)"}`,
-              color: isUnlocked ? "#4ade80" : "#f87171", fontSize: 12, fontWeight: 600,
-              display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 1,
-            }}>
-              {isUnlocked ? <Unlock size={10} /> : <Lock size={10} />}
-              {lessonId}
-            </button>
+            <div key={lessonId} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+              <button onClick={() => mutate({ lessonId, unlock: !isUnlocked })} style={{
+                width: 44, height: 44, borderRadius: 10, cursor: "pointer", fontFamily: "Vazirmatn",
+                background: isUnlocked ? "rgba(34,197,94,0.2)" : "rgba(248,113,113,0.1)",
+                border: `1px solid ${isUnlocked ? "rgba(34,197,94,0.5)" : "rgba(248,113,113,0.3)"}`,
+                color: isUnlocked ? "#4ade80" : "#f87171", fontSize: 12, fontWeight: 600,
+                display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 1,
+              }}>
+                {isUnlocked ? <Unlock size={10} /> : <Lock size={10} />}
+                {lessonId}
+              </button>
+              {date && (
+                <span style={{
+                  fontSize: 9, color: "#60a5fa", textAlign: "center",
+                  background: "rgba(59,130,246,0.1)", borderRadius: 4,
+                  padding: "1px 4px", direction: "ltr", whiteSpace: "nowrap",
+                  maxWidth: 44, overflow: "hidden", textOverflow: "ellipsis",
+                }}>{date}</span>
+              )}
+            </div>
           );
         })}
       </div>

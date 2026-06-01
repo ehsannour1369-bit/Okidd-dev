@@ -6,15 +6,26 @@ import { presenceLogTable, studentProgressTable } from "@workspace/db";
 const router = Router();
 
 async function getSchoolClassIds(schoolId: number): Promise<number[]> {
+  const classes = await getSchoolClasses(schoolId);
+  return classes.map(c => c.id);
+}
+
+async function getSchoolClasses(schoolId: number) {
   const branches = await db.select({ id: branchesTable.id }).from(branchesTable).where(eq(branchesTable.schoolId, schoolId));
   if (!branches.length) return [];
   const glRows = await db.select({ id: gradeLevelsTable.id }).from(gradeLevelsTable).where(inArray(gradeLevelsTable.branchId, branches.map(b => b.id)));
   if (!glRows.length) return [];
   const gradeRows = await db.select({ id: gradesTable.id }).from(gradesTable).where(inArray(gradesTable.gradeLevelId, glRows.map(g => g.id)));
   if (!gradeRows.length) return [];
-  const classRows = await db.select({ id: classesTable.id }).from(classesTable).where(inArray(classesTable.gradeId, gradeRows.map(g => g.id)));
-  return classRows.map(c => c.id);
+  return db.select().from(classesTable).where(inArray(classesTable.gradeId, gradeRows.map(g => g.id)));
 }
+
+router.get("/school-classes", async (req, res) => {
+  const { schoolId } = req.query as Record<string, string>;
+  if (!schoolId) { res.status(400).json({ error: "schoolId required" }); return; }
+  const classes = await getSchoolClasses(parseInt(schoolId));
+  res.json(classes);
+});
 
 router.get("/school-report/teachers", async (req, res) => {
   const { schoolId } = req.query as Record<string, string>;

@@ -38,6 +38,7 @@ const schoolManagerNav: NavItem[] = [
   { label: "معلمان", path: "/school/teachers", icon: <GraduationCap size={18} />, color: "#f59e0b", bgGradient: "linear-gradient(135deg, #d97706, #f59e0b)", emoji: "👨‍🏫" },
   { label: "دانش‌آموزان", path: "/school/students", icon: <Users size={18} />, color: "#ec4899", bgGradient: "linear-gradient(135deg, #db2777, #ec4899)", emoji: "🧑‍🎓" },
   { label: "کلاس‌ها", path: "/school/classes", icon: <BookMarked size={18} />, color: "#10b981", bgGradient: "linear-gradient(135deg, #059669, #10b981)", emoji: "📚" },
+  { label: "پراگرس چارت", path: "/school/progress", icon: <BarChart2 size={18} />, color: "#3b82f6", bgGradient: "linear-gradient(135deg, #2563eb, #3b82f6)", emoji: "📊" },
   { label: "گزارش عملکرد", path: "/school/report", icon: <BarChart2 size={18} />, color: "#a855f7", bgGradient: "linear-gradient(135deg, #9333ea, #a855f7)", emoji: "📈" },
   { label: "اعلان‌ها", path: "/school/notifications", icon: <Bell size={18} />, color: "#f97316", bgGradient: "linear-gradient(135deg, #ea580c, #f97316)", emoji: "🔔" },
   { label: "برنامه امتحانات", path: "/school/exams", icon: <ClipboardList size={18} />, color: "#06b6d4", bgGradient: "linear-gradient(135deg, #0891b2, #06b6d4)", emoji: "📅" },
