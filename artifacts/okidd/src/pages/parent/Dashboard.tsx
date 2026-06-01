@@ -59,7 +59,6 @@ export default function ParentDashboard() {
   const { user, logout } = useAuthStore();
   const [, navigate]          = useLocation();
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
-  const [expandedBook, setExpandedBook]       = useState<number | null>(null);
   const [mounted, setMounted]                 = useState(false);
   const [confirmLogout, setConfirmLogout]     = useState(false);
   const [weekOffset, setWeekOffset]           = useState(0);
@@ -241,7 +240,7 @@ export default function ParentDashboard() {
                 return (
                   <button
                     key={child.id}
-                    onClick={() => { setSelectedChildId(child.id); setExpandedBook(null); }}
+                    onClick={() => { setSelectedChildId(child.id); }}
                     style={{
                       flexShrink: 0, minWidth: 110, padding: "12px 14px",
                       background: isActive ? `linear-gradient(135deg,${cc}bb,${ccd}99)` : `${cc}18`,
@@ -303,61 +302,6 @@ export default function ParentDashboard() {
                       <BookOpen size={11} /> {cls.name}
                     </span>
                   ))}
-                </div>
-              )}
-
-              {/* Books progress */}
-              {childSummary.books?.length > 0 && (
-                <div style={{ ...glassCard(accent, accentDark, { padding: 18, marginBottom: 12 }), ...cardAnim(11) }}>
-                  <div style={shine()} />
-                  <div style={{ fontWeight: 800, color: "white", marginBottom: 12, fontSize: 14, textShadow: "0 1px 6px rgba(0,0,0,0.2)", position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 6 }}>
-                    <BookOpen size={14} /> کتاب‌ها و پیشرفت درسی
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative", zIndex: 1 }}>
-                    {childSummary.books.map((book: any) => {
-                      const pct        = book.lessonCount > 0 ? Math.round((book.completedLessons / book.lessonCount) * 100) : 0;
-                      const isExpanded = expandedBook === book.id;
-                      return (
-                        <div key={book.id} style={{ background: "rgba(255,255,255,0.14)", borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,0.28)" }}>
-                          <div onClick={() => setExpandedBook(isExpanded ? null : book.id)} style={{ padding: "12px 14px", cursor: "pointer" }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                <span style={{ fontWeight: 700, color: "white", fontSize: 13 }}>{book.title}</span>
-                                {book.totalScore > 0 && (
-                                  <span style={{ background: "rgba(255,255,255,0.22)", color: "white", borderRadius: 6, padding: "1px 7px", fontSize: 11, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 3 }}>
-                                    <Star size={9} /> {book.totalScore.toLocaleString("fa-IR")}
-                                  </span>
-                                )}
-                              </div>
-                              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>{book.completedLessons}/{book.lessonCount}</span>
-                                {isExpanded ? <ChevronUp size={13} color="rgba(255,255,255,0.8)" /> : <ChevronDown size={13} color="rgba(255,255,255,0.8)" />}
-                              </div>
-                            </div>
-                            <div style={{ height: 6, background: "rgba(255,255,255,0.20)", borderRadius: 999, overflow: "hidden" }}>
-                              <div style={{ height: "100%", width: `${pct}%`, background: "rgba(255,255,255,0.75)", borderRadius: 999, transition: "width 0.5s" }} />
-                            </div>
-                            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", marginTop: 4, fontWeight: 600 }}>{pct}% پیشرفت</div>
-                          </div>
-                          {isExpanded && book.lessons && (
-                            <div style={{ padding: "0 14px 12px", borderTop: "1px solid rgba(255,255,255,0.18)" }}>
-                              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)", marginBottom: 8, paddingTop: 10, fontWeight: 600 }}>جزئیات دروس</div>
-                              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(96px, 1fr))", gap: 6 }}>
-                                {book.lessons.map((lesson: any) => (
-                                  <div key={lesson.lessonId} style={{ background: lesson.completed ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.08)", border: `1px solid ${lesson.completed ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.18)"}`, borderRadius: 8, padding: "6px 10px" }}>
-                                    <div style={{ fontSize: 11, color: "white", fontWeight: 700 }}>درس {lesson.lessonId.toLocaleString("fa-IR")}</div>
-                                    <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", marginTop: 2 }}>
-                                      {lesson.completed ? (lesson.score > 0 ? `+${lesson.score}` : "تکمیل") : "ناتمام"}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
                 </div>
               )}
 

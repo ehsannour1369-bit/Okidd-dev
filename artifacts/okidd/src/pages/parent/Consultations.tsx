@@ -1,19 +1,36 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { showToast } from "../../lib/toast";
 import { Plus, X, Calendar, Clock, MessageSquare, UserCheck, CheckCircle, Clock4, XCircle } from "lucide-react";
 
-const IS = { width: "100%", background: "rgba(13,10,26,0.5)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#f8f5ff", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
+const PURPLE = "#7c3aed";
+const PURPLE_L = "#a855f7";
+const TEXT  = "#1e1b4b";
+const TEXT2 = "#4b5563";
+
+const IS: React.CSSProperties = {
+  width: "100%",
+  background: "rgba(255,255,255,0.85)",
+  border: "1px solid rgba(124,58,237,0.25)",
+  borderRadius: 10,
+  color: TEXT,
+  padding: "10px 12px",
+  fontSize: 14,
+  fontFamily: "Vazirmatn, sans-serif",
+  outline: "none",
+  direction: "rtl",
+  boxSizing: "border-box",
+};
 
 function Modal({ title, onClose, children }: any) {
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ background: "#1a1238", border: "1px solid rgba(124,58,237,0.5)", borderRadius: 20, padding: 28, width: "90%", maxWidth: 560, maxHeight: "92vh", overflowY: "auto" }}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", backdropFilter: "blur(4px)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ background: "rgba(255,255,255,0.97)", border: `1px solid rgba(124,58,237,0.25)`, borderRadius: 20, padding: 28, width: "90%", maxWidth: 520, maxHeight: "92vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(124,58,237,0.18)" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <h3 style={{ margin: 0, color: "#f8f5ff", fontSize: 17, fontWeight: 700 }}>{title}</h3>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer" }}><X size={20} /></button>
+          <h3 style={{ margin: 0, color: TEXT, fontSize: 17, fontWeight: 700 }}>{title}</h3>
+          <button onClick={onClose} style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 8, width: 32, height: 32, color: PURPLE, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><X size={16} /></button>
         </div>
         {children}
       </div>
@@ -22,27 +39,35 @@ function Modal({ title, onClose, children }: any) {
 }
 
 function Lbl({ label, children }: any) {
-  return <div style={{ marginBottom: 12 }}><label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 5 }}>{label}</label>{children}</div>;
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <label style={{ display: "block", color: TEXT2, fontSize: 13, marginBottom: 5, fontWeight: 600 }}>{label}</label>
+      {children}
+    </div>
+  );
 }
 
 function SaveBtn({ onClick, disabled, label = "ذخیره" }: any) {
   return (
-    <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
-      <button onClick={onClick} disabled={disabled} style={{ flex: 1, padding: "11px 0", background: "linear-gradient(135deg, #7c3aed, #a855f7)", border: "none", borderRadius: 10, color: "white", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14, opacity: disabled ? 0.5 : 1 }}>{label}</button>
+    <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+      <button onClick={onClick} disabled={disabled}
+        style={{ flex: 1, padding: "11px 0", background: `linear-gradient(135deg,${PURPLE},${PURPLE_L})`, border: "none", borderRadius: 10, color: "white", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: disabled ? "not-allowed" : "pointer", fontSize: 14, opacity: disabled ? 0.5 : 1, boxShadow: "0 4px 16px rgba(124,58,237,0.3)" }}>
+        {label}
+      </button>
     </div>
   );
 }
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { color: string; bg: string; label: string; icon: any }> = {
-    pending: { color: "#fbbf24", bg: "rgba(251,191,36,0.15)", label: "در انتظار", icon: <Clock4 size={12} /> },
-    approved: { color: "#4ade80", bg: "rgba(74,222,128,0.15)", label: "تایید شده", icon: <CheckCircle size={12} /> },
-    rejected: { color: "#f87171", bg: "rgba(248,113,113,0.15)", label: "رد شده", icon: <XCircle size={12} /> },
-    completed: { color: "#60a5fa", bg: "rgba(96,165,250,0.15)", label: "انجام شده", icon: <CheckCircle size={12} /> },
+    pending:   { color: "#d97706", bg: "rgba(245,158,11,0.12)",  label: "در انتظار", icon: <Clock4 size={12} /> },
+    approved:  { color: "#16a34a", bg: "rgba(22,163,74,0.12)",   label: "تایید شده", icon: <CheckCircle size={12} /> },
+    rejected:  { color: "#dc2626", bg: "rgba(220,38,38,0.10)",   label: "رد شده",    icon: <XCircle size={12} /> },
+    completed: { color: "#2563eb", bg: "rgba(37,99,235,0.10)",   label: "انجام شده", icon: <CheckCircle size={12} /> },
   };
   const s = map[status] || map.pending;
   return (
-    <span style={{ display: "flex", alignItems: "center", gap: 4, background: s.bg, color: s.color, border: `1px solid ${s.color}33`, borderRadius: 999, padding: "2px 10px", fontSize: 12 }}>
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: s.bg, color: s.color, border: `1px solid ${s.color}33`, borderRadius: 999, padding: "3px 10px", fontSize: 12, fontWeight: 600 }}>
       {s.icon}{s.label}
     </span>
   );
@@ -77,42 +102,45 @@ export default function ParentConsultations() {
   });
 
   return (
-    <div>
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f8f5ff", margin: 0 }}>مشاوره‌ها</h1>
-        <p style={{ color: "#8b5cf6", fontSize: 14, marginTop: 4 }}>درخواست و تاریخ مشاوره</p>
+    <div dir="rtl" style={{ fontFamily: "Vazirmatn, sans-serif" }}>
+      <div style={{ marginBottom: 20 }}>
+        <h1 style={{ fontSize: 20, fontWeight: 800, color: TEXT, margin: 0 }}>مشاوره‌ها</h1>
+        <p style={{ color: TEXT2, fontSize: 13, marginTop: 4 }}>درخواست و پیگیری مشاوره تحصیلی</p>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <div style={{ color: "#c4b5fd", fontSize: 14 }}>{consultations.length} درخواست</div>
-        <button onClick={() => setShowModal(true)} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", background: "linear-gradient(135deg, #7c3aed, #a855f7)", border: "none", borderRadius: 10, color: "white", fontSize: 14, fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>
-          <Plus size={16} /> درخواست جدید
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <div style={{ color: TEXT2, fontSize: 13 }}>{consultations.length.toLocaleString("fa-IR")} درخواست</div>
+        <button onClick={() => setShowModal(true)}
+          style={{ display: "flex", alignItems: "center", gap: 8, padding: "9px 18px", background: `linear-gradient(135deg,${PURPLE},${PURPLE_L})`, border: "none", borderRadius: 10, color: "white", fontSize: 13, fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", boxShadow: "0 4px 16px rgba(124,58,237,0.28)" }}>
+          <Plus size={15} /> درخواست جدید
         </button>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {consultations.map((c: any) => (
-          <div key={c.id} style={{ background: "rgba(30,18,60,0.85)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 14, padding: 18 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <div key={c.id} style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(16px)", border: "1px solid rgba(124,58,237,0.15)", borderRadius: 14, padding: 16, boxShadow: "0 2px 12px rgba(124,58,237,0.08)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <MessageSquare size={16} color="#8b5cf6" />
-                <span style={{ fontWeight: 700, color: "#f8f5ff", fontSize: 15 }}>{c.topic}</span>
+                <div style={{ width: 34, height: 34, borderRadius: 10, background: `linear-gradient(135deg,${PURPLE},${PURPLE_L})`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <MessageSquare size={16} color="white" />
+                </div>
+                <span style={{ fontWeight: 700, color: TEXT, fontSize: 14 }}>{c.topic}</span>
               </div>
               <StatusBadge status={c.status} />
             </div>
-            <div style={{ color: "#c4b5fd", fontSize: 13, marginBottom: 10 }}>{c.description || "بدون توضیح"}</div>
-            <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-              {c.consultantName && <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#8b5cf6", fontSize: 13 }}><UserCheck size={13} /> {c.consultantName}</div>}
-              {c.scheduledDate && <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#8b5cf6", fontSize: 13 }}><Calendar size={13} /> {c.scheduledDate}</div>}
-              {c.scheduledTime && <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#8b5cf6", fontSize: 13 }}><Clock size={13} /> {c.scheduledTime}</div>}
-              {c.duration && <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#8b5cf6", fontSize: 13 }}><Clock4 size={13} /> {c.duration} دقیقه</div>}
+            {c.description && <div style={{ color: TEXT2, fontSize: 13, marginBottom: 10, paddingRight: 44 }}>{c.description}</div>}
+            <div style={{ display: "flex", gap: 14, flexWrap: "wrap", paddingRight: 44 }}>
+              {c.consultantName && <div style={{ display: "flex", alignItems: "center", gap: 5, color: PURPLE, fontSize: 12 }}><UserCheck size={12} /> {c.consultantName}</div>}
+              {c.scheduledDate  && <div style={{ display: "flex", alignItems: "center", gap: 5, color: TEXT2, fontSize: 12 }}><Calendar size={12} /> {c.scheduledDate}</div>}
+              {c.scheduledTime  && <div style={{ display: "flex", alignItems: "center", gap: 5, color: TEXT2, fontSize: 12 }}><Clock size={12} /> {c.scheduledTime}</div>}
+              {c.duration       && <div style={{ display: "flex", alignItems: "center", gap: 5, color: TEXT2, fontSize: 12 }}><Clock4 size={12} /> {c.duration} دقیقه</div>}
             </div>
           </div>
         ))}
         {consultations.length === 0 && (
-          <div style={{ textAlign: "center", padding: 60, color: "#8b5cf6" }}>
-            <MessageSquare size={48} style={{ opacity: 0.3, marginBottom: 16 }} />
-            <p>هنوز درخواست مشاوره‌ای ثبت نکرده‌اید</p>
+          <div style={{ textAlign: "center", padding: 60, color: TEXT2 }}>
+            <MessageSquare size={44} style={{ opacity: 0.25, marginBottom: 14, color: PURPLE }} />
+            <p style={{ margin: 0, fontSize: 14 }}>هنوز درخواست مشاوره‌ای ثبت نکرده‌اید</p>
           </div>
         )}
       </div>
