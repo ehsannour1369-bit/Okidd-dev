@@ -20,11 +20,9 @@ const GLASS: React.CSSProperties = {
 const BREAKDOWN_ITEMS = [
   { key: "balloon", label: "بادکنک", emoji: "🎈" },
   { key: "animation", label: "انیمیشن", emoji: "🎬" },
-  { key: "video", label: "ویدیو", emoji: "▶️" },
   { key: "game", label: "بازی", emoji: "🎮" },
   { key: "quiz", label: "آزمونک", emoji: "📝" },
   { key: "exercise", label: "تمرین", emoji: "✏️" },
-  { key: "lesson", label: "درس", emoji: "📖" },
 ];
 
 type RankTab = "class" | "grade" | "book";
