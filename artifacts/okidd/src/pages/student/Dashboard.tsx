@@ -7,11 +7,11 @@ import {
   Lock, CheckCircle, ChevronRight, ChevronDown, ChevronUp,
   Bell, Plus, Send as SendIcon, MessageCircle,
   BookOpen, GraduationCap, Trophy, Play,
-  Building2, RefreshCw, X, LogOut,
+  Building2, MapPin, Phone, Users, X, LogOut,
 } from "lucide-react";
 import NotificationThread from "../../components/NotificationThread";
 
-type Screen = "home" | "books" | "lesson" | "review";
+type Screen = "home" | "books" | "lesson" | "school";
 type NotifTab = "received" | "sent";
 
 const BLUE   = "#3b82f6";
@@ -19,7 +19,6 @@ const ORANGE = "#f97316";
 const PINK   = "#ec4899";
 const GREEN  = "#22c55e";
 const PURPLE = "#8b5cf6";
-const TEAL   = "#06b6d4";
 
 /* Colored glassmorphism card */
 function glassCard(color: string, extra?: React.CSSProperties): React.CSSProperties {
@@ -155,8 +154,6 @@ export default function StudentDashboard() {
     progress.filter(p => p.completed && p.bookId === selectedBook?.id).map(p => p.lessonId)
   );
 
-  /* Total completed lessons across all books */
-  const totalCompleted = progress.filter(p => p.completed).length;
 
   const drawerInput: React.CSSProperties = {
     width: "100%", background: "rgba(255,255,255,0.7)",
@@ -167,13 +164,17 @@ export default function StudentDashboard() {
 
   /* ─────────────────────────────────── RENDER ─────────────────────────────────── */
   return (
-    <div style={{ minHeight: "100vh", background: "#eef2ff", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", position: "relative", overflow: "hidden" }}>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#e8eeff 0%,#f0eaff 40%,#eafaf3 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", position: "relative", overflow: "hidden" }}>
 
-      {/* Animated background blobs */}
+      {/* Animated background blobs with glow */}
       <div className="blob b1" />
       <div className="blob b2" />
       <div className="blob b3" />
       <div className="blob b4" />
+      <div className="blob b5" />
+      {/* Glow rings */}
+      <div className="glow-ring gr1" />
+      <div className="glow-ring gr2" />
 
       <div style={{ position: "relative", zIndex: 1, minHeight: "100vh" }}>
 
@@ -246,7 +247,7 @@ export default function StudentDashboard() {
 
               {/* ④ مدرسه من — Orange  (RTL: right col, row 2) */}
               <div style={{ ...glassCard(ORANGE, { padding: "22px 18px" }) }}
-                onClick={() => {}}
+                onClick={() => setScreen("school")}
                 onMouseEnter={e => hoverIn(e.currentTarget, ORANGE)}
                 onMouseLeave={e => hoverOut(e.currentTarget, ORANGE)}>
                 <div style={{ ...glassIconStyle(ORANGE), marginBottom: 14 }}>
@@ -272,89 +273,108 @@ export default function StudentDashboard() {
                 <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${GREEN}70, ${GREEN}20)`, borderRadius: "0 0 24px 24px" }} />
               </div>
 
-              {/* ⑥ اعلانات — Purple */}
-              <div style={{ ...glassCard(PURPLE, { padding: "20px 18px", display: "flex", alignItems: "center", gap: 14 }) }}
+              {/* ⑥ اعلانات — Purple, full width */}
+              <div style={{ gridColumn: "span 2", ...glassCard(PURPLE, { padding: "20px 22px", display: "flex", alignItems: "center", gap: 16 }) }}
                 onClick={() => setNotifOpen(true)}
                 onMouseEnter={e => hoverIn(e.currentTarget, PURPLE)}
                 onMouseLeave={e => hoverOut(e.currentTarget, PURPLE)}>
-                <div style={{ ...glassIconStyle(PURPLE, 50), position: "relative" }}>
-                  <Bell size={22} color={PURPLE} />
+                <div style={{ ...glassIconStyle(PURPLE, 54), position: "relative" }}>
+                  <Bell size={24} color={PURPLE} />
                   {receivedNotifs.length > 0 && (
-                    <span style={{ position: "absolute", top: -4, right: -4, width: 16, height: 16, background: "#ef4444", borderRadius: "50%", border: "2px solid white", fontSize: 9, color: "white", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <span style={{ position: "absolute", top: -4, right: -4, width: 17, height: 17, background: "#ef4444", borderRadius: "50%", border: "2px solid white", fontSize: 9, color: "white", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>
                       {receivedNotifs.length > 9 ? "9+" : receivedNotifs.length}
                     </span>
                   )}
                 </div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 15, color: "#1e1b4b" }}>اعلانات</div>
-                  <div style={{ fontSize: 11, color: "#4b5563", marginTop: 3 }}>
-                    {receivedNotifs.length > 0 ? `${receivedNotifs.length} اعلان` : "بدون اعلان"}
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: 16, color: "#1e1b4b" }}>اعلانات</div>
+                  <div style={{ fontSize: 12, color: "#4b5563", marginTop: 4 }}>
+                    {receivedNotifs.length > 0 ? `${receivedNotifs.length} اعلان دریافتی` : "بدون اعلان جدید"}
                   </div>
                 </div>
-              </div>
-
-              {/* ⑦ مرور — Teal */}
-              <div style={{ ...glassCard(TEAL, { padding: "20px 18px", display: "flex", alignItems: "center", gap: 14 }) }}
-                onClick={() => setScreen("review")}
-                onMouseEnter={e => hoverIn(e.currentTarget, TEAL)}
-                onMouseLeave={e => hoverOut(e.currentTarget, TEAL)}>
-                <div style={{ ...glassIconStyle(TEAL, 50) }}>
-                  <RefreshCw size={22} color={TEAL} />
-                </div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 15, color: "#1e1b4b" }}>مرور</div>
-                  <div style={{ fontSize: 11, color: "#4b5563", marginTop: 3 }}>
-                    {totalCompleted > 0 ? `${totalCompleted} درس تکمیل شده` : "همه درس‌ها"}
+                {receivedNotifs.length > 0 && (
+                  <div style={{ background: `linear-gradient(135deg,${PURPLE},#6d28d9)`, borderRadius: 999, padding: "4px 14px", color: "white", fontSize: 13, fontWeight: 700, boxShadow: `0 4px 14px ${PURPLE}55` }}>
+                    {receivedNotifs.length}
                   </div>
-                </div>
+                )}
               </div>
 
             </div>
           </div>
         )}
 
-        {/* ══════════ REVIEW ══════════ */}
-        {screen === "review" && (
+        {/* ══════════ SCHOOL INFO ══════════ */}
+        {screen === "school" && (
           <div style={{ padding: "24px 16px" }}>
-            <div style={{ background: "rgba(255,255,255,0.78)", backdropFilter: "blur(20px)", borderRadius: 24, padding: 24, maxWidth: 480, margin: "0 auto", border: "1.5px solid rgba(255,255,255,0.9)", boxShadow: "0 8px 32px rgba(0,0,0,0.08)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+            <div style={{ background: "rgba(255,255,255,0.82)", backdropFilter: "blur(22px)", borderRadius: 28, padding: 24, maxWidth: 480, margin: "0 auto", border: "1.5px solid rgba(255,255,255,0.92)", boxShadow: "0 10px 40px rgba(0,0,0,0.09)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 22 }}>
                 <button onClick={() => setScreen("home")} style={{ background: "rgba(255,255,255,0.7)", border: "1.5px solid rgba(200,200,230,0.5)", borderRadius: "50%", width: 36, height: 36, color: "#1e1b4b", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <ChevronRight size={20} />
                 </button>
-                <div style={{ fontWeight: 800, fontSize: 20, color: "#1e1b4b" }}>🔁 مرور درس‌ها</div>
+                <div style={{ fontWeight: 800, fontSize: 20, color: "#1e1b4b" }}>🏫 مدرسه من</div>
               </div>
-              {enrolledBooks.length === 0 ? (
-                <div style={{ textAlign: "center", padding: 40, color: "#5b21b6" }}>
-                  <div style={{ fontSize: 40, marginBottom: 12 }}>📭</div>
-                  کتابی برای مرور وجود ندارد
+
+              {/* School name banner */}
+              <div style={{ background: `linear-gradient(135deg, ${ORANGE}28, ${ORANGE}14)`, border: `1.5px solid ${ORANGE}45`, borderRadius: 20, padding: "20px 20px", marginBottom: 16, display: "flex", alignItems: "center", gap: 16 }}>
+                <div style={{ ...glassIconStyle(ORANGE, 60) }}>
+                  <Building2 size={28} color={ORANGE} />
                 </div>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                  {enrolledBooks.map((book: any) => {
-                    const completed = progress.filter(p => p.completed && p.bookId === book.id).length;
-                    const pct = book.lessonCount > 0 ? Math.round((completed / book.lessonCount) * 100) : 0;
-                    return (
-                      <div key={book.id} style={{ background: `linear-gradient(135deg, ${TEAL}20, ${TEAL}0d)`, border: `1.5px solid ${TEAL}40`, borderRadius: 18, padding: "16px 18px", display: "flex", alignItems: "center", gap: 14 }}>
-                        <div style={{ ...glassIconStyle(TEAL, 48) }}>
-                          <BookOpen size={22} color={TEAL} />
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontWeight: 700, color: "#1e1b4b", fontSize: 14, marginBottom: 4 }}>{book.title}</div>
-                          <div style={{ height: 5, background: "rgba(6,182,212,0.15)", borderRadius: 999, overflow: "hidden" }}>
-                            <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg, ${TEAL}, #0891b2)`, borderRadius: 999, transition: "width 0.5s" }} />
-                          </div>
-                          <div style={{ fontSize: 11, color: "#4b5563", marginTop: 4 }}>{completed}/{book.lessonCount} درس — {pct}٪</div>
-                        </div>
-                        <button
-                          onClick={() => navigate(`/student/lesson-player?bookId=${book.id}&lessonId=0`)}
-                          style={{ padding: "8px 16px", background: `linear-gradient(135deg, ${TEAL}, #0891b2)`, border: "none", borderRadius: 12, color: "white", fontFamily: "Vazirmatn", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: `0 4px 14px ${TEAL}45`, whiteSpace: "nowrap" }}>
-                          مرور ▶
-                        </button>
-                      </div>
-                    );
-                  })}
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: 18, color: "#1e1b4b", marginBottom: 4 }}>
+                    {schoolInfo?.name ?? "در حال بارگذاری..."}
+                  </div>
+                  <div style={{ fontSize: 12, color: ORANGE, fontWeight: 600 }}>
+                    {schoolInfo?.status === "active" ? "✅ فعال" : "—"}
+                  </div>
                 </div>
-              )}
+              </div>
+
+              {/* Info rows */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {schoolInfo?.address && (
+                  <div style={{ background: "rgba(255,255,255,0.65)", border: "1.5px solid rgba(200,200,230,0.35)", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ ...glassIconStyle(ORANGE, 38), borderRadius: 10 }}>
+                      <MapPin size={18} color={ORANGE} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, color: "#9ca3af" }}>آدرس</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "#1e1b4b" }}>{schoolInfo.address}</div>
+                    </div>
+                  </div>
+                )}
+                {schoolInfo?.phone && (
+                  <div style={{ background: "rgba(255,255,255,0.65)", border: "1.5px solid rgba(200,200,230,0.35)", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ ...glassIconStyle(BLUE, 38), borderRadius: 10 }}>
+                      <Phone size={18} color={BLUE} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, color: "#9ca3af" }}>تلفن</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "#1e1b4b" }}>{schoolInfo.phone}</div>
+                    </div>
+                  </div>
+                )}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div style={{ background: "rgba(255,255,255,0.65)", border: "1.5px solid rgba(200,200,230,0.35)", borderRadius: 14, padding: "12px 16px", textAlign: "center" }}>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: BLUE }}>{schoolInfo?.studentCount ?? 0}</div>
+                    <div style={{ fontSize: 11, color: "#6b7280", marginTop: 2 }}>دانش‌آموز</div>
+                  </div>
+                  <div style={{ background: "rgba(255,255,255,0.65)", border: "1.5px solid rgba(200,200,230,0.35)", borderRadius: 14, padding: "12px 16px", textAlign: "center" }}>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: GREEN }}>{schoolInfo?.teacherCount ?? 0}</div>
+                    <div style={{ fontSize: 11, color: "#6b7280", marginTop: 2 }}>معلم</div>
+                  </div>
+                </div>
+                {schoolInfo?.branchCount > 0 && (
+                  <div style={{ background: "rgba(255,255,255,0.65)", border: "1.5px solid rgba(200,200,230,0.35)", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ ...glassIconStyle(GREEN, 38), borderRadius: 10 }}>
+                      <Users size={18} color={GREEN} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, color: "#9ca3af" }}>شعبه‌ها</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "#1e1b4b" }}>{schoolInfo.branchCount} شعبه فعال</div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -531,15 +551,57 @@ export default function StudentDashboard() {
       {notifOpen && <div onClick={() => setNotifOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 499 }} />}
 
       <style>{`
-        .blob { position: absolute; border-radius: 50%; filter: blur(65px); pointer-events: none; z-index: 0; }
-        .b1 { top: -8%; right: -6%; width: 430px; height: 430px; background: radial-gradient(circle, #bfdbfe 0%, transparent 70%); animation: fb1 9s ease-in-out infinite; }
-        .b2 { bottom: 5%; left: -8%; width: 370px; height: 370px; background: radial-gradient(circle, #fed7aa 0%, transparent 70%); animation: fb2 11s ease-in-out infinite; }
-        .b3 { top: 38%; left: 22%; width: 310px; height: 310px; background: radial-gradient(circle, #fbcfe8 0%, transparent 70%); animation: fb3 13s ease-in-out infinite; }
-        .b4 { bottom: -6%; right: 18%; width: 290px; height: 290px; background: radial-gradient(circle, #a7f3d0 0%, transparent 70%); animation: fb4 10s ease-in-out infinite; }
-        @keyframes fb1 { 0%,100%{transform:translate(0,0) scale(1)} 40%{transform:translate(-22px,18px) scale(1.06)} 70%{transform:translate(14px,-12px) scale(0.95)} }
-        @keyframes fb2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(20px,-22px) scale(1.08)} }
-        @keyframes fb3 { 0%,100%{transform:translate(0,0) scale(1)} 35%{transform:translate(-16px,22px) scale(1.04)} 75%{transform:translate(12px,-10px) scale(0.97)} }
-        @keyframes fb4 { 0%,100%{transform:translate(0,0) scale(1)} 55%{transform:translate(-10px,-18px) scale(1.05)} }
+        /* ── Blobs ── */
+        .blob { position: absolute; border-radius: 50%; pointer-events: none; z-index: 0; }
+        .b1 { top: -10%; right: -8%; width: 480px; height: 480px;
+              background: radial-gradient(circle, #93c5fd 0%, #bfdbfe 40%, transparent 70%);
+              filter: blur(55px); animation: fb1 10s ease-in-out infinite; }
+        .b2 { bottom: 4%; left: -10%; width: 400px; height: 400px;
+              background: radial-gradient(circle, #fdba74 0%, #fed7aa 40%, transparent 70%);
+              filter: blur(55px); animation: fb2 12s ease-in-out infinite; }
+        .b3 { top: 35%; left: 18%; width: 340px; height: 340px;
+              background: radial-gradient(circle, #f9a8d4 0%, #fbcfe8 40%, transparent 70%);
+              filter: blur(50px); animation: fb3 14s ease-in-out infinite; }
+        .b4 { bottom: -8%; right: 16%; width: 320px; height: 320px;
+              background: radial-gradient(circle, #6ee7b7 0%, #a7f3d0 40%, transparent 70%);
+              filter: blur(50px); animation: fb4 11s ease-in-out infinite; }
+        .b5 { top: 55%; right: -5%; width: 260px; height: 260px;
+              background: radial-gradient(circle, #c4b5fd 0%, #ddd6fe 40%, transparent 70%);
+              filter: blur(45px); animation: fb2 15s ease-in-out infinite reverse; }
+
+        /* ── Glow rings ── */
+        .glow-ring { position: absolute; border-radius: 50%; pointer-events: none; z-index: 0; }
+        .gr1 { top: 10%; right: 5%; width: 200px; height: 200px;
+               background: transparent;
+               box-shadow: 0 0 80px 30px rgba(147,197,253,0.35);
+               animation: pulse-glow 6s ease-in-out infinite; }
+        .gr2 { bottom: 20%; left: 8%; width: 160px; height: 160px;
+               background: transparent;
+               box-shadow: 0 0 70px 25px rgba(249,168,212,0.3);
+               animation: pulse-glow 8s ease-in-out infinite 2s; }
+
+        @keyframes fb1 {
+          0%,100%{ transform:translate(0,0) scale(1) }
+          33%    { transform:translate(-28px,22px) scale(1.07) }
+          66%    { transform:translate(18px,-14px) scale(0.94) }
+        }
+        @keyframes fb2 {
+          0%,100%{ transform:translate(0,0) scale(1) }
+          50%    { transform:translate(24px,-26px) scale(1.09) }
+        }
+        @keyframes fb3 {
+          0%,100%{ transform:translate(0,0) scale(1) }
+          35%    { transform:translate(-20px,26px) scale(1.05) }
+          75%    { transform:translate(15px,-12px) scale(0.96) }
+        }
+        @keyframes fb4 {
+          0%,100%{ transform:translate(0,0) scale(1) }
+          55%    { transform:translate(-14px,-22px) scale(1.06) }
+        }
+        @keyframes pulse-glow {
+          0%,100%{ opacity:0.5; transform:scale(1) }
+          50%    { opacity:1;   transform:scale(1.35) }
+        }
       `}</style>
     </div>
   );
