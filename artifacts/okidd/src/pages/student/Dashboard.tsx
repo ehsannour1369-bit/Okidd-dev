@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import {
   Lock, CheckCircle, ChevronRight, ChevronDown, ChevronUp,
@@ -82,8 +82,15 @@ export default function StudentDashboard() {
   const [profileOpen, setProfileOpen]     = useState(false);
   const [showPassword, setShowPassword]   = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
+  const [introPhase, setIntroPhase] = useState<'splash' | 'animate' | 'done'>('splash');
   const [avatarUploading, setAvatarUploading] = useState(false);
   const avatarRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setIntroPhase('animate'), 1400);
+    const t2 = setTimeout(() => setIntroPhase('done'), 2700);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
 
   const { data: enrolledBooks = [] } = useQuery<any[]>({
     queryKey: ["enrolled-books", user?.id],
@@ -187,6 +194,18 @@ export default function StudentDashboard() {
     fontFamily: "Vazirmatn", direction: "rtl", outline: "none", boxSizing: "border-box",
   };
 
+  /* intro animation helper */
+  function cardAnim(dir: 'left' | 'right' | 'up', delay: number): React.CSSProperties {
+    if (introPhase === 'splash') return { opacity: 0 };
+    if (introPhase === 'animate') return { animation: `intro-${dir} 0.55s cubic-bezier(0.16,1,0.3,1) ${delay}s both` };
+    return {};
+  }
+  const headerAnim: React.CSSProperties = introPhase === 'splash'
+    ? { opacity: 0 }
+    : introPhase === 'animate'
+    ? { animation: 'intro-header 0.5s ease-out 0.05s both' }
+    : {};
+
   /* ─────────────────────────────────── RENDER ─────────────────────────────────── */
   return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#e8eeff 0%,#f0eaff 40%,#eafaf3 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", position: "relative", overflow: "hidden" }}>
@@ -212,14 +231,14 @@ export default function StudentDashboard() {
         {/* ── Logo banner ── */}
         {schoolInfo?.logoUrl && (
           <div style={{ display: "flex", justifyContent: "center", paddingTop: 18, paddingBottom: 2 }}>
-            <div style={{ width: 82, height: 82, borderRadius: 22, background: "rgba(255,255,255,0.82)", backdropFilter: "blur(16px)", border: "1.5px solid rgba(255,255,255,0.9)", boxShadow: "0 6px 28px rgba(0,0,0,0.09)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ ...headerAnim, width: 82, height: 82, borderRadius: 22, background: "rgba(255,255,255,0.82)", backdropFilter: "blur(16px)", border: "1.5px solid rgba(255,255,255,0.9)", boxShadow: "0 6px 28px rgba(0,0,0,0.09)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <img src={schoolInfo.logoUrl} alt="لوگو" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
             </div>
           </div>
         )}
 
-        {/* ── Top bar: score + greeting + logout ── */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: schoolInfo?.logoUrl ? "10px 18px 0" : "18px 18px 0", direction: "ltr" }}>
+        {/* ── Top bar: score + greeting + profile ── */}
+        <div style={{ ...headerAnim, display: "flex", justifyContent: "space-between", alignItems: "center", padding: schoolInfo?.logoUrl ? "10px 18px 0" : "18px 18px 0", direction: "ltr" }}>
           {/* Score */}
           <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.72)", backdropFilter: "blur(14px)", border: "1.5px solid rgba(255,255,255,0.9)", borderRadius: 999, padding: "9px 18px", boxShadow: "0 4px 18px rgba(0,0,0,0.07)" }}>
             <span style={{ fontSize: 18 }}>⭐</span>
@@ -246,7 +265,7 @@ export default function StudentDashboard() {
 
               {/* ① PLAY — full width */}
               <div
-                style={{ gridColumn: "span 2", ...glassCard(accent, { padding: "26px 22px", display: "flex", alignItems: "center", gap: 18, background: `linear-gradient(145deg, ${accent}38, ${accentDark}20)`, border: `1.5px solid ${accent}60` }) }}
+                style={{ gridColumn: "span 2", ...glassCard(accent, { padding: "26px 22px", display: "flex", alignItems: "center", gap: 18, background: `linear-gradient(145deg, ${accent}38, ${accentDark}20)`, border: `1.5px solid ${accent}60` }), ...cardAnim('up', 0) }}
                 onClick={() => enrolledBooks.length > 0 ? navigate(`/student/lesson-player?bookId=${enrolledBooks[0].id}&lessonId=0`) : setScreen("books")}
                 onMouseEnter={e => hoverIn(e.currentTarget, accent)}
                 onMouseLeave={e => hoverOut(e.currentTarget, accent)}
@@ -264,7 +283,7 @@ export default function StudentDashboard() {
               </div>
 
               {/* ② کتاب‌هایم — Blue  (RTL: right col) */}
-              <div style={{ ...glassCard(BLUE, { padding: "22px 18px" }) }}
+              <div style={{ ...glassCard(BLUE, { padding: "22px 18px" }), ...cardAnim('right', 0.15) }}
                 onClick={() => navigate("/student/books")}
                 onMouseEnter={e => hoverIn(e.currentTarget, BLUE)}
                 onMouseLeave={e => hoverOut(e.currentTarget, BLUE)}>
@@ -277,7 +296,7 @@ export default function StudentDashboard() {
               </div>
 
               {/* ③ معلم من — Pink  (RTL: left col) */}
-              <div style={{ ...glassCard(PINK, { padding: "22px 18px" }) }}
+              <div style={{ ...glassCard(PINK, { padding: "22px 18px" }), ...cardAnim('left', 0.15) }}
                 onClick={() => navigate("/student/teacher")}
                 onMouseEnter={e => hoverIn(e.currentTarget, PINK)}
                 onMouseLeave={e => hoverOut(e.currentTarget, PINK)}>
@@ -290,7 +309,7 @@ export default function StudentDashboard() {
               </div>
 
               {/* ④ مدرسه من — Orange  (RTL: right col, row 2) */}
-              <div style={{ ...glassCard(ORANGE, { padding: "22px 18px" }) }}
+              <div style={{ ...glassCard(ORANGE, { padding: "22px 18px" }), ...cardAnim('right', 0.3) }}
                 onClick={() => setScreen("school")}
                 onMouseEnter={e => hoverIn(e.currentTarget, ORANGE)}
                 onMouseLeave={e => hoverOut(e.currentTarget, ORANGE)}>
@@ -305,7 +324,7 @@ export default function StudentDashboard() {
               </div>
 
               {/* ⑤ رتبه‌ام — Green  (RTL: left col, row 2) */}
-              <div style={{ ...glassCard(GREEN, { padding: "22px 18px" }) }}
+              <div style={{ ...glassCard(GREEN, { padding: "22px 18px" }), ...cardAnim('left', 0.3) }}
                 onClick={() => navigate("/student/ranking")}
                 onMouseEnter={e => hoverIn(e.currentTarget, GREEN)}
                 onMouseLeave={e => hoverOut(e.currentTarget, GREEN)}>
@@ -318,7 +337,7 @@ export default function StudentDashboard() {
               </div>
 
               {/* ⑥ اعلانات — Purple, full width */}
-              <div style={{ gridColumn: "span 2", ...glassCard(PURPLE, { padding: "20px 22px", display: "flex", alignItems: "center", gap: 16 }) }}
+              <div style={{ gridColumn: "span 2", ...glassCard(PURPLE, { padding: "20px 22px", display: "flex", alignItems: "center", gap: 16 }), ...cardAnim('up', 0.45) }}
                 onClick={() => setNotifOpen(true)}
                 onMouseEnter={e => hoverIn(e.currentTarget, PURPLE)}
                 onMouseLeave={e => hoverOut(e.currentTarget, PURPLE)}>
@@ -513,6 +532,22 @@ export default function StudentDashboard() {
         )}
 
       </div>{/* /main content */}
+
+      {/* ══════════ INTRO SPLASH OVERLAY ══════════ */}
+      {introPhase !== 'done' && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 99, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none", gap: 20, animation: introPhase === 'animate' ? 'splash-exit 1.3s cubic-bezier(0.4,0,0.2,1) forwards' : 'none' }}>
+          {schoolInfo?.logoUrl && (
+            <div style={{ width: 110, height: 110, borderRadius: 28, background: "rgba(255,255,255,0.82)", backdropFilter: "blur(18px)", border: "2px solid rgba(255,255,255,0.92)", boxShadow: "0 8px 36px rgba(0,0,0,0.10)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <img src={schoolInfo.logoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+            </div>
+          )}
+          <div className="glow-greeting" style={{ fontWeight: 800, fontSize: 18, textAlign: "center", lineHeight: 1.7, padding: "0 24px" }}>
+            <span>{user?.name?.split(" ")[0]} عزیزم، به </span>
+            <span className="glow-school">{schoolInfo?.name ?? "..."}</span>
+            <span> خوش آمدی ✨</span>
+          </div>
+        </div>
+      )}
 
       {/* ══════════ Notification drawer ══════════ */}
       <div style={{ position: "fixed", top: 0, left: notifOpen ? 0 : "-100%", width: 300, height: "100vh", background: "rgba(255,255,255,0.94)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)", borderRight: "1.5px solid rgba(200,200,230,0.5)", zIndex: 500, transition: "left 0.3s ease", overflowY: "auto", boxShadow: notifOpen ? "24px 0 60px rgba(80,40,120,0.12)" : "none" }}>
@@ -773,6 +808,29 @@ export default function StudentDashboard() {
           5%   { opacity:1 }
           20%  { opacity:0; transform:rotate(-35deg) translateX(220px) }
           100% { opacity:0; transform:rotate(-35deg) translateX(220px) }
+        }
+
+        /* ── Intro entrance animations ── */
+        @keyframes intro-up {
+          from { opacity:0; transform: translateY(48px) scale(0.94); }
+          to   { opacity:1; transform: translateY(0)    scale(1); }
+        }
+        @keyframes intro-right {
+          from { opacity:0; transform: translateX(72px) scale(0.94); }
+          to   { opacity:1; transform: translateX(0)    scale(1); }
+        }
+        @keyframes intro-left {
+          from { opacity:0; transform: translateX(-72px) scale(0.94); }
+          to   { opacity:1; transform: translateX(0)     scale(1); }
+        }
+        @keyframes intro-header {
+          from { opacity:0; transform: translateY(-18px); }
+          to   { opacity:1; transform: translateY(0); }
+        }
+        @keyframes splash-exit {
+          0%   { opacity:1; transform: scale(1) translateY(0); }
+          60%  { opacity:0.7; transform: scale(0.88) translateY(-18px); }
+          100% { opacity:0; transform: scale(0.7) translateY(-60px); }
         }
       `}</style>
     </div>
