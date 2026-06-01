@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useNotificationReads } from "../../hooks/useNotificationReads";
 
 /* ─────────── helpers ─────────── */
 function glassCard(color: string, dark: string, extra?: React.CSSProperties): React.CSSProperties {
@@ -62,6 +63,7 @@ export default function ParentDashboard() {
   const [mounted, setMounted]                 = useState(false);
   const [confirmLogout, setConfirmLogout]     = useState(false);
   const [weekOffset, setWeekOffset]           = useState(0);
+  const { countUnread } = useNotificationReads(user?.id);
 
   useEffect(() => { const t = setTimeout(() => setMounted(true), 80); return () => clearTimeout(t); }, []);
 
@@ -357,7 +359,7 @@ export default function ParentDashboard() {
                 <div style={shine()} />
                 <div style={{ fontWeight: 800, color: "white", marginBottom: 10, fontSize: 14, display: "flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1, textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>
                   <Bell size={14} /> اعلانات مدرسه
-                  {notifications.length > 0 && (
+                  {countUnread(notifications) > 0 && (
                     <span style={{
                       minWidth: 20, height: 20, borderRadius: 999,
                       background: "#dc2626",
@@ -368,7 +370,7 @@ export default function ParentDashboard() {
                       boxShadow: "0 2px 8px rgba(220,38,38,0.55)",
                       lineHeight: 1,
                     }}>
-                      {notifications.length.toLocaleString("fa-IR")}
+                      {countUnread(notifications) > 9 ? "۹+" : countUnread(notifications).toLocaleString("fa-IR")}
                     </span>
                   )}
                 </div>

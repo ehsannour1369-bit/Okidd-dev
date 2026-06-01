@@ -1,4 +1,7 @@
 import { ReactNode, ComponentType, useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../lib/api";
+import { useNotificationReads } from "../hooks/useNotificationReads";
 import { Link, useLocation } from "wouter";
 import { useAuthStore } from "../store/auth";
 import {
@@ -219,6 +222,50 @@ function NavCard({ item, active, onClick, TEXT }: { item: NavItem; active: boole
           textShadow: active ? "0 1px 4px rgba(0,0,0,0.3)" : "none",
         }}>{item.label}</div>
       </div>
+    </Link>
+  );
+}
+
+/* ─── Bell icon with unread-count badge ─── */
+function BellBadge({ userId, schoolId, href, isActive, accent, accentDark }: {
+  userId: number; schoolId?: number; href: string; isActive: boolean;
+  accent: string; accentDark: string;
+}) {
+  const { data: notifs = [] } = useQuery<{ id: number; createdAt?: string }[]>({
+    queryKey: ["notifs-badge", schoolId],
+    queryFn: () => api.get(`/notifications?schoolId=${schoolId}`),
+    enabled: !!schoolId,
+    staleTime: 60_000,
+  });
+  const { countUnread } = useNotificationReads(userId);
+  const unread = countUnread(notifs);
+  return (
+    <Link href={href}>
+      <button title="اعلان‌ها" style={{
+        position: "relative",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        width: 38, height: 38, borderRadius: 12, cursor: "pointer",
+        background: isActive ? `${accent}28` : `${accent}14`,
+        border: `1.5px solid ${isActive ? `${accent}70` : `${accent}35`}`,
+        color: accentDark, transition: "all 0.2s ease",
+      }}
+        onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = `${accent}28`; }}
+        onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = isActive ? `${accent}28` : `${accent}14`; }}
+      >
+        <Bell size={17} />
+        {unread > 0 && (
+          <span style={{
+            position: "absolute", top: -5, left: -5,
+            minWidth: 16, height: 16, borderRadius: 999,
+            background: "#dc2626", border: "2px solid white",
+            color: "white", fontSize: 9, fontWeight: 900,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "0 3px", lineHeight: 1, pointerEvents: "none",
+          }}>
+            {unread > 9 ? "۹+" : unread.toLocaleString("fa-IR")}
+          </span>
+        )}
+      </button>
     </Link>
   );
 }
@@ -511,22 +558,15 @@ export default function Layout({ children }: { children: ReactNode }) {
                 const notifPath = user.role === "teacher" ? "/teacher/notifications"
                   : user.role === "branch_manager" ? "/branch/notifications"
                   : "/parent/notifications";
-                const isActive = location === notifPath;
                 return (
-                  <Link href={notifPath}>
-                    <button title="اعلان‌ها" style={{
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      width: 38, height: 38, borderRadius: 12, cursor: "pointer",
-                      background: isActive ? `${accent}28` : `${accent}14`,
-                      border: `1.5px solid ${isActive ? `${accent}70` : `${accent}35`}`,
-                      color: accentDark, transition: "all 0.2s ease",
-                    }}
-                      onMouseOver={e => { e.currentTarget.style.background = `${accent}28`; }}
-                      onMouseOut={e => { e.currentTarget.style.background = isActive ? `${accent}28` : `${accent}14`; }}
-                    >
-                      <Bell size={17} />
-                    </button>
-                  </Link>
+                  <BellBadge
+                    userId={user.id}
+                    schoolId={user.schoolId ?? undefined}
+                    href={notifPath}
+                    isActive={location === notifPath}
+                    accent={accent}
+                    accentDark={accentDark}
+                  />
                 );
               })()}
 

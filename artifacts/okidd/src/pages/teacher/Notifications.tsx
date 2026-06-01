@@ -1,7 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
+import { useNotificationReads } from "../../hooks/useNotificationReads";
 import { showToast } from "../../lib/toast";
 import { Bell, Send, Plus, Users, User, ChevronDown } from "lucide-react";
 
@@ -31,6 +32,7 @@ const TARGET_OPTIONS: { value: TargetType; label: string }[] = [
 export default function TeacherNotifications() {
   const { user } = useAuthStore();
   const qc = useQueryClient();
+  const { markAllSeen } = useNotificationReads(user?.id);
   const [tab, setTab] = useState<"inbox" | "send">("inbox");
   const [form, setForm] = useState({ title: "", body: "", classId: "", targetType: "all_students" as TargetType });
   const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>([]);
@@ -64,6 +66,8 @@ export default function TeacherNotifications() {
       .filter(n => { if (seen.has(n.id)) return false; seen.add(n.id); return true; })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [broadcastNotifs, personalNotifs]);
+
+  useEffect(() => { if (inbox.length > 0) markAllSeen(); }, [inbox.length]);
 
   const selectedClass = classes.find((c: any) => c.id === parseInt(form.classId));
 

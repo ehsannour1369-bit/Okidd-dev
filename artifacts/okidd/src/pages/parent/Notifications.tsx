@@ -1,15 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
+import { useNotificationReads } from "../../hooks/useNotificationReads";
 import { Bell } from "lucide-react";
 
 export default function ParentNotifications() {
   const { user } = useAuthStore();
+  const { markAllSeen } = useNotificationReads(user?.id);
   const { data: notifs = [] } = useQuery<any[]>({
     queryKey: ["notifications", user?.schoolId, "parent"],
     queryFn: () => api.get(`/notifications?schoolId=${user?.schoolId}&targetRole=parent`),
     enabled: !!user?.schoolId,
   });
+
+  useEffect(() => { if (notifs.length > 0) markAllSeen(); }, [notifs.length]);
 
   return (
     <div>

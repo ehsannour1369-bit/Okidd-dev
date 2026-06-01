@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
+import { useNotificationReads } from "../../hooks/useNotificationReads";
 import { showToast } from "../../lib/toast";
 import { Bell, Calendar, Plus, X, MessageCircle, ChevronDown, ChevronUp, Send as SendIcon, ChevronRight } from "lucide-react";
 import { useLocation } from "wouter";
@@ -37,6 +38,7 @@ export default function StudentNotifications() {
   const { user } = useAuthStore();
   const [, navigate] = useLocation();
   const qc = useQueryClient();
+  const { markAllSeen } = useNotificationReads(user?.id);
   const [tab, setTab] = useState<"received" | "sent">("received");
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: "", body: "", targetRole: "teacher" });
@@ -47,6 +49,8 @@ export default function StudentNotifications() {
     queryFn: () => api.get(`/notifications?schoolId=${user?.schoolId}&targetRole=student`),
     enabled: !!user?.schoolId,
   });
+
+  useEffect(() => { if (received.length > 0) markAllSeen(); }, [received.length]);
 
   const { data: sent = [] } = useQuery<any[]>({
     queryKey: ["notifications", "student-sent", user?.id],
