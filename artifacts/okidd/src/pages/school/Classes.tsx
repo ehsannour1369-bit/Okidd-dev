@@ -19,7 +19,7 @@ export default function SchoolClasses() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f8f5ff", marginBottom: 24 }}>کلاس‌ها</h1>
+      <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1e1b4b", marginBottom: 24 }}>کلاس‌ها</h1>
       {branches.map(branch => {
         const branchGLs = gradeLevels.filter(gl => gl.branchId === branch.id);
         return (
@@ -32,7 +32,7 @@ export default function SchoolClasses() {
               const glGrades = grades.filter(g => g.gradeLevelId === gl.id);
               return (
                 <div key={gl.id} style={{ marginBottom: 16, paddingRight: 16 }}>
-                  <h3 style={{ color: "#c4b5fd", fontSize: 14, fontWeight: 600, marginBottom: 10 }}>{gl.name}</h3>
+                  <h3 style={{ color: "#3730a3", fontSize: 14, fontWeight: 600, marginBottom: 10 }}>{gl.name}</h3>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12 }}>
                     {glGrades.map(grade => {
                       const gradeClasses = classes.filter(c => c.gradeId === grade.id);
@@ -40,19 +40,19 @@ export default function SchoolClasses() {
                         <Link key={cls.id} href={`/school/classes/${cls.id}`}>
                           <a style={{ textDecoration: "none" }}>
                             <div style={{
-                              background: "rgba(30,18,60,0.85)", border: "1px solid rgba(139,92,246,0.2)",
+                              background: "rgba(255,255,255,0.82)", border: "1px solid rgba(139,92,246,0.2)",
                               borderRadius: 14, padding: 18, transition: "all 0.3s ease", cursor: "pointer",
                             }}
-                              onMouseOver={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "#7c3aed"; el.style.boxShadow = "0 0 20px rgba(124,58,237,0.2)"; el.style.transform = "translateY(-2px)"; }}
-                              onMouseOut={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "rgba(139,92,246,0.2)"; el.style.boxShadow = "none"; el.style.transform = "translateY(0)"; }}
+                              onMouseOver={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "#7c3aed"; el.style.boxShadow = "0 0 20px rgba(99,102,241,0.12)"; el.style.transform = "translateY(-2px)"; }}
+                              onMouseOut={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "rgba(99,102,241,0.15)"; el.style.boxShadow = "none"; el.style.transform = "translateY(0)"; }}
                             >
                               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                                 <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg, #7c3aed, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                                   <BookMarked size={18} color="white" />
                                 </div>
                                 <div>
-                                  <div style={{ fontWeight: 700, color: "#f8f5ff", fontSize: 14 }}>{cls.name}</div>
-                                  <div style={{ fontSize: 11, color: "#8b5cf6" }}>{grade.name}</div>
+                                  <div style={{ fontWeight: 700, color: "#1e1b4b", fontSize: 14 }}>{cls.name}</div>
+                                  <div style={{ fontSize: 11, color: "#4f46e5" }}>{grade.name}</div>
                                 </div>
                               </div>
                               <div style={{ display: "flex", gap: 8 }}>
@@ -70,7 +70,7 @@ export default function SchoolClasses() {
                         </Link>
                       ));
                     })}
-                    {glGrades.length === 0 && <p style={{ color: "#8b5cf6", fontSize: 13 }}>کلاسی وجود ندارد</p>}
+                    {glGrades.length === 0 && <p style={{ color: "#4f46e5", fontSize: 13 }}>کلاسی وجود ندارد</p>}
                   </div>
                 </div>
               );

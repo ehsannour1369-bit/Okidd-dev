@@ -7,33 +7,33 @@ import { Plus, ChevronDown, ChevronUp, Trash2, BookOpen, Users, GraduationCap, X
 function ConfirmDialog({ title, name, onConfirm, onCancel, loading }: { title: string; name: string; onConfirm: () => void; onCancel: () => void; loading?: boolean }) {
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(4px)", zIndex: 400, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-      <div style={{ background: "#1a1238", border: "1px solid rgba(248,113,113,0.5)", borderRadius: 20, padding: 28, width: "100%", maxWidth: 400, boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}>
+      <div style={{ background: "#fffef5", border: "1px solid rgba(248,113,113,0.5)", borderRadius: 20, padding: 28, width: "100%", maxWidth: 400, boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}>
         <div style={{ textAlign: "center", marginBottom: 20 }}>
           <div style={{ fontSize: 36, marginBottom: 10 }}>🗑️</div>
-          <h3 style={{ margin: "0 0 8px", color: "#f8f5ff", fontSize: 17, fontWeight: 700 }}>{title}</h3>
-          <p style={{ margin: 0, color: "#c4b5fd", fontSize: 14 }}>«<strong style={{ color: "#f87171" }}>{name}</strong>» حذف خواهد شد.</p>
+          <h3 style={{ margin: "0 0 8px", color: "#78350f", fontSize: 17, fontWeight: 700 }}>{title}</h3>
+          <p style={{ margin: 0, color: "#92400e", fontSize: 14 }}>«<strong style={{ color: "#f87171" }}>{name}</strong>» حذف خواهد شد.</p>
           <p style={{ margin: "8px 0 0", color: "#f87171", fontSize: 12 }}>این عملیات قابل بازگشت نیست.</p>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={onConfirm} disabled={loading} style={{ flex: 1, padding: "11px 0", background: loading ? "rgba(248,113,113,0.3)" : "linear-gradient(135deg, #dc2626, #f87171)", border: "none", borderRadius: 10, color: "white", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: loading ? "not-allowed" : "pointer", fontSize: 14 }}>
             {loading ? "در حال حذف..." : "بله، حذف شود"}
           </button>
-          <button onClick={onCancel} style={{ flex: 1, padding: "11px 0", background: "transparent", border: "1px solid rgba(124,58,237,0.5)", borderRadius: 10, color: "#a855f7", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14 }}>انصراف</button>
+          <button onClick={onCancel} style={{ flex: 1, padding: "11px 0", background: "transparent", border: "1px solid rgba(180,83,9,0.40)", borderRadius: 10, color: "#d97706", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14 }}>انصراف</button>
         </div>
       </div>
     </div>
   );
 }
 
-const IS = { width: "100%", background: "rgba(13,10,26,0.5)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#f8f5ff", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
+const IS = { width: "100%", background: "rgba(255,252,235,0.90)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#78350f", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
 
 function Modal({ title, onClose, children }: any) {
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ background: "#1a1238", border: "1px solid rgba(124,58,237,0.5)", borderRadius: 20, padding: 28, width: "90%", maxWidth: 560, maxHeight: "92vh", overflowY: "auto" }}>
+      <div style={{ background: "#fffef5", border: "1px solid rgba(180,83,9,0.40)", borderRadius: 20, padding: 28, width: "90%", maxWidth: 560, maxHeight: "92vh", overflowY: "auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <h3 style={{ margin: 0, color: "#f8f5ff", fontSize: 17, fontWeight: 700 }}>{title}</h3>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer" }}><X size={20} /></button>
+          <h3 style={{ margin: 0, color: "#78350f", fontSize: 17, fontWeight: 700 }}>{title}</h3>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "#b45309", cursor: "pointer" }}><X size={20} /></button>
         </div>
         {children}
       </div>
@@ -42,7 +42,7 @@ function Modal({ title, onClose, children }: any) {
 }
 
 function Lbl({ label, children }: any) {
-  return <div style={{ marginBottom: 12 }}><label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 5 }}>{label}</label>{children}</div>;
+  return <div style={{ marginBottom: 12 }}><label style={{ display: "block", color: "#92400e", fontSize: 13, marginBottom: 5 }}>{label}</label>{children}</div>;
 }
 
 function SaveBtn({ onClick, disabled, label = "ذخیره" }: any) {
@@ -172,7 +172,7 @@ export default function AdminBranches() {
   }
 
   const tabBtn = (tab: Tab, label: string, icon: any) => (
-    <button onClick={() => setClassTab(tab)} style={{ flex: 1, padding: "10px 0", background: classTab === tab ? "rgba(124,58,237,0.3)" : "transparent", border: `1px solid ${classTab === tab ? "#7c3aed" : "rgba(139,92,246,0.2)"}`, borderRadius: 10, color: classTab === tab ? "#c4b5fd" : "#8b5cf6", fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+    <button onClick={() => setClassTab(tab)} style={{ flex: 1, padding: "10px 0", background: classTab === tab ? "rgba(180,83,9,0.20)" : "transparent", border: `1px solid ${classTab === tab ? "#7c3aed" : "rgba(180,83,9,0.15)"}`, borderRadius: 10, color: classTab === tab ? "#92400e" : "#b45309", fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
       {icon}{label}
     </button>
   );
@@ -182,14 +182,14 @@ export default function AdminBranches() {
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f8f5ff", margin: 0 }}>شعبه‌ها و کلاس‌ها</h1>
-        <p style={{ color: "#8b5cf6", fontSize: 14, marginTop: 4 }}>مدیریت سلسله‌مراتبی شعبه‌ها، مقطع‌ها، پایه‌ها، کلاس‌ها و کتاب‌ها</p>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#78350f", margin: 0 }}>شعبه‌ها و کلاس‌ها</h1>
+        <p style={{ color: "#b45309", fontSize: 14, marginTop: 4 }}>مدیریت سلسله‌مراتبی شعبه‌ها، مقطع‌ها، پایه‌ها، کلاس‌ها و کتاب‌ها</p>
       </div>
 
       {/* School Selector */}
-      <div style={{ marginBottom: 20, padding: "16px", background: "rgba(30,18,60,0.85)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 14, display: "flex", alignItems: "center", gap: 12 }}>
-        <School size={20} color="#8b5cf6" />
-        <label style={{ color: "#c4b5fd", fontSize: 14, fontWeight: 500 }}>مدرسه:</label>
+      <div style={{ marginBottom: 20, padding: "16px", background: "rgba(255,255,255,0.82)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 14, display: "flex", alignItems: "center", gap: 12 }}>
+        <School size={20} color="#b45309" />
+        <label style={{ color: "#92400e", fontSize: 14, fontWeight: 500 }}>مدرسه:</label>
         <select
           value={selectedSchoolId ?? ""}
           onChange={e => { setSelectedSchoolId(e.target.value ? parseInt(e.target.value) : null); setExpBranch(new Set()); setExpGL(new Set()); setExpGrade(new Set()); }}
@@ -201,14 +201,14 @@ export default function AdminBranches() {
           ))}
         </select>
         {selectedSchool && (
-          <span style={{ color: "#8b5cf6", fontSize: 13 }}>
+          <span style={{ color: "#b45309", fontSize: 13 }}>
             {selectedSchool.branchCount} شعبه / {selectedSchool.studentCount} دانش‌آموز / {selectedSchool.teacherCount} معلم
           </span>
         )}
       </div>
 
       {!selectedSchoolId && (
-        <div style={{ textAlign: "center", padding: 60, color: "#8b5cf6" }}>
+        <div style={{ textAlign: "center", padding: 60, color: "#b45309" }}>
           <GitBranch size={48} style={{ opacity: 0.3, marginBottom: 16 }} />
           <p>برای مدیریت شعبه‌ها، ابتدا یک مدرسه انتخاب کنید</p>
         </div>
@@ -217,7 +217,7 @@ export default function AdminBranches() {
       {selectedSchoolId && (
         <>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-            <h2 style={{ color: "#f8f5ff", fontSize: 16, margin: 0 }}>شعبه‌ها</h2>
+            <h2 style={{ color: "#78350f", fontSize: 16, margin: 0 }}>شعبه‌ها</h2>
             <button onClick={() => { setBForm(emptyBForm); setBDuplicates([]); setBSelectedMgrId(null); setBError(""); setAddBranchOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "linear-gradient(135deg, #7c3aed, #a855f7)", border: "none", borderRadius: 10, color: "white", fontSize: 13, fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>
               <Plus size={14} /> افزودن شعبه
             </button>
@@ -225,13 +225,13 @@ export default function AdminBranches() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {branches.map((branch: any) => (
-              <div key={branch.id} style={{ background: "rgba(30,18,60,0.85)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 14, overflow: "hidden" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", cursor: "pointer", background: "rgba(13,10,26,0.3)" }}
+              <div key={branch.id} style={{ background: "rgba(255,255,255,0.82)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 14, overflow: "hidden" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", cursor: "pointer", background: "rgba(255,252,235,0.60)" }}
                   onClick={() => setExpBranch(toggle(expBranch, branch.id))}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    {expBranch.has(branch.id) ? <ChevronUp size={16} color="#8b5cf6" /> : <ChevronDown size={16} color="#8b5cf6" />}
-                    <GitBranch size={16} color="#a855f7" />
-                    <span style={{ fontWeight: 700, color: "#f8f5ff", fontSize: 15 }}>{branch.name}</span>
+                    {expBranch.has(branch.id) ? <ChevronUp size={16} color="#b45309" /> : <ChevronDown size={16} color="#b45309" />}
+                    <GitBranch size={16} color="#d97706" />
+                    <span style={{ fontWeight: 700, color: "#78350f", fontSize: 15 }}>{branch.name}</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <button onClick={(e) => { e.stopPropagation(); setDeleteTarget({ type: "branch", id: branch.id, name: branch.name }); }} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", padding: 4 }}>
@@ -243,21 +243,21 @@ export default function AdminBranches() {
                 {expBranch.has(branch.id) && (
                   <div style={{ padding: "14px 18px", borderTop: "1px solid rgba(139,92,246,0.1)" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                      <h3 style={{ color: "#c4b5fd", fontSize: 14, margin: 0 }}>مقطع‌ها</h3>
-                      <button onClick={() => setAddGLFor(branch.id)} style={{ display: "flex", alignItems: "center", gap: 4, padding: "6px 12px", background: "rgba(124,58,237,0.2)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 8, color: "#c4b5fd", fontSize: 12, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>
+                      <h3 style={{ color: "#92400e", fontSize: 14, margin: 0 }}>مقطع‌ها</h3>
+                      <button onClick={() => setAddGLFor(branch.id)} style={{ display: "flex", alignItems: "center", gap: 4, padding: "6px 12px", background: "rgba(180,83,9,0.15)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 8, color: "#92400e", fontSize: 12, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>
                         <Plus size={12} /> مقطع
                       </button>
                     </div>
                     {gradeLevels.filter((gl: any) => gl.branchId === branch.id).map((gl: any) => (
                       <div key={gl.id} style={{ marginBottom: 12 }}>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: "rgba(13,10,26,0.3)", borderRadius: 8, cursor: "pointer" }}
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: "rgba(255,252,235,0.60)", borderRadius: 8, cursor: "pointer" }}
                           onClick={() => setExpGL(toggle(expGL, gl.id))}>
-                          <span style={{ color: "#c4b5fd", fontSize: 14, fontWeight: 600 }}>{gl.name}</span>
+                          <span style={{ color: "#92400e", fontSize: 14, fontWeight: 600 }}>{gl.name}</span>
                           <div style={{ display: "flex", gap: 8 }}>
                             <button onClick={(e) => { e.stopPropagation(); setDeleteTarget({ type: "gl", id: gl.id, name: gl.name }); }} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer" }}>
                               <Trash2 size={13} />
                             </button>
-                            <button onClick={(e) => { e.stopPropagation(); setAddGradeFor(gl.id); }} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer" }}>
+                            <button onClick={(e) => { e.stopPropagation(); setAddGradeFor(gl.id); }} style={{ background: "none", border: "none", color: "#b45309", cursor: "pointer" }}>
                               <Plus size={13} />
                             </button>
                           </div>
@@ -265,50 +265,50 @@ export default function AdminBranches() {
                         {expGL.has(gl.id) && (
                           <div style={{ padding: "10px 12px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>
                             {grades.filter((g: any) => g.gradeLevelId === gl.id).map((grade: any) => (
-                              <div key={grade.id} style={{ background: "rgba(30,18,60,0.5)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 10, padding: 10 }}>
+                              <div key={grade.id} style={{ background: "rgba(255,255,255,0.80)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 10, padding: 10 }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                                  <span style={{ color: "#f8f5ff", fontSize: 14, fontWeight: 600 }}>{grade.name}</span>
+                                  <span style={{ color: "#78350f", fontSize: 14, fontWeight: 600 }}>{grade.name}</span>
                                   <div style={{ display: "flex", gap: 6 }}>
                                     <button onClick={() => setDeleteTarget({ type: "grade", id: grade.id, name: grade.name })} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer" }}>
                                       <Trash2 size={12} />
                                     </button>
-                                    <button onClick={() => setAddClassFor(grade.id)} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer" }}>
+                                    <button onClick={() => setAddClassFor(grade.id)} style={{ background: "none", border: "none", color: "#b45309", cursor: "pointer" }}>
                                       <Plus size={12} />
                                     </button>
                                   </div>
                                 </div>
                                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                                   {classes.filter((c: any) => c.gradeId === grade.id).map((cls: any) => (
-                                    <div key={cls.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 8px", background: "rgba(13,10,26,0.3)", borderRadius: 6, cursor: "pointer" }}
+                                    <div key={cls.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 8px", background: "rgba(255,252,235,0.60)", borderRadius: 6, cursor: "pointer" }}
                                       onClick={() => setClassManage(cls)}>
-                                      <span style={{ color: "#c4b5fd", fontSize: 13 }}>{cls.name}</span>
+                                      <span style={{ color: "#92400e", fontSize: 13 }}>{cls.name}</span>
                                       <button onClick={(e) => { e.stopPropagation(); setDeleteTarget({ type: "class", id: cls.id, name: cls.name }); }} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer" }}>
                                         <Trash2 size={12} />
                                       </button>
                                     </div>
                                   ))}
                                   {classes.filter((c: any) => c.gradeId === grade.id).length === 0 && (
-                                    <span style={{ color: "#8b5cf6", fontSize: 12, padding: "4px 0" }}>کلاسی ندارد</span>
+                                    <span style={{ color: "#b45309", fontSize: 12, padding: "4px 0" }}>کلاسی ندارد</span>
                                   )}
                                 </div>
                               </div>
                             ))}
                             {grades.filter((g: any) => g.gradeLevelId === gl.id).length === 0 && (
-                              <span style={{ color: "#8b5cf6", fontSize: 12 }}>پایه‌ای وجود ندارد</span>
+                              <span style={{ color: "#b45309", fontSize: 12 }}>پایه‌ای وجود ندارد</span>
                             )}
                           </div>
                         )}
                       </div>
                     ))}
                     {gradeLevels.filter((gl: any) => gl.branchId === branch.id).length === 0 && (
-                      <span style={{ color: "#8b5cf6", fontSize: 13 }}>مقطعی تعریف نشده</span>
+                      <span style={{ color: "#b45309", fontSize: 13 }}>مقطعی تعریف نشده</span>
                     )}
                   </div>
                 )}
               </div>
             ))}
             {branches.length === 0 && (
-              <div style={{ textAlign: "center", padding: 30, color: "#8b5cf6" }}>
+              <div style={{ textAlign: "center", padding: 30, color: "#b45309" }}>
                 <p>هنوز شعبه‌ای برای این مدرسه ایجاد نشده</p>
               </div>
             )}
@@ -324,32 +324,32 @@ export default function AdminBranches() {
           {bDuplicates.length > 0 && (
             <div style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 12, padding: 14, marginBottom: 14 }}>
               <p style={{ color: "#fbbf24", fontSize: 13, fontWeight: 600, margin: "0 0 8px" }}>⚠️ کاربری با این شماره موبایل یا کد ملی در سیستم وجود دارد.</p>
-              <p style={{ color: "#c4b5fd", fontSize: 12, margin: "0 0 10px" }}>یک کاربر انتخاب کنید یا کاربر جدید بسازید:</p>
+              <p style={{ color: "#92400e", fontSize: 12, margin: "0 0 10px" }}>یک کاربر انتخاب کنید یا کاربر جدید بسازید:</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 10 }}>
                 {bDuplicates.map((u: any) => (
                   <button key={u.id} onClick={() => { setBSelectedMgrId(u.id); setBDuplicates([]); setBForm(prev => ({ ...prev, managerName: u.name, managerPhone: u.phone ?? "", managerNationalId: u.nationalId ?? "" })); }}
-                    style={{ background: "rgba(30,18,60,0.8)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, padding: "8px 12px", cursor: "pointer", textAlign: "right", fontFamily: "Vazirmatn", color: "#f8f5ff" }}>
+                    style={{ background: "rgba(255,255,255,0.82)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, padding: "8px 12px", cursor: "pointer", textAlign: "right", fontFamily: "Vazirmatn", color: "#78350f" }}>
                     <div style={{ fontSize: 14, fontWeight: 600 }}>{u.name}</div>
-                    <div style={{ fontSize: 12, color: "#a78bfa", marginTop: 2, display: "flex", gap: 10 }}>
+                    <div style={{ fontSize: 12, color: "#d97706", marginTop: 2, display: "flex", gap: 10 }}>
                       {u.phone && <span>📱 {u.phone}</span>}
                       {u.nationalId && <span>🪪 {u.nationalId}</span>}
                     </div>
                   </button>
                 ))}
               </div>
-              <button onClick={() => { setBDuplicates([]); setBSelectedMgrId(-1); }} style={{ width: "100%", padding: "8px 0", background: "transparent", border: "1px dashed rgba(139,92,246,0.4)", borderRadius: 10, color: "#a78bfa", fontFamily: "Vazirmatn", fontSize: 13, cursor: "pointer" }}>+ ساخت کاربر جدید</button>
+              <button onClick={() => { setBDuplicates([]); setBSelectedMgrId(-1); }} style={{ width: "100%", padding: "8px 0", background: "transparent", border: "1px dashed rgba(139,92,246,0.4)", borderRadius: 10, color: "#d97706", fontFamily: "Vazirmatn", fontSize: 13, cursor: "pointer" }}>+ ساخت کاربر جدید</button>
             </div>
           )}
 
           {bSelectedMgrId && bSelectedMgrId > 0 && (
-            <div style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.3)", borderRadius: 10, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#4ade80" }}>
+            <div style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.3)", borderRadius: 10, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#15803d" }}>
               ✓ کاربر موجود انتخاب شد — پنل جدید ساخته نمی‌شود
             </div>
           )}
 
           {/* Branch info */}
           <div style={{ borderBottom: "1px solid rgba(139,92,246,0.2)", paddingBottom: 6, marginBottom: 12 }}>
-            <span style={{ color: "#a78bfa", fontSize: 13, fontWeight: 700 }}>اطلاعات شعبه</span>
+            <span style={{ color: "#d97706", fontSize: 13, fontWeight: 700 }}>اطلاعات شعبه</span>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 14px" }}>
             <div style={{ gridColumn: "1/-1" }}>
@@ -369,7 +369,7 @@ export default function AdminBranches() {
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 2 }}>
                   {EDUCATIONAL_LEVELS.map(lvl => (
                     <button key={lvl} type="button" onClick={() => setBForm(prev => ({ ...prev, educationalLevels: prev.educationalLevels.includes(lvl) ? prev.educationalLevels.filter(l => l !== lvl) : [...prev.educationalLevels, lvl] }))}
-                      style={{ padding: "5px 12px", borderRadius: 20, fontSize: 13, cursor: "pointer", fontFamily: "Vazirmatn", background: bForm.educationalLevels.includes(lvl) ? "rgba(124,58,237,0.35)" : "rgba(13,10,26,0.5)", border: `1px solid ${bForm.educationalLevels.includes(lvl) ? "#7c3aed" : "rgba(139,92,246,0.3)"}`, color: bForm.educationalLevels.includes(lvl) ? "#e9d5ff" : "#a78bfa", fontWeight: bForm.educationalLevels.includes(lvl) ? 600 : 400 }}>
+                      style={{ padding: "5px 12px", borderRadius: 20, fontSize: 13, cursor: "pointer", fontFamily: "Vazirmatn", background: bForm.educationalLevels.includes(lvl) ? "rgba(180,83,9,0.20)" : "rgba(255,252,235,0.90)", border: `1px solid ${bForm.educationalLevels.includes(lvl) ? "#7c3aed" : "rgba(180,83,9,0.25)"}`, color: bForm.educationalLevels.includes(lvl) ? "#78350f" : "#d97706", fontWeight: bForm.educationalLevels.includes(lvl) ? 600 : 400 }}>
                       {lvl}
                     </button>
                   ))}
@@ -380,7 +380,7 @@ export default function AdminBranches() {
 
           {/* Manager info */}
           <div style={{ borderBottom: "1px solid rgba(139,92,246,0.2)", paddingBottom: 6, marginBottom: 12, marginTop: 4 }}>
-            <span style={{ color: "#a78bfa", fontSize: 13, fontWeight: 700 }}>اطلاعات مدیر شعبه</span>
+            <span style={{ color: "#d97706", fontSize: 13, fontWeight: 700 }}>اطلاعات مدیر شعبه</span>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 14px" }}>
             <div style={{ gridColumn: "1/-1" }}>
@@ -411,7 +411,7 @@ export default function AdminBranches() {
           {glForm.name && GRADE_DEFAULTS[glForm.name] && GRADE_DEFAULTS[glForm.name].length > 0 && (
             <div style={{ marginTop: 4 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <span style={{ color: "#a78bfa", fontSize: 13, fontWeight: 600 }}>پایه‌های این مقطع</span>
+                <span style={{ color: "#d97706", fontSize: 13, fontWeight: 600 }}>پایه‌های این مقطع</span>
                 <div style={{ display: "flex", gap: 8 }}>
                   <button type="button" onClick={() => setGLForm(prev => ({ ...prev, selectedGrades: [...GRADE_DEFAULTS[prev.name]] }))}
                     style={{ fontSize: 11, color: "#60a5fa", background: "none", border: "none", cursor: "pointer", fontFamily: "Vazirmatn" }}>انتخاب همه</button>
@@ -419,7 +419,7 @@ export default function AdminBranches() {
                     style={{ fontSize: 11, color: "#f87171", background: "none", border: "none", cursor: "pointer", fontFamily: "Vazirmatn" }}>حذف انتخاب</button>
                 </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6, background: "rgba(13,10,26,0.5)", borderRadius: 10, padding: "10px 12px", border: "1px solid rgba(139,92,246,0.2)" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, background: "rgba(255,252,235,0.90)", borderRadius: 10, padding: "10px 12px", border: "1px solid rgba(139,92,246,0.2)" }}>
                 {GRADE_DEFAULTS[glForm.name].map(grade => {
                   const checked = glForm.selectedGrades.includes(grade);
                   return (
@@ -428,13 +428,13 @@ export default function AdminBranches() {
                         style={{ width: 18, height: 18, borderRadius: 5, border: `2px solid ${checked ? "#7c3aed" : "rgba(139,92,246,0.4)"}`, background: checked ? "#7c3aed" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "all 0.15s" }}>
                         {checked && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                       </div>
-                      <span style={{ color: checked ? "#e9d5ff" : "#c4b5fd", fontSize: 14, fontFamily: "Vazirmatn", userSelect: "none" }}>{grade}</span>
+                      <span style={{ color: checked ? "#78350f" : "#92400e", fontSize: 14, fontFamily: "Vazirmatn", userSelect: "none" }}>{grade}</span>
                     </label>
                   );
                 })}
               </div>
               {glForm.selectedGrades.length > 0 && (
-                <p style={{ color: "#a78bfa", fontSize: 12, margin: "6px 0 0", textAlign: "left" }}>
+                <p style={{ color: "#d97706", fontSize: 12, margin: "6px 0 0", textAlign: "left" }}>
                   {glForm.selectedGrades.length} پایه انتخاب شده
                 </p>
               )}
@@ -510,14 +510,14 @@ export default function AdminBranches() {
                 </button>
               </div>
               {classBooks.map((cb: any) => (
-                <div key={cb.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "rgba(13,10,26,0.3)", borderRadius: 8, marginBottom: 6 }}>
-                  <span style={{ color: "#c4b5fd", fontSize: 14 }}>{cb.title}</span>
+                <div key={cb.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "rgba(255,252,235,0.60)", borderRadius: 8, marginBottom: 6 }}>
+                  <span style={{ color: "#92400e", fontSize: 14 }}>{cb.title}</span>
                   <button onClick={() => delBookMut.mutate({ cid: classManage.id, bid: cb.id })} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer" }}>
                     <Trash2 size={14} />
                   </button>
                 </div>
               ))}
-              {classBooks.length === 0 && <p style={{ color: "#8b5cf6", fontSize: 13 }}>کتابی اختصاص نیافته</p>}
+              {classBooks.length === 0 && <p style={{ color: "#b45309", fontSize: 13 }}>کتابی اختصاص نیافته</p>}
             </div>
           )}
 
@@ -535,14 +535,14 @@ export default function AdminBranches() {
                 </button>
               </div>
               {classStudents.map((cs: any) => (
-                <div key={cs.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "rgba(13,10,26,0.3)", borderRadius: 8, marginBottom: 6 }}>
-                  <span style={{ color: "#c4b5fd", fontSize: 14 }}>{cs.name}</span>
+                <div key={cs.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "rgba(255,252,235,0.60)", borderRadius: 8, marginBottom: 6 }}>
+                  <span style={{ color: "#92400e", fontSize: 14 }}>{cs.name}</span>
                   <button onClick={() => delStudMut.mutate({ cid: classManage.id, sid: cs.id })} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer" }}>
                     <Trash2 size={14} />
                   </button>
                 </div>
               ))}
-              {classStudents.length === 0 && <p style={{ color: "#8b5cf6", fontSize: 13 }}>دانش‌آموزی ثبت نشده</p>}
+              {classStudents.length === 0 && <p style={{ color: "#b45309", fontSize: 13 }}>دانش‌آموزی ثبت نشده</p>}
             </div>
           )}
 
@@ -560,14 +560,14 @@ export default function AdminBranches() {
                 </button>
               </div>
               {classTeachers.map((ct: any) => (
-                <div key={ct.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "rgba(13,10,26,0.3)", borderRadius: 8, marginBottom: 6 }}>
-                  <span style={{ color: "#c4b5fd", fontSize: 14 }}>{ct.name}</span>
+                <div key={ct.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "rgba(255,252,235,0.60)", borderRadius: 8, marginBottom: 6 }}>
+                  <span style={{ color: "#92400e", fontSize: 14 }}>{ct.name}</span>
                   <button onClick={() => delTeachMut.mutate({ cid: classManage.id, tid: ct.id })} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer" }}>
                     <Trash2 size={14} />
                   </button>
                 </div>
               ))}
-              {classTeachers.length === 0 && <p style={{ color: "#8b5cf6", fontSize: 13 }}>معلی ثبت نشده</p>}
+              {classTeachers.length === 0 && <p style={{ color: "#b45309", fontSize: 13 }}>معلی ثبت نشده</p>}
             </div>
           )}
         </Modal>

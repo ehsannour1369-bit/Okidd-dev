@@ -23,16 +23,16 @@ const ACADEMIC_YEARS = ["1401-1402","1402-1403","1403-1404","1404-1405","1405-14
 const EDUCATIONAL_LEVELS = ["ابتدایی","متوسطه اول","متوسطه دوم"];
 
 const inputStyle: React.CSSProperties = {
-  width: "100%", background: "rgba(13,10,26,0.5)", border: "1px solid rgba(139,92,246,0.3)",
-  borderRadius: 10, color: "#f8f5ff", padding: "10px 14px", fontSize: 14,
+  width: "100%", background: "rgba(255,252,235,0.90)", border: "1px solid rgba(139,92,246,0.3)",
+  borderRadius: 10, color: "#78350f", padding: "10px 14px", fontSize: 14,
   fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl", boxSizing: "border-box",
 };
 const labelStyle: React.CSSProperties = {
-  display: "block", color: "#c4b5fd", fontSize: 13, fontWeight: 500, marginBottom: 6,
+  display: "block", color: "#92400e", fontSize: 13, fontWeight: 500, marginBottom: 6,
 };
 const sectionDivider = (title: string) => (
   <div style={{ margin: "20px 0 12px", borderBottom: "1px solid rgba(139,92,246,0.25)", paddingBottom: 6 }}>
-    <span style={{ color: "#a78bfa", fontSize: 13, fontWeight: 700 }}>{title}</span>
+    <span style={{ color: "#d97706", fontSize: 13, fontWeight: 700 }}>{title}</span>
   </div>
 );
 
@@ -40,13 +40,13 @@ function Modal({ title, onClose, children, wide }: { title: string; onClose: () 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
       <div style={{
-        background: "#1a1238", border: "1px solid rgba(124,58,237,0.5)", borderRadius: 20,
+        background: "#fffef5", border: "1px solid rgba(180,83,9,0.40)", borderRadius: 20,
         padding: 28, width: "100%", maxWidth: wide ? 680 : 520, maxHeight: "92vh", overflowY: "auto",
-        boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(124,58,237,0.2)",
+        boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(180,83,9,0.12)",
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <h3 style={{ margin: 0, color: "#f8f5ff", fontSize: 18, fontWeight: 700 }}>{title}</h3>
-          <button onClick={onClose} style={{ background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 8, color: "#8b5cf6", cursor: "pointer", fontSize: 18, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Vazirmatn" }}>×</button>
+          <h3 style={{ margin: 0, color: "#78350f", fontSize: 18, fontWeight: 700 }}>{title}</h3>
+          <button onClick={onClose} style={{ background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 8, color: "#b45309", cursor: "pointer", fontSize: 18, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Vazirmatn" }}>×</button>
         </div>
         {children}
       </div>
@@ -61,9 +61,9 @@ function Field({ label, value, onChange, type = "text", placeholder = "", readOn
       <input
         type={type} value={value} onChange={e => !readOnly && onChange?.(e.target.value)}
         placeholder={placeholder} readOnly={readOnly}
-        style={{ ...inputStyle, background: readOnly ? "rgba(139,92,246,0.06)" : "rgba(13,10,26,0.5)", opacity: readOnly ? 0.7 : 1, cursor: readOnly ? "not-allowed" : "text" }}
+        style={{ ...inputStyle, background: readOnly ? "rgba(139,92,246,0.06)" : "rgba(255,252,235,0.90)", opacity: readOnly ? 0.7 : 1, cursor: readOnly ? "not-allowed" : "text" }}
         onFocus={e => !readOnly && (e.target.style.borderColor = "#7c3aed")}
-        onBlur={e => e.target.style.borderColor = "rgba(139,92,246,0.3)"}
+        onBlur={e => e.target.style.borderColor = "rgba(180,83,9,0.25)"}
       />
     </div>
   );
@@ -93,9 +93,9 @@ function MultiSelect({ label, selected, onChange, options }: { label: string; se
         {options.map(o => (
           <button key={o} onClick={() => toggle(o)} type="button" style={{
             padding: "6px 14px", borderRadius: 20, fontSize: 13, cursor: "pointer", fontFamily: "Vazirmatn",
-            background: selected.includes(o) ? "rgba(124,58,237,0.35)" : "rgba(13,10,26,0.5)",
-            border: `1px solid ${selected.includes(o) ? "#7c3aed" : "rgba(139,92,246,0.3)"}`,
-            color: selected.includes(o) ? "#e9d5ff" : "#a78bfa",
+            background: selected.includes(o) ? "rgba(180,83,9,0.20)" : "rgba(255,252,235,0.90)",
+            border: `1px solid ${selected.includes(o) ? "#7c3aed" : "rgba(180,83,9,0.25)"}`,
+            color: selected.includes(o) ? "#78350f" : "#d97706",
             fontWeight: selected.includes(o) ? 600 : 400, transition: "all 0.15s",
           }}>{o}</button>
         ))}
@@ -107,7 +107,7 @@ function MultiSelect({ label, selected, onChange, options }: { label: string; se
 function SaveBtn({ onClick, disabled, label }: any) {
   return (
     <button onClick={onClick} disabled={disabled} style={{
-      flex: 1, padding: "11px 0", background: disabled ? "rgba(124,58,237,0.3)" : "linear-gradient(135deg, #7c3aed, #a855f7)",
+      flex: 1, padding: "11px 0", background: disabled ? "rgba(180,83,9,0.20)" : "linear-gradient(135deg, #7c3aed, #a855f7)",
       border: "none", borderRadius: 10, color: "white", fontWeight: 600,
       fontFamily: "Vazirmatn, sans-serif", cursor: disabled ? "not-allowed" : "pointer", fontSize: 14,
     }}>{label}</button>
@@ -117,7 +117,7 @@ function CancelBtn({ onClick }: any) {
   return (
     <button onClick={onClick} style={{
       flex: 1, padding: "11px 0", background: "transparent",
-      border: "1px solid rgba(124,58,237,0.5)", borderRadius: 10, color: "#a855f7",
+      border: "1px solid rgba(180,83,9,0.40)", borderRadius: 10, color: "#d97706",
       fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14,
     }}>انصراف</button>
   );
@@ -131,16 +131,16 @@ function DuplicateSelector({ candidates, onSelect, onCreateNew }: {
       <p style={{ color: "#fbbf24", fontSize: 13, fontWeight: 600, margin: "0 0 10px" }}>
         ⚠️ کاربری با این شماره موبایل یا کد ملی در سیستم وجود دارد.
       </p>
-      <p style={{ color: "#c4b5fd", fontSize: 12, margin: "0 0 12px" }}>لطفاً یک کاربر انتخاب کنید یا کاربر جدید بسازید:</p>
+      <p style={{ color: "#92400e", fontSize: 12, margin: "0 0 12px" }}>لطفاً یک کاربر انتخاب کنید یا کاربر جدید بسازید:</p>
       <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
         {candidates.map(u => (
           <button key={u.id} onClick={() => onSelect(u)} style={{
-            background: "rgba(30,18,60,0.8)", border: "1px solid rgba(139,92,246,0.3)",
+            background: "rgba(255,255,255,0.82)", border: "1px solid rgba(139,92,246,0.3)",
             borderRadius: 10, padding: "10px 14px", cursor: "pointer", textAlign: "right",
-            fontFamily: "Vazirmatn", color: "#f8f5ff",
+            fontFamily: "Vazirmatn", color: "#78350f",
           }}>
             <div style={{ fontSize: 14, fontWeight: 600 }}>{u.name}</div>
-            <div style={{ fontSize: 12, color: "#a78bfa", marginTop: 3, display: "flex", gap: 12 }}>
+            <div style={{ fontSize: 12, color: "#d97706", marginTop: 3, display: "flex", gap: 12 }}>
               {u.phone && <span>📱 {u.phone}</span>}
               {u.nationalId && <span>🪪 {u.nationalId}</span>}
               <span style={{ color: "#7c3aed" }}>نقش: {u.role}</span>
@@ -150,7 +150,7 @@ function DuplicateSelector({ candidates, onSelect, onCreateNew }: {
       </div>
       <button onClick={onCreateNew} style={{
         width: "100%", padding: "9px 0", background: "transparent",
-        border: "1px dashed rgba(139,92,246,0.4)", borderRadius: 10, color: "#a78bfa",
+        border: "1px dashed rgba(139,92,246,0.4)", borderRadius: 10, color: "#d97706",
         fontFamily: "Vazirmatn", fontSize: 13, cursor: "pointer",
       }}>+ ساخت کاربر جدید (نادیده گرفتن تکراری)</button>
     </div>
@@ -238,7 +238,7 @@ function BranchModal({ school, onClose, onCreated }: {
 
       {sectionDivider("اطلاعات مدیر شعبه")}
       {selectedManagerUserId && selectedManagerUserId > 0 && (
-        <div style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.3)", borderRadius: 10, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#4ade80" }}>
+        <div style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.3)", borderRadius: 10, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#15803d" }}>
           ✓ کاربر موجود انتخاب شد — پنل کاربری جدید ساخته نمی‌شود
         </div>
       )}
@@ -268,20 +268,20 @@ function DetailsPopup({ school, onClose }: { school: School; onClose: () => void
   return (
     <Modal title={`جزییات شعب — ${school.name}`} onClose={onClose}>
       {school.branchDetails.length === 0
-        ? <p style={{ color: "#8b5cf6", textAlign: "center", padding: 20 }}>شعبه‌ای ثبت نشده</p>
+        ? <p style={{ color: "#b45309", textAlign: "center", padding: 20 }}>شعبه‌ای ثبت نشده</p>
         : school.branchDetails.map(b => (
           <div key={b.branchId} style={{ marginBottom: 10, border: "1px solid rgba(139,92,246,0.2)", borderRadius: 12, overflow: "hidden" }}>
             <button onClick={() => setOpenBranch(openBranch === b.branchId ? null : b.branchId)} style={{
               width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center",
-              padding: "12px 16px", background: "rgba(13,10,26,0.5)", border: "none", cursor: "pointer",
-              color: "#f8f5ff", fontFamily: "Vazirmatn", fontSize: 14, fontWeight: 600,
+              padding: "12px 16px", background: "rgba(255,252,235,0.90)", border: "none", cursor: "pointer",
+              color: "#78350f", fontFamily: "Vazirmatn", fontSize: 14, fontWeight: 600,
             }}>
               <span>{b.branchName}</span>
-              {openBranch === b.branchId ? <ChevronUp size={16} style={{ color: "#a78bfa" }} /> : <ChevronDown size={16} style={{ color: "#a78bfa" }} />}
+              {openBranch === b.branchId ? <ChevronUp size={16} style={{ color: "#d97706" }} /> : <ChevronDown size={16} style={{ color: "#d97706" }} />}
             </button>
             {openBranch === b.branchId && (
-              <div style={{ padding: "12px 16px", background: "rgba(30,18,60,0.4)", display: "flex", gap: 24, flexWrap: "wrap" }}>
-                <Stat icon={<Users size={14} />} label="دانش‌آموزان فعال" value={b.studentCount} color="#a78bfa" />
+              <div style={{ padding: "12px 16px", background: "rgba(255,252,235,0.70)", display: "flex", gap: 24, flexWrap: "wrap" }}>
+                <Stat icon={<Users size={14} />} label="دانش‌آموزان فعال" value={b.studentCount} color="#d97706" />
                 {b.managerName && <Stat icon={<span>👤</span>} label="مدیر شعبه" value={b.managerName} color="#34d399" />}
                 {b.academicYear && <Stat icon={<span>📅</span>} label="سال تحصیلی" value={b.academicYear} color="#60a5fa" />}
               </div>
@@ -297,8 +297,8 @@ function Stat({ icon, label, value, color }: { icon: any; label: string; value: 
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
       <span style={{ color }}>{icon}</span>
       <div>
-        <div style={{ color: "#8b5cf6", fontSize: 11 }}>{label}</div>
-        <div style={{ color: "#f8f5ff", fontSize: 14, fontWeight: 600 }}>{value}</div>
+        <div style={{ color: "#b45309", fontSize: 11 }}>{label}</div>
+        <div style={{ color: "#78350f", fontSize: 14, fontWeight: 600 }}>{value}</div>
       </div>
     </div>
   );
@@ -309,25 +309,25 @@ function ActiveStudentsPopup({ school, onClose }: { school: School; onClose: () 
   return (
     <Modal title={`دانش‌آموزان فعال — ${school.name}`} onClose={onClose}>
       <div style={{ background: "rgba(124,58,237,0.08)", borderRadius: 10, padding: "10px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
-        <span style={{ color: "#c4b5fd", fontSize: 13 }}>مجموع دانش‌آموزان</span>
-        <span style={{ color: "#e9d5ff", fontWeight: 700, fontSize: 16 }}>{school.studentCount}</span>
+        <span style={{ color: "#92400e", fontSize: 13 }}>مجموع دانش‌آموزان</span>
+        <span style={{ color: "#78350f", fontWeight: 700, fontSize: 16 }}>{school.studentCount}</span>
       </div>
       {school.branchDetails.length === 0
-        ? <p style={{ color: "#8b5cf6", textAlign: "center", padding: 16 }}>شعبه‌ای ثبت نشده</p>
+        ? <p style={{ color: "#b45309", textAlign: "center", padding: 16 }}>شعبه‌ای ثبت نشده</p>
         : <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr>
               {["شعبه","دانش‌آموزان","سال تحصیلی"].map(h => (
-                <th key={h} style={{ padding: "8px 12px", color: "#8b5cf6", fontSize: 12, fontWeight: 600, textAlign: "right", background: "rgba(13,10,26,0.4)", borderBottom: "1px solid rgba(139,92,246,0.15)" }}>{h}</th>
+                <th key={h} style={{ padding: "8px 12px", color: "#b45309", fontSize: 12, fontWeight: 600, textAlign: "right", background: "rgba(255,252,235,0.65)", borderBottom: "1px solid rgba(139,92,246,0.15)" }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {school.branchDetails.map(b => (
               <tr key={b.branchId}>
-                <td style={{ padding: "10px 12px", color: "#f8f5ff", fontSize: 14, borderBottom: "1px solid rgba(139,92,246,0.08)", fontWeight: 500 }}>{b.branchName}</td>
-                <td style={{ padding: "10px 12px", color: "#a78bfa", fontSize: 14, borderBottom: "1px solid rgba(139,92,246,0.08)", fontWeight: 600 }}>{b.studentCount}</td>
-                <td style={{ padding: "10px 12px", color: "#8b5cf6", fontSize: 13, borderBottom: "1px solid rgba(139,92,246,0.08)" }}>{b.academicYear ?? "—"}</td>
+                <td style={{ padding: "10px 12px", color: "#78350f", fontSize: 14, borderBottom: "1px solid rgba(139,92,246,0.08)", fontWeight: 500 }}>{b.branchName}</td>
+                <td style={{ padding: "10px 12px", color: "#d97706", fontSize: 14, borderBottom: "1px solid rgba(139,92,246,0.08)", fontWeight: 600 }}>{b.studentCount}</td>
+                <td style={{ padding: "10px 12px", color: "#b45309", fontSize: 13, borderBottom: "1px solid rgba(139,92,246,0.08)" }}>{b.academicYear ?? "—"}</td>
               </tr>
             ))}
           </tbody>
@@ -342,21 +342,21 @@ function TotalPackagesPopup({ school, onClose }: { school: School; onClose: () =
   return (
     <Modal title={`کل پکیج‌های خریداری شده — ${school.name}`} onClose={onClose}>
       <div style={{ background: "rgba(124,58,237,0.08)", borderRadius: 10, padding: "10px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
-        <span style={{ color: "#c4b5fd", fontSize: 13 }}>مجموع پکیج‌ها (از ابتدا تا کنون)</span>
-        <span style={{ color: "#e9d5ff", fontWeight: 700, fontSize: 16 }}>{school.totalPackages}</span>
+        <span style={{ color: "#92400e", fontSize: 13 }}>مجموع پکیج‌ها (از ابتدا تا کنون)</span>
+        <span style={{ color: "#78350f", fontWeight: 700, fontSize: 16 }}>{school.totalPackages}</span>
       </div>
       <SelectField label="فیلتر بر اساس سال تحصیلی" value={yearFilter} onChange={setYearFilter} options={ACADEMIC_YEARS} />
       {school.branchDetails.length === 0
-        ? <p style={{ color: "#8b5cf6", textAlign: "center", padding: 16 }}>شعبه‌ای ثبت نشده</p>
+        ? <p style={{ color: "#b45309", textAlign: "center", padding: 16 }}>شعبه‌ای ثبت نشده</p>
         : <div>
-          <p style={{ color: "#8b5cf6", fontSize: 12, marginBottom: 10 }}>
+          <p style={{ color: "#b45309", fontSize: 12, marginBottom: 10 }}>
             تفکیک پکیج به تفکیک شعبه پس از ثبت تراکنش برای هر شعبه نمایش داده می‌شود.
           </p>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr>
                 {["شعبه","سال تحصیلی","دانش‌آموزان"].map(h => (
-                  <th key={h} style={{ padding: "8px 12px", color: "#8b5cf6", fontSize: 12, fontWeight: 600, textAlign: "right", background: "rgba(13,10,26,0.4)", borderBottom: "1px solid rgba(139,92,246,0.15)" }}>{h}</th>
+                  <th key={h} style={{ padding: "8px 12px", color: "#b45309", fontSize: 12, fontWeight: 600, textAlign: "right", background: "rgba(255,252,235,0.65)", borderBottom: "1px solid rgba(139,92,246,0.15)" }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -365,9 +365,9 @@ function TotalPackagesPopup({ school, onClose }: { school: School; onClose: () =
                 .filter(b => !yearFilter || b.academicYear === yearFilter)
                 .map(b => (
                   <tr key={b.branchId}>
-                    <td style={{ padding: "10px 12px", color: "#f8f5ff", fontSize: 14, borderBottom: "1px solid rgba(139,92,246,0.08)", fontWeight: 500 }}>{b.branchName}</td>
-                    <td style={{ padding: "10px 12px", color: "#8b5cf6", fontSize: 13, borderBottom: "1px solid rgba(139,92,246,0.08)" }}>{b.academicYear ?? "—"}</td>
-                    <td style={{ padding: "10px 12px", color: "#a78bfa", fontSize: 14, borderBottom: "1px solid rgba(139,92,246,0.08)", fontWeight: 600 }}>{b.studentCount}</td>
+                    <td style={{ padding: "10px 12px", color: "#78350f", fontSize: 14, borderBottom: "1px solid rgba(139,92,246,0.08)", fontWeight: 500 }}>{b.branchName}</td>
+                    <td style={{ padding: "10px 12px", color: "#b45309", fontSize: 13, borderBottom: "1px solid rgba(139,92,246,0.08)" }}>{b.academicYear ?? "—"}</td>
+                    <td style={{ padding: "10px 12px", color: "#d97706", fontSize: 14, borderBottom: "1px solid rgba(139,92,246,0.08)", fontWeight: 600 }}>{b.studentCount}</td>
                   </tr>
                 ))}
             </tbody>
@@ -446,7 +446,7 @@ function SchoolModal({ editing, onClose, onSuccess }: {
 
       {sectionDivider("اطلاعات مدیر مدرسه")}
       {selectedManagerUserId && selectedManagerUserId > 0 && (
-        <div style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.3)", borderRadius: 10, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#4ade80" }}>
+        <div style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.3)", borderRadius: 10, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#15803d" }}>
           ✓ کاربر موجود انتخاب شد — پنل کاربری جدید ساخته نمی‌شود
         </div>
       )}
@@ -512,8 +512,8 @@ export default function AdminSchools() {
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f8f5ff", margin: 0 }}>مدارس</h1>
-          <p style={{ color: "#8b5cf6", fontSize: 14, marginTop: 4 }}>{schools.length} مدرسه ثبت شده</p>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#78350f", margin: 0 }}>مدارس</h1>
+          <p style={{ color: "#b45309", fontSize: 14, marginTop: 4 }}>{schools.length} مدرسه ثبت شده</p>
         </div>
         <button onClick={openCreate} style={{
           display: "flex", alignItems: "center", gap: 8, padding: "10px 20px",
@@ -528,25 +528,25 @@ export default function AdminSchools() {
 
       {/* Search */}
       <div style={{ position: "relative", marginBottom: 20 }}>
-        <Search size={16} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", color: "#8b5cf6" }} />
+        <Search size={16} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", color: "#b45309" }} />
         <input
           value={search} onChange={e => setSearch(e.target.value)} placeholder="جستجو..."
           style={{
-            width: "100%", background: "rgba(30,18,60,0.5)", border: "1px solid rgba(139,92,246,0.2)",
-            borderRadius: 10, color: "#f8f5ff", padding: "10px 40px 10px 14px", fontSize: 14,
+            width: "100%", background: "rgba(255,255,255,0.80)", border: "1px solid rgba(139,92,246,0.2)",
+            borderRadius: 10, color: "#78350f", padding: "10px 40px 10px 14px", fontSize: 14,
             fontFamily: "Vazirmatn, sans-serif", outline: "none",
           }}
         />
       </div>
 
       {/* Table */}
-      <div style={{ background: "rgba(30,18,60,0.85)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, overflow: "hidden" }}>
+      <div style={{ background: "rgba(255,255,255,0.82)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, overflow: "hidden" }}>
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 860 }}>
             <thead>
               <tr>
                 {["نام مدرسه","شعبه‌ها","دانش‌آموزان فعال","کل پکیج‌ها","جزییات","وضعیت","عملیات"].map(h => (
-                  <th key={h} style={{ textAlign: "right", padding: "12px 14px", color: "#c4b5fd", fontSize: 13, fontWeight: 600, background: "rgba(13,10,26,0.5)", borderBottom: "1px solid rgba(139,92,246,0.15)", whiteSpace: "nowrap" }}>{h}</th>
+                  <th key={h} style={{ textAlign: "right", padding: "12px 14px", color: "#92400e", fontSize: 13, fontWeight: 600, background: "rgba(255,252,235,0.90)", borderBottom: "1px solid rgba(139,92,246,0.15)", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -558,21 +558,21 @@ export default function AdminSchools() {
 
                   {/* Name */}
                   <td style={tdStyle}>
-                    <div style={{ fontWeight: 600, color: "#f8f5ff", fontSize: 14 }}>{school.name}</div>
-                    {school.address && <div style={{ color: "#8b5cf6", fontSize: 12, marginTop: 2 }}>{school.address}</div>}
-                    {school.managerName && <div style={{ color: "#a78bfa", fontSize: 11, marginTop: 2 }}>👤 {school.managerName}</div>}
+                    <div style={{ fontWeight: 600, color: "#78350f", fontSize: 14 }}>{school.name}</div>
+                    {school.address && <div style={{ color: "#b45309", fontSize: 12, marginTop: 2 }}>{school.address}</div>}
+                    {school.managerName && <div style={{ color: "#d97706", fontSize: 11, marginTop: 2 }}>👤 {school.managerName}</div>}
                   </td>
 
                   {/* Branches */}
                   <td style={tdStyle}>
-                    <span style={{ color: "#c4b5fd", fontWeight: 600 }}>{school.branchCount}</span>
+                    <span style={{ color: "#92400e", fontWeight: 600 }}>{school.branchCount}</span>
                   </td>
 
                   {/* Active students — clickable */}
                   <td style={tdStyle}>
                     <button onClick={() => setStudentsTarget(school)} style={{
                       background: "rgba(167,139,250,0.12)", border: "1px solid rgba(167,139,250,0.25)",
-                      borderRadius: 8, color: "#a78bfa", padding: "4px 12px", cursor: "pointer",
+                      borderRadius: 8, color: "#d97706", padding: "4px 12px", cursor: "pointer",
                       fontFamily: "Vazirmatn", fontSize: 14, fontWeight: 600, display: "flex", alignItems: "center", gap: 5,
                     }}>
                       <Users size={13} /> {school.studentCount}
@@ -605,7 +605,7 @@ export default function AdminSchools() {
                   <td style={tdStyle}>
                     <span style={{
                       background: school.status === "active" ? "rgba(34,197,94,0.15)" : "rgba(248,113,113,0.15)",
-                      color: school.status === "active" ? "#4ade80" : "#f87171",
+                      color: school.status === "active" ? "#15803d" : "#f87171",
                       border: `1px solid ${school.status === "active" ? "rgba(34,197,94,0.3)" : "rgba(248,113,113,0.3)"}`,
                       borderRadius: 999, padding: "3px 10px", fontSize: 12, fontWeight: 600,
                     }}>{school.status === "active" ? "فعال" : "غیرفعال"}</span>
@@ -615,7 +615,7 @@ export default function AdminSchools() {
                   <td style={tdStyle}>
                     <div style={{ display: "flex", gap: 6, flexWrap: "nowrap" }}>
                       <button onClick={() => openEdit(school)} title="ویرایش"
-                        style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.3)", borderRadius: 8, color: "#a855f7", padding: "6px 10px", cursor: "pointer", fontFamily: "Vazirmatn" }}>
+                        style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.3)", borderRadius: 8, color: "#d97706", padding: "6px 10px", cursor: "pointer", fontFamily: "Vazirmatn" }}>
                         <Edit2 size={14} />
                       </button>
                       <button onClick={() => setBranchTarget(school)} title="افزودن شعبه"
@@ -630,7 +630,7 @@ export default function AdminSchools() {
                         style={{
                           background: school.status === "active" ? "rgba(248,113,113,0.15)" : "rgba(34,197,94,0.15)",
                           border: `1px solid ${school.status === "active" ? "rgba(248,113,113,0.3)" : "rgba(34,197,94,0.3)"}`,
-                          borderRadius: 8, color: school.status === "active" ? "#f87171" : "#4ade80",
+                          borderRadius: 8, color: school.status === "active" ? "#f87171" : "#15803d",
                           padding: "6px 10px", cursor: "pointer", fontFamily: "Vazirmatn",
                         }}>
                         <Power size={14} />
@@ -647,7 +647,7 @@ export default function AdminSchools() {
           </table>
         </div>
         {filtered.length === 0 && (
-          <p style={{ color: "#8b5cf6", textAlign: "center", padding: 30 }}>مدرسه‌ای یافت نشد</p>
+          <p style={{ color: "#b45309", textAlign: "center", padding: 30 }}>مدرسه‌ای یافت نشد</p>
         )}
       </div>
 
@@ -656,11 +656,11 @@ export default function AdminSchools() {
         const target = schools.find(s => s.id === deleteConfirmId);
         return (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(4px)", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-            <div style={{ background: "#1a1238", border: "1px solid rgba(248,113,113,0.5)", borderRadius: 20, padding: 28, width: "100%", maxWidth: 420, boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}>
+            <div style={{ background: "#fffef5", border: "1px solid rgba(248,113,113,0.5)", borderRadius: 20, padding: 28, width: "100%", maxWidth: 420, boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}>
               <div style={{ textAlign: "center", marginBottom: 20 }}>
                 <div style={{ fontSize: 40, marginBottom: 12 }}>🗑️</div>
-                <h3 style={{ margin: "0 0 8px", color: "#f8f5ff", fontSize: 18, fontWeight: 700 }}>حذف مدرسه</h3>
-                <p style={{ margin: 0, color: "#c4b5fd", fontSize: 14 }}>
+                <h3 style={{ margin: "0 0 8px", color: "#78350f", fontSize: 18, fontWeight: 700 }}>حذف مدرسه</h3>
+                <p style={{ margin: 0, color: "#92400e", fontSize: 14 }}>
                   آیا مطمئن هستید که می‌خواهید مدرسه<br />
                   <strong style={{ color: "#f87171" }}>«{target?.name}»</strong> را حذف کنید؟
                 </p>
@@ -672,7 +672,7 @@ export default function AdminSchools() {
                   {deleteMutation.isPending ? "در حال حذف..." : "بله، حذف شود"}
                 </button>
                 <button onClick={() => setDeleteConfirmId(null)}
-                  style={{ flex: 1, padding: "11px 0", background: "transparent", border: "1px solid rgba(124,58,237,0.5)", borderRadius: 10, color: "#a855f7", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14 }}>
+                  style={{ flex: 1, padding: "11px 0", background: "transparent", border: "1px solid rgba(180,83,9,0.40)", borderRadius: 10, color: "#d97706", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14 }}>
                   انصراف
                 </button>
               </div>

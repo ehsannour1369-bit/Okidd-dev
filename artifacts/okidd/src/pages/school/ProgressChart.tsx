@@ -41,24 +41,24 @@ function LessonDateRow({
     <div style={{
       display: "flex", alignItems: "center", gap: 12,
       padding: "10px 14px",
-      background: existing?.teachDate ? "rgba(34,197,94,0.06)" : "rgba(13,10,26,0.4)",
+      background: existing?.teachDate ? "rgba(34,197,94,0.06)" : "rgba(245,243,255,0.65)",
       borderRadius: 10,
       border: `1px solid ${existing?.teachDate ? "rgba(34,197,94,0.2)" : "rgba(139,92,246,0.12)"}`,
     }}>
       <div style={{
         width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-        background: existing?.teachDate ? "rgba(34,197,94,0.2)" : "rgba(124,58,237,0.2)",
-        border: `1px solid ${existing?.teachDate ? "rgba(34,197,94,0.4)" : "rgba(139,92,246,0.3)"}`,
+        background: existing?.teachDate ? "rgba(34,197,94,0.2)" : "rgba(99,102,241,0.15)",
+        border: `1px solid ${existing?.teachDate ? "rgba(34,197,94,0.4)" : "rgba(99,102,241,0.30)"}`,
         display: "flex", alignItems: "center", justifyContent: "center",
-        color: existing?.teachDate ? "#4ade80" : "#a855f7",
+        color: existing?.teachDate ? "#15803d" : "#a855f7",
         fontSize: 12, fontWeight: 700,
       }}>{lessonIndex}</div>
 
       <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-        <span style={{ color: "#c4b5fd", fontSize: 13, minWidth: 50 }}>جلسه {lessonIndex.toLocaleString("fa-IR")}</span>
+        <span style={{ color: "#3730a3", fontSize: 13, minWidth: 50 }}>جلسه {lessonIndex.toLocaleString("fa-IR")}</span>
         {existing?.teachDate && (
           <span style={{
-            fontSize: 12, color: "#4ade80", background: "rgba(34,197,94,0.12)",
+            fontSize: 12, color: "#15803d", background: "rgba(34,197,94,0.12)",
             padding: "2px 8px", borderRadius: 999, border: "1px solid rgba(34,197,94,0.25)",
           }}>
             {existing.teachDate}
@@ -68,7 +68,7 @@ function LessonDateRow({
 
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-          <Calendar size={14} style={{ position: "absolute", right: 9, color: "#8b5cf6", pointerEvents: "none" }} />
+          <Calendar size={14} style={{ position: "absolute", right: 9, color: "#4f46e5", pointerEvents: "none" }} />
           <input
             type="text"
             value={value}
@@ -79,7 +79,7 @@ function LessonDateRow({
             style={{
               paddingRight: 30, paddingLeft: 10, paddingTop: 6, paddingBottom: 6,
               borderRadius: 8, border: "1px solid rgba(139,92,246,0.3)",
-              background: "rgba(18,14,42,0.8)", color: "#f8f5ff",
+              background: "rgba(245,243,255,0.85)", color: "#1e1b4b",
               fontFamily: "Vazirmatn, sans-serif", fontSize: 13,
               width: 120, outline: "none",
               direction: "ltr",
@@ -93,7 +93,7 @@ function LessonDateRow({
             padding: "6px 14px", borderRadius: 8, border: "none", cursor: "pointer",
             fontFamily: "Vazirmatn, sans-serif", fontSize: 12, fontWeight: 700,
             background: saved ? "rgba(34,197,94,0.3)" : "linear-gradient(135deg, #7c3aed, #a855f7)",
-            color: saved ? "#4ade80" : "#fff",
+            color: saved ? "#15803d" : "#fff",
             opacity: isPending || !value.trim() ? 0.6 : 1,
             transition: "all 0.2s",
             display: "flex", alignItems: "center", gap: 5,
@@ -142,20 +142,20 @@ export default function SchoolProgressChart() {
   return (
     <div style={{ maxWidth: 820, margin: "0 auto" }}>
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: "#f8f5ff", margin: 0 }}>پراگرس چارت مدرسه</h1>
-        <p style={{ color: "#8b5cf6", fontSize: 14, marginTop: 4 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 800, color: "#1e1b4b", margin: 0 }}>پراگرس چارت مدرسه</h1>
+        <p style={{ color: "#4f46e5", fontSize: 14, marginTop: 4 }}>
           تعیین تاریخ جلسات به تفکیک کلاس و کتاب
         </p>
       </div>
 
       {/* Class & Book selector */}
       <div style={{
-        background: "rgba(18,14,42,0.95)", borderRadius: 16,
+        background: "rgba(255,255,255,0.97)", borderRadius: 16,
         border: "1px solid rgba(139,92,246,0.2)", padding: 20, marginBottom: 24,
         display: "flex", gap: 20, flexWrap: "wrap",
       }}>
         <div style={{ flex: 1, minWidth: 200 }}>
-          <label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 8, fontWeight: 600 }}>
+          <label style={{ display: "block", color: "#3730a3", fontSize: 13, marginBottom: 8, fontWeight: 600 }}>
             انتخاب کلاس
           </label>
           <select
@@ -163,8 +163,8 @@ export default function SchoolProgressChart() {
             onChange={e => { setSelectedClassId(e.target.value ? parseInt(e.target.value) : null); setSelectedBookId(null); }}
             style={{
               width: "100%", padding: "10px 14px", borderRadius: 10,
-              background: "rgba(30,18,60,0.8)", border: "1px solid rgba(139,92,246,0.3)",
-              color: "#f8f5ff", fontFamily: "Vazirmatn, sans-serif", fontSize: 14,
+              background: "rgba(255,255,255,0.82)", border: "1px solid rgba(139,92,246,0.3)",
+              color: "#1e1b4b", fontFamily: "Vazirmatn, sans-serif", fontSize: 14,
               outline: "none", cursor: "pointer",
             }}
           >
@@ -176,7 +176,7 @@ export default function SchoolProgressChart() {
         </div>
 
         <div style={{ flex: 1, minWidth: 200 }}>
-          <label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 8, fontWeight: 600 }}>
+          <label style={{ display: "block", color: "#3730a3", fontSize: 13, marginBottom: 8, fontWeight: 600 }}>
             انتخاب کتاب
           </label>
           <select
@@ -185,8 +185,8 @@ export default function SchoolProgressChart() {
             disabled={!selectedClassId || books.length === 0}
             style={{
               width: "100%", padding: "10px 14px", borderRadius: 10,
-              background: "rgba(30,18,60,0.8)", border: "1px solid rgba(139,92,246,0.3)",
-              color: selectedClassId ? "#f8f5ff" : "#6b7280",
+              background: "rgba(255,255,255,0.82)", border: "1px solid rgba(139,92,246,0.3)",
+              color: selectedClassId ? "#1e1b4b" : "#6b7280",
               fontFamily: "Vazirmatn, sans-serif", fontSize: 14,
               outline: "none", cursor: selectedClassId ? "pointer" : "default",
               opacity: selectedClassId ? 1 : 0.5,
@@ -208,13 +208,13 @@ export default function SchoolProgressChart() {
               display: "flex", alignItems: "center", justifyContent: "space-between",
               marginBottom: 16, flexWrap: "wrap", gap: 8,
             }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#c4b5fd" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#3730a3" }}>
                 <BookOpen size={16} style={{ color: "#a855f7" }} />
                 <span style={{ fontWeight: 600 }}>{selectedBook.title}</span>
-                <span style={{ fontSize: 13, color: "#8b5cf6" }}>— {lessonCount} جلسه</span>
+                <span style={{ fontSize: 13, color: "#4f46e5" }}>— {lessonCount} جلسه</span>
               </div>
               <div style={{
-                fontSize: 12, color: "#4ade80",
+                fontSize: 12, color: "#15803d",
                 background: "rgba(34,197,94,0.12)", padding: "4px 12px",
                 borderRadius: 999, border: "1px solid rgba(34,197,94,0.25)",
               }}>
@@ -224,18 +224,18 @@ export default function SchoolProgressChart() {
           )}
 
           <div style={{
-            background: "rgba(18,14,42,0.95)", borderRadius: 16,
+            background: "rgba(255,255,255,0.97)", borderRadius: 16,
             border: "1px solid rgba(139,92,246,0.2)", overflow: "hidden",
           }}>
             <div style={{
               padding: "12px 16px",
-              background: "rgba(13,10,26,0.5)",
+              background: "rgba(245,243,255,0.90)",
               borderBottom: "1px solid rgba(139,92,246,0.15)",
               display: "flex", gap: 16, alignItems: "center",
             }}>
-              <span style={{ color: "#8b5cf6", fontSize: 12, fontWeight: 600 }}>جلسه</span>
-              <span style={{ color: "#8b5cf6", fontSize: 12, fontWeight: 600, flex: 1 }}>تاریخ فعلی</span>
-              <span style={{ color: "#8b5cf6", fontSize: 12, fontWeight: 600 }}>تاریخ جدید (شمسی)</span>
+              <span style={{ color: "#4f46e5", fontSize: 12, fontWeight: 600 }}>جلسه</span>
+              <span style={{ color: "#4f46e5", fontSize: 12, fontWeight: 600, flex: 1 }}>تاریخ فعلی</span>
+              <span style={{ color: "#4f46e5", fontSize: 12, fontWeight: 600 }}>تاریخ جدید (شمسی)</span>
             </div>
             <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 8 }}>
               {Array.from({ length: lessonCount }, (_, i) => i + 1).map(idx => (
@@ -257,7 +257,7 @@ export default function SchoolProgressChart() {
           textAlign: "center", padding: 60,
           background: "rgba(18,14,42,0.5)", borderRadius: 16,
           border: "1px solid rgba(139,92,246,0.15)",
-          color: "#8b5cf6", fontSize: 14,
+          color: "#4f46e5", fontSize: 14,
         }}>
           برای شروع یک کلاس انتخاب کنید
         </div>

@@ -4,15 +4,15 @@ import { api } from "../../lib/api";
 import { showToast } from "../../lib/toast";
 import { UserCheck, X, Plus, Trash2, School, Mail, Phone } from "lucide-react";
 
-const IS = { width: "100%", background: "rgba(13,10,26,0.5)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#f8f5ff", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
+const IS = { width: "100%", background: "rgba(255,252,235,0.90)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#78350f", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
 
 function Modal({ title, onClose, children }: any) {
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ background: "#1a1238", border: "1px solid rgba(124,58,237,0.5)", borderRadius: 20, padding: 28, width: "90%", maxWidth: 560, maxHeight: "92vh", overflowY: "auto" }}>
+      <div style={{ background: "#fffef5", border: "1px solid rgba(180,83,9,0.40)", borderRadius: 20, padding: 28, width: "90%", maxWidth: 560, maxHeight: "92vh", overflowY: "auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <h3 style={{ margin: 0, color: "#f8f5ff", fontSize: 17, fontWeight: 700 }}>{title}</h3>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer" }}><X size={20} /></button>
+          <h3 style={{ margin: 0, color: "#78350f", fontSize: 17, fontWeight: 700 }}>{title}</h3>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "#b45309", cursor: "pointer" }}><X size={20} /></button>
         </div>
         {children}
       </div>
@@ -21,7 +21,7 @@ function Modal({ title, onClose, children }: any) {
 }
 
 function Lbl({ label, children }: any) {
-  return <div style={{ marginBottom: 12 }}><label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 5 }}>{label}</label>{children}</div>;
+  return <div style={{ marginBottom: 12 }}><label style={{ display: "block", color: "#92400e", fontSize: 13, marginBottom: 5 }}>{label}</label>{children}</div>;
 }
 
 function SaveBtn({ onClick, disabled, label = "ذخیره" }: any) {
@@ -71,13 +71,13 @@ export default function AdminConsultants() {
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f8f5ff", margin: 0 }}>مشاورها</h1>
-        <p style={{ color: "#8b5cf6", fontSize: 14, marginTop: 4 }}>مدیریت مشاوران مدارس</p>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#78350f", margin: 0 }}>مشاورها</h1>
+        <p style={{ color: "#b45309", fontSize: 14, marginTop: 4 }}>مدیریت مشاوران مدارس</p>
       </div>
 
-      <div style={{ marginBottom: 20, padding: "16px", background: "rgba(30,18,60,0.85)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 14, display: "flex", alignItems: "center", gap: 12 }}>
-        <School size={20} color="#8b5cf6" />
-        <label style={{ color: "#c4b5fd", fontSize: 14, fontWeight: 500 }}>مدرسه:</label>
+      <div style={{ marginBottom: 20, padding: "16px", background: "rgba(255,255,255,0.82)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 14, display: "flex", alignItems: "center", gap: 12 }}>
+        <School size={20} color="#b45309" />
+        <label style={{ color: "#92400e", fontSize: 14, fontWeight: 500 }}>مدرسه:</label>
         <select value={selectedSchoolId ?? ""} onChange={e => setSelectedSchoolId(e.target.value ? parseInt(e.target.value) : null)} style={{ ...IS, maxWidth: 400, cursor: "pointer" }}>
           <option value="">یک مدرسه انتخاب کنید</option>
           {schools.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -85,7 +85,7 @@ export default function AdminConsultants() {
       </div>
 
       {!selectedSchoolId && (
-        <div style={{ textAlign: "center", padding: 60, color: "#8b5cf6" }}>
+        <div style={{ textAlign: "center", padding: 60, color: "#b45309" }}>
           <UserCheck size={48} style={{ opacity: 0.3, marginBottom: 16 }} />
           <p>برای مدیریت مشاوران، ابتدا یک مدرسه انتخاب کنید</p>
         </div>
@@ -95,11 +95,11 @@ export default function AdminConsultants() {
         <>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
             <div>
-              <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f8f5ff", margin: 0 }}>مشاوران</h1>
-              <p style={{ color: "#8b5cf6", fontSize: 14, marginTop: 4 }}>{consultants.length} مشاور</p>
+              <h1 style={{ fontSize: 22, fontWeight: 800, color: "#78350f", margin: 0 }}>مشاوران</h1>
+              <p style={{ color: "#b45309", fontSize: 14, marginTop: 4 }}>{consultants.length} مشاور</p>
             </div>
             <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={() => setShowAssignModal(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 20px", background: "rgba(124,58,237,0.2)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#c4b5fd", fontSize: 14, fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>
+              <button onClick={() => setShowAssignModal(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 20px", background: "rgba(180,83,9,0.15)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#92400e", fontSize: 14, fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>
                 <UserCheck size={16} /> ارتباط از قبل
               </button>
               <button onClick={() => { setForm({ name: "", email: "", password: "", gender: "male", phone: "", specialty: "", about: "" }); setShowModal(true); }} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", background: "linear-gradient(135deg, #7c3aed, #a855f7)", border: "none", borderRadius: 10, color: "white", fontSize: 14, fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>
@@ -110,27 +110,27 @@ export default function AdminConsultants() {
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 14 }}>
             {consultants.map((c: any) => (
-              <div key={c.id} style={{ background: "rgba(30,18,60,0.85)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 14, padding: 20 }}
-                onMouseOver={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.5)"; }}
-                onMouseOut={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(139,92,246,0.2)"; }}>
+              <div key={c.id} style={{ background: "rgba(255,255,255,0.82)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 14, padding: 20 }}
+                onMouseOver={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(180,83,9,0.40)"; }}
+                onMouseOut={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(180,83,9,0.15)"; }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
                   <div style={{ width: 48, height: 48, borderRadius: 14, background: "linear-gradient(135deg, #7c3aed, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, color: "white", fontWeight: 700 }}>{c.userName?.[0] || "M"}</div>
                   <div>
-                    <div style={{ fontWeight: 700, color: "#f8f5ff", fontSize: 15 }}>{c.userName}</div>
-                    <span style={{ background: c.isActive ? "rgba(34,197,94,0.15)" : "rgba(248,113,113,0.15)", color: c.isActive ? "#4ade80" : "#f87171", border: `1px solid ${c.isActive ? "rgba(34,197,94,0.3)" : "rgba(248,113,113,0.3)"}`, borderRadius: 999, padding: "1px 8px", fontSize: 11 }}>
+                    <div style={{ fontWeight: 700, color: "#78350f", fontSize: 15 }}>{c.userName}</div>
+                    <span style={{ background: c.isActive ? "rgba(34,197,94,0.15)" : "rgba(248,113,113,0.15)", color: c.isActive ? "#15803d" : "#f87171", border: `1px solid ${c.isActive ? "rgba(34,197,94,0.3)" : "rgba(248,113,113,0.3)"}`, borderRadius: 999, padding: "1px 8px", fontSize: 11 }}>
                       {c.isActive ? "فعال" : "غیرفعال"}
                     </span>
                   </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#c4b5fd", fontSize: 13 }}>
-                    <Mail size={13} style={{ color: "#8b5cf6" }} />
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#92400e", fontSize: 13 }}>
+                    <Mail size={13} style={{ color: "#b45309" }} />
                     <span style={{ direction: "ltr" }}>{c.userEmail}</span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#c4b5fd", fontSize: 13 }}>
-                    <UserCheck size={13} style={{ color: "#8b5cf6" }} /> {c.specialty || "عمومی"}
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#92400e", fontSize: 13 }}>
+                    <UserCheck size={13} style={{ color: "#b45309" }} /> {c.specialty || "عمومی"}
                   </div>
-                  {c.about && <div style={{ color: "#8b5cf6", fontSize: 12, marginTop: 4 }}>{c.about}</div>}
+                  {c.about && <div style={{ color: "#b45309", fontSize: 12, marginTop: 4 }}>{c.about}</div>}
                 </div>
                 <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
                   <button onClick={() => { if (confirm("حذف از ارتباط؟")) delConsultantMut.mutate(c.id); }} style={{ flex: 1, padding: "8px", background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.2)", borderRadius: 8, color: "#f87171", fontSize: 12, cursor: "pointer" }}>
@@ -139,7 +139,7 @@ export default function AdminConsultants() {
                 </div>
               </div>
             ))}
-            {consultants.length === 0 && <p style={{ color: "#8b5cf6" }}>هیچ مشاوری ارتباط نشده</p>}
+            {consultants.length === 0 && <p style={{ color: "#b45309" }}>هیچ مشاوری ارتباط نشده</p>}
           </div>
         </>
       )}
@@ -186,7 +186,7 @@ export default function AdminConsultants() {
             </select>
           </Lbl>
           {allUsers.filter((u: any) => !consultants.find((c: any) => c.userId === u.id)).length === 0 && (
-            <p style={{ color: "#8b5cf6" }}>همه کاربران ارتباط شده‌اند</p>
+            <p style={{ color: "#b45309" }}>همه کاربران ارتباط شده‌اند</p>
           )}
         </Modal>
       )}

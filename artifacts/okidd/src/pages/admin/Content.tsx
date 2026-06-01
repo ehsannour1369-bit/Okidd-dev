@@ -15,7 +15,7 @@ const TYPES = [
   { value: "animation", label: "انیمیشن", icon: Film, color: "#f59e0b" },
   { value: "game", label: "بازی", icon: Gamepad2, color: "#34d399" },
   { value: "quiz", label: "آزمونک", icon: ClipboardCheck, color: "#60a5fa" },
-  { value: "exercise", label: "تمرین", icon: PenLine, color: "#a855f7" },
+  { value: "exercise", label: "تمرین", icon: PenLine, color: "#d97706" },
 ];
 
 const STAGES = ["ابتدایی", "متوسطه اول", "متوسطه دوم", "پیش‌دبستانی", "عمومی"];
@@ -38,12 +38,12 @@ const STAGE_GRADES: Record<string, string[]> = {
 function gradeLabel(v: string) { return GRADES.find(g => g.value === v)?.label ?? v; }
 
 const inp: React.CSSProperties = {
-  width: "100%", background: "rgba(13,10,26,0.5)", border: "1px solid rgba(139,92,246,0.3)",
-  borderRadius: 10, color: "#f8f5ff", padding: "10px 12px", fontSize: 14,
+  width: "100%", background: "rgba(255,252,235,0.90)", border: "1px solid rgba(139,92,246,0.3)",
+  borderRadius: 10, color: "#78350f", padding: "10px 12px", fontSize: 14,
   fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl", boxSizing: "border-box",
 };
 
-const lbl: React.CSSProperties = { display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 5 };
+const lbl: React.CSSProperties = { display: "block", color: "#92400e", fontSize: 13, marginBottom: 5 };
 const row: React.CSSProperties = { marginBottom: 14 };
 
 function typeInfo(t: string) { return TYPES.find(x => x.value === t) ?? TYPES[0]; }
@@ -83,26 +83,26 @@ function DropZone({ onUploaded, currentUrl }: { onUploaded: (url: string) => voi
       onDragLeave={() => setDragging(false)}
       onDrop={onDrop}
       style={{
-        border: `2px dashed ${dragging ? "#a855f7" : "rgba(139,92,246,0.4)"}`,
+        border: `2px dashed ${dragging ? "#d97706" : "rgba(139,92,246,0.4)"}`,
         borderRadius: 10, padding: "18px 14px", cursor: "pointer",
-        background: dragging ? "rgba(168,85,247,0.08)" : "rgba(13,10,26,0.3)",
+        background: dragging ? "rgba(168,85,247,0.08)" : "rgba(255,252,235,0.60)",
         textAlign: "center", transition: "all 0.2s",
       }}
     >
       <input ref={inputRef} type="file" style={{ display: "none" }} onChange={onPick} />
       {uploading ? (
-        <div style={{ color: "#a855f7", fontSize: 13 }}>در حال بارگذاری...</div>
+        <div style={{ color: "#d97706", fontSize: 13 }}>در حال بارگذاری...</div>
       ) : fileName || currentUrl ? (
         <div style={{ color: "#34d399", fontSize: 13 }}>
           <Upload size={14} style={{ marginLeft: 6 }} />
           {fileName || "فایل بارگذاری شده"}
-          <span style={{ color: "#8b5cf6", fontSize: 11, marginRight: 8 }}>تغییر</span>
+          <span style={{ color: "#b45309", fontSize: 11, marginRight: 8 }}>تغییر</span>
         </div>
       ) : (
-        <div style={{ color: "#8b5cf6", fontSize: 13 }}>
+        <div style={{ color: "#b45309", fontSize: 13 }}>
           <Upload size={16} style={{ marginBottom: 4 }} />
           <div>فایل را اینجا رها کنید یا کلیک کنید</div>
-          <div style={{ fontSize: 11, marginTop: 4, color: "#6d4baa" }}>حداکثر ۲۰۰ مگابایت</div>
+          <div style={{ fontSize: 11, marginTop: 4, color: "#b45309" }}>حداکثر ۲۰۰ مگابایت</div>
         </div>
       )}
     </div>
@@ -178,10 +178,10 @@ function ContentModal({ editing, onClose, onSuccess }: { editing: Content | null
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ background: "#1a1238", border: "1px solid rgba(124,58,237,0.5)", borderRadius: 20, padding: 28, width: "92%", maxWidth: 520, maxHeight: "92vh", overflowY: "auto" }}>
+      <div style={{ background: "#fffef5", border: "1px solid rgba(180,83,9,0.40)", borderRadius: 20, padding: 28, width: "92%", maxWidth: 520, maxHeight: "92vh", overflowY: "auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <h3 style={{ margin: 0, color: "#f8f5ff", fontSize: 18, fontWeight: 700 }}>{editing ? "ویرایش محتوا" : "افزودن محتوا"}</h3>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer" }}><X size={20} /></button>
+          <h3 style={{ margin: 0, color: "#78350f", fontSize: 18, fontWeight: 700 }}>{editing ? "ویرایش محتوا" : "افزودن محتوا"}</h3>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "#b45309", cursor: "pointer" }}><X size={20} /></button>
         </div>
 
         {/* Title */}
@@ -200,9 +200,9 @@ function ContentModal({ editing, onClose, onSuccess }: { editing: Content | null
               return (
                 <button key={t.value} onClick={() => set("type", t.value)} style={{
                   display: "flex", alignItems: "center", gap: 8, padding: "10px 14px",
-                  background: active ? `${t.color}22` : "rgba(13,10,26,0.5)",
-                  border: `1px solid ${active ? t.color : "rgba(139,92,246,0.2)"}`,
-                  borderRadius: 10, color: active ? t.color : "#8b5cf6", cursor: "pointer",
+                  background: active ? `${t.color}22` : "rgba(255,252,235,0.90)",
+                  border: `1px solid ${active ? t.color : "rgba(180,83,9,0.15)"}`,
+                  borderRadius: 10, color: active ? t.color : "#b45309", cursor: "pointer",
                   fontFamily: "Vazirmatn, sans-serif", fontSize: 13, fontWeight: active ? 700 : 400,
                   transition: "all 0.15s",
                 }}>
@@ -227,7 +227,7 @@ function ContentModal({ editing, onClose, onSuccess }: { editing: Content | null
 
         {/* Assignment section */}
         <div style={{ borderTop: "1px solid rgba(139,92,246,0.2)", paddingTop: 14, marginBottom: 14 }}>
-          <div style={{ color: "#a855f7", fontSize: 12, fontWeight: 700, marginBottom: 12 }}>تخصیص محتوا</div>
+          <div style={{ color: "#d97706", fontSize: 12, fontWeight: 700, marginBottom: 12 }}>تخصیص محتوا</div>
 
           {/* مقطع */}
           <div style={row}>
@@ -289,7 +289,7 @@ function ContentModal({ editing, onClose, onSuccess }: { editing: Content | null
           <button onClick={handleSave} disabled={!form.title.trim() || loading} style={{ flex: 1, padding: "11px 0", background: "linear-gradient(135deg, #7c3aed, #a855f7)", border: "none", borderRadius: 10, color: "white", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14, opacity: loading ? 0.7 : 1 }}>
             {loading ? "در حال ذخیره..." : editing ? "بروزرسانی" : "ذخیره"}
           </button>
-          <button onClick={onClose} style={{ flex: 1, padding: "11px 0", background: "transparent", border: "1px solid rgba(124,58,237,0.5)", borderRadius: 10, color: "#a855f7", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14 }}>انصراف</button>
+          <button onClick={onClose} style={{ flex: 1, padding: "11px 0", background: "transparent", border: "1px solid rgba(180,83,9,0.40)", borderRadius: 10, color: "#d97706", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14 }}>انصراف</button>
         </div>
       </div>
     </div>
@@ -312,8 +312,8 @@ export default function AdminContent() {
     <div>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f8f5ff", margin: 0 }}>محتوا</h1>
-          <p style={{ color: "#8b5cf6", fontSize: 14, marginTop: 4 }}>{content.length} محتوا</p>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#78350f", margin: 0 }}>محتوا</h1>
+          <p style={{ color: "#b45309", fontSize: 14, marginTop: 4 }}>{content.length} محتوا</p>
         </div>
         <button onClick={openCreate} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", background: "linear-gradient(135deg, #7c3aed, #a855f7)", border: "none", borderRadius: 10, color: "white", fontSize: 14, fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>
           <Plus size={16} /> افزودن محتوا
@@ -325,23 +325,23 @@ export default function AdminContent() {
           const ti = typeInfo(c.type);
           const Icon = ti.icon;
           return (
-            <div key={c.id} style={{ background: "rgba(30,18,60,0.85)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 14, padding: 18 }}>
+            <div key={c.id} style={{ background: "rgba(255,255,255,0.82)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 14, padding: 18 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                 <div style={{ width: 36, height: 36, borderRadius: 10, background: `${ti.color}22`, border: `1px solid ${ti.color}44`, display: "flex", alignItems: "center", justifyContent: "center", color: ti.color }}>
                   <Icon size={16} />
                 </div>
                 <div>
-                  <div style={{ fontWeight: 700, color: "#f8f5ff", fontSize: 14 }}>{c.title}</div>
+                  <div style={{ fontWeight: 700, color: "#78350f", fontSize: 14 }}>{c.title}</div>
                   <div style={{ fontSize: 11, color: ti.color }}>{ti.label}</div>
                 </div>
                 {c.orderIndex > 0 && (
-                  <div style={{ marginRight: "auto", fontSize: 11, color: "#6d4baa", background: "rgba(109,75,170,0.15)", borderRadius: 6, padding: "2px 7px" }}>#{c.orderIndex}</div>
+                  <div style={{ marginRight: "auto", fontSize: 11, color: "#b45309", background: "rgba(109,75,170,0.15)", borderRadius: 6, padding: "2px 7px" }}>#{c.orderIndex}</div>
                 )}
               </div>
-              {c.url && <div style={{ color: "#8b5cf6", fontSize: 12, marginBottom: 8, direction: "ltr", textAlign: "left", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.url}</div>}
-              {c.description && <div style={{ color: "#c4b5fd", fontSize: 13, marginBottom: 10 }}>{c.description}</div>}
+              {c.url && <div style={{ color: "#b45309", fontSize: 12, marginBottom: 8, direction: "ltr", textAlign: "left", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.url}</div>}
+              {c.description && <div style={{ color: "#92400e", fontSize: 13, marginBottom: 10 }}>{c.description}</div>}
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={() => openEdit(c)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "7px 0", background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.3)", borderRadius: 8, color: "#a855f7", cursor: "pointer", fontSize: 12, fontFamily: "Vazirmatn" }}><Edit2 size={12} /> ویرایش</button>
+                <button onClick={() => openEdit(c)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "7px 0", background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.3)", borderRadius: 8, color: "#d97706", cursor: "pointer", fontSize: 12, fontFamily: "Vazirmatn" }}><Edit2 size={12} /> ویرایش</button>
                 <button onClick={() => { if (confirm("حذف شود؟")) deleteMut.mutate(c.id); }} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "7px 0", background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.3)", borderRadius: 8, color: "#f87171", cursor: "pointer", fontSize: 12, fontFamily: "Vazirmatn" }}><Trash2 size={12} /> حذف</button>
               </div>
             </div>

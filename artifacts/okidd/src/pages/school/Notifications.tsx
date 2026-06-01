@@ -11,8 +11,8 @@ interface Notification {
 }
 
 const inputStyle = {
-  width: "100%", background: "rgba(13,10,26,0.5)", border: "1px solid rgba(139,92,246,0.3)",
-  borderRadius: 10, color: "#f8f5ff", padding: "10px 12px", fontSize: 14,
+  width: "100%", background: "rgba(245,243,255,0.90)", border: "1px solid rgba(139,92,246,0.3)",
+  borderRadius: 10, color: "#1e1b4b", padding: "10px 12px", fontSize: 14,
   fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const,
   boxSizing: "border-box" as const,
 };
@@ -27,13 +27,13 @@ function SelectRow({ label, value, onChange, options, placeholder }: {
 }) {
   return (
     <div>
-      <label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 5 }}>{label}</label>
+      <label style={{ display: "block", color: "#3730a3", fontSize: 13, marginBottom: 5 }}>{label}</label>
       <div style={{ position: "relative" }}>
         <select value={value} onChange={e => onChange(e.target.value)} style={selectStyle}>
           <option value="">{placeholder}</option>
           {options.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
         </select>
-        <ChevronDown size={15} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#8b5cf6", pointerEvents: "none" }} />
+        <ChevronDown size={15} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#4f46e5", pointerEvents: "none" }} />
       </div>
     </div>
   );
@@ -43,9 +43,9 @@ const roleLabel = (r: string) => ({ student: "دانش‌آموز", teacher: "م
 
 const roleColor = (r: string) => ({
   student: { bg: "rgba(59,130,246,0.15)", border: "rgba(59,130,246,0.3)", text: "#60a5fa" },
-  teacher: { bg: "rgba(34,197,94,0.15)", border: "rgba(34,197,94,0.3)", text: "#4ade80" },
+  teacher: { bg: "rgba(34,197,94,0.15)", border: "rgba(34,197,94,0.3)", text: "#15803d" },
   parent: { bg: "rgba(249,115,22,0.15)", border: "rgba(249,115,22,0.3)", text: "#fb923c" },
-} as any)[r] ?? { bg: "rgba(139,92,246,0.15)", border: "rgba(139,92,246,0.3)", text: "#a78bfa" };
+} as any)[r] ?? { bg: "rgba(99,102,241,0.12)", border: "rgba(99,102,241,0.30)", text: "#4338ca" };
 
 export default function SchoolNotifications() {
   const { user } = useAuthStore();
@@ -140,7 +140,7 @@ export default function SchoolNotifications() {
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f8f5ff", margin: 0 }}>اعلان‌ها</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1e1b4b", margin: 0 }}>اعلان‌ها</h1>
         <button onClick={() => setShowForm(!showForm)} style={{
           display: "flex", alignItems: "center", gap: 8, padding: "10px 20px",
           background: "linear-gradient(135deg, #7c3aed, #a855f7)", border: "none",
@@ -152,22 +152,22 @@ export default function SchoolNotifications() {
       </div>
 
       {showForm && (
-        <div style={{ background: "rgba(30,18,60,0.85)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 16, padding: 20, marginBottom: 20 }}>
-          <h3 style={{ color: "#f8f5ff", fontSize: 16, fontWeight: 700, marginTop: 0, marginBottom: 16 }}>ارسال اعلان جدید</h3>
+        <div style={{ background: "rgba(255,255,255,0.82)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 16, padding: 20, marginBottom: 20 }}>
+          <h3 style={{ color: "#1e1b4b", fontSize: 16, fontWeight: 700, marginTop: 0, marginBottom: 16 }}>ارسال اعلان جدید</h3>
           <div style={{ display: "grid", gap: 14 }}>
 
             <div>
-              <label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 5 }}>عنوان</label>
+              <label style={{ display: "block", color: "#3730a3", fontSize: 13, marginBottom: 5 }}>عنوان</label>
               <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} style={inputStyle} placeholder="عنوان اعلان..." />
             </div>
 
             <div>
-              <label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 5 }}>متن اعلان</label>
+              <label style={{ display: "block", color: "#3730a3", fontSize: 13, marginBottom: 5 }}>متن اعلان</label>
               <textarea value={form.body} onChange={e => setForm({ ...form, body: e.target.value })} rows={3} style={{ ...inputStyle, resize: "vertical" }} placeholder="متن پیام را بنویسید..." />
             </div>
 
             <div>
-              <label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 5 }}>مخاطب</label>
+              <label style={{ display: "block", color: "#3730a3", fontSize: 13, marginBottom: 5 }}>مخاطب</label>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
                 {[{ v: "student", l: "دانش‌آموزان" }, { v: "parent", l: "والدین" }, { v: "teacher", l: "معلمان" }].map(({ v, l }) => (
                   <button key={v} onClick={() => setForm({ ...form, targetRole: v, branchId: "", gradeLevelId: "", gradeId: "", classId: "" })}
@@ -175,7 +175,7 @@ export default function SchoolNotifications() {
                       padding: "9px 0", borderRadius: 10, border: "1px solid",
                       borderColor: form.targetRole === v ? "#a855f7" : "rgba(139,92,246,0.25)",
                       background: form.targetRole === v ? "rgba(124,58,237,0.25)" : "transparent",
-                      color: form.targetRole === v ? "#d8b4fe" : "#8b5cf6",
+                      color: form.targetRole === v ? "#d8b4fe" : "#4f46e5",
                       fontFamily: "Vazirmatn, sans-serif", fontSize: 13, cursor: "pointer", fontWeight: 600,
                     }}>{l}</button>
                 ))}
@@ -184,10 +184,10 @@ export default function SchoolNotifications() {
 
             {/* Cascading filters */}
             {hasStudentOrParent && (
-              <div style={{ background: "rgba(13,10,26,0.4)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 12, padding: 14 }}>
+              <div style={{ background: "rgba(245,243,255,0.65)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 12, padding: 14 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
-                  <Filter size={14} style={{ color: "#8b5cf6" }} />
-                  <span style={{ color: "#c4b5fd", fontSize: 13, fontWeight: 600 }}>محدوده ارسال (اختیاری)</span>
+                  <Filter size={14} style={{ color: "#4f46e5" }} />
+                  <span style={{ color: "#3730a3", fontSize: 13, fontWeight: 600 }}>محدوده ارسال (اختیاری)</span>
                 </div>
                 <div style={{ display: "grid", gap: 10 }}>
                   <SelectRow
@@ -228,14 +228,14 @@ export default function SchoolNotifications() {
                   {/* Summary badge */}
                   {form.branchId && (
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 2 }}>
-                      <span style={{ fontSize: 11, color: "#a78bfa" }}>ارسال به:</span>
+                      <span style={{ fontSize: 11, color: "#4338ca" }}>ارسال به:</span>
                       {form.classId
-                        ? <span style={{ fontSize: 11, background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 999, padding: "2px 8px", color: "#d8b4fe" }}>کلاس {classMap[parseInt(form.classId)] ?? form.classId}</span>
+                        ? <span style={{ fontSize: 11, background: "rgba(99,102,241,0.15)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 999, padding: "2px 8px", color: "#d8b4fe" }}>کلاس {classMap[parseInt(form.classId)] ?? form.classId}</span>
                         : form.gradeId
-                          ? <span style={{ fontSize: 11, background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 999, padding: "2px 8px", color: "#d8b4fe" }}>پایه {grades.find((g: any) => g.id === parseInt(form.gradeId))?.name ?? form.gradeId}</span>
+                          ? <span style={{ fontSize: 11, background: "rgba(99,102,241,0.15)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 999, padding: "2px 8px", color: "#d8b4fe" }}>پایه {grades.find((g: any) => g.id === parseInt(form.gradeId))?.name ?? form.gradeId}</span>
                           : form.gradeLevelId
-                            ? <span style={{ fontSize: 11, background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 999, padding: "2px 8px", color: "#d8b4fe" }}>مقطع {glMap[parseInt(form.gradeLevelId)] ?? form.gradeLevelId}</span>
-                            : <span style={{ fontSize: 11, background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 999, padding: "2px 8px", color: "#d8b4fe" }}>شعبه {branchMap[parseInt(form.branchId)] ?? form.branchId}</span>
+                            ? <span style={{ fontSize: 11, background: "rgba(99,102,241,0.15)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 999, padding: "2px 8px", color: "#d8b4fe" }}>مقطع {glMap[parseInt(form.gradeLevelId)] ?? form.gradeLevelId}</span>
+                            : <span style={{ fontSize: 11, background: "rgba(99,102,241,0.15)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 999, padding: "2px 8px", color: "#d8b4fe" }}>شعبه {branchMap[parseInt(form.branchId)] ?? form.branchId}</span>
                       }
                     </div>
                   )}
@@ -247,7 +247,7 @@ export default function SchoolNotifications() {
               <button onClick={() => createMut.mutate(form)} disabled={!form.title || !form.body || createMut.isPending}
                 style={{
                   flex: 1, padding: "11px 0",
-                  background: form.title && form.body ? "linear-gradient(135deg, #7c3aed, #a855f7)" : "rgba(124,58,237,0.3)",
+                  background: form.title && form.body ? "linear-gradient(135deg, #7c3aed, #a855f7)" : "rgba(99,102,241,0.20)",
                   border: "none", borderRadius: 10, color: "white", fontWeight: 600,
                   fontFamily: "Vazirmatn, sans-serif", cursor: form.title && form.body ? "pointer" : "not-allowed",
                 }}>
@@ -268,11 +268,11 @@ export default function SchoolNotifications() {
           const rc = roleColor(n.targetRole);
           return (
             <div key={n.id} style={{
-              background: "rgba(30,18,60,0.85)", border: "1px solid rgba(139,92,246,0.2)",
+              background: "rgba(255,255,255,0.82)", border: "1px solid rgba(139,92,246,0.2)",
               borderRadius: 14, padding: "16px 18px", display: "flex", alignItems: "flex-start", gap: 14,
             }}>
               <div style={{
-                width: 40, height: 40, borderRadius: 12, background: "rgba(124,58,237,0.2)",
+                width: 40, height: 40, borderRadius: 12, background: "rgba(99,102,241,0.15)",
                 border: "1px solid rgba(124,58,237,0.3)", display: "flex", alignItems: "center",
                 justifyContent: "center", flexShrink: 0,
               }}>
@@ -280,14 +280,14 @@ export default function SchoolNotifications() {
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
-                  <div style={{ fontWeight: 700, color: "#f8f5ff", fontSize: 15 }}>{n.title}</div>
+                  <div style={{ fontWeight: 700, color: "#1e1b4b", fontSize: 15 }}>{n.title}</div>
                   <span style={{ background: rc.bg, border: `1px solid ${rc.border}`, borderRadius: 999, padding: "2px 8px", fontSize: 11, color: rc.text, whiteSpace: "nowrap" }}>
                     {roleLabel(n.targetRole)}
                   </span>
                 </div>
-                <p style={{ color: "#c4b5fd", fontSize: 13, margin: "0 0 6px", lineHeight: 1.6 }}>{n.body}</p>
+                <p style={{ color: "#3730a3", fontSize: 13, margin: "0 0 6px", lineHeight: 1.6 }}>{n.body}</p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 5, alignItems: "center" }}>
-                  {n.createdAt && <span style={{ color: "#8b5cf6", fontSize: 11 }}>{new Date(n.createdAt).toLocaleDateString("fa-IR")}</span>}
+                  {n.createdAt && <span style={{ color: "#4f46e5", fontSize: 11 }}>{new Date(n.createdAt).toLocaleDateString("fa-IR")}</span>}
                   {n.branchId && !n.classId && !n.gradeLevelId && (
                     <span style={{ fontSize: 11, background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.2)", borderRadius: 999, padding: "1px 7px", color: "#93c5fd" }}>شعبه: {allBranchMap[n.branchId] ?? n.branchId}</span>
                   )}
@@ -295,7 +295,7 @@ export default function SchoolNotifications() {
                     <span style={{ fontSize: 11, background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.2)", borderRadius: 999, padding: "1px 7px", color: "#93c5fd" }}>مقطع: {allGlMap[n.gradeLevelId] ?? n.gradeLevelId}</span>
                   )}
                   {n.classId && (
-                    <span style={{ fontSize: 11, background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 999, padding: "1px 7px", color: "#c4b5fd" }}>کلاس: {allClassMap[n.classId] ?? n.classId}</span>
+                    <span style={{ fontSize: 11, background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 999, padding: "1px 7px", color: "#3730a3" }}>کلاس: {allClassMap[n.classId] ?? n.classId}</span>
                   )}
                   {!n.branchId && !n.gradeLevelId && !n.classId && (
                     <span style={{ fontSize: 11, color: "#6b7280" }}>همه مدرسه</span>
@@ -313,7 +313,7 @@ export default function SchoolNotifications() {
           );
         })}
         {notifs.length === 0 && (
-          <div style={{ textAlign: "center", padding: 40, color: "#8b5cf6" }}>
+          <div style={{ textAlign: "center", padding: 40, color: "#4f46e5" }}>
             <Bell size={40} style={{ opacity: 0.4, display: "block", margin: "0 auto 10px" }} />
             <p style={{ margin: 0 }}>هیچ اعلانی ارسال نشده</p>
           </div>

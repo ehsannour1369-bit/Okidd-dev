@@ -5,10 +5,10 @@ import { useAuthStore } from "../../store/auth";
 import { showToast } from "../../lib/toast";
 import { Plus, X } from "lucide-react";
 
-const IS = { width: "100%", background: "rgba(13,10,26,0.5)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#f8f5ff", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
+const IS = { width: "100%", background: "rgba(245,243,255,0.90)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#1e1b4b", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
 
 function Lbl({ label, children }: any) {
-  return <div style={{ marginBottom: 12 }}><label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 5 }}>{label}</label>{children}</div>;
+  return <div style={{ marginBottom: 12 }}><label style={{ display: "block", color: "#3730a3", fontSize: 13, marginBottom: 5 }}>{label}</label>{children}</div>;
 }
 
 export default function SchoolStudents() {
@@ -33,49 +33,49 @@ export default function SchoolStudents() {
     <div>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f8f5ff", margin: 0 }}>دانش‌آموزان</h1>
-          <p style={{ color: "#8b5cf6", fontSize: 14, marginTop: 4 }}>{students.length} دانش‌آموز</p>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1e1b4b", margin: 0 }}>دانش‌آموزان</h1>
+          <p style={{ color: "#4f46e5", fontSize: 14, marginTop: 4 }}>{students.length} دانش‌آموز</p>
         </div>
         <button onClick={() => { setForm({ name: "", email: "", password: "", gender: "male", nationalId: "" }); setShowModal(true); }} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", background: "linear-gradient(135deg, #7c3aed, #a855f7)", border: "none", borderRadius: 10, color: "white", fontSize: 14, fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>
           <Plus size={16} /> ایجاد حساب کاربری
         </button>
       </div>
 
-      <div style={{ background: "rgba(30,18,60,0.85)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, overflow: "hidden" }}>
+      <div style={{ background: "rgba(255,255,255,0.82)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr>{["نام", "ایمیل", "کد ملی", "جنسیت", "وضعیت"].map(h => <th key={h} style={{ textAlign: "right", padding: "12px 16px", color: "#c4b5fd", fontSize: 13, fontWeight: 600, background: "rgba(13,10,26,0.5)", borderBottom: "1px solid rgba(139,92,246,0.15)" }}>{h}</th>)}</tr>
+            <tr>{["نام", "ایمیل", "کد ملی", "جنسیت", "وضعیت"].map(h => <th key={h} style={{ textAlign: "right", padding: "12px 16px", color: "#3730a3", fontSize: 13, fontWeight: 600, background: "rgba(245,243,255,0.90)", borderBottom: "1px solid rgba(139,92,246,0.15)" }}>{h}</th>)}</tr>
           </thead>
           <tbody>
             {students.map((s: any) => (
               <tr key={s.id}>
                 <td style={{ padding: "11px 16px", borderBottom: "1px solid rgba(139,92,246,0.08)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 34, height: 34, borderRadius: 10, background: s.gender === "female" ? "rgba(236,72,153,0.2)" : "rgba(124,58,237,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>{s.gender === "female" ? "👧" : "👦"}</div>
-                    <div style={{ fontWeight: 600, color: "#f8f5ff" }}>{s.name}</div>
+                    <div style={{ width: 34, height: 34, borderRadius: 10, background: s.gender === "female" ? "rgba(236,72,153,0.2)" : "rgba(99,102,241,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>{s.gender === "female" ? "👧" : "👦"}</div>
+                    <div style={{ fontWeight: 600, color: "#1e1b4b" }}>{s.name}</div>
                   </div>
                 </td>
-                <td style={{ padding: "11px 16px", color: "#c4b5fd", fontSize: 13, direction: "ltr", borderBottom: "1px solid rgba(139,92,246,0.08)" }}>{s.email}</td>
-                <td style={{ padding: "11px 16px", color: "#8b5cf6", fontSize: 13, borderBottom: "1px solid rgba(139,92,246,0.08)" }}>{s.nationalId ?? "—"}</td>
+                <td style={{ padding: "11px 16px", color: "#3730a3", fontSize: 13, direction: "ltr", borderBottom: "1px solid rgba(139,92,246,0.08)" }}>{s.email}</td>
+                <td style={{ padding: "11px 16px", color: "#4f46e5", fontSize: 13, borderBottom: "1px solid rgba(139,92,246,0.08)" }}>{s.nationalId ?? "—"}</td>
                 <td style={{ padding: "11px 16px", borderBottom: "1px solid rgba(139,92,246,0.08)" }}>
                   <span style={{ fontSize: 13, color: s.gender === "female" ? "#f472b6" : "#60a5fa" }}>{s.gender === "female" ? "دختر" : "پسر"}</span>
                 </td>
                 <td style={{ padding: "11px 16px", borderBottom: "1px solid rgba(139,92,246,0.08)" }}>
-                  <span style={{ background: s.status === "active" ? "rgba(34,197,94,0.15)" : "rgba(248,113,113,0.15)", color: s.status === "active" ? "#4ade80" : "#f87171", border: `1px solid ${s.status === "active" ? "rgba(34,197,94,0.3)" : "rgba(248,113,113,0.3)"}`, borderRadius: 999, padding: "2px 10px", fontSize: 12 }}>{s.status === "active" ? "فعال" : "غیرفعال"}</span>
+                  <span style={{ background: s.status === "active" ? "rgba(34,197,94,0.15)" : "rgba(248,113,113,0.15)", color: s.status === "active" ? "#15803d" : "#f87171", border: `1px solid ${s.status === "active" ? "rgba(34,197,94,0.3)" : "rgba(248,113,113,0.3)"}`, borderRadius: 999, padding: "2px 10px", fontSize: 12 }}>{s.status === "active" ? "فعال" : "غیرفعال"}</span>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {students.length === 0 && <p style={{ color: "#8b5cf6", textAlign: "center", padding: 30 }}>دانش‌آموزی یافت نشد</p>}
+        {students.length === 0 && <p style={{ color: "#4f46e5", textAlign: "center", padding: 30 }}>دانش‌آموزی یافت نشد</p>}
       </div>
 
       {showModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ background: "#1a1238", border: "1px solid rgba(124,58,237,0.5)", borderRadius: 20, padding: 28, width: "90%", maxWidth: 480, maxHeight: "90vh", overflowY: "auto" }}>
+          <div style={{ background: "#f5f3ff", border: "1px solid rgba(124,58,237,0.5)", borderRadius: 20, padding: 28, width: "90%", maxWidth: 480, maxHeight: "90vh", overflowY: "auto" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-              <h3 style={{ margin: 0, color: "#f8f5ff", fontSize: 17, fontWeight: 700 }}>ایجاد حساب دانش‌آموز</h3>
-              <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", color: "#8b5cf6", cursor: "pointer" }}><X size={20} /></button>
+              <h3 style={{ margin: 0, color: "#1e1b4b", fontSize: 17, fontWeight: 700 }}>ایجاد حساب دانش‌آموز</h3>
+              <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", color: "#4f46e5", cursor: "pointer" }}><X size={20} /></button>
             </div>
             <Lbl label="نام کامل"><input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={IS} /></Lbl>
             <Lbl label="ایمیل"><input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} type="email" style={{ ...IS, direction: "ltr", textAlign: "left" }} /></Lbl>

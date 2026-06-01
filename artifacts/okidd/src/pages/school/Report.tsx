@@ -30,10 +30,10 @@ function fmtDuration(mins: number) {
 const thStyle: React.CSSProperties = {
   textAlign: "right",
   padding: "10px 14px",
-  color: "#c4b5fd",
+  color: "#3730a3",
   fontSize: 12,
   fontWeight: 600,
-  background: "rgba(13,10,26,0.7)",
+  background: "rgba(245,243,255,0.88)",
   borderBottom: "1px solid rgba(139,92,246,0.2)",
   whiteSpace: "nowrap",
 };
@@ -95,10 +95,10 @@ export default function SchoolReport() {
         background:
           tab === value
             ? "linear-gradient(135deg, #7c3aed, #a855f7)"
-            : "rgba(30,18,60,0.6)",
-        color: tab === value ? "#fff" : "#c4b5fd",
+            : "rgba(245,243,255,0.80)",
+        color: tab === value ? "#fff" : "#3730a3",
         boxShadow: tab === value ? "0 4px 16px rgba(124,58,237,0.4)" : "none",
-        border: `1px solid ${tab === value ? "transparent" : "rgba(139,92,246,0.2)"}`,
+        border: `1px solid ${tab === value ? "transparent" : "rgba(99,102,241,0.15)"}`,
       }}
     >
       <span style={{ fontSize: 18 }}>{emoji}</span>
@@ -109,10 +109,10 @@ export default function SchoolReport() {
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto" }}>
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: "#f8f5ff", margin: 0 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 800, color: "#1e1b4b", margin: 0 }}>
           گزارش عملکرد
         </h1>
-        <p style={{ color: "#8b5cf6", fontSize: 14, marginTop: 4 }}>
+        <p style={{ color: "#4f46e5", fontSize: 14, marginTop: 4 }}>
           گزارش کامل عملکرد معلمان و دانش‌آموزان مدرسه
         </p>
       </div>
@@ -127,7 +127,7 @@ export default function SchoolReport() {
       {tab === "teachers" && (
         <div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 12, flexWrap: "wrap" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#c4b5fd", fontSize: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#3730a3", fontSize: 14 }}>
               <GraduationCap size={16} style={{ color: "#f59e0b" }} />
               <span>{filteredTeachers.length} معلم</span>
             </div>
@@ -136,11 +136,11 @@ export default function SchoolReport() {
               onChange={(e) => setTeacherSearch(e.target.value)}
               placeholder="جستجوی معلم..."
               style={{
-                background: "rgba(30,18,60,0.7)",
+                background: "rgba(255,255,255,0.80)",
                 border: "1px solid rgba(139,92,246,0.3)",
                 borderRadius: 10,
                 padding: "8px 14px",
-                color: "#f8f5ff",
+                color: "#1e1b4b",
                 fontFamily: "Vazirmatn, sans-serif",
                 fontSize: 13,
                 outline: "none",
@@ -150,13 +150,13 @@ export default function SchoolReport() {
           </div>
 
           {loadingTeachers ? (
-            <div style={{ color: "#c4b5fd", textAlign: "center", padding: 40 }}>در حال بارگذاری...</div>
+            <div style={{ color: "#3730a3", textAlign: "center", padding: 40 }}>در حال بارگذاری...</div>
           ) : filteredTeachers.length === 0 ? (
-            <div style={{ color: "#8b5cf6", textAlign: "center", padding: 40, background: "rgba(30,18,60,0.5)", borderRadius: 16 }}>
+            <div style={{ color: "#4f46e5", textAlign: "center", padding: 40, background: "rgba(255,255,255,0.80)", borderRadius: 16 }}>
               معلمی یافت نشد
             </div>
           ) : (
-            <div style={{ background: "rgba(18,14,42,0.95)", borderRadius: 16, border: "1px solid rgba(139,92,246,0.2)", overflow: "hidden" }}>
+            <div style={{ background: "rgba(255,255,255,0.97)", borderRadius: 16, border: "1px solid rgba(139,92,246,0.2)", overflow: "hidden" }}>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 640 }}>
                   <thead>
@@ -182,23 +182,23 @@ export default function SchoolReport() {
                               fontSize: 14, fontWeight: 700, color: "#1a1a2e", flexShrink: 0,
                             }}>{t.name?.[0] ?? "م"}</div>
                             <div>
-                              <div style={{ color: "#f8f5ff", fontWeight: 600, fontSize: 13 }}>{t.name}</div>
-                              <div style={{ color: "#8b5cf6", fontSize: 11 }}>{t.status === "active" ? "فعال" : "غیرفعال"}</div>
+                              <div style={{ color: "#1e1b4b", fontWeight: 600, fontSize: 13 }}>{t.name}</div>
+                              <div style={{ color: "#4f46e5", fontSize: 11 }}>{t.status === "active" ? "فعال" : "غیرفعال"}</div>
                             </div>
                           </div>
                         </td>
                         <td style={tdStyle}>
-                          <span style={{ color: "#c4b5fd", fontSize: 13, direction: "ltr", display: "block" }}>{t.phone ?? "—"}</span>
+                          <span style={{ color: "#3730a3", fontSize: 13, direction: "ltr", display: "block" }}>{t.phone ?? "—"}</span>
                         </td>
                         <td style={tdStyle}>
-                          <span style={{ color: "#8b5cf6", fontSize: 12, direction: "ltr", display: "block" }}>{t.email ?? "—"}</span>
+                          <span style={{ color: "#4f46e5", fontSize: 12, direction: "ltr", display: "block" }}>{t.email ?? "—"}</span>
                         </td>
                         <td style={tdStyle}>
                           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                             {t.classNames?.length > 0 ? t.classNames.map((cn: string, i: number) => (
                               <span key={i} style={{
                                 padding: "2px 8px", borderRadius: 999, fontSize: 11,
-                                background: "rgba(124,58,237,0.2)", color: "#c4b5fd",
+                                background: "rgba(99,102,241,0.15)", color: "#3730a3",
                                 border: "1px solid rgba(139,92,246,0.3)",
                               }}>{cn}</span>
                             )) : <span style={{ color: "#6b7280", fontSize: 12 }}>—</span>}
@@ -207,7 +207,7 @@ export default function SchoolReport() {
                         <td style={tdStyle}>
                           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                             <Clock size={12} style={{ color: "#60a5fa", flexShrink: 0 }} />
-                            <span style={{ color: "#c4b5fd", fontSize: 12 }}>{fmtDate(t.lastLoginAt)}</span>
+                            <span style={{ color: "#3730a3", fontSize: 12 }}>{fmtDate(t.lastLoginAt)}</span>
                           </div>
                         </td>
                       </tr>
@@ -224,7 +224,7 @@ export default function SchoolReport() {
       {tab === "students" && (
         <div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 12, flexWrap: "wrap" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#c4b5fd", fontSize: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#3730a3", fontSize: 14 }}>
               <Users size={16} style={{ color: "#ec4899" }} />
               <span>{filteredStudents.length} دانش‌آموز</span>
             </div>
@@ -233,11 +233,11 @@ export default function SchoolReport() {
               onChange={(e) => setStudentSearch(e.target.value)}
               placeholder="جستجو (نام، کلاس)..."
               style={{
-                background: "rgba(30,18,60,0.7)",
+                background: "rgba(255,255,255,0.80)",
                 border: "1px solid rgba(139,92,246,0.3)",
                 borderRadius: 10,
                 padding: "8px 14px",
-                color: "#f8f5ff",
+                color: "#1e1b4b",
                 fontFamily: "Vazirmatn, sans-serif",
                 fontSize: 13,
                 outline: "none",
@@ -247,13 +247,13 @@ export default function SchoolReport() {
           </div>
 
           {loadingStudents ? (
-            <div style={{ color: "#c4b5fd", textAlign: "center", padding: 40 }}>در حال بارگذاری...</div>
+            <div style={{ color: "#3730a3", textAlign: "center", padding: 40 }}>در حال بارگذاری...</div>
           ) : filteredStudents.length === 0 ? (
-            <div style={{ color: "#8b5cf6", textAlign: "center", padding: 40, background: "rgba(30,18,60,0.5)", borderRadius: 16 }}>
+            <div style={{ color: "#4f46e5", textAlign: "center", padding: 40, background: "rgba(255,255,255,0.80)", borderRadius: 16 }}>
               دانش‌آموزی یافت نشد
             </div>
           ) : (
-            <div style={{ background: "rgba(18,14,42,0.95)", borderRadius: 16, border: "1px solid rgba(139,92,246,0.2)", overflow: "hidden" }}>
+            <div style={{ background: "rgba(255,255,255,0.97)", borderRadius: 16, border: "1px solid rgba(139,92,246,0.2)", overflow: "hidden" }}>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 760 }}>
                   <thead>
@@ -274,8 +274,8 @@ export default function SchoolReport() {
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                             <span style={{ fontSize: 20 }}>{s.gender === "female" ? "👧" : "👦"}</span>
                             <div>
-                              <div style={{ color: "#f8f5ff", fontWeight: 600, fontSize: 13 }}>{s.name}</div>
-                              <div style={{ color: "#8b5cf6", fontSize: 11, direction: "ltr" }}>{s.email}</div>
+                              <div style={{ color: "#1e1b4b", fontWeight: 600, fontSize: 13 }}>{s.name}</div>
+                              <div style={{ color: "#4f46e5", fontSize: 11, direction: "ltr" }}>{s.email}</div>
                             </div>
                           </div>
                         </td>
@@ -289,11 +289,11 @@ export default function SchoolReport() {
                         <td style={tdStyle}>
                           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                             <Clock size={12} style={{ color: "#60a5fa", flexShrink: 0 }} />
-                            <span style={{ color: "#c4b5fd", fontSize: 12 }}>{fmtDate(s.lastPresenceAt)}</span>
+                            <span style={{ color: "#3730a3", fontSize: 12 }}>{fmtDate(s.lastPresenceAt)}</span>
                           </div>
                         </td>
                         <td style={tdStyle}>
-                          <span style={{ color: "#4ade80", fontSize: 13, fontWeight: 600 }}>{fmtDuration(s.totalMinutesInApp ?? 0)}</span>
+                          <span style={{ color: "#15803d", fontSize: 13, fontWeight: 600 }}>{fmtDuration(s.totalMinutesInApp ?? 0)}</span>
                         </td>
                         <td style={tdStyle}>
                           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -310,12 +310,12 @@ export default function SchoolReport() {
                               return (
                                 <div key={bp.bookId}>
                                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
-                                    <span style={{ fontSize: 11, color: "#c4b5fd", display: "flex", alignItems: "center", gap: 4 }}>
+                                    <span style={{ fontSize: 11, color: "#3730a3", display: "flex", alignItems: "center", gap: 4 }}>
                                       <BookOpen size={10} /> {bp.bookTitle}
                                     </span>
-                                    <span style={{ fontSize: 11, color: "#8b5cf6" }}>{bp.completedLessons}/{bp.lessonCount}</span>
+                                    <span style={{ fontSize: 11, color: "#4f46e5" }}>{bp.completedLessons}/{bp.lessonCount}</span>
                                   </div>
-                                  <div style={{ height: 4, background: "rgba(139,92,246,0.15)", borderRadius: 999, overflow: "hidden", width: 110 }}>
+                                  <div style={{ height: 4, background: "rgba(99,102,241,0.12)", borderRadius: 999, overflow: "hidden", width: 110 }}>
                                     <div style={{ height: "100%", width: `${pct}%`, background: "linear-gradient(90deg, #7c3aed, #a855f7)", borderRadius: 999, transition: "width 0.5s ease" }} />
                                   </div>
                                 </div>
