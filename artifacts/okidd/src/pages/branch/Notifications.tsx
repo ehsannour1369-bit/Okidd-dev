@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { useNotificationReads } from "../../hooks/useNotificationReads";
+import NotificationThread from "../../components/NotificationThread";
 import { showToast } from "../../lib/toast";
-import { Bell, Send, Plus, Users, Filter, Calendar, ChevronDown } from "lucide-react";
+import { Bell, Send, Plus, Filter, Calendar, ChevronDown, CheckCheck, MessageCircle, ChevronUp } from "lucide-react";
 
 const TEAL   = "#0d9488";
 const TEAL_D = "#0f766e";
@@ -41,11 +42,11 @@ const TARGET_ROLES = [
 export default function BranchNotifications() {
   const { user } = useAuthStore();
   const qc = useQueryClient();
-  const { markAllSeen } = useNotificationReads(user?.id);
+  const { markRead, markAllRead, isRead, countUnread } = useNotificationReads(user?.id);
   const [tab, setTab] = useState<"inbox" | "send">("inbox");
   const [filter, setFilter] = useState("");
   const [form, setForm] = useState({ title: "", body: "", targetRole: "student" });
-  const [showForm, setShowForm] = useState(false);
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
 
   const { data: notifs = [], isLoading } = useQuery<any[]>({
     queryKey: ["notifications", user?.schoolId, "branch"],
@@ -53,10 +54,10 @@ export default function BranchNotifications() {
     enabled: !!user?.schoolId,
   });
 
-  useEffect(() => { if (notifs.length > 0) markAllSeen(); }, [notifs.length]);
-
   const inbox = notifs.filter(n => filter === "" || n.targetRole === filter)
     .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  const unreadCount = countUnread(inbox);
 
   const { data: sent = [] } = useQuery<any[]>({
     queryKey: ["notifications-sent", user?.id],
@@ -68,7 +69,7 @@ export default function BranchNotifications() {
     mutationFn: (d: any) => api.post("/notifications", d),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["notifications"] });
-      setShowForm(false);
+      setTab("inbox");
       setForm({ title: "", body: "", targetRole: "student" });
       showToast("اعلان با موفقیت ارسال شد ✓");
     },
@@ -84,6 +85,14 @@ export default function BranchNotifications() {
       schoolId: user?.schoolId,
       branchId: user?.branchId,
       senderId: user?.id,
+    });
+  }
+
+  function toggleExpand(id: number) {
+    setExpandedIds(prev => {
+      const n = new Set(prev);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
     });
   }
 
@@ -115,14 +124,29 @@ export default function BranchNotifications() {
               <Bell size={22} color="white" />
             </div>
             <div>
-              <h1 style={{ fontSize: 22, fontWeight: 900, color: TEXT, margin: 0 }}>اعلان‌ها</h1>
+              <h1 style={{ fontSize: 22, fontWeight: 900, color: TEXT, margin: 0 }}>
+                اعلان‌ها
+                {unreadCount > 0 && (
+                  <span style={{ marginRight: 10, background: "#dc2626", color: "white", fontSize: 12, fontWeight: 800, borderRadius: 999, padding: "2px 9px", verticalAlign: "middle" }}>
+                    {unreadCount} جدید
+                  </span>
+                )}
+              </h1>
               <div style={{ fontSize: 13, color: TEXT2, marginTop: 2 }}>{isLoading ? "در حال بارگذاری..." : `${notifs.length} اعلان`}</div>
             </div>
           </div>
-          <button onClick={() => { setTab("send"); setShowForm(true); }}
-            style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", background: `linear-gradient(135deg,${TEAL_D},${TEAL})`, border: "none", borderRadius: 12, color: "white", fontSize: 13, fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", boxShadow: `0 4px 15px ${TEAL}44` }}>
-            <Plus size={15} /> اعلان جدید
-          </button>
+          <div style={{ display: "flex", gap: 8 }}>
+            {tab === "inbox" && unreadCount > 0 && (
+              <button onClick={() => markAllRead(inbox.map(n => n.id))}
+                style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", background: "rgba(255,255,255,0.70)", border: `1px solid rgba(13,148,136,0.30)`, borderRadius: 10, color: TEAL_D, fontFamily: "Vazirmatn", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                <CheckCheck size={14} /> خواندن همه
+              </button>
+            )}
+            <button onClick={() => { setTab("send"); }}
+              style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", background: `linear-gradient(135deg,${TEAL_D},${TEAL})`, border: "none", borderRadius: 12, color: "white", fontSize: 13, fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", boxShadow: `0 4px 15px ${TEAL}44` }}>
+              <Plus size={15} /> اعلان جدید
+            </button>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -130,7 +154,7 @@ export default function BranchNotifications() {
           <button style={tabBtn(tab === "inbox")} onClick={() => setTab("inbox")}>
             <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
               <Bell size={15} /> اعلانات
-              {inbox.length > 0 && <span style={{ background: GREEN, color: "white", borderRadius: 999, padding: "1px 7px", fontSize: 11 }}>{inbox.length}</span>}
+              {unreadCount > 0 && <span style={{ background: GREEN, color: "white", borderRadius: 999, padding: "1px 7px", fontSize: 11 }}>{unreadCount}</span>}
             </span>
           </button>
           <button style={tabBtn(tab === "send")} onClick={() => setTab("send")}>
@@ -163,30 +187,67 @@ export default function BranchNotifications() {
                   <Bell size={48} style={{ color: TEAL, opacity: 0.35, display: "block", margin: "0 auto 14px" }} />
                   <p style={{ color: TEXT2, margin: 0, fontSize: 15, fontWeight: 600 }}>هیچ اعلانی وجود ندارد</p>
                 </div>
-              ) : inbox.map((n: any) => (
-                <div key={n.id} style={{ ...card, padding: "16px 18px", display: "flex", alignItems: "flex-start", gap: 14 }}>
-                  <div style={{ width: 42, height: 42, borderRadius: 12, background: `rgba(13,148,136,0.12)`, border: `1px solid rgba(13,148,136,0.28)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <Bell size={18} style={{ color: TEAL }} />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                      <div style={{ fontWeight: 800, color: TEXT, fontSize: 15 }}>{n.title}</div>
-                      {n.targetRole && (
-                        <span style={{ fontSize: 11, color: TEAL_D, background: `rgba(13,148,136,0.10)`, border: `1px solid rgba(13,148,136,0.20)`, borderRadius: 999, padding: "1px 8px" }}>
-                          {TARGET_ROLES.find(r => r.value === n.targetRole)?.label ?? n.targetRole}
-                        </span>
-                      )}
-                    </div>
-                    <p style={{ color: TEXT2, fontSize: 13, margin: 0, lineHeight: 1.7 }}>{n.body}</p>
-                    {n.createdAt && (
-                      <div style={{ display: "flex", alignItems: "center", gap: 5, color: TEAL_D, fontSize: 11, marginTop: 8 }}>
-                        <Calendar size={11} />
-                        {new Date(n.createdAt).toLocaleDateString("fa-IR", { year: "numeric", month: "long", day: "numeric" })}
+              ) : inbox.map((n: any) => {
+                const read = isRead(n.id);
+                const expanded = expandedIds.has(n.id);
+                return (
+                  <div key={n.id} style={{
+                    ...card,
+                    padding: "16px 18px",
+                    borderRight: read ? undefined : `3px solid ${TEAL}`,
+                    opacity: read ? 0.82 : 1,
+                    transition: "all 0.2s",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+                      <div style={{ width: 42, height: 42, borderRadius: 12, background: `rgba(13,148,136,${read ? "0.07" : "0.14"})`, border: `1px solid rgba(13,148,136,${read ? "0.16" : "0.30"})`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative" }}>
+                        <Bell size={18} style={{ color: read ? `${TEAL}88` : TEAL }} />
+                        {!read && <span style={{ position: "absolute", top: -3, right: -3, width: 9, height: 9, borderRadius: "50%", background: "#dc2626", border: "2px solid #f0fdfa" }} />}
                       </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                          <div style={{ fontWeight: 800, color: read ? `${TEXT}99` : TEXT, fontSize: 15 }}>{n.title}</div>
+                          {n.targetRole && (
+                            <span style={{ fontSize: 11, color: TEAL_D, background: `rgba(13,148,136,0.10)`, border: `1px solid rgba(13,148,136,0.20)`, borderRadius: 999, padding: "1px 8px" }}>
+                              {TARGET_ROLES.find(r => r.value === n.targetRole)?.label ?? n.targetRole}
+                            </span>
+                          )}
+                        </div>
+                        <p style={{ color: TEXT2, fontSize: 13, margin: 0, lineHeight: 1.7 }}>{n.body}</p>
+                        {n.createdAt && (
+                          <div style={{ display: "flex", alignItems: "center", gap: 5, color: TEAL_D, fontSize: 11, marginTop: 8 }}>
+                            <Calendar size={11} />
+                            {new Date(n.createdAt).toLocaleDateString("fa-IR", { year: "numeric", month: "long", day: "numeric" })}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 5, flexShrink: 0 }}>
+                        <button onClick={() => toggleExpand(n.id)}
+                          style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 10px", background: expanded ? `rgba(13,148,136,0.12)` : "rgba(255,255,255,0.55)", border: `1px solid rgba(13,148,136,0.30)`, borderRadius: 8, color: TEAL_D, cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 11, fontWeight: 600 }}>
+                          <MessageCircle size={12} />
+                          پاسخ
+                          {expanded ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+                        </button>
+                        {!read && (
+                          <button onClick={() => markRead(n.id)}
+                            style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 10px", background: "rgba(255,255,255,0.55)", border: `1px solid rgba(13,148,136,0.22)`, borderRadius: 8, color: TEXT2, cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 11, fontWeight: 600 }}>
+                            <CheckCheck size={12} />
+                            خوانده شد
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    {expanded && (
+                      <NotificationThread
+                        notifId={n.id}
+                        currentUserId={user?.id ?? 0}
+                        currentUserName={user?.name ?? ""}
+                        currentUserRole="branch_manager"
+                        glass
+                      />
                     )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </>
         )}
@@ -229,6 +290,11 @@ export default function BranchNotifications() {
           </div>
         )}
       </div>
+
+      <style>{`
+        @keyframes blobFloat1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(18px,14px) scale(1.06)} }
+        @keyframes blobFloat2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-14px,10px) scale(1.04)} }
+      `}</style>
     </div>
   );
 }

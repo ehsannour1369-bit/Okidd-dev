@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { db, notificationsTable } from "@workspace/db";
+import { notificationRepliesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
 const router = Router();
@@ -24,6 +25,27 @@ router.delete("/notifications/:id", async (req, res) => {
   const id = parseInt(req.params.id);
   await db.delete(notificationsTable).where(eq(notificationsTable.id, id));
   res.status(204).end();
+});
+
+/* ── Notification Replies ── */
+
+router.get("/notifications/:id/replies", async (req, res) => {
+  const notificationId = parseInt(req.params.id);
+  const rows = await db
+    .select()
+    .from(notificationRepliesTable)
+    .where(eq(notificationRepliesTable.notificationId, notificationId));
+  rows.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  res.json(rows);
+});
+
+router.post("/notifications/:id/replies", async (req, res) => {
+  const notificationId = parseInt(req.params.id);
+  const [reply] = await db
+    .insert(notificationRepliesTable)
+    .values({ ...req.body, notificationId })
+    .returning();
+  res.status(201).json(reply);
 });
 
 export default router;

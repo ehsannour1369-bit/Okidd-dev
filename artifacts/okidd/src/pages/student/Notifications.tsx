@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { useNotificationReads } from "../../hooks/useNotificationReads";
 import { showToast } from "../../lib/toast";
-import { Bell, Calendar, Plus, X, MessageCircle, ChevronDown, ChevronUp, Send as SendIcon, ChevronRight } from "lucide-react";
+import { Bell, Calendar, Plus, X, MessageCircle, ChevronDown, ChevronUp, Send as SendIcon, ChevronRight, CheckCheck } from "lucide-react";
 import { useLocation } from "wouter";
 import NotificationThread from "../../components/NotificationThread";
 
@@ -38,7 +38,7 @@ export default function StudentNotifications() {
   const { user } = useAuthStore();
   const [, navigate] = useLocation();
   const qc = useQueryClient();
-  const { markAllSeen } = useNotificationReads(user?.id);
+  const { markRead, isRead, countUnread } = useNotificationReads(user?.id);
   const [tab, setTab] = useState<"received" | "sent">("received");
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: "", body: "", targetRole: "teacher" });
@@ -50,7 +50,6 @@ export default function StudentNotifications() {
     enabled: !!user?.schoolId,
   });
 
-  useEffect(() => { if (received.length > 0) markAllSeen(); }, [received.length]);
 
   const { data: sent = [] } = useQuery<any[]>({
     queryKey: ["notifications", "student-sent", user?.id],
@@ -156,7 +155,7 @@ export default function StudentNotifications() {
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        {([["received", Bell, "اعلانات دریافتی"], ["sent", SendIcon, `پیام‌های من${sent.length > 0 ? ` (${sent.length})` : ""}`]] as const).map(([t, Icon, label]) => (
+        {([["received", Bell, `اعلانات دریافتی${countUnread(received) > 0 ? ` (${countUnread(received)})` : ""}`], ["sent", SendIcon, `پیام‌های من${sent.length > 0 ? ` (${sent.length})` : ""}`]] as const).map(([t, Icon, label]) => (
           <button key={t} onClick={() => setTab(t as any)}
             style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", background: tab === t ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.25)", border: `1px solid ${tab === t ? "rgba(124,58,237,0.4)" : "rgba(255,255,255,0.4)"}`, borderRadius: 10, color: tab === t ? "#2d1b69" : "#5b21b6", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: tab === t ? 700 : 400, cursor: "pointer", backdropFilter: "blur(8px)" }}>
             <Icon size={14} /> {label}
@@ -169,11 +168,13 @@ export default function StudentNotifications() {
         {notifs.map((n: any) => {
           const isExpanded = expandedIds.has(n.id);
           const isMine = tab === "sent";
+          const read = isMine || isRead(n.id);
           return (
-            <div key={n.id} style={{ ...GLASS, borderRadius: 16, padding: "16px 18px" }}>
+            <div key={n.id} style={{ ...GLASS, borderRadius: 16, padding: "16px 18px", borderRight: !isMine && !read ? `3px solid ${accentColor}` : undefined, opacity: read ? 0.88 : 1, transition: "all 0.2s" }}>
               <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
-                <div style={{ width: 42, height: 42, borderRadius: 12, background: isMine ? "rgba(16,185,129,0.18)" : "rgba(245,158,11,0.18)", border: `1px solid ${isMine ? "rgba(16,185,129,0.3)" : "rgba(245,158,11,0.3)"}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <div style={{ width: 42, height: 42, borderRadius: 12, background: isMine ? "rgba(16,185,129,0.18)" : "rgba(245,158,11,0.18)", border: `1px solid ${isMine ? "rgba(16,185,129,0.3)" : "rgba(245,158,11,0.3)"}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative" }}>
                   <Bell size={18} style={{ color: isMine ? "#10b981" : "#d97706" }} />
+                  {!isMine && !read && <span style={{ position: "absolute", top: -3, right: -3, width: 9, height: 9, borderRadius: "50%", background: accentColor, border: "2px solid rgba(255,255,255,0.6)" }} />}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700, color: "#2d1b69", fontSize: 15, marginBottom: 4 }}>{n.title}</div>
@@ -185,12 +186,21 @@ export default function StudentNotifications() {
                   )}
                   {n.createdAt && <div style={{ color: "#7c3aed", fontSize: 11, marginTop: 4 }}>{new Date(n.createdAt).toLocaleDateString("fa-IR")}</div>}
                 </div>
-                <button onClick={() => toggleExpand(n.id)}
-                  style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", background: isExpanded ? "rgba(124,58,237,0.15)" : "rgba(255,255,255,0.3)", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 8, color: accentColor, cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 12, flexShrink: 0 }}>
-                  <MessageCircle size={14} />
-                  پاسخ‌ها
-                  {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                </button>
+                <div style={{ display: "flex", flexDirection: "column", gap: 5, flexShrink: 0 }}>
+                  <button onClick={() => toggleExpand(n.id)}
+                    style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", background: isExpanded ? "rgba(124,58,237,0.15)" : "rgba(255,255,255,0.3)", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 8, color: accentColor, cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 12 }}>
+                    <MessageCircle size={14} />
+                    پاسخ‌ها
+                    {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                  </button>
+                  {!isMine && !read && (
+                    <button onClick={() => markRead(n.id)}
+                      style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", background: "rgba(255,255,255,0.3)", border: "1px solid rgba(124,58,237,0.20)", borderRadius: 8, color: "#5b21b6", cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 12 }}>
+                      <CheckCheck size={12} />
+                      خوانده شد
+                    </button>
+                  )}
+                </div>
               </div>
               {isExpanded && (
                 <NotificationThread

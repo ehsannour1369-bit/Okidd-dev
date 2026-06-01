@@ -227,15 +227,18 @@ function NavCard({ item, active, onClick, TEXT }: { item: NavItem; active: boole
 }
 
 /* ─── Bell icon with unread-count badge ─── */
-function BellBadge({ userId, schoolId, href, isActive, accent, accentDark }: {
-  userId: number; schoolId?: number; href: string; isActive: boolean;
+function BellBadge({ userId, schoolId, role, href, isActive, accent, accentDark }: {
+  userId: number; schoolId?: number; role: string; href: string; isActive: boolean;
   accent: string; accentDark: string;
 }) {
-  const { data: notifs = [] } = useQuery<{ id: number; createdAt?: string }[]>({
-    queryKey: ["notifs-badge", schoolId],
-    queryFn: () => api.get(`/notifications?schoolId=${schoolId}`),
-    enabled: !!schoolId,
-    staleTime: 60_000,
+  const isTeacher = role === "teacher";
+  const { data: notifs = [] } = useQuery<{ id: number }[]>({
+    queryKey: isTeacher ? ["notifs-badge-personal", userId] : ["notifs-badge", schoolId],
+    queryFn: isTeacher
+      ? () => api.get(`/notifications?targetUserId=${userId}`)
+      : () => api.get(`/notifications?schoolId=${schoolId}`),
+    enabled: isTeacher ? !!userId : !!schoolId,
+    staleTime: 30_000,
   });
   const { countUnread } = useNotificationReads(userId);
   const unread = countUnread(notifs);
@@ -562,6 +565,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                   <BellBadge
                     userId={user.id}
                     schoolId={user.schoolId ?? undefined}
+                    role={user.role}
                     href={notifPath}
                     isActive={location === notifPath}
                     accent={accent}

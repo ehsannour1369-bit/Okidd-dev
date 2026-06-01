@@ -7,7 +7,6 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useNotificationReads } from "../../hooks/useNotificationReads";
 
 /* ─────────── helpers ─────────── */
 function glassCard(color: string, dark: string, extra?: React.CSSProperties): React.CSSProperties {
@@ -63,7 +62,6 @@ export default function ParentDashboard() {
   const [mounted, setMounted]                 = useState(false);
   const [confirmLogout, setConfirmLogout]     = useState(false);
   const [weekOffset, setWeekOffset]           = useState(0);
-  const { countUnread } = useNotificationReads(user?.id);
 
   useEffect(() => { const t = setTimeout(() => setMounted(true), 80); return () => clearTimeout(t); }, []);
 
@@ -84,11 +82,6 @@ export default function ParentDashboard() {
     queryKey: ["rankings", childSummary?.classes?.[0]?.id],
     queryFn:  () => api.get(`/rankings?classId=${childSummary?.classes?.[0]?.id}`),
     enabled:  !!childSummary?.classes?.[0]?.id,
-  });
-  const { data: notifications = [] } = useQuery<any[]>({
-    queryKey: ["notifications", user?.schoolId],
-    queryFn:  () => api.get(`/notifications?schoolId=${user?.schoolId}`),
-    enabled:  !!user?.schoolId,
   });
   const { data: examSchedule = [] } = useQuery<any[]>({
     queryKey: ["exam-schedule", user?.schoolId],
@@ -353,42 +346,6 @@ export default function ParentDashboard() {
                   </div>
                 </div>
               )}
-
-              {/* Notifications */}
-              <div style={{ ...glassCard("#f59e0b", "#d97706", { padding: 18, marginBottom: 12 }), ...cardAnim(12) }}>
-                <div style={shine()} />
-                <div style={{ fontWeight: 800, color: "white", marginBottom: 10, fontSize: 14, display: "flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1, textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>
-                  <Bell size={14} /> اعلانات مدرسه
-                  {countUnread(notifications) > 0 && (
-                    <span style={{
-                      minWidth: 20, height: 20, borderRadius: 999,
-                      background: "#dc2626",
-                      border: "2px solid rgba(255,255,255,0.80)",
-                      color: "white", fontSize: 10, fontWeight: 900,
-                      display: "inline-flex", alignItems: "center", justifyContent: "center",
-                      padding: "0 5px",
-                      boxShadow: "0 2px 8px rgba(220,38,38,0.55)",
-                      lineHeight: 1,
-                    }}>
-                      {countUnread(notifications) > 9 ? "۹+" : countUnread(notifications).toLocaleString("fa-IR")}
-                    </span>
-                  )}
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
-                  {notifications.length === 0 ? (
-                    <div style={{ textAlign: "center", padding: "14px 0", color: "rgba(255,255,255,0.62)", fontSize: 13, fontWeight: 600 }}>
-                      اعلانی وجود ندارد
-                    </div>
-                  ) : (
-                    notifications.slice(0, 5).map((n: any) => (
-                      <div key={n.id} style={{ background: "rgba(255,255,255,0.14)", borderRadius: 10, padding: "10px 14px", borderRight: "3px solid rgba(255,255,255,0.5)" }}>
-                        <div style={{ fontWeight: 700, color: "white", fontSize: 13, marginBottom: 3, textShadow: "0 1px 4px rgba(0,0,0,0.18)" }}>{n.title}</div>
-                        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>{n.body}</div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
 
               {/* Exam schedule — weekly calendar */}
               <div style={{ ...glassCard("#f43f5e", "#e11d48", { padding: 18, marginBottom: 12 }), ...cardAnim(13) }}>

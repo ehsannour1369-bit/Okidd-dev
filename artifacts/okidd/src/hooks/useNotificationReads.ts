@@ -1,45 +1,57 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 
 function storageKey(userId: number) {
-  return `notif_last_seen_${userId}`;
+  return `notif_read_ids_${userId}`;
 }
 
-function loadLastSeen(userId: number): Date {
+function loadIds(userId: number): Set<number> {
   try {
     const raw = localStorage.getItem(storageKey(userId));
-    return raw ? new Date(parseInt(raw)) : new Date(0);
+    return raw ? new Set(JSON.parse(raw) as number[]) : new Set<number>();
   } catch {
-    return new Date(0);
+    return new Set<number>();
   }
 }
 
-function saveLastSeen(userId: number, date: Date) {
+function saveIds(userId: number, ids: Set<number>) {
   try {
-    localStorage.setItem(storageKey(userId), String(date.getTime()));
+    localStorage.setItem(storageKey(userId), JSON.stringify([...ids]));
   } catch {}
 }
 
-export function useNotificationReads(userId?: number) {
-  const [lastSeen, setLastSeen] = useState<Date>(() =>
-    userId ? loadLastSeen(userId) : new Date(0)
+export function useNotificationReads(userId?: number | null) {
+  const [readIds, setReadIds] = useState<Set<number>>(
+    () => (userId ? loadIds(userId) : new Set<number>())
   );
 
-  useEffect(() => {
-    if (userId) setLastSeen(loadLastSeen(userId));
-  }, [userId]);
+  const update = useCallback(
+    (fn: (prev: Set<number>) => Set<number>) => {
+      if (!userId) return;
+      setReadIds(prev => {
+        const next = fn(prev);
+        saveIds(userId, next);
+        return next;
+      });
+    },
+    [userId]
+  );
 
-  const markAllSeen = useCallback(() => {
-    if (!userId) return;
-    const now = new Date();
-    saveLastSeen(userId, now);
-    setLastSeen(now);
-  }, [userId]);
+  const markRead = useCallback(
+    (id: number) => update(prev => new Set([...prev, id])),
+    [update]
+  );
+
+  const markAllRead = useCallback(
+    (ids: number[]) => update(prev => new Set([...prev, ...ids])),
+    [update]
+  );
+
+  const isRead = useCallback((id: number) => readIds.has(id), [readIds]);
 
   const countUnread = useCallback(
-    (notifs: { id: number; createdAt?: string }[]) =>
-      notifs.filter(n => n.createdAt && new Date(n.createdAt) > lastSeen).length,
-    [lastSeen]
+    (notifs: { id: number }[]) => notifs.filter(n => !readIds.has(n.id)).length,
+    [readIds]
   );
 
-  return { markAllSeen, countUnread, lastSeen };
+  return { markRead, markAllRead, isRead, countUnread };
 }
