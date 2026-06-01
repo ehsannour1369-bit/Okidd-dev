@@ -250,6 +250,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   const dashboardPath = nav[0].path;
   const isOnSubPage = location !== dashboardPath;
+  const isTeacherOrParentDash = (user.role === "teacher" || user.role === "parent") && !isOnSubPage;
 
   // Back button — rendered in topbar OR in a standalone sticky bar
   const hasTopbar = !isStudent && user.role !== "admin" && user.role !== "school_manager";
@@ -462,8 +463,8 @@ export default function Layout({ children }: { children: ReactNode }) {
             : undefined,
       }}>
 
-        {/* Topbar — hidden for student, admin, school_manager */}
-        {!isStudent && user.role !== "admin" && user.role !== "school_manager" && (
+        {/* Topbar — hidden for student, admin, school_manager, and teacher/parent on their dashboard */}
+        {!isStudent && user.role !== "admin" && user.role !== "school_manager" && !isTeacherOrParentDash && (
           <div style={{
             height: 58,
             background: "rgba(255,255,255,0.82)",
@@ -565,7 +566,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         )}
 
         {/* Page content */}
-        <div style={{ padding: isStudent ? 0 : (isMobile ? "12px" : "24px") }}>{children}</div>
+        <div style={{ padding: (isStudent || isTeacherOrParentDash) ? 0 : (isMobile ? "12px" : "24px") }}>{children}</div>
       </div>
 
       <style>{`

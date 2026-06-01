@@ -1,70 +1,109 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
-import { Bell, BookOpen, Clock, Star, Calendar, ChevronDown, ChevronUp, Trophy, Heart, UserRound, Users } from "lucide-react";
+import {
+  Bell, BookOpen, Clock, Star, Calendar, ChevronDown, ChevronUp,
+  Trophy, Heart, UserRound, Users, LogOut,
+} from "lucide-react";
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 
-const P = "#f43f5e";
-const PD = "#e11d48";
-const S = "#ec4899";
-const SD = "#db2777";
-
-function colorCard(color: string, dark: string, extra?: React.CSSProperties): React.CSSProperties {
+/* ─────────── helpers ─────────── */
+function glassCard(color: string, dark: string, extra?: React.CSSProperties): React.CSSProperties {
   return {
-    background: `linear-gradient(145deg, ${color}c0, ${dark}90)`,
+    background: `linear-gradient(145deg, ${color}68, ${dark}42)`,
     backdropFilter: "blur(22px)",
     WebkitBackdropFilter: "blur(22px)",
-    border: `1.5px solid ${color}cc`,
+    border: `1.5px solid ${color}88`,
     borderRadius: 22,
     position: "relative",
     overflow: "hidden",
-    boxShadow: `0 8px 32px ${color}55, inset 0 1px 0 rgba(255,255,255,0.28)`,
-    transition: "all 0.26s cubic-bezier(0.4,0,0.2,1)",
+    boxShadow: `0 6px 28px ${color}44, inset 0 1px 0 rgba(255,255,255,0.32)`,
+    transition: "transform 0.26s cubic-bezier(.34,1.56,.64,1), box-shadow 0.26s ease",
     ...extra,
   };
 }
 
+function glassIcon(color: string, size = 46): React.CSSProperties {
+  return {
+    width: size, height: size, borderRadius: 14,
+    background: "rgba(255,255,255,0.35)",
+    backdropFilter: "blur(12px)",
+    border: "1.5px solid rgba(255,255,255,0.60)",
+    boxShadow: `0 2px 10px ${color}22`,
+    display: "flex", alignItems: "center", justifyContent: "center",
+    flexShrink: 0,
+  };
+}
+
+function shine(): React.CSSProperties {
+  return {
+    position: "absolute", top: 0, left: 0, right: 0, height: "45%",
+    background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%)",
+    borderRadius: "22px 22px 0 0", pointerEvents: "none",
+  };
+}
+
+/* stat cards meta — colors are fixed per stat type, not child-theme */
 const STAT_META = [
-  { label: "آخرین ورود", key: "lastLogin", icon: Calendar, color: "#3b82f6", dark: "#2563eb" },
-  { label: "زمان در برنامه", key: "duration", icon: Clock, color: "#22c55e", dark: "#16a34a" },
-  { label: "کتاب‌های ثبت‌نامی", key: "books", icon: BookOpen, color: S, dark: SD },
-  { label: "امتیاز کل", key: "score", icon: Star, color: "#f59e0b", dark: "#d97706" },
-  { label: "رتبه کلاس", key: "rank", icon: Trophy, color: "#f97316", dark: "#ea580c" },
-  { label: "دروس تکمیل شده", key: "lessons", icon: Star, color: "#10b981", dark: "#059669" },
+  { label: "آخرین ورود",       key: "lastLogin", icon: Calendar,  color: "#3b82f6", dark: "#2563eb" },
+  { label: "زمان در برنامه",    key: "duration",  icon: Clock,     color: "#22c55e", dark: "#16a34a" },
+  { label: "کتاب‌های ثبت‌نامی", key: "books",     icon: BookOpen,  color: "#8b5cf6", dark: "#7c3aed" },
+  { label: "امتیاز کل",        key: "score",     icon: Star,      color: "#f59e0b", dark: "#d97706" },
+  { label: "رتبه کلاس",        key: "rank",      icon: Trophy,    color: "#f97316", dark: "#ea580c" },
+  { label: "دروس تکمیل‌شده",   key: "lessons",   icon: Star,      color: "#10b981", dark: "#059669" },
 ];
 
 export default function ParentDashboard() {
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
+  const [, navigate]          = useLocation();
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
-  const [expandedBook, setExpandedBook] = useState<number | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const [expandedBook, setExpandedBook]       = useState<number | null>(null);
+  const [mounted, setMounted]                 = useState(false);
+  const [confirmLogout, setConfirmLogout]     = useState(false);
+
   useEffect(() => { const t = setTimeout(() => setMounted(true), 80); return () => clearTimeout(t); }, []);
 
-  const { data: allUsers = [] } = useQuery<any[]>({ queryKey: ["users"], queryFn: () => api.get("/users") });
+  const { data: allUsers = [] } = useQuery<any[]>({
+    queryKey: ["users"],
+    queryFn: () => api.get("/users"),
+  });
   const children = allUsers.filter(u => u.role === "student" && u.schoolId === user?.schoolId);
   const currentChildId = selectedChildId ?? children[0]?.id;
-  const currentChild = children.find(c => c.id === currentChildId);
+  const currentChild   = children.find(c => c.id === currentChildId);
 
   const { data: childSummary } = useQuery<any>({
     queryKey: ["student-summary", currentChildId],
-    queryFn: () => api.get(`/users/${currentChildId}/student-summary`),
-    enabled: !!currentChildId,
+    queryFn:  () => api.get(`/users/${currentChildId}/student-summary`),
+    enabled:  !!currentChildId,
   });
   const { data: rankings = [] } = useQuery<any[]>({
     queryKey: ["rankings", childSummary?.classes?.[0]?.id],
-    queryFn: () => api.get(`/rankings?classId=${childSummary?.classes?.[0]?.id}`),
-    enabled: !!childSummary?.classes?.[0]?.id,
+    queryFn:  () => api.get(`/rankings?classId=${childSummary?.classes?.[0]?.id}`),
+    enabled:  !!childSummary?.classes?.[0]?.id,
   });
   const { data: notifications = [] } = useQuery<any[]>({
     queryKey: ["notifications", user?.schoolId],
-    queryFn: () => api.get(`/notifications?schoolId=${user?.schoolId}`),
-    enabled: !!user?.schoolId,
+    queryFn:  () => api.get(`/notifications?schoolId=${user?.schoolId}`),
+    enabled:  !!user?.schoolId,
   });
   const { data: examSchedule = [] } = useQuery<any[]>({
     queryKey: ["exam-schedule", user?.schoolId],
-    queryFn: () => api.get(`/exam-schedule?schoolId=${user?.schoolId}`),
-    enabled: !!user?.schoolId,
+    queryFn:  () => api.get(`/exam-schedule?schoolId=${user?.schoolId}`),
+    enabled:  !!user?.schoolId,
   });
+
+  /* Dynamic theme based on selected child's gender */
+  const isGirl     = currentChild?.gender === "female";
+  const accent     = isGirl ? "#e879f9" : "#818cf8";
+  const accentDark = isGirl ? "#c026d3" : "#4f46e5";
+  const bgGrad     = isGirl
+    ? "linear-gradient(160deg,#fdf2f8 0%,#fce7f3 40%,#fff1f2 100%)"
+    : "linear-gradient(160deg,#f5f3ff 0%,#ede9fe 40%,#eef2ff 100%)";
+  const blob1      = isGirl ? "rgba(232,121,249,0.30)" : "rgba(129,140,248,0.30)";
+  const blob2      = isGirl ? "rgba(240,100,220,0.20)" : "rgba(99,102,241,0.20)";
+  const TEXT       = isGirl ? "#4a044e" : "#1e1b4b";
+  const TEXT2      = isGirl ? "#86198f" : "#3730a3";
 
   function fmtDateTime(d: string | null) {
     if (!d) return "—";
@@ -80,72 +119,105 @@ export default function ParentDashboard() {
     return parts.join(" و ");
   }
 
-  const isGirl = currentChild?.gender === "female";
-  const childColor = isGirl ? S : "#818cf8";
-  const childDark = isGirl ? SD : "#4f46e5";
   const myRank = rankings.find((r: any) => r.studentId === currentChildId);
+  const statValues: Record<string, string> = {
+    lastLogin: fmtDateTime(childSummary?.lastLoginAt || childSummary?.lastActivity),
+    duration:  fmtDuration(childSummary?.totalMinutes ?? 0),
+    books:     (childSummary?.books?.length ?? 0).toLocaleString("fa-IR"),
+    score:     (childSummary?.totalScore ?? 0).toLocaleString("fa-IR"),
+    rank:      myRank ? `${myRank.rank.toLocaleString("fa-IR")} از ${rankings.length.toLocaleString("fa-IR")}` : "—",
+    lessons:   (childSummary?.books ?? []).reduce((s: number, b: any) => s + (b.completedLessons ?? 0), 0).toLocaleString("fa-IR"),
+  };
 
   function cardAnim(idx: number): React.CSSProperties {
     if (!mounted) return { opacity: 0, transform: "translateY(22px)" };
     return { animation: `dashUp 0.5s cubic-bezier(0.16,1,0.3,1) ${idx * 0.07}s both` };
   }
 
-  const statValues: Record<string, string> = {
-    lastLogin: fmtDateTime(childSummary?.lastLoginAt || childSummary?.lastActivity),
-    duration: fmtDuration(childSummary?.totalMinutes ?? 0),
-    books: (childSummary?.books?.length ?? 0).toLocaleString("fa-IR"),
-    score: (childSummary?.totalScore ?? 0).toLocaleString("fa-IR"),
-    rank: myRank ? `${myRank.rank.toLocaleString("fa-IR")} از ${rankings.length.toLocaleString("fa-IR")}` : "—",
-    lessons: (childSummary?.books ?? []).reduce((s: number, b: any) => s + (b.completedLessons ?? 0), 0).toLocaleString("fa-IR"),
-  };
-
   return (
-    <div style={{ margin: -24, padding: 24, minHeight: "calc(100vh - 60px)", background: "linear-gradient(160deg,#fff1f2 0%,#fce7f3 40%,#fdf2f8 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", position: "relative", overflow: "hidden" }}>
+    <div style={{
+      height: "100dvh",
+      background: bgGrad,
+      fontFamily: "Vazirmatn, sans-serif", direction: "rtl",
+      position: "relative", overflow: "hidden",
+      transition: "background 0.5s ease",
+    }}>
 
-      {/* Blobs */}
-      <div style={{ position: "absolute", top: "-12%", right: "-8%", width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle,rgba(244,63,94,0.28) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat1 9s ease-in-out infinite" }} />
-      <div style={{ position: "absolute", bottom: "5%", left: "-8%", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle,rgba(236,72,153,0.22) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat2 12s ease-in-out infinite" }} />
-      <div style={{ position: "absolute", top: "45%", left: "36%", width: 180, height: 180, borderRadius: "50%", background: "radial-gradient(circle,rgba(249,168,212,0.30) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat1 14s ease-in-out infinite reverse" }} />
+      {/* Background blobs — color follows child gender */}
+      <div style={{ position: "absolute", top: "-12%", right: "-8%", width: 360, height: 360, borderRadius: "50%", background: `radial-gradient(circle,${blob1} 0%,transparent 70%)`, pointerEvents: "none", animation: "blobFloat1 9s ease-in-out infinite", transition: "background 0.5s" }} />
+      <div style={{ position: "absolute", bottom: "5%", left: "-8%", width: 300, height: 300, borderRadius: "50%", background: `radial-gradient(circle,${blob2} 0%,transparent 70%)`, pointerEvents: "none", animation: "blobFloat2 12s ease-in-out infinite", transition: "background 0.5s" }} />
+      <div style={{ position: "absolute", top: "45%", left: "36%", width: 180, height: 180, borderRadius: "50%", background: `radial-gradient(circle,${blob1.replace("0.30", "0.18")} 0%,transparent 70%)`, pointerEvents: "none", animation: "blobFloat1 14s ease-in-out infinite reverse" }} />
 
-      <div style={{ position: "relative", zIndex: 1 }}>
-        {/* Header */}
-        <div style={{ ...cardAnim(0), marginBottom: 22 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 50, height: 50, borderRadius: 16, background: `linear-gradient(135deg, ${P}, ${S})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 6px 20px ${P}77` }}>
+      <div style={{ position: "relative", zIndex: 1, height: "100%", display: "flex", flexDirection: "column" }}>
+
+        {/* ── Top bar ── */}
+        <div style={{ ...cardAnim(0), display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 20px 0" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 50, height: 50, borderRadius: 16, background: `linear-gradient(135deg, ${accent}, ${accentDark})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 6px 20px ${accent}66`, transition: "background 0.4s" }}>
               <Heart size={24} color="white" />
             </div>
             <div>
-              <h1 style={{ fontSize: 22, fontWeight: 900, color: "#4c0519", margin: 0 }}>پنل والدین</h1>
-              <p style={{ color: "#881337", fontSize: 13, margin: 0 }}>خوش آمدید، {user?.name}</p>
+              <div style={{ fontWeight: 900, fontSize: 19, color: TEXT, transition: "color 0.4s" }}>پنل والدین</div>
+              <div style={{ fontSize: 12, color: TEXT2, fontWeight: 600, marginTop: 1, transition: "color 0.4s" }}>خوش آمدید، {user?.name}</div>
             </div>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <button
+              onClick={() => navigate("/parent/notifications")}
+              style={{ width: 40, height: 40, borderRadius: "50%", background: `${accent}18`, border: `1.5px solid ${accent}45`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "background 0.4s, border 0.4s" }}
+            >
+              <Bell size={18} color={accentDark} />
+            </button>
+            <button
+              onClick={() => setConfirmLogout(true)}
+              style={{ width: 40, height: 40, borderRadius: "50%", background: `linear-gradient(135deg,${accent},${accentDark})`, border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: `0 4px 16px ${accent}55`, transition: "background 0.4s" }}
+            >
+              <LogOut size={17} color="white" />
+            </button>
           </div>
         </div>
 
-        {/* No children */}
+        {/* ── Child selector ── */}
         {children.length === 0 && (
-          <div style={{ ...colorCard(P, PD, { padding: 40, textAlign: "center" }), ...cardAnim(1) }}>
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "45%", background: "linear-gradient(180deg, rgba(255,255,255,0.16) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
-            <div style={{ width: 60, height: 60, borderRadius: 18, background: "rgba(255,255,255,0.25)", border: "1.5px solid rgba(255,255,255,0.50)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px", backdropFilter: "blur(10px)" }}><Users size={30} color="white" /></div>
-            <div style={{ color: "rgba(255,255,255,0.88)", fontSize: 15, fontWeight: 600 }}>هیچ فرزندی ثبت نشده است</div>
+          <div style={{ padding: "16px 20px 0", ...cardAnim(1) }}>
+            <div style={{ ...glassCard(accent, accentDark, { padding: 32, textAlign: "center" }) }}>
+              <div style={shine()} />
+              <div style={{ ...glassIcon(accent, 56), margin: "0 auto 12px" }}>
+                <Users size={26} color="white" />
+              </div>
+              <div style={{ color: "rgba(255,255,255,0.88)", fontSize: 15, fontWeight: 600 }}>هیچ فرزندی ثبت نشده است</div>
+            </div>
           </div>
         )}
 
-        {/* Child selector */}
         {children.length > 0 && (
-          <div style={{ ...colorCard(P, PD, { padding: "18px 20px", marginBottom: 18 }), ...cardAnim(1) }}>
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(180deg, rgba(255,255,255,0.16) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
-            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)", marginBottom: 12, fontWeight: 700, position: "relative", zIndex: 1 }}>انتخاب فرزند</div>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", position: "relative", zIndex: 1 }}>
+          <div style={{ padding: "14px 20px 0", ...cardAnim(1) }}>
+            <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 2 }}>
               {children.map(child => {
-                const isActive = currentChildId === child.id;
-                const cc = child.gender === "female" ? S : "#818cf8";
-                const ccd = child.gender === "female" ? SD : "#4f46e5";
+                const isActive  = currentChildId === child.id;
+                const cc        = child.gender === "female" ? "#e879f9" : "#818cf8";
+                const ccd       = child.gender === "female" ? "#c026d3" : "#4f46e5";
                 return (
-                  <button key={child.id} onClick={() => { setSelectedChildId(child.id); setExpandedBook(null); }}
-                    style={{ flex: 1, minWidth: 110, padding: "14px 16px", background: isActive ? "rgba(255,255,255,0.30)" : "rgba(255,255,255,0.12)", border: `2px solid ${isActive ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.25)"}`, borderRadius: 16, cursor: "pointer", fontFamily: "Vazirmatn", color: "white", backdropFilter: "blur(8px)", transition: "all 0.2s", transform: isActive ? "scale(1.04)" : "scale(1)", boxShadow: isActive ? "0 8px 24px rgba(0,0,0,0.18)" : "none" }}>
-                    <div style={{ width: 38, height: 38, borderRadius: 12, background: isActive ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.15)", border: "1.5px solid rgba(255,255,255,0.40)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 5px" }}><Users size={18} color="white" /></div>
-                    <div style={{ fontWeight: 700, fontSize: 14, textShadow: "0 1px 4px rgba(0,0,0,0.2)" }}>{child.name}</div>
-                    <div style={{ fontSize: 11, opacity: 0.75, marginTop: 2 }}>{child.status === "active" ? "فعال" : "غیرفعال"}</div>
+                  <button
+                    key={child.id}
+                    onClick={() => { setSelectedChildId(child.id); setExpandedBook(null); }}
+                    style={{
+                      flexShrink: 0, minWidth: 110, padding: "12px 14px",
+                      background: isActive ? `linear-gradient(135deg,${cc}bb,${ccd}99)` : `${cc}18`,
+                      border: `2px solid ${isActive ? cc + "dd" : cc + "44"}`,
+                      borderRadius: 18, cursor: "pointer", fontFamily: "Vazirmatn",
+                      backdropFilter: "blur(12px)",
+                      transition: "all 0.25s",
+                      transform: isActive ? "scale(1.04)" : "scale(1)",
+                      boxShadow: isActive ? `0 8px 24px ${cc}44` : "none",
+                    }}
+                  >
+                    <div style={{ width: 36, height: 36, borderRadius: 11, background: isActive ? "rgba(255,255,255,0.28)" : `${cc}20`, border: "1.5px solid rgba(255,255,255,0.45)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 6px" }}>
+                      <UserRound size={18} color={isActive ? "white" : ccd} />
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: 13, color: isActive ? "white" : TEXT, textShadow: isActive ? "0 1px 4px rgba(0,0,0,0.2)" : "none" }}>{child.name}</div>
+                    <div style={{ fontSize: 11, color: isActive ? "rgba(255,255,255,0.75)" : TEXT2, marginTop: 2 }}>{child.gender === "female" ? "دختر" : "پسر"}</div>
                   </button>
                 );
               })}
@@ -153,163 +225,212 @@ export default function ParentDashboard() {
           </div>
         )}
 
-        {/* Quick notif/exam counters */}
-        {(notifications.length > 0 || examSchedule.length > 0) && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))", gap: 12, marginBottom: 18, ...cardAnim(2) }}>
-            {notifications.length > 0 && (
-              <div style={colorCard("#f59e0b", "#d97706", { padding: "16px 18px", display: "flex", alignItems: "center", gap: 12 })}>
-                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
-                <div style={{ width: 42, height: 42, borderRadius: 13, background: "rgba(255,255,255,0.22)", border: "1.5px solid rgba(255,255,255,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Bell size={20} color="white" />
-                </div>
-                <div style={{ position: "relative", zIndex: 1 }}>
-                  <div style={{ fontWeight: 900, color: "white", fontSize: 22, textShadow: "0 2px 8px rgba(0,0,0,0.18)" }}>{notifications.length.toLocaleString("fa-IR")}</div>
-                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.82)", fontWeight: 700 }}>اعلان مدرسه</div>
-                </div>
-              </div>
-            )}
-            {examSchedule.length > 0 && (
-              <div style={colorCard(S, SD, { padding: "16px 18px", display: "flex", alignItems: "center", gap: 12 })}>
-                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
-                <div style={{ width: 42, height: 42, borderRadius: 13, background: "rgba(255,255,255,0.22)", border: "1.5px solid rgba(255,255,255,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Calendar size={20} color="white" />
-                </div>
-                <div style={{ position: "relative", zIndex: 1 }}>
-                  <div style={{ fontWeight: 900, color: "white", fontSize: 22, textShadow: "0 2px 8px rgba(0,0,0,0.18)" }}>{examSchedule.length.toLocaleString("fa-IR")}</div>
-                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.82)", fontWeight: 700 }}>امتحان پیش رو</div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        {/* ── Scrollable content ── */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "14px 20px 36px" }}>
 
-        {/* Child detail */}
-        {currentChild && childSummary && (
-          <div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: "#4c0519", marginBottom: 14, ...cardAnim(3) }}>
-              <UserRound size={16} style={{ display: "inline", verticalAlign: "middle", marginLeft: 6 }} /> گزارش عملکرد {currentChild.name}
-            </div>
-
-            {/* Stats grid */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 11, marginBottom: 18 }}>
-              {STAT_META.map((sm, idx) => {
-                const Icon = sm.icon;
-                return (
-                  <div key={sm.key} style={{ ...colorCard(sm.color, sm.dark, { padding: "16px 14px" }), ...cardAnim(idx + 4) }}>
-                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, position: "relative", zIndex: 1 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(255,255,255,0.22)", border: "1.5px solid rgba(255,255,255,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <Icon size={15} color="white" />
-                      </div>
-                      <span style={{ color: "rgba(255,255,255,0.82)", fontSize: 11, fontWeight: 700 }}>{sm.label}</span>
-                    </div>
-                    <div style={{ color: "white", fontWeight: 800, fontSize: 14, position: "relative", zIndex: 1, textShadow: "0 1px 6px rgba(0,0,0,0.18)" }}>{statValues[sm.key]}</div>
+          {/* Quick counters */}
+          {(notifications.length > 0 || examSchedule.length > 0) && (
+            <div style={{ display: "flex", gap: 10, marginBottom: 12, ...cardAnim(2) }}>
+              {notifications.length > 0 && (
+                <div style={{ ...glassCard("#f59e0b", "#d97706", { flex: 1, padding: "14px 16px", display: "flex", alignItems: "center", gap: 10 }) }}>
+                  <div style={shine()} />
+                  <div style={{ ...glassIcon("#f59e0b", 40) }}><Bell size={18} color="white" /></div>
+                  <div style={{ position: "relative", zIndex: 1 }}>
+                    <div style={{ fontWeight: 900, color: "white", fontSize: 20 }}>{notifications.length.toLocaleString("fa-IR")}</div>
+                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.82)", fontWeight: 700 }}>اعلان مدرسه</div>
                   </div>
-                );
-              })}
+                </div>
+              )}
+              {examSchedule.length > 0 && (
+                <div style={{ ...glassCard("#f43f5e", "#e11d48", { flex: 1, padding: "14px 16px", display: "flex", alignItems: "center", gap: 10 }) }}>
+                  <div style={shine()} />
+                  <div style={{ ...glassIcon("#f43f5e", 40) }}><Calendar size={18} color="white" /></div>
+                  <div style={{ position: "relative", zIndex: 1 }}>
+                    <div style={{ fontWeight: 900, color: "white", fontSize: 20 }}>{examSchedule.length.toLocaleString("fa-IR")}</div>
+                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.82)", fontWeight: 700 }}>امتحان پیش‌رو</div>
+                  </div>
+                </div>
+              )}
             </div>
+          )}
 
-            {/* Classes chips */}
-            {childSummary.classes?.length > 0 && (
-              <div style={{ marginBottom: 14, display: "flex", flexWrap: "wrap", gap: 6, ...cardAnim(10) }}>
-                {childSummary.classes.map((cls: any) => (
-                  <span key={cls.id} style={{ background: `${childColor}28`, border: `1px solid ${childColor}55`, borderRadius: 8, padding: "4px 12px", fontSize: 12, color: childDark, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 4 }}><BookOpen size={11} /> {cls.name}</span>
-                ))}
+          {/* Child stats */}
+          {currentChild && childSummary && (
+            <>
+              <div style={{ fontSize: 14, fontWeight: 800, color: TEXT, marginBottom: 10, ...cardAnim(3), display: "flex", alignItems: "center", gap: 6 }}>
+                <UserRound size={15} style={{ color: accent }} /> گزارش عملکرد {currentChild.name}
               </div>
-            )}
 
-            {/* Books with progress */}
-            {childSummary.books?.length > 0 && (
-              <div style={{ ...colorCard(childColor, childDark, { padding: 20, marginBottom: 18 }), ...cardAnim(11) }}>
-                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "35%", background: "linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
-                <div style={{ fontWeight: 800, color: "white", marginBottom: 14, fontSize: 15, textShadow: "0 1px 6px rgba(0,0,0,0.2)", position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 6 }}><BookOpen size={15} /> کتاب‌ها و پیشرفت درسی</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative", zIndex: 1 }}>
-                  {childSummary.books.map((book: any) => {
-                    const pct = book.lessonCount > 0 ? Math.round((book.completedLessons / book.lessonCount) * 100) : 0;
-                    const isExpanded = expandedBook === book.id;
-                    return (
-                      <div key={book.id} style={{ background: "rgba(255,255,255,0.14)", borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,0.28)" }}>
-                        <div onClick={() => setExpandedBook(isExpanded ? null : book.id)} style={{ padding: "13px 16px", cursor: "pointer" }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                              <span style={{ fontWeight: 700, color: "white", fontSize: 13, textShadow: "0 1px 4px rgba(0,0,0,0.18)" }}>{book.title}</span>
-                              {book.totalScore > 0 && <span style={{ background: "rgba(255,255,255,0.22)", color: "white", borderRadius: 6, padding: "1px 7px", fontSize: 11, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 3 }}><Star size={9} /> {book.totalScore.toLocaleString("fa-IR")}</span>}
-                            </div>
-                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                              <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>{book.completedLessons}/{book.lessonCount}</span>
-                              {isExpanded ? <ChevronUp size={13} color="rgba(255,255,255,0.8)" /> : <ChevronDown size={13} color="rgba(255,255,255,0.8)" />}
-                            </div>
-                          </div>
-                          <div style={{ height: 6, background: "rgba(255,255,255,0.20)", borderRadius: 999, overflow: "hidden" }}>
-                            <div style={{ height: "100%", width: `${pct}%`, background: "rgba(255,255,255,0.75)", borderRadius: 999, transition: "width 0.5s" }} />
-                          </div>
-                          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", marginTop: 4, fontWeight: 600 }}>{pct}% پیشرفت</div>
+              {/* Stats grid */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 9, marginBottom: 12 }}>
+                {STAT_META.map((sm, idx) => {
+                  const Icon = sm.icon;
+                  return (
+                    <div key={sm.key} style={{ ...glassCard(sm.color, sm.dark, { padding: "13px 11px" }), ...cardAnim(idx + 4) }}>
+                      <div style={shine()} />
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6, position: "relative", zIndex: 1 }}>
+                        <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(255,255,255,0.22)", border: "1.5px solid rgba(255,255,255,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <Icon size={13} color="white" />
                         </div>
-                        {isExpanded && book.lessons && (
-                          <div style={{ padding: "0 16px 14px", borderTop: "1px solid rgba(255,255,255,0.18)" }}>
-                            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)", marginBottom: 10, paddingTop: 10, fontWeight: 600 }}>جزئیات دروس</div>
-                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", gap: 6 }}>
-                              {book.lessons.map((lesson: any) => (
-                                <div key={lesson.lessonId} style={{ background: lesson.completed ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.08)", border: `1px solid ${lesson.completed ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.18)"}`, borderRadius: 8, padding: "6px 10px" }}>
-                                  <div style={{ fontSize: 11, color: "white", fontWeight: 700 }}>درس {lesson.lessonId.toLocaleString("fa-IR")}</div>
-                                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", marginTop: 2 }}>{lesson.completed ? (lesson.score > 0 ? `+${lesson.score}` : "تکمیل") : "ناتمام"}</div>
-                                </div>
-                              ))}
+                        <span style={{ color: "rgba(255,255,255,0.82)", fontSize: 10, fontWeight: 700, lineHeight: 1.2 }}>{sm.label}</span>
+                      </div>
+                      <div style={{ color: "white", fontWeight: 800, fontSize: 12, position: "relative", zIndex: 1, textShadow: "0 1px 5px rgba(0,0,0,0.18)", wordBreak: "break-word" }}>{statValues[sm.key]}</div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Classes chips */}
+              {childSummary.classes?.length > 0 && (
+                <div style={{ marginBottom: 12, display: "flex", flexWrap: "wrap", gap: 6, ...cardAnim(10) }}>
+                  {childSummary.classes.map((cls: any) => (
+                    <span key={cls.id} style={{ background: `${accent}22`, border: `1px solid ${accent}50`, borderRadius: 8, padding: "4px 12px", fontSize: 12, color: accentDark, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      <BookOpen size={11} /> {cls.name}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Books progress */}
+              {childSummary.books?.length > 0 && (
+                <div style={{ ...glassCard(accent, accentDark, { padding: 18, marginBottom: 12 }), ...cardAnim(11) }}>
+                  <div style={shine()} />
+                  <div style={{ fontWeight: 800, color: "white", marginBottom: 12, fontSize: 14, textShadow: "0 1px 6px rgba(0,0,0,0.2)", position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 6 }}>
+                    <BookOpen size={14} /> کتاب‌ها و پیشرفت درسی
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative", zIndex: 1 }}>
+                    {childSummary.books.map((book: any) => {
+                      const pct        = book.lessonCount > 0 ? Math.round((book.completedLessons / book.lessonCount) * 100) : 0;
+                      const isExpanded = expandedBook === book.id;
+                      return (
+                        <div key={book.id} style={{ background: "rgba(255,255,255,0.14)", borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,0.28)" }}>
+                          <div onClick={() => setExpandedBook(isExpanded ? null : book.id)} style={{ padding: "12px 14px", cursor: "pointer" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                <span style={{ fontWeight: 700, color: "white", fontSize: 13 }}>{book.title}</span>
+                                {book.totalScore > 0 && (
+                                  <span style={{ background: "rgba(255,255,255,0.22)", color: "white", borderRadius: 6, padding: "1px 7px", fontSize: 11, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 3 }}>
+                                    <Star size={9} /> {book.totalScore.toLocaleString("fa-IR")}
+                                  </span>
+                                )}
+                              </div>
+                              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>{book.completedLessons}/{book.lessonCount}</span>
+                                {isExpanded ? <ChevronUp size={13} color="rgba(255,255,255,0.8)" /> : <ChevronDown size={13} color="rgba(255,255,255,0.8)" />}
+                              </div>
                             </div>
+                            <div style={{ height: 6, background: "rgba(255,255,255,0.20)", borderRadius: 999, overflow: "hidden" }}>
+                              <div style={{ height: "100%", width: `${pct}%`, background: "rgba(255,255,255,0.75)", borderRadius: 999, transition: "width 0.5s" }} />
+                            </div>
+                            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", marginTop: 4, fontWeight: 600 }}>{pct}% پیشرفت</div>
+                          </div>
+                          {isExpanded && book.lessons && (
+                            <div style={{ padding: "0 14px 12px", borderTop: "1px solid rgba(255,255,255,0.18)" }}>
+                              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)", marginBottom: 8, paddingTop: 10, fontWeight: 600 }}>جزئیات دروس</div>
+                              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(96px, 1fr))", gap: 6 }}>
+                                {book.lessons.map((lesson: any) => (
+                                  <div key={lesson.lessonId} style={{ background: lesson.completed ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.08)", border: `1px solid ${lesson.completed ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.18)"}`, borderRadius: 8, padding: "6px 10px" }}>
+                                    <div style={{ fontSize: 11, color: "white", fontWeight: 700 }}>درس {lesson.lessonId.toLocaleString("fa-IR")}</div>
+                                    <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", marginTop: 2 }}>
+                                      {lesson.completed ? (lesson.score > 0 ? `+${lesson.score}` : "تکمیل") : "ناتمام"}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Notifications */}
+              {notifications.length > 0 && (
+                <div style={{ ...glassCard("#f59e0b", "#d97706", { padding: 18, marginBottom: 12 }), ...cardAnim(12) }}>
+                  <div style={shine()} />
+                  <div style={{ fontWeight: 800, color: "white", marginBottom: 10, fontSize: 14, display: "flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1, textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>
+                    <Bell size={14} /> اعلانات مدرسه
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
+                    {notifications.slice(0, 5).map((n: any) => (
+                      <div key={n.id} style={{ background: "rgba(255,255,255,0.14)", borderRadius: 10, padding: "10px 14px", borderRight: "3px solid rgba(255,255,255,0.5)" }}>
+                        <div style={{ fontWeight: 700, color: "white", fontSize: 13, marginBottom: 3, textShadow: "0 1px 4px rgba(0,0,0,0.18)" }}>{n.title}</div>
+                        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>{n.message}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Exam schedule */}
+              {examSchedule.length > 0 && (
+                <div style={{ ...glassCard("#f43f5e", "#e11d48", { padding: 18, marginBottom: 12 }), ...cardAnim(13) }}>
+                  <div style={shine()} />
+                  <div style={{ fontWeight: 800, color: "white", marginBottom: 10, fontSize: 14, display: "flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1, textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>
+                    <Calendar size={14} /> تقویم امتحانی
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
+                    {examSchedule.slice(0, 5).map((exam: any) => (
+                      <div key={exam.id} style={{ background: "rgba(255,255,255,0.14)", borderRadius: 10, padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid rgba(255,255,255,0.22)" }}>
+                        <div>
+                          <div style={{ fontWeight: 700, color: "white", fontSize: 13 }}>{exam.subject ?? exam.title ?? "امتحان"}</div>
+                          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", marginTop: 2 }}>{exam.description ?? ""}</div>
+                        </div>
+                        {exam.examDate && (
+                          <div style={{ background: "rgba(255,255,255,0.20)", borderRadius: 8, padding: "4px 10px", fontSize: 12, color: "white", fontWeight: 700, flexShrink: 0 }}>
+                            {new Date(exam.examDate).toLocaleDateString("fa-IR")}
                           </div>
                         )}
                       </div>
-                    );
-                  })}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Notifications */}
-            {notifications.length > 0 && (
-              <div style={{ ...colorCard("#f59e0b", "#d97706", { padding: 20, marginBottom: 18 }), ...cardAnim(12) }}>
-                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "35%", background: "linear-gradient(180deg, rgba(255,255,255,0.16) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
-                <div style={{ fontWeight: 800, color: "white", marginBottom: 12, fontSize: 15, display: "flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1, textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>
-                  <Bell size={15} color="rgba(255,255,255,0.9)" /> اعلانات مدرسه
+              {/* Children management shortcut */}
+              <div
+                style={{ ...glassCard(accent, accentDark, { padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer", marginBottom: 12 }), ...cardAnim(14) }}
+                onClick={() => navigate("/parent/children")}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ""; }}
+              >
+                <div style={shine()} />
+                <div style={{ ...glassIcon(accent, 44) }}>
+                  <Users size={20} color="white" />
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
-                  {notifications.slice(0, 5).map((n: any) => (
-                    <div key={n.id} style={{ background: "rgba(255,255,255,0.14)", borderRadius: 10, padding: "10px 14px", borderRight: "3px solid rgba(255,255,255,0.5)" }}>
-                      <div style={{ fontWeight: 700, color: "white", fontSize: 13, marginBottom: 3, textShadow: "0 1px 4px rgba(0,0,0,0.18)" }}>{n.title}</div>
-                      <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>{n.message}</div>
-                    </div>
-                  ))}
+                <div style={{ flex: 1, position: "relative", zIndex: 1 }}>
+                  <div style={{ fontWeight: 800, fontSize: 14, color: "white", textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>مدیریت فرزندان</div>
+                  <div style={{ color: "rgba(255,255,255,0.78)", fontSize: 12 }}>مشاهده و مدیریت کامل فرزندان</div>
                 </div>
+                <Trophy size={16} color="rgba(255,255,255,0.7)" style={{ position: "relative", zIndex: 1 }} />
               </div>
-            )}
+            </>
+          )}
 
-            {/* Exam schedule */}
-            {examSchedule.length > 0 && (
-              <div style={{ ...colorCard(P, PD, { padding: 20 }), ...cardAnim(13) }}>
-                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "35%", background: "linear-gradient(180deg, rgba(255,255,255,0.16) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
-                <div style={{ fontWeight: 800, color: "white", marginBottom: 12, fontSize: 15, display: "flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1, textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>
-                  <Calendar size={15} color="rgba(255,255,255,0.9)" /> تقویم امتحانی
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
-                  {examSchedule.slice(0, 5).map((exam: any) => (
-                    <div key={exam.id} style={{ background: "rgba(255,255,255,0.14)", borderRadius: 10, padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid rgba(255,255,255,0.22)" }}>
-                      <div>
-                        <div style={{ fontWeight: 700, color: "white", fontSize: 13, textShadow: "0 1px 4px rgba(0,0,0,0.18)" }}>{exam.subject ?? exam.title ?? "امتحان"}</div>
-                        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", marginTop: 2 }}>{exam.description ?? ""}</div>
-                      </div>
-                      {exam.examDate && (
-                        <div style={{ background: "rgba(255,255,255,0.20)", borderRadius: 8, padding: "4px 10px", fontSize: 12, color: "white", fontWeight: 700 }}>
-                          {new Date(exam.examDate).toLocaleDateString("fa-IR")}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        </div>
       </div>
+
+      {/* Logout confirm */}
+      {confirmLogout && (
+        <div
+          style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}
+          onClick={() => setConfirmLogout(false)}
+        >
+          <div
+            style={{ background: isGirl ? "rgba(253,242,248,0.96)" : "rgba(245,243,255,0.96)", backdropFilter: "blur(24px)", borderRadius: 24, padding: 28, maxWidth: 320, width: "90%", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", border: `1.5px solid ${accent}35` }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ fontWeight: 900, fontSize: 17, color: TEXT, marginBottom: 8 }}>خروج از حساب</div>
+            <div style={{ fontSize: 13, color: TEXT2, marginBottom: 22 }}>آیا مطمئن هستید؟</div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={logout} style={{ flex: 1, padding: "11px 0", background: "linear-gradient(135deg,#dc2626,#ef4444)", border: "none", borderRadius: 12, color: "white", fontFamily: "Vazirmatn", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>خروج</button>
+              <button onClick={() => setConfirmLogout(false)} style={{ flex: 1, padding: "11px 0", background: `${accent}18`, border: `1.5px solid ${accent}40`, borderRadius: 12, color: accentDark, fontFamily: "Vazirmatn", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>انصراف</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         @keyframes dashUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
