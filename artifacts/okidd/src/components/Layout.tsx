@@ -430,8 +430,8 @@ export default function Layout({ children }: { children: ReactNode }) {
           : undefined,
       }}>
 
-        {/* Topbar — hidden for student */}
-        {!isStudent && (
+        {/* Topbar — hidden for student, admin, school_manager */}
+        {!isStudent && user.role !== "admin" && user.role !== "school_manager" && (
           <div style={{
             height: 58,
             background: "rgba(255,255,255,0.82)",
@@ -473,9 +473,8 @@ export default function Layout({ children }: { children: ReactNode }) {
                 }}>{getRoleLabel(user.role)}</div>
               )}
 
-              {(["teacher","school_manager","branch_manager","parent"].includes(user.role)) && (() => {
+              {(["teacher","branch_manager","parent"].includes(user.role)) && (() => {
                 const notifPath = user.role === "teacher" ? "/teacher/notifications"
-                  : user.role === "school_manager" ? "/school/notifications"
                   : user.role === "branch_manager" ? "/branch/notifications"
                   : "/parent/notifications";
                 const isActive = location === notifPath;
