@@ -8,6 +8,9 @@ import {
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 
+const BOOK_COLORS  = ["#818cf8","#3b82f6","#ec4899","#f97316","#22c55e","#8b5cf6","#e879f9","#f59e0b"];
+const BOOK_DARKS   = ["#4f46e5","#2563eb","#c026d3","#ea580c","#16a34a","#7c3aed","#a21caf","#d97706"];
+
 const TYPE_ICONS: Record<string, any> = {
   animation: Film, game: Gamepad2, quiz: ClipboardCheck,
   exercise: PenLine, video: Film, pdf: FileText,
@@ -159,38 +162,39 @@ export default function StudentBooks() {
           </div>
         </div>
 
-        {/* ── Books list ── */}
+        {/* ── Books grid ── */}
         {!selectedBook && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {books.map((book, idx) => (
-              <div key={book.id}
-                style={{ ...glassCard(accent, { padding: "18px 18px" }), ...cardAnim(idx) }}
-                onClick={() => { setSelectedBook(book); setSelectedLesson(null); }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"; (e.currentTarget as HTMLElement).style.boxShadow = `0 14px 40px rgba(80,40,120,0.14), 0 0 0 1px ${accent}30`; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ""; (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 32px rgba(80,40,120,0.09), 0 0 0 1px ${accent}18`; }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                  <div style={{ ...glassIconBox(accent, 58) }}>
-                    <BookOpen size={28} color={accentDark} />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            {books.map((book, idx) => {
+              const bc  = BOOK_COLORS[idx % BOOK_COLORS.length];
+              const bcd = BOOK_DARKS[idx % BOOK_DARKS.length];
+              return (
+                <div key={book.id}
+                  style={{ ...glassCard(bc, {
+                    padding: "18px 14px",
+                    background: `linear-gradient(145deg, ${bc}30, ${bcd}18)`,
+                    border: `1.5px solid ${bc}55`,
+                  }), ...cardAnim(idx) }}
+                  onClick={() => { setSelectedBook(book); setSelectedLesson(null); }}
+                  onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-4px)"; el.style.boxShadow = `0 16px 40px ${bc}30`; }}
+                  onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = `0 8px 32px rgba(80,40,120,0.09), 0 0 0 1px ${bc}18`; }}
+                >
+                  <div style={{ ...glassIconBox(bc, 48), marginBottom: 12 }}>
+                    <BookOpen size={24} color={bcd} />
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 800, fontSize: 16, color: "#1e1b4b", marginBottom: 8 }}>{book.title}</div>
-                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                      {book.gradeLevel && (
-                        <span style={{ background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.25)", borderRadius: 999, padding: "3px 10px", fontSize: 11, color: "#4f46e5", fontWeight: 600 }}>{book.gradeLevel}</span>
-                      )}
-                      <span style={{ background: `${accent}16`, border: `1px solid ${accent}30`, borderRadius: 999, padding: "3px 10px", fontSize: 11, color: accentDark, fontWeight: 600 }}>{book.lessonCount ?? 0} درس</span>
-                    </div>
+                  <div style={{ fontWeight: 800, fontSize: 14, color: "#1e1b4b", marginBottom: 8, lineHeight: 1.3 }}>{book.title}</div>
+                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                    {book.gradeLevel && (
+                      <span style={{ background: `${bc}22`, border: `1px solid ${bc}40`, borderRadius: 999, padding: "2px 8px", fontSize: 10, color: bcd, fontWeight: 700 }}>{book.gradeLevel}</span>
+                    )}
+                    <span style={{ background: `${bc}18`, border: `1px solid ${bc}35`, borderRadius: 999, padding: "2px 8px", fontSize: 10, color: bcd, fontWeight: 700 }}>{book.lessonCount ?? 0} درس</span>
                   </div>
-                  <div style={{ width: 32, height: 32, borderRadius: 10, background: `${accent}18`, border: `1.5px solid ${accent}35`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <ChevronRight size={16} color={accentDark} />
-                  </div>
+                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${bc}80, ${bc}20)`, borderRadius: "0 0 22px 22px" }} />
                 </div>
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${accent}80, ${accent}20)`, borderRadius: "0 0 22px 22px" }} />
-              </div>
-            ))}
+              );
+            })}
             {books.length === 0 && (
-              <div style={{ ...glassCard(accent, { padding: 40, textAlign: "center" }) }}>
+              <div style={{ ...glassCard(accent, { padding: 40, textAlign: "center", gridColumn: "1/-1" }) }}>
                 <div style={{ fontSize: 48, marginBottom: 14 }}>📭</div>
                 <p style={{ color: accentDark, margin: 0, fontWeight: 600 }}>هیچ کتابی ثبت‌نام نشده</p>
               </div>
