@@ -5,7 +5,7 @@ import {
   LayoutDashboard, School, Users, BookOpen, Package, CreditCard,
   Bell, FileText, LogOut, GraduationCap,
   BookMarked, Home, Star, ClipboardList, GitBranch, UserCheck,
-  Menu, X, BarChart2,
+  Menu, X, BarChart2, ChevronRight,
 } from "lucide-react";
 
 interface NavItem {
@@ -223,7 +223,7 @@ function NavCard({ item, active, onClick, TEXT }: { item: NavItem; active: boole
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuthStore();
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -245,6 +245,34 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   const showDesktopSidebar = isAdmin && !isMobile;
   const showHamburger = !isStudent && !isAdmin && user.role !== "school_manager";
+
+  const dashboardPath = nav[0].path;
+  const isOnSubPage = location !== dashboardPath;
+
+  // Back button — rendered in topbar OR in a standalone sticky bar
+  const hasTopbar = !isStudent && user.role !== "admin" && user.role !== "school_manager";
+  function BackBtn() {
+    return (
+      <button
+        onClick={() => navigate(dashboardPath)}
+        style={{
+          display: "flex", alignItems: "center", gap: 6,
+          padding: "7px 14px", borderRadius: 12, border: "none",
+          background: `linear-gradient(135deg,${accent},${accentDark})`,
+          color: "#fff", cursor: "pointer", fontSize: 13,
+          fontFamily: "Vazirmatn, sans-serif", fontWeight: 700,
+          boxShadow: `0 3px 12px ${accent}55`,
+          transition: "all 0.2s ease", flexShrink: 0,
+          whiteSpace: "nowrap",
+        }}
+        onMouseOver={e => { (e.currentTarget as HTMLElement).style.transform = "scale(1.04)"; }}
+        onMouseOut={e => { (e.currentTarget as HTMLElement).style.transform = ""; }}
+      >
+        <ChevronRight size={15} />
+        داشبورد
+      </button>
+    );
+  }
 
   const greeting = getMobileGreeting(user.role, user.name);
 
@@ -446,6 +474,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             boxShadow: `0 2px 20px ${accent}14`,
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              {isOnSubPage && <BackBtn />}
               {showHamburger && (
                 <button onClick={() => setSidebarOpen(true)} style={{
                   background: theme.logoGrad, border: "none",
@@ -513,6 +542,23 @@ export default function Layout({ children }: { children: ReactNode }) {
                 {!isMobile && "خروج"}
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Back bar — for roles without topbar (admin, school_manager, student) */}
+        {!hasTopbar && isOnSubPage && (
+          <div style={{
+            position: "sticky", top: 0, zIndex: 41,
+            padding: isMobile ? "8px 14px" : "10px 24px",
+            background: isStudent
+              ? "rgba(255,255,255,0.18)"
+              : "rgba(255,255,255,0.78)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            borderBottom: `1px solid ${isStudent ? "rgba(255,255,255,0.30)" : accent + "28"}`,
+            display: "flex", alignItems: "center",
+          }}>
+            <BackBtn />
           </div>
         )}
 
