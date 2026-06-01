@@ -55,25 +55,33 @@ function InteractiveEye({ isRight = false }: { isRight?: boolean }) {
   );
 }
 
+/* ─────────────── WebGL availability check ─────────────── */
+function isWebGLAvailable(): boolean {
+  try {
+    const test = document.createElement("canvas");
+    return !!(
+      window.WebGLRenderingContext &&
+      (test.getContext("webgl") || test.getContext("experimental-webgl"))
+    );
+  } catch {
+    return false;
+  }
+}
+
 /* ─────────────── Three.js Scene Hook ─────────────── */
 function useThreeScene(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || !isWebGLAvailable()) return; // graceful no-op when WebGL unavailable
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
     camera.position.set(0, 2, 12);
     cameraRef.current = camera;
 
-    let renderer: THREE.WebGLRenderer;
-    try {
-      renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    } catch {
-      return; // WebGL not available — CSS fallback handles the visuals
-    }
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setClearColor(0x000000, 0);
