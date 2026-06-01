@@ -4,27 +4,36 @@ import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { useNotificationReads } from "../../hooks/useNotificationReads";
 import { showToast } from "../../lib/toast";
-import { Bell, Send, Plus, Users, User, ChevronDown } from "lucide-react";
+import { Bell, Send, Plus, Users, User, ChevronDown, Calendar } from "lucide-react";
 
-const inputStyle = {
+const AMBER   = "#f59e0b";
+const AMBER_D = "#d97706";
+const ORANGE  = "#f97316";
+const TEXT    = "#78350f";
+const TEXT2   = "#92400e";
+
+const inputStyle: React.CSSProperties = {
   width: "100%",
-  background: "rgba(13,10,26,0.5)",
-  border: "1px solid rgba(139,92,246,0.3)",
-  borderRadius: 10,
-  color: "#f8f5ff",
-  padding: "10px 12px",
-  fontSize: 14,
-  fontFamily: "Vazirmatn, sans-serif",
-  outline: "none",
-  direction: "rtl" as const,
-  boxSizing: "border-box" as const,
+  background: "rgba(255,255,255,0.80)",
+  border: `1px solid rgba(245,158,11,0.35)`,
+  borderRadius: 10, color: TEXT,
+  padding: "10px 12px", fontSize: 14,
+  fontFamily: "Vazirmatn, sans-serif", outline: "none",
+  direction: "rtl", boxSizing: "border-box",
+};
+
+const card: React.CSSProperties = {
+  background: "rgba(255,255,255,0.72)",
+  backdropFilter: "blur(16px)",
+  WebkitBackdropFilter: "blur(16px)",
+  border: `1px solid rgba(245,158,11,0.22)`,
+  borderRadius: 16,
 };
 
 type TargetType = "all_students" | "all_parents" | "specific_students" | "specific_parents";
-
 const TARGET_OPTIONS: { value: TargetType; label: string }[] = [
-  { value: "all_students", label: "همه دانش‌آموزان کلاس" },
-  { value: "all_parents", label: "همه اولیا کلاس" },
+  { value: "all_students", label: "همه دانش‌آموزان" },
+  { value: "all_parents", label: "همه والدین" },
   { value: "specific_students", label: "دانش‌آموزان خاص" },
   { value: "specific_parents", label: "اولیای دانش‌آموزان خاص" },
 ];
@@ -45,10 +54,11 @@ export default function TeacherNotifications() {
 
   const schoolIds = useMemo(() => [...new Set(classes.map((c: any) => c.schoolId).filter(Boolean))], [classes]);
 
+  /* ── Fix: show ALL school notifications, not just teacher-targeted ── */
   const { data: broadcastNotifs = [] } = useQuery<any[]>({
     queryKey: ["notifs-teacher-broadcast", schoolIds],
     queryFn: async () => {
-      const all = await Promise.all(schoolIds.map(sid => api.get(`/notifications?schoolId=${sid}&targetRole=teacher`)));
+      const all = await Promise.all(schoolIds.map(sid => api.get(`/notifications?schoolId=${sid}`)));
       return all.flat();
     },
     enabled: schoolIds.length > 0,
@@ -56,7 +66,7 @@ export default function TeacherNotifications() {
 
   const { data: personalNotifs = [] } = useQuery<any[]>({
     queryKey: ["notifs-teacher-personal", user?.id],
-    queryFn: () => api.get(`/notifications?targetUserId=${user?.id}&targetRole=teacher`),
+    queryFn: () => api.get(`/notifications?targetUserId=${user?.id}`),
     enabled: !!user?.id,
   });
 
@@ -69,241 +79,231 @@ export default function TeacherNotifications() {
 
   useEffect(() => { if (inbox.length > 0) markAllSeen(); }, [inbox.length]);
 
+  const needsStudentPick = form.targetType === "specific_students" || form.targetType === "specific_parents";
   const selectedClass = classes.find((c: any) => c.id === parseInt(form.classId));
 
   const { data: classStudents = [] } = useQuery<any[]>({
-    queryKey: ["students-in-class", form.classId],
-    queryFn: () => api.get(`/users?classId=${form.classId}&role=student`),
-    enabled: !!form.classId && (form.targetType === "specific_students" || form.targetType === "specific_parents"),
+    queryKey: ["class-students", form.classId],
+    queryFn: () => api.get(`/classes/${form.classId}/students`),
+    enabled: !!form.classId && needsStudentPick,
   });
 
-  const toggleStudent = (id: number) =>
-    setSelectedStudentIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  const canSend = form.title.trim() && form.body.trim() && form.classId &&
+    (!needsStudentPick || selectedStudentIds.length > 0);
 
   const sendMut = useMutation({
-    mutationFn: async (payload: { title: string; body: string; classId?: number; targetType: TargetType }) => {
-      const schoolId = selectedClass?.schoolId;
-      if (!schoolId) throw new Error("schoolId یافت نشد");
-      const base = { title: payload.title, body: payload.body, schoolId, senderId: user?.id, classId: payload.classId };
-
-      if (payload.targetType === "all_students") {
-        return api.post("/notifications", { ...base, targetRole: "student" });
-      }
-      if (payload.targetType === "all_parents") {
-        return api.post("/notifications", { ...base, targetRole: "parent" });
-      }
-      if (payload.targetType === "specific_students") {
-        if (!selectedStudentIds.length) throw new Error("حداقل یک دانش‌آموز انتخاب کنید");
-        return Promise.all(selectedStudentIds.map(uid =>
-          api.post("/notifications", { ...base, targetRole: "student", targetUserId: uid })
-        ));
-      }
-      if (payload.targetType === "specific_parents") {
-        if (!selectedStudentIds.length) throw new Error("حداقل یک دانش‌آموز انتخاب کنید");
-        const parents = selectedStudentIds.map(sid => classStudents.find((s: any) => s.id === sid)?.parentId).filter(Boolean);
-        if (!parents.length) throw new Error("اولیا پیدا نشد");
-        return Promise.all(parents.map((pid: number) =>
-          api.post("/notifications", { ...base, targetRole: "parent", targetUserId: pid })
-        ));
-      }
-      throw new Error("نوع مخاطب نامعتبر");
-    },
+    mutationFn: (d: any) => api.post("/notifications/teacher-send", d),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["notifs-teacher"] });
+      qc.invalidateQueries({ queryKey: ["notifs-teacher-broadcast"] });
       setForm({ title: "", body: "", classId: "", targetType: "all_students" });
       setSelectedStudentIds([]);
       showToast("پیام با موفقیت ارسال شد ✓");
-      setTab("inbox");
     },
     onError: (e: any) => showToast(e?.message ?? "خطا در ارسال", "error"),
   });
 
-  const needsStudentPick = form.targetType === "specific_students" || form.targetType === "specific_parents";
-  const canSend = form.title && form.body && form.classId && (!needsStudentPick || selectedStudentIds.length > 0);
+  function toggleStudent(id: number) {
+    setSelectedStudentIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  }
 
-  const tabStyle = (active: boolean) => ({
-    flex: 1,
-    padding: "10px 0",
-    border: "none",
-    borderRadius: 10,
-    fontFamily: "Vazirmatn, sans-serif",
-    fontSize: 14,
-    fontWeight: 700,
+  const tabBtn = (active: boolean): React.CSSProperties => ({
+    flex: 1, padding: "10px 0", borderRadius: 10, border: "none",
+    fontFamily: "Vazirmatn, sans-serif", fontSize: 14, fontWeight: 700,
     cursor: "pointer",
-    background: active ? "linear-gradient(135deg, #7c3aed, #a855f7)" : "transparent",
-    color: active ? "white" : "#8b5cf6",
+    background: active ? `linear-gradient(135deg, ${AMBER_D}, ${AMBER})` : "transparent",
+    color: active ? "white" : AMBER_D,
+    boxShadow: active ? `0 4px 14px ${AMBER}44` : "none",
     transition: "all 0.2s",
   });
 
   return (
-    <div>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-        <Bell size={22} style={{ color: "#f97316" }} />
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f8f5ff", margin: 0 }}>اعلان‌ها</h1>
-      </div>
+    <div style={{
+      margin: -24, padding: 24, minHeight: "calc(100vh - 60px)",
+      background: "linear-gradient(160deg,#fffbeb 0%,#fef3c7 40%,#fff7ed 100%)",
+      fontFamily: "Vazirmatn, sans-serif", direction: "rtl",
+      position: "relative", overflow: "hidden",
+    }}>
+      {/* Blobs */}
+      <div style={{ position: "absolute", top: "-10%", right: "-6%", width: 320, height: 320, borderRadius: "50%", background: `radial-gradient(circle,rgba(245,158,11,0.35) 0%,transparent 70%)`, pointerEvents: "none", animation: "blobFloat1 9s ease-in-out infinite" }} />
+      <div style={{ position: "absolute", bottom: "5%", left: "-6%", width: 270, height: 270, borderRadius: "50%", background: `radial-gradient(circle,rgba(249,115,22,0.22) 0%,transparent 70%)`, pointerEvents: "none", animation: "blobFloat2 12s ease-in-out infinite" }} />
 
-      <div style={{ display: "flex", gap: 8, background: "rgba(30,18,60,0.7)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 12, padding: 4, marginBottom: 24 }}>
-        <button style={tabStyle(tab === "inbox")} onClick={() => setTab("inbox")}>
-          <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-            <Bell size={15} /> دریافت‌شده {inbox.length > 0 && <span style={{ background: "#f97316", color: "white", borderRadius: 999, padding: "1px 7px", fontSize: 11 }}>{inbox.length}</span>}
-          </span>
-        </button>
-        <button style={tabStyle(tab === "send")} onClick={() => setTab("send")}>
-          <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-            <Send size={15} /> ارسال پیام
-          </span>
-        </button>
-      </div>
-
-      {tab === "inbox" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {inbox.map(n => (
-            <div key={n.id} style={{ background: "rgba(30,18,60,0.85)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 14, padding: "16px 18px", display: "flex", alignItems: "flex-start", gap: 14 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(249,115,22,0.15)", border: "1px solid rgba(249,115,22,0.3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <Bell size={18} style={{ color: "#f97316" }} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, color: "#f8f5ff", fontSize: 15, marginBottom: 4 }}>{n.title}</div>
-                <p style={{ color: "#c4b5fd", fontSize: 13, margin: 0, lineHeight: 1.6 }}>{n.body}</p>
-                {n.createdAt && (
-                  <div style={{ color: "#8b5cf6", fontSize: 11, marginTop: 6 }}>
-                    {new Date(n.createdAt).toLocaleDateString("fa-IR")}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-          {inbox.length === 0 && (
-            <div style={{ textAlign: "center", padding: 50, color: "#8b5cf6" }}>
-              <Bell size={48} style={{ marginBottom: 12, opacity: 0.4, display: "block", margin: "0 auto 12px" }} />
-              <p>هیچ اعلانی دریافت نشده</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {tab === "send" && (
-        <div style={{ background: "rgba(30,18,60,0.85)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 16, padding: 24 }}>
-          <h3 style={{ color: "#f8f5ff", fontSize: 16, fontWeight: 700, marginTop: 0, marginBottom: 20 }}>ارسال پیام جدید</h3>
-          <div style={{ display: "grid", gap: 16 }}>
-
-            <div>
-              <label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 6 }}>انتخاب کلاس</label>
-              <div style={{ position: "relative" }}>
-                <select value={form.classId} onChange={e => { setForm({ ...form, classId: e.target.value }); setSelectedStudentIds([]); }} style={{ ...inputStyle, appearance: "none", paddingLeft: 36 }}>
-                  <option value="">-- کلاس را انتخاب کنید --</option>
-                  {classes.map((c: any) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-                <ChevronDown size={16} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "#8b5cf6", pointerEvents: "none" }} />
-              </div>
-            </div>
-
-            <div>
-              <label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 6 }}>مخاطبان</label>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                {TARGET_OPTIONS.map(opt => (
-                  <button key={opt.value} onClick={() => { setForm({ ...form, targetType: opt.value }); setSelectedStudentIds([]); }}
-                    style={{
-                      padding: "10px 12px", borderRadius: 10, border: "1px solid",
-                      borderColor: form.targetType === opt.value ? "#a855f7" : "rgba(139,92,246,0.25)",
-                      background: form.targetType === opt.value ? "rgba(124,58,237,0.25)" : "transparent",
-                      color: form.targetType === opt.value ? "#d8b4fe" : "#8b5cf6",
-                      fontFamily: "Vazirmatn, sans-serif", fontSize: 13, cursor: "pointer",
-                      display: "flex", alignItems: "center", gap: 6,
-                    }}>
-                    {opt.value.startsWith("all") ? <Users size={14} /> : <User size={14} />}
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {needsStudentPick && form.classId && (
-              <div>
-                <label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 8 }}>
-                  انتخاب دانش‌آموزان
-                  {selectedStudentIds.length > 0 && (
-                    <span style={{ marginRight: 8, background: "rgba(124,58,237,0.3)", borderRadius: 999, padding: "2px 8px", fontSize: 11, color: "#d8b4fe" }}>
-                      {selectedStudentIds.length} نفر انتخاب شده
-                    </span>
-                  )}
-                </label>
-                <div style={{ background: "rgba(13,10,26,0.4)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 10, overflow: "hidden" }}>
-                  {classStudents.length === 0 && (
-                    <p style={{ color: "#8b5cf6", padding: "14px 16px", margin: 0, fontSize: 13 }}>دانش‌آموزی در این کلاس ثبت نشده</p>
-                  )}
-                  {classStudents.map((s: any, i: number) => {
-                    const selected = selectedStudentIds.includes(s.id);
-                    return (
-                      <div key={s.id} onClick={() => toggleStudent(s.id)}
-                        style={{
-                          display: "flex", alignItems: "center", gap: 12,
-                          padding: "10px 14px", cursor: "pointer",
-                          borderTop: i > 0 ? "1px solid rgba(139,92,246,0.1)" : "none",
-                          background: selected ? "rgba(124,58,237,0.15)" : "transparent",
-                          transition: "background 0.15s",
-                        }}>
-                        <div style={{
-                          width: 20, height: 20, borderRadius: 6, border: `2px solid ${selected ? "#a855f7" : "rgba(139,92,246,0.4)"}`,
-                          background: selected ? "#a855f7" : "transparent",
-                          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                        }}>
-                          {selected && <span style={{ color: "white", fontSize: 12, lineHeight: 1 }}>✓</span>}
-                        </div>
-                        <span style={{ color: "#f8f5ff", fontSize: 14 }}>{s.name}</span>
-                        {form.targetType === "specific_parents" && s.parentId && (
-                          <span style={{ fontSize: 11, color: "#60a5fa", background: "rgba(59,130,246,0.1)", borderRadius: 999, padding: "2px 8px" }}>ولی دارد</span>
-                        )}
-                        {form.targetType === "specific_parents" && !s.parentId && (
-                          <span style={{ fontSize: 11, color: "#f87171", background: "rgba(248,113,113,0.1)", borderRadius: 999, padding: "2px 8px" }}>بدون ولی</span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                {classStudents.length > 0 && (
-                  <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-                    <button onClick={() => setSelectedStudentIds(classStudents.map((s: any) => s.id))}
-                      style={{ fontSize: 12, color: "#a855f7", background: "none", border: "none", cursor: "pointer", fontFamily: "Vazirmatn, sans-serif", padding: 0 }}>
-                      <Plus size={12} style={{ verticalAlign: "middle" }} /> انتخاب همه
-                    </button>
-                    <span style={{ color: "#4b5563" }}>|</span>
-                    <button onClick={() => setSelectedStudentIds([])}
-                      style={{ fontSize: 12, color: "#6b7280", background: "none", border: "none", cursor: "pointer", fontFamily: "Vazirmatn, sans-serif", padding: 0 }}>
-                      حذف انتخاب‌ها
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div>
-              <label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 6 }}>عنوان پیام</label>
-              <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="عنوان را وارد کنید..." style={inputStyle} />
-            </div>
-
-            <div>
-              <label style={{ display: "block", color: "#c4b5fd", fontSize: 13, marginBottom: 6 }}>متن پیام</label>
-              <textarea value={form.body} onChange={e => setForm({ ...form, body: e.target.value })} rows={4} placeholder="متن پیام را اینجا بنویسید..." style={{ ...inputStyle, resize: "vertical" }} />
-            </div>
-
-            <button
-              onClick={() => sendMut.mutate({ title: form.title, body: form.body, classId: form.classId ? parseInt(form.classId) : undefined, targetType: form.targetType })}
-              disabled={!canSend || sendMut.isPending}
-              style={{
-                padding: "13px 0", background: canSend ? "linear-gradient(135deg, #7c3aed, #a855f7)" : "rgba(124,58,237,0.3)",
-                border: "none", borderRadius: 12, color: "white", fontSize: 15, fontWeight: 700,
-                fontFamily: "Vazirmatn, sans-serif", cursor: canSend ? "pointer" : "not-allowed",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-              }}>
-              <Send size={16} />
-              {sendMut.isPending ? "در حال ارسال..." : "ارسال پیام"}
-            </button>
+      <div style={{ position: "relative", zIndex: 1, maxWidth: 720, margin: "0 auto" }}>
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
+          <div style={{ width: 46, height: 46, borderRadius: 15, background: `linear-gradient(135deg,${AMBER_D},${AMBER})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 6px 22px ${AMBER}55`, flexShrink: 0 }}>
+            <Bell size={22} color="white" />
+          </div>
+          <div>
+            <h1 style={{ fontSize: 22, fontWeight: 900, color: TEXT, margin: 0 }}>اعلان‌ها</h1>
+            <div style={{ fontSize: 13, color: TEXT2, marginTop: 2 }}>ارسال و دریافت پیام</div>
           </div>
         </div>
-      )}
+
+        {/* Tabs */}
+        <div style={{ display: "flex", gap: 6, background: "rgba(255,255,255,0.65)", border: `1px solid rgba(245,158,11,0.25)`, borderRadius: 14, padding: 5, marginBottom: 20 }}>
+          <button style={tabBtn(tab === "inbox")} onClick={() => setTab("inbox")}>
+            <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <Bell size={15} /> دریافت‌شده
+              {inbox.length > 0 && <span style={{ background: ORANGE, color: "white", borderRadius: 999, padding: "1px 7px", fontSize: 11 }}>{inbox.length}</span>}
+            </span>
+          </button>
+          <button style={tabBtn(tab === "send")} onClick={() => setTab("send")}>
+            <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <Send size={15} /> ارسال پیام
+            </span>
+          </button>
+        </div>
+
+        {/* Inbox */}
+        {tab === "inbox" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {inbox.map(n => (
+              <div key={n.id} style={{ ...card, padding: "16px 18px", display: "flex", alignItems: "flex-start", gap: 14 }}>
+                <div style={{ width: 42, height: 42, borderRadius: 12, background: `rgba(245,158,11,0.14)`, border: `1px solid rgba(245,158,11,0.30)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Bell size={18} style={{ color: AMBER }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 800, color: TEXT, fontSize: 15, marginBottom: 4 }}>{n.title}</div>
+                  <p style={{ color: TEXT2, fontSize: 13, margin: 0, lineHeight: 1.7 }}>{n.body}</p>
+                  {n.createdAt && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 5, color: AMBER_D, fontSize: 11, marginTop: 8 }}>
+                      <Calendar size={11} />
+                      {new Date(n.createdAt).toLocaleDateString("fa-IR", { year: "numeric", month: "long", day: "numeric" })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+            {inbox.length === 0 && (
+              <div style={{ ...card, textAlign: "center", padding: "60px 20px" }}>
+                <Bell size={48} style={{ color: AMBER, opacity: 0.35, display: "block", margin: "0 auto 14px" }} />
+                <p style={{ color: TEXT2, margin: 0, fontSize: 15, fontWeight: 600 }}>هیچ اعلانی دریافت نشده</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Send */}
+        {tab === "send" && (
+          <div style={{ ...card, padding: 24 }}>
+            <h3 style={{ color: TEXT, fontSize: 16, fontWeight: 800, marginTop: 0, marginBottom: 20 }}>ارسال پیام جدید</h3>
+            <div style={{ display: "grid", gap: 16 }}>
+
+              <div>
+                <label style={{ display: "block", color: TEXT2, fontSize: 13, marginBottom: 6 }}>انتخاب کلاس</label>
+                <div style={{ position: "relative" }}>
+                  <select value={form.classId} onChange={e => { setForm({ ...form, classId: e.target.value }); setSelectedStudentIds([]); }}
+                    style={{ ...inputStyle, appearance: "none", paddingLeft: 36 }}>
+                    <option value="">-- کلاس را انتخاب کنید --</option>
+                    {classes.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                  <ChevronDown size={16} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: AMBER, pointerEvents: "none" }} />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: "block", color: TEXT2, fontSize: 13, marginBottom: 6 }}>مخاطبان</label>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                  {TARGET_OPTIONS.map(opt => (
+                    <button key={opt.value} onClick={() => { setForm({ ...form, targetType: opt.value }); setSelectedStudentIds([]); }}
+                      style={{
+                        padding: "10px 12px", borderRadius: 10, border: "1.5px solid",
+                        borderColor: form.targetType === opt.value ? AMBER : "rgba(245,158,11,0.30)",
+                        background: form.targetType === opt.value ? `rgba(245,158,11,0.12)` : "rgba(255,255,255,0.55)",
+                        color: form.targetType === opt.value ? AMBER_D : TEXT2,
+                        fontFamily: "Vazirmatn, sans-serif", fontSize: 13, cursor: "pointer",
+                        display: "flex", alignItems: "center", gap: 6, fontWeight: form.targetType === opt.value ? 700 : 400,
+                      }}>
+                      {opt.value.startsWith("all") ? <Users size={14} /> : <User size={14} />}
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {needsStudentPick && form.classId && (
+                <div>
+                  <label style={{ display: "block", color: TEXT2, fontSize: 13, marginBottom: 8 }}>
+                    انتخاب دانش‌آموزان
+                    {selectedStudentIds.length > 0 && (
+                      <span style={{ marginRight: 8, background: `rgba(245,158,11,0.15)`, borderRadius: 999, padding: "2px 8px", fontSize: 11, color: AMBER_D }}>
+                        {selectedStudentIds.length} نفر انتخاب شده
+                      </span>
+                    )}
+                  </label>
+                  <div style={{ background: "rgba(255,255,255,0.60)", border: `1px solid rgba(245,158,11,0.22)`, borderRadius: 10, overflow: "hidden" }}>
+                    {classStudents.length === 0 && (
+                      <p style={{ color: AMBER_D, padding: "14px 16px", margin: 0, fontSize: 13 }}>دانش‌آموزی در این کلاس ثبت نشده</p>
+                    )}
+                    {classStudents.map((s: any, i: number) => {
+                      const selected = selectedStudentIds.includes(s.id);
+                      return (
+                        <div key={s.id} onClick={() => toggleStudent(s.id)}
+                          style={{
+                            display: "flex", alignItems: "center", gap: 12,
+                            padding: "10px 14px", cursor: "pointer",
+                            borderTop: i > 0 ? `1px solid rgba(245,158,11,0.12)` : "none",
+                            background: selected ? `rgba(245,158,11,0.10)` : "transparent",
+                            transition: "background 0.15s",
+                          }}>
+                          <div style={{ width: 20, height: 20, borderRadius: 6, border: `2px solid ${selected ? AMBER : "rgba(245,158,11,0.40)"}`, background: selected ? AMBER : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            {selected && <span style={{ color: "white", fontSize: 12, lineHeight: 1 }}>✓</span>}
+                          </div>
+                          <span style={{ color: TEXT, fontSize: 14 }}>{s.name}</span>
+                          {form.targetType === "specific_parents" && s.parentId && (
+                            <span style={{ fontSize: 11, color: "#0d9488", background: "rgba(13,148,136,0.10)", borderRadius: 999, padding: "2px 8px" }}>ولی دارد</span>
+                          )}
+                          {form.targetType === "specific_parents" && !s.parentId && (
+                            <span style={{ fontSize: 11, color: "#ef4444", background: "rgba(239,68,68,0.10)", borderRadius: 999, padding: "2px 8px" }}>بدون ولی</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {classStudents.length > 0 && (
+                    <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                      <button onClick={() => setSelectedStudentIds(classStudents.map((s: any) => s.id))}
+                        style={{ fontSize: 12, color: AMBER_D, background: "none", border: "none", cursor: "pointer", fontFamily: "Vazirmatn, sans-serif", padding: 0 }}>
+                        <Plus size={12} style={{ verticalAlign: "middle" }} /> انتخاب همه
+                      </button>
+                      <span style={{ color: "#9ca3af" }}>|</span>
+                      <button onClick={() => setSelectedStudentIds([])}
+                        style={{ fontSize: 12, color: "#6b7280", background: "none", border: "none", cursor: "pointer", fontFamily: "Vazirmatn, sans-serif", padding: 0 }}>
+                        حذف انتخاب‌ها
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div>
+                <label style={{ display: "block", color: TEXT2, fontSize: 13, marginBottom: 6 }}>عنوان پیام</label>
+                <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="عنوان را وارد کنید..." style={inputStyle} />
+              </div>
+
+              <div>
+                <label style={{ display: "block", color: TEXT2, fontSize: 13, marginBottom: 6 }}>متن پیام</label>
+                <textarea value={form.body} onChange={e => setForm({ ...form, body: e.target.value })} rows={4} placeholder="متن پیام را اینجا بنویسید..." style={{ ...inputStyle, resize: "vertical" }} />
+              </div>
+
+              <button
+                onClick={() => sendMut.mutate({ title: form.title, body: form.body, classId: form.classId ? parseInt(form.classId) : undefined, targetType: form.targetType, selectedStudentIds: needsStudentPick ? selectedStudentIds : undefined })}
+                disabled={!canSend || sendMut.isPending}
+                style={{
+                  padding: "13px 0",
+                  background: canSend ? `linear-gradient(135deg, ${AMBER_D}, ${AMBER})` : "rgba(245,158,11,0.25)",
+                  border: "none", borderRadius: 12, color: canSend ? "white" : AMBER_D, fontSize: 15, fontWeight: 700,
+                  fontFamily: "Vazirmatn, sans-serif", cursor: canSend ? "pointer" : "not-allowed",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  boxShadow: canSend ? `0 6px 20px ${AMBER}44` : "none",
+                }}>
+                <Send size={16} />
+                {sendMut.isPending ? "در حال ارسال..." : "ارسال پیام"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

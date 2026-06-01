@@ -101,8 +101,12 @@ export default function StudentNotifications() {
   const notifs = tab === "received" ? received : sent;
   const accentColor = user?.gender === "female" ? "#ec4899" : "#7c3aed";
 
+  const bgGrad = user?.gender === "female"
+    ? "linear-gradient(135deg, #4facfe 0%, #c084fc 38%, #f472b6 72%, #fb7185 100%)"
+    : "linear-gradient(135deg, #4facfe 0%, #818cf8 42%, #a78bfa 72%, #c084fc 100%)";
+
   return (
-    <div style={{ padding: "24px 20px", minHeight: "100vh", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
+    <div style={{ margin: -24, padding: 24, minHeight: "calc(100vh - 60px)", background: bgGrad, fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

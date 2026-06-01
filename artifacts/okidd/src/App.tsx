@@ -33,7 +33,7 @@ import BranchDashboard from "./pages/branch/Dashboard";
 import BranchClasses from "./pages/branch/Classes";
 import BranchStudents from "./pages/school/Students";
 import BranchTeachers from "./pages/school/Teachers";
-import BranchNotifications from "./pages/school/Notifications";
+import BranchNotifications from "./pages/branch/Notifications";
 import BranchExams from "./pages/school/Exams";
 
 import TeacherDashboard from "./pages/teacher/Dashboard";
