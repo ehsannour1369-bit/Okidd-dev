@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { Trophy, Star, Users, BookOpen, GraduationCap, TrendingUp, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from "recharts";
 
@@ -77,6 +77,13 @@ export default function StudentRanking() {
     queryFn: () => api.get(`/users/${user?.id}/enrolled-books`),
     enabled: !!user?.id,
   });
+
+  // Auto-select first enrolled book for chart when books load
+  useEffect(() => {
+    if (books.length > 0 && chartBookId === null) {
+      setChartBookId(books[0].id);
+    }
+  }, [books, chartBookId]);
 
   const rankingsQuery = useQuery<RankingEntry[]>({
     queryKey: ["rankings", tab, classId, gradeId, selectedBookId],

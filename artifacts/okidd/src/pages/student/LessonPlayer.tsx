@@ -120,7 +120,7 @@ export default function LessonPlayer() {
         /* gameType باید دقیقاً نوع محتوا باشد تا در breakdown درست دسته‌بندی شود */
         const gameType = currentContent?.type ?? "game";
         if (user?.id && !freeMode) {
-          api.post("/game-scores", { studentId: user.id, gameType, score })
+          api.post("/game-scores", { studentId: user.id, gameType, score, lessonId: currentLesson?.id ?? null })
             .then(() => { setSavedScore(true); setContentCompleted(true); }).catch(() => {});
         } else {
           /* حالت آزاد: score ثبت نمی‌شود ولی UI کامل می‌شود */
@@ -132,7 +132,7 @@ export default function LessonPlayer() {
         /* برای کوییز و تمرین: ارسال امتیاز ثابت ۵ هنگام تکمیل */
         const type = currentContent?.type;
         if (!freeMode && user?.id && (type === "quiz" || type === "exercise")) {
-          api.post("/game-scores", { studentId: user.id, gameType: type, score: 5 }).catch(() => {});
+          api.post("/game-scores", { studentId: user.id, gameType: type, score: 5, lessonId: currentLesson?.id ?? null }).catch(() => {});
         }
       }
     };
@@ -411,7 +411,7 @@ export default function LessonPlayer() {
                       setContentCompleted(true);
                       /* ذخیره امتیاز ۵ برای تماشای انیمیشن/ویدیو تا آخر */
                       if (!freeMode && user?.id && currentContent?.type) {
-                        api.post("/game-scores", { studentId: user.id, gameType: currentContent.type, score: 5 }).catch(() => {});
+                        api.post("/game-scores", { studentId: user.id, gameType: currentContent.type, score: 5, lessonId: currentLesson?.id ?? null }).catch(() => {});
                       }
                     }}
                     onTimeUpdate={e => {

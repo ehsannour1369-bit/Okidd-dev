@@ -175,17 +175,20 @@ router.get("/student-lesson-scores", async (req, res) => {
     }
   }
 
-  // Add game scores mapped to lessons via content
+  // Add game scores mapped to lessons
   for (const gs of gameScores) {
-    let lessonId: number | null = null;
-    if (gs.gameType.startsWith("content-")) {
-      const cid = parseInt(gs.gameType.replace("content-", ""));
-      lessonId = contentLessonMap.get(cid)?.lessonId ?? null;
+    let lid: number | null = null;
+    // 1) New format: lessonId stored directly on the record
+    if (gs.lessonId && lessonScores.has(gs.lessonId)) {
+      lid = gs.lessonId;
     }
-    // For type-based scores (game/animation/video/etc.) we can't easily map to a lesson
-    // without a contentId — skip those for lesson breakdown
-    if (lessonId && lessonScores.has(lessonId)) {
-      lessonScores.set(lessonId, (lessonScores.get(lessonId) ?? 0) + gs.score);
+    // 2) Old format: content-{id} → look up via contentLessonMap
+    else if (gs.gameType.startsWith("content-")) {
+      const cid = parseInt(gs.gameType.replace("content-", ""));
+      lid = contentLessonMap.get(cid)?.lessonId ?? null;
+    }
+    if (lid && lessonScores.has(lid)) {
+      lessonScores.set(lid, (lessonScores.get(lid) ?? 0) + gs.score);
     }
   }
 

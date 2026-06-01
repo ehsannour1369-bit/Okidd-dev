@@ -7,6 +7,7 @@ export const gameScoresTable = pgTable("game_scores", {
   studentId: integer("student_id").notNull(),
   gameType: varchar("game_type", { length: 50 }).notNull().default("balloon"),
   score: integer("score").notNull().default(0),
+  lessonId: integer("lesson_id"),
   playedAt: timestamp("played_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
