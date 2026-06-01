@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { useState } from "react";
-import { BookOpen, Star } from "lucide-react";
+import { BookOpen, Star, UserRound } from "lucide-react";
 
 export default function ParentChildren() {
   const { user } = useAuthStore();
@@ -33,7 +33,7 @@ export default function ParentChildren() {
               border: `1px solid ${currentChild?.id === child.id ? "#7c3aed" : "rgba(139,92,246,0.3)"}`,
               color: currentChild?.id === child.id ? "white" : "#c4b5fd",
             }}>
-              {child.gender === "female" ? "👧" : "👦"} {child.name}
+              <UserRound size={14} style={{ display: "inline", verticalAlign: "middle", marginLeft: 4 }} /> {child.name}
             </button>
           ))}
         </div>
@@ -42,8 +42,8 @@ export default function ParentChildren() {
         <div>
           <div style={{ background: "rgba(30,18,60,0.85)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, padding: 24, marginBottom: 20 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
-              <div style={{ width: 60, height: 60, borderRadius: 18, background: currentChild.gender === "female" ? "linear-gradient(135deg, #ec4899, #f472b6)" : "linear-gradient(135deg, #7c3aed, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30 }}>
-                {currentChild.gender === "female" ? "👧" : "👦"}
+              <div style={{ width: 60, height: 60, borderRadius: 18, background: currentChild.gender === "female" ? "linear-gradient(135deg, #ec4899, #f472b6)" : "linear-gradient(135deg, #7c3aed, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <UserRound size={30} color="white" />
               </div>
               <div>
                 <h2 style={{ margin: 0, color: "#f8f5ff", fontWeight: 800, fontSize: 20 }}>{currentChild.name}</h2>

@@ -56,7 +56,7 @@ export default function GamePlayer() {
           )}
           {saved && (
             <div style={{ color: "#22c55e", fontSize: 12, fontWeight: 700 }}>
-              ✅ ذخیره شد
+              ذخیره شد
             </div>
           )}
           <button

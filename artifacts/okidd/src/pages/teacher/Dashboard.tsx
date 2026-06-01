@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { useState, useEffect } from "react";
-import { School, ChevronDown, ChevronLeft, Users, BookOpen, Lock, Unlock, BarChart2, Clock, Star, GraduationCap } from "lucide-react";
+import { School, ChevronDown, ChevronLeft, Users, BookOpen, Lock, Unlock, BarChart2, Clock, Star, GraduationCap, TrendingUp, UserRound } from "lucide-react";
 
 const P = "#f59e0b";
 const PD = "#d97706";
@@ -78,9 +78,9 @@ export default function TeacherDashboard() {
   );
 
   const ACCORDION_CARDS = [
-    { id: "schools", label: "مدارس من", emoji: "🏫", desc: `${schools.length} مدرسه`, open: schoolsOpen, color: P, dark: PD },
-    { id: "progress", label: "پراگرس چارت", emoji: "📊", desc: "باز کردن دسترسی دروس برای کلاس‌ها", open: progressOpen, color: "#3b82f6", dark: "#2563eb" },
-    { id: "perf", label: "ارزیابی عملکرد", emoji: "📈", desc: "عملکرد دانش‌آموزان به تفکیک کلاس", open: perfOpen, color: "#ec4899", dark: "#db2777" },
+    { id: "schools", label: "مدارس من", icon: School, desc: `${schools.length} مدرسه`, open: schoolsOpen, color: P, dark: PD },
+    { id: "progress", label: "پراگرس چارت", icon: BarChart2, desc: "باز کردن دسترسی دروس برای کلاس‌ها", open: progressOpen, color: "#3b82f6", dark: "#2563eb" },
+    { id: "perf", label: "ارزیابی عملکرد", icon: TrendingUp, desc: "عملکرد دانش‌آموزان به تفکیک کلاس", open: perfOpen, color: "#ec4899", dark: "#db2777" },
   ];
 
   return (
@@ -119,7 +119,7 @@ export default function TeacherDashboard() {
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ""; }}
             >
               <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
-              <div style={{ fontSize: 34, lineHeight: 1 }}>{ac.emoji}</div>
+              {(() => { const AcIcon = ac.icon; return (<div style={{ width: 48, height: 48, borderRadius: 15, background: "rgba(255,255,255,0.25)", border: "1.5px solid rgba(255,255,255,0.50)", display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(10px)", flexShrink: 0 }}><AcIcon size={24} color="white" /></div>); })()}
               <div style={{ flex: 1, position: "relative", zIndex: 1 }}>
                 <div style={{ fontWeight: 800, fontSize: 16, color: "white", marginBottom: 3, textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>{ac.label}</div>
                 <div style={{ color: "rgba(255,255,255,0.78)", fontSize: 13, fontWeight: 500 }}>{ac.desc}</div>
@@ -150,7 +150,7 @@ export default function TeacherDashboard() {
                                     <div key={cls.id}>
                                       <button onClick={() => setSelectedClass(selectedClass?.id === cls.id ? null : cls)}
                                         style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 14px", background: selectedClass?.id === cls.id ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.08)", border: `1px solid ${selectedClass?.id === cls.id ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.18)"}`, borderRadius: 10, cursor: "pointer", color: "white", fontFamily: "Vazirmatn", fontSize: 13 }}>
-                                        <span>📚 {cls.name}</span>
+                                        <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><BookOpen size={12} /> {cls.name}</span>
                                         <ChevronDown size={13} color="rgba(255,255,255,0.7)" />
                                       </button>
                                       {selectedClass?.id === cls.id && (
@@ -163,7 +163,7 @@ export default function TeacherDashboard() {
                                               {classStudents.map((s: any) => (
                                                 <div key={s.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 12px", background: "rgba(255,255,255,0.10)", borderRadius: 8 }}>
                                                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                                    <span style={{ fontSize: 15 }}>{s.gender === "female" ? "👧" : "👦"}</span>
+                                                    <div style={{ width: 26, height: 26, borderRadius: 8, background: s.gender === "female" ? "rgba(236,72,153,0.2)" : "rgba(99,102,241,0.18)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><UserRound size={13} color={s.gender === "female" ? "#ec4899" : "#818cf8"} /></div>
                                                     <span style={{ color: "white", fontSize: 13, fontWeight: 600 }}>{s.name}</span>
                                                   </div>
                                                   <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 11 }}>آخرین ورود: {fmtDate(s.lastLoginAt)}</div>
@@ -227,7 +227,7 @@ export default function TeacherDashboard() {
                                   <tr key={s.id}>
                                     <td style={{ padding: "10px 12px", borderBottom: "1px solid rgba(255,255,255,0.10)" }}>
                                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                        <span style={{ fontSize: 17 }}>{s.gender === "female" ? "👧" : "👦"}</span>
+                                        <div style={{ width: 30, height: 30, borderRadius: 9, background: s.gender === "female" ? "rgba(236,72,153,0.18)" : "rgba(99,102,241,0.18)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><UserRound size={14} color={s.gender === "female" ? "#ec4899" : "#818cf8"} /></div>
                                         <div>
                                           <div style={{ color: "white", fontWeight: 700, fontSize: 13 }}>{s.name}</div>
                                           <div style={{ color: "rgba(255,255,255,0.55)", fontSize: 11, direction: "ltr" }}>{s.email}</div>

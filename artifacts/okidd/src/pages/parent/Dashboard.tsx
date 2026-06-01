@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
-import { Bell, BookOpen, Clock, Star, Calendar, ChevronDown, ChevronUp, Trophy, Heart } from "lucide-react";
+import { Bell, BookOpen, Clock, Star, Calendar, ChevronDown, ChevronUp, Trophy, Heart, UserRound, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const P = "#f43f5e";
@@ -125,7 +125,7 @@ export default function ParentDashboard() {
         {children.length === 0 && (
           <div style={{ ...colorCard(P, PD, { padding: 40, textAlign: "center" }), ...cardAnim(1) }}>
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "45%", background: "linear-gradient(180deg, rgba(255,255,255,0.16) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
-            <div style={{ fontSize: 44, marginBottom: 12 }}>👨‍👩‍👧</div>
+            <div style={{ width: 60, height: 60, borderRadius: 18, background: "rgba(255,255,255,0.25)", border: "1.5px solid rgba(255,255,255,0.50)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px", backdropFilter: "blur(10px)" }}><Users size={30} color="white" /></div>
             <div style={{ color: "rgba(255,255,255,0.88)", fontSize: 15, fontWeight: 600 }}>هیچ فرزندی ثبت نشده است</div>
           </div>
         )}
@@ -143,7 +143,7 @@ export default function ParentDashboard() {
                 return (
                   <button key={child.id} onClick={() => { setSelectedChildId(child.id); setExpandedBook(null); }}
                     style={{ flex: 1, minWidth: 110, padding: "14px 16px", background: isActive ? "rgba(255,255,255,0.30)" : "rgba(255,255,255,0.12)", border: `2px solid ${isActive ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.25)"}`, borderRadius: 16, cursor: "pointer", fontFamily: "Vazirmatn", color: "white", backdropFilter: "blur(8px)", transition: "all 0.2s", transform: isActive ? "scale(1.04)" : "scale(1)", boxShadow: isActive ? "0 8px 24px rgba(0,0,0,0.18)" : "none" }}>
-                    <div style={{ fontSize: 26, marginBottom: 5 }}>{child.gender === "female" ? "👧" : "👦"}</div>
+                    <div style={{ width: 38, height: 38, borderRadius: 12, background: isActive ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.15)", border: "1.5px solid rgba(255,255,255,0.40)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 5px" }}><Users size={18} color="white" /></div>
                     <div style={{ fontWeight: 700, fontSize: 14, textShadow: "0 1px 4px rgba(0,0,0,0.2)" }}>{child.name}</div>
                     <div style={{ fontSize: 11, opacity: 0.75, marginTop: 2 }}>{child.status === "active" ? "فعال" : "غیرفعال"}</div>
                   </button>
@@ -187,7 +187,7 @@ export default function ParentDashboard() {
         {currentChild && childSummary && (
           <div>
             <div style={{ fontSize: 15, fontWeight: 800, color: "#4c0519", marginBottom: 14, ...cardAnim(3) }}>
-              {isGirl ? "👧" : "👦"} گزارش عملکرد {currentChild.name}
+              <UserRound size={16} style={{ display: "inline", verticalAlign: "middle", marginLeft: 6 }} /> گزارش عملکرد {currentChild.name}
             </div>
 
             {/* Stats grid */}
@@ -213,7 +213,7 @@ export default function ParentDashboard() {
             {childSummary.classes?.length > 0 && (
               <div style={{ marginBottom: 14, display: "flex", flexWrap: "wrap", gap: 6, ...cardAnim(10) }}>
                 {childSummary.classes.map((cls: any) => (
-                  <span key={cls.id} style={{ background: `${childColor}28`, border: `1px solid ${childColor}55`, borderRadius: 8, padding: "4px 12px", fontSize: 12, color: childDark, fontWeight: 600 }}>📚 {cls.name}</span>
+                  <span key={cls.id} style={{ background: `${childColor}28`, border: `1px solid ${childColor}55`, borderRadius: 8, padding: "4px 12px", fontSize: 12, color: childDark, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 4 }}><BookOpen size={11} /> {cls.name}</span>
                 ))}
               </div>
             )}
@@ -222,7 +222,7 @@ export default function ParentDashboard() {
             {childSummary.books?.length > 0 && (
               <div style={{ ...colorCard(childColor, childDark, { padding: 20, marginBottom: 18 }), ...cardAnim(11) }}>
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "35%", background: "linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
-                <div style={{ fontWeight: 800, color: "white", marginBottom: 14, fontSize: 15, textShadow: "0 1px 6px rgba(0,0,0,0.2)", position: "relative", zIndex: 1 }}>📚 کتاب‌ها و پیشرفت درسی</div>
+                <div style={{ fontWeight: 800, color: "white", marginBottom: 14, fontSize: 15, textShadow: "0 1px 6px rgba(0,0,0,0.2)", position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 6 }}><BookOpen size={15} /> کتاب‌ها و پیشرفت درسی</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative", zIndex: 1 }}>
                   {childSummary.books.map((book: any) => {
                     const pct = book.lessonCount > 0 ? Math.round((book.completedLessons / book.lessonCount) * 100) : 0;
@@ -233,7 +233,7 @@ export default function ParentDashboard() {
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                               <span style={{ fontWeight: 700, color: "white", fontSize: 13, textShadow: "0 1px 4px rgba(0,0,0,0.18)" }}>{book.title}</span>
-                              {book.totalScore > 0 && <span style={{ background: "rgba(255,255,255,0.22)", color: "white", borderRadius: 6, padding: "1px 7px", fontSize: 11, fontWeight: 700 }}>⭐ {book.totalScore.toLocaleString("fa-IR")}</span>}
+                              {book.totalScore > 0 && <span style={{ background: "rgba(255,255,255,0.22)", color: "white", borderRadius: 6, padding: "1px 7px", fontSize: 11, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 3 }}><Star size={9} /> {book.totalScore.toLocaleString("fa-IR")}</span>}
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                               <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>{book.completedLessons}/{book.lessonCount}</span>
@@ -252,7 +252,7 @@ export default function ParentDashboard() {
                               {book.lessons.map((lesson: any) => (
                                 <div key={lesson.lessonId} style={{ background: lesson.completed ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.08)", border: `1px solid ${lesson.completed ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.18)"}`, borderRadius: 8, padding: "6px 10px" }}>
                                   <div style={{ fontSize: 11, color: "white", fontWeight: 700 }}>درس {lesson.lessonId.toLocaleString("fa-IR")}</div>
-                                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", marginTop: 2 }}>{lesson.completed ? `✅ ${lesson.score > 0 ? `+${lesson.score}` : ""}` : "❌ ناتمام"}</div>
+                                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", marginTop: 2 }}>{lesson.completed ? (lesson.score > 0 ? `+${lesson.score}` : "تکمیل") : "ناتمام"}</div>
                                 </div>
                               ))}
                             </div>

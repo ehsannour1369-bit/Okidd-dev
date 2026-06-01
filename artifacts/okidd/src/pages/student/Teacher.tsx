@@ -69,7 +69,7 @@ export default function StudentTeacher() {
           <ChevronRight size={16} /> برگشت
         </button>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "white", margin: 0, textShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>
-          👨‍🏫 مدرس من
+          <GraduationCap size={20} style={{ display: "inline", verticalAlign: "middle", marginLeft: 6 }} /> مدرس من
         </h1>
       </div>
 

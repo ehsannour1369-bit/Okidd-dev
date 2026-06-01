@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Gamepad2, Trophy } from "lucide-react";
 import { useAuthStore } from "../../store/auth";
 import { api } from "../../lib/api";
 import { useQuery } from "@tanstack/react-query";
@@ -95,7 +96,7 @@ export default function StudentGame() {
     <div style={{ direction: "rtl" }}>
       <div style={{ marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f8f5ff", margin: 0 }}>
-          {isGirl ? "🎀 بازی بادکنک" : "🎮 بازی بادکنک"}
+          <Gamepad2 size={20} style={{ display: "inline", verticalAlign: "middle", marginLeft: 6 }} /> بازی بادکنک
         </h1>
         <div style={{ fontSize: 13, color: "#8b5cf6" }}>رکورد: {overallBest} امتیاز</div>
       </div>
@@ -148,15 +149,15 @@ export default function StudentGame() {
           <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
             {timeLeft === 0 && score > 0 ? (
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 48, marginBottom: 8 }}>{isGirl ? "🎀" : "🎉"}</div>
+                <div style={{ width: 64, height: 64, borderRadius: 20, background: `linear-gradient(135deg, ${accent}40, ${accentLight}28)`, border: `2px solid ${accent}50`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 8px" }}><Trophy size={32} color={accentLight} /></div>
                 <h2 style={{ color: "#f8f5ff", fontSize: 24, fontWeight: 800, marginBottom: 8 }}>بازی تمام شد!</h2>
                 <div style={{ fontSize: 32, fontWeight: 800, color: accentLight, marginBottom: 4 }}>{score} امتیاز</div>
-                {score >= overallBest && score > 0 && <div style={{ color: "#fbbf24", fontSize: 14, marginBottom: 20 }}>🏆 رکورد جدید!</div>}
+                {score >= overallBest && score > 0 && <div style={{ color: "#fbbf24", fontSize: 14, marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}><Trophy size={16} color="#fbbf24" /> رکورد جدید!</div>}
                 <button onClick={startGame} style={{ padding: "12px 32px", background: `linear-gradient(135deg, ${accent}, ${accentLight})`, border: "none", borderRadius: 12, color: "white", fontSize: 16, fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>دوباره بازی کن</button>
               </div>
             ) : (
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 64, marginBottom: 16 }}>{isGirl ? "🎈🎀🎈" : "🎈🎮🎈"}</div>
+                <div style={{ width: 80, height: 80, borderRadius: 24, background: `linear-gradient(135deg, ${accent}40, ${accentLight}28)`, border: `2px solid ${accent}50`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", backdropFilter: "blur(10px)" }}><Gamepad2 size={40} color={accentLight} /></div>
                 <h2 style={{ color: "#f8f5ff", fontSize: 22, fontWeight: 800, marginBottom: 8 }}>بادکنک‌ها را بترکانید!</h2>
                 <p style={{ color: "#8b5cf6", fontSize: 14, marginBottom: 24 }}>در ۶۰ ثانیه هر چه بادکنک بیشتر بترکانید</p>
                 <button onClick={startGame} style={{ padding: "14px 40px", background: `linear-gradient(135deg, ${accent}, ${accentLight})`, border: "none", borderRadius: 14, color: "white", fontSize: 18, fontWeight: 800, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", boxShadow: `0 8px 24px ${accent}66` }}>شروع بازی</button>

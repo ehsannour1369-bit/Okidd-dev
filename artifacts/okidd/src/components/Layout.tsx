@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, ComponentType, useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuthStore } from "../store/auth";
 import {
@@ -8,74 +8,74 @@ import {
   Menu, X, BarChart2, ChevronRight,
 } from "lucide-react";
 
+type IconComp = ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
 interface NavItem {
   label: string;
   path: string;
-  icon: ReactNode;
+  icon: IconComp;
   color: string;
   bgGradient: string;
-  emoji: string;
 }
 
 const adminNav: NavItem[] = [
-  { label: "داشبورد", path: "/admin", icon: <LayoutDashboard size={18} />, color: "#f59e0b", bgGradient: "linear-gradient(135deg, #d97706, #f59e0b)", emoji: "📊" },
-  { label: "مدارس", path: "/admin/schools", icon: <School size={18} />, color: "#ef4444", bgGradient: "linear-gradient(135deg, #dc2626, #ef4444)", emoji: "🏫" },
-  { label: "شعبه‌ها و کلاس‌ها", path: "/admin/branches", icon: <GitBranch size={18} />, color: "#f97316", bgGradient: "linear-gradient(135deg, #ea580c, #f97316)", emoji: "🌿" },
-  { label: "معلمان", path: "/admin/teachers", icon: <GraduationCap size={18} />, color: "#fbbf24", bgGradient: "linear-gradient(135deg, #f59e0b, #fbbf24)", emoji: "👨‍🏫" },
-  { label: "دانش‌آموزان", path: "/admin/students", icon: <Users size={18} />, color: "#fb923c", bgGradient: "linear-gradient(135deg, #f97316, #fb923c)", emoji: "🧑‍🎓" },
-  { label: "کلاس‌ها", path: "/admin/classes", icon: <BookMarked size={18} />, color: "#f59e0b", bgGradient: "linear-gradient(135deg, #d97706, #f59e0b)", emoji: "📚" },
-  { label: "کاربران", path: "/admin/users", icon: <Users size={18} />, color: "#fcd34d", bgGradient: "linear-gradient(135deg, #f59e0b, #fcd34d)", emoji: "👥" },
-  { label: "کتاب‌ها", path: "/admin/books", icon: <BookOpen size={18} />, color: "#ef4444", bgGradient: "linear-gradient(135deg, #dc2626, #ef4444)", emoji: "📖" },
-  { label: "پکیج‌ها", path: "/admin/packages", icon: <Package size={18} />, color: "#f97316", bgGradient: "linear-gradient(135deg, #ea580c, #f97316)", emoji: "🎁" },
-  { label: "تراکنش‌ها", path: "/admin/transactions", icon: <CreditCard size={18} />, color: "#fbbf24", bgGradient: "linear-gradient(135deg, #f59e0b, #fbbf24)", emoji: "💳" },
-  { label: "محتوا", path: "/admin/content", icon: <FileText size={18} />, color: "#f87171", bgGradient: "linear-gradient(135deg, #ef4444, #f87171)", emoji: "📝" },
-  { label: "مشاوره", path: "/admin/consultants", icon: <UserCheck size={18} />, color: "#fb923c", bgGradient: "linear-gradient(135deg, #f97316, #fb923c)", emoji: "💡" },
+  { label: "داشبورد", path: "/admin", icon: LayoutDashboard, color: "#f59e0b", bgGradient: "linear-gradient(135deg, #d97706, #f59e0b)" },
+  { label: "مدارس", path: "/admin/schools", icon: School, color: "#ef4444", bgGradient: "linear-gradient(135deg, #dc2626, #ef4444)" },
+  { label: "شعبه‌ها و کلاس‌ها", path: "/admin/branches", icon: GitBranch, color: "#f97316", bgGradient: "linear-gradient(135deg, #ea580c, #f97316)" },
+  { label: "معلمان", path: "/admin/teachers", icon: GraduationCap, color: "#fbbf24", bgGradient: "linear-gradient(135deg, #f59e0b, #fbbf24)" },
+  { label: "دانش‌آموزان", path: "/admin/students", icon: Users, color: "#fb923c", bgGradient: "linear-gradient(135deg, #f97316, #fb923c)" },
+  { label: "کلاس‌ها", path: "/admin/classes", icon: BookMarked, color: "#f59e0b", bgGradient: "linear-gradient(135deg, #d97706, #f59e0b)" },
+  { label: "کاربران", path: "/admin/users", icon: Users, color: "#fcd34d", bgGradient: "linear-gradient(135deg, #f59e0b, #fcd34d)" },
+  { label: "کتاب‌ها", path: "/admin/books", icon: BookOpen, color: "#ef4444", bgGradient: "linear-gradient(135deg, #dc2626, #ef4444)" },
+  { label: "پکیج‌ها", path: "/admin/packages", icon: Package, color: "#f97316", bgGradient: "linear-gradient(135deg, #ea580c, #f97316)" },
+  { label: "تراکنش‌ها", path: "/admin/transactions", icon: CreditCard, color: "#fbbf24", bgGradient: "linear-gradient(135deg, #f59e0b, #fbbf24)" },
+  { label: "محتوا", path: "/admin/content", icon: FileText, color: "#f87171", bgGradient: "linear-gradient(135deg, #ef4444, #f87171)" },
+  { label: "مشاوره", path: "/admin/consultants", icon: UserCheck, color: "#fb923c", bgGradient: "linear-gradient(135deg, #f97316, #fb923c)" },
 ];
 
 const schoolManagerNav: NavItem[] = [
-  { label: "داشبورد", path: "/school", icon: <LayoutDashboard size={18} />, color: "#6366f1", bgGradient: "linear-gradient(135deg, #4f46e5, #6366f1)", emoji: "📊" },
-  { label: "شعبه‌ها", path: "/school/branches", icon: <GitBranch size={18} />, color: "#3b82f6", bgGradient: "linear-gradient(135deg, #2563eb, #3b82f6)", emoji: "🌿" },
-  { label: "معلمان", path: "/school/teachers", icon: <GraduationCap size={18} />, color: "#818cf8", bgGradient: "linear-gradient(135deg, #6366f1, #818cf8)", emoji: "👨‍🏫" },
-  { label: "دانش‌آموزان", path: "/school/students", icon: <Users size={18} />, color: "#60a5fa", bgGradient: "linear-gradient(135deg, #3b82f6, #60a5fa)", emoji: "🧑‍🎓" },
-  { label: "کلاس‌ها", path: "/school/classes", icon: <BookMarked size={18} />, color: "#a5b4fc", bgGradient: "linear-gradient(135deg, #818cf8, #a5b4fc)", emoji: "📚" },
-  { label: "پراگرس چارت", path: "/school/progress", icon: <BarChart2 size={18} />, color: "#6366f1", bgGradient: "linear-gradient(135deg, #4f46e5, #6366f1)", emoji: "📊" },
-  { label: "گزارش عملکرد", path: "/school/report", icon: <BarChart2 size={18} />, color: "#818cf8", bgGradient: "linear-gradient(135deg, #6366f1, #818cf8)", emoji: "📈" },
-  { label: "اعلان‌ها", path: "/school/notifications", icon: <Bell size={18} />, color: "#3b82f6", bgGradient: "linear-gradient(135deg, #2563eb, #3b82f6)", emoji: "🔔" },
-  { label: "برنامه امتحانات", path: "/school/exams", icon: <ClipboardList size={18} />, color: "#60a5fa", bgGradient: "linear-gradient(135deg, #3b82f6, #60a5fa)", emoji: "📅" },
+  { label: "داشبورد", path: "/school", icon: LayoutDashboard, color: "#6366f1", bgGradient: "linear-gradient(135deg, #4f46e5, #6366f1)" },
+  { label: "شعبه‌ها", path: "/school/branches", icon: GitBranch, color: "#3b82f6", bgGradient: "linear-gradient(135deg, #2563eb, #3b82f6)" },
+  { label: "معلمان", path: "/school/teachers", icon: GraduationCap, color: "#818cf8", bgGradient: "linear-gradient(135deg, #6366f1, #818cf8)" },
+  { label: "دانش‌آموزان", path: "/school/students", icon: Users, color: "#60a5fa", bgGradient: "linear-gradient(135deg, #3b82f6, #60a5fa)" },
+  { label: "کلاس‌ها", path: "/school/classes", icon: BookMarked, color: "#a5b4fc", bgGradient: "linear-gradient(135deg, #818cf8, #a5b4fc)" },
+  { label: "پراگرس چارت", path: "/school/progress", icon: BarChart2, color: "#6366f1", bgGradient: "linear-gradient(135deg, #4f46e5, #6366f1)" },
+  { label: "گزارش عملکرد", path: "/school/report", icon: BarChart2, color: "#818cf8", bgGradient: "linear-gradient(135deg, #6366f1, #818cf8)" },
+  { label: "اعلان‌ها", path: "/school/notifications", icon: Bell, color: "#3b82f6", bgGradient: "linear-gradient(135deg, #2563eb, #3b82f6)" },
+  { label: "برنامه امتحانات", path: "/school/exams", icon: ClipboardList, color: "#60a5fa", bgGradient: "linear-gradient(135deg, #3b82f6, #60a5fa)" },
 ];
 
 const branchManagerNav: NavItem[] = [
-  { label: "داشبورد", path: "/branch", icon: <LayoutDashboard size={18} />, color: "#0d9488", bgGradient: "linear-gradient(135deg, #0f766e, #0d9488)", emoji: "📊" },
-  { label: "کلاس‌ها", path: "/branch/classes", icon: <BookMarked size={18} />, color: "#10b981", bgGradient: "linear-gradient(135deg, #059669, #10b981)", emoji: "📚" },
-  { label: "معلمان", path: "/branch/teachers", icon: <GraduationCap size={18} />, color: "#2dd4bf", bgGradient: "linear-gradient(135deg, #0d9488, #2dd4bf)", emoji: "👨‍🏫" },
-  { label: "دانش‌آموزان", path: "/branch/students", icon: <Users size={18} />, color: "#34d399", bgGradient: "linear-gradient(135deg, #10b981, #34d399)", emoji: "🧑‍🎓" },
-  { label: "اعلان‌ها", path: "/branch/notifications", icon: <Bell size={18} />, color: "#0d9488", bgGradient: "linear-gradient(135deg, #0f766e, #0d9488)", emoji: "🔔" },
-  { label: "برنامه امتحانات", path: "/branch/exams", icon: <ClipboardList size={18} />, color: "#10b981", bgGradient: "linear-gradient(135deg, #059669, #10b981)", emoji: "📅" },
+  { label: "داشبورد", path: "/branch", icon: LayoutDashboard, color: "#0d9488", bgGradient: "linear-gradient(135deg, #0f766e, #0d9488)" },
+  { label: "کلاس‌ها", path: "/branch/classes", icon: BookMarked, color: "#10b981", bgGradient: "linear-gradient(135deg, #059669, #10b981)" },
+  { label: "معلمان", path: "/branch/teachers", icon: GraduationCap, color: "#2dd4bf", bgGradient: "linear-gradient(135deg, #0d9488, #2dd4bf)" },
+  { label: "دانش‌آموزان", path: "/branch/students", icon: Users, color: "#34d399", bgGradient: "linear-gradient(135deg, #10b981, #34d399)" },
+  { label: "اعلان‌ها", path: "/branch/notifications", icon: Bell, color: "#0d9488", bgGradient: "linear-gradient(135deg, #0f766e, #0d9488)" },
+  { label: "برنامه امتحانات", path: "/branch/exams", icon: ClipboardList, color: "#10b981", bgGradient: "linear-gradient(135deg, #059669, #10b981)" },
 ];
 
 const teacherNav: NavItem[] = [
-  { label: "داشبورد", path: "/teacher", icon: <LayoutDashboard size={18} />, color: "#f59e0b", bgGradient: "linear-gradient(135deg, #d97706, #f59e0b)", emoji: "📊" },
-  { label: "پراگرس چارت", path: "/teacher/progress", icon: <BarChart2 size={18} />, color: "#f97316", bgGradient: "linear-gradient(135deg, #ea580c, #f97316)", emoji: "📈" },
-  { label: "اعلان‌ها", path: "/teacher/notifications", icon: <Bell size={18} />, color: "#fbbf24", bgGradient: "linear-gradient(135deg, #f59e0b, #fbbf24)", emoji: "🔔" },
+  { label: "داشبورد", path: "/teacher", icon: LayoutDashboard, color: "#f59e0b", bgGradient: "linear-gradient(135deg, #d97706, #f59e0b)" },
+  { label: "پراگرس چارت", path: "/teacher/progress", icon: BarChart2, color: "#f97316", bgGradient: "linear-gradient(135deg, #ea580c, #f97316)" },
+  { label: "اعلان‌ها", path: "/teacher/notifications", icon: Bell, color: "#fbbf24", bgGradient: "linear-gradient(135deg, #f59e0b, #fbbf24)" },
 ];
 
 const parentNav: NavItem[] = [
-  { label: "داشبورد", path: "/parent", icon: <LayoutDashboard size={18} />, color: "#f43f5e", bgGradient: "linear-gradient(135deg, #e11d48, #f43f5e)", emoji: "📊" },
-  { label: "فرزندانم", path: "/parent/children", icon: <Users size={18} />, color: "#ec4899", bgGradient: "linear-gradient(135deg, #db2777, #ec4899)", emoji: "👶" },
-  { label: "مشاوره", path: "/parent/consultations", icon: <BookOpen size={18} />, color: "#fb7185", bgGradient: "linear-gradient(135deg, #f43f5e, #fb7185)", emoji: "💬" },
-  { label: "اعلان‌ها", path: "/parent/notifications", icon: <Bell size={18} />, color: "#f43f5e", bgGradient: "linear-gradient(135deg, #e11d48, #f43f5e)", emoji: "🔔" },
+  { label: "داشبورد", path: "/parent", icon: LayoutDashboard, color: "#f43f5e", bgGradient: "linear-gradient(135deg, #e11d48, #f43f5e)" },
+  { label: "فرزندانم", path: "/parent/children", icon: Users, color: "#ec4899", bgGradient: "linear-gradient(135deg, #db2777, #ec4899)" },
+  { label: "مشاوره", path: "/parent/consultations", icon: BookOpen, color: "#fb7185", bgGradient: "linear-gradient(135deg, #f43f5e, #fb7185)" },
+  { label: "اعلان‌ها", path: "/parent/notifications", icon: Bell, color: "#f43f5e", bgGradient: "linear-gradient(135deg, #e11d48, #f43f5e)" },
 ];
 
 const studentNav: NavItem[] = [
-  { label: "داشبورد", path: "/student", icon: <Home size={18} />, color: "#8b5cf6", bgGradient: "linear-gradient(135deg, #7c3aed, #a855f7)", emoji: "🏠" },
-  { label: "کتاب‌هایم", path: "/student/books", icon: <BookOpen size={18} />, color: "#3b82f6", bgGradient: "linear-gradient(135deg, #2563eb, #3b82f6)", emoji: "📖" },
-  { label: "رتبه‌بندی", path: "/student/ranking", icon: <Star size={18} />, color: "#f59e0b", bgGradient: "linear-gradient(135deg, #d97706, #f59e0b)", emoji: "⭐" },
-  { label: "بازی", path: "/student/game", icon: <Package size={18} />, color: "#ec4899", bgGradient: "linear-gradient(135deg, #db2777, #ec4899)", emoji: "🎮" },
+  { label: "داشبورد", path: "/student", icon: Home, color: "#8b5cf6", bgGradient: "linear-gradient(135deg, #7c3aed, #a855f7)" },
+  { label: "کتاب‌هایم", path: "/student/books", icon: BookOpen, color: "#3b82f6", bgGradient: "linear-gradient(135deg, #2563eb, #3b82f6)" },
+  { label: "رتبه‌بندی", path: "/student/ranking", icon: Star, color: "#f59e0b", bgGradient: "linear-gradient(135deg, #d97706, #f59e0b)" },
+  { label: "بازی", path: "/student/game", icon: Package, color: "#ec4899", bgGradient: "linear-gradient(135deg, #db2777, #ec4899)" },
 ];
 
 const consultantNav: NavItem[] = [
-  { label: "داشبورد", path: "/consultant", icon: <LayoutDashboard size={18} />, color: "#06b6d4", bgGradient: "linear-gradient(135deg, #0891b2, #06b6d4)", emoji: "📊" },
-  { label: "برنامه مشاوره‌ها", path: "/consultant/schedule", icon: <ClipboardList size={18} />, color: "#22d3ee", bgGradient: "linear-gradient(135deg, #06b6d4, #22d3ee)", emoji: "📅" },
+  { label: "داشبورد", path: "/consultant", icon: LayoutDashboard, color: "#06b6d4", bgGradient: "linear-gradient(135deg, #0891b2, #06b6d4)" },
+  { label: "برنامه مشاوره‌ها", path: "/consultant/schedule", icon: ClipboardList, color: "#22d3ee", bgGradient: "linear-gradient(135deg, #06b6d4, #22d3ee)" },
 ];
 
 function getNav(role: string): NavItem[] {
@@ -161,14 +161,14 @@ function getRoleTheme(role: string, isGirl: boolean): RoleTheme {
   };
 }
 
-function getMobileGreeting(role: string, name: string): { title: string; sub: string; emoji: string } {
-  if (role === "admin") return { title: `سلام ${name}`, sub: "مدیریت سیستم اوکید", emoji: "⚙️" };
-  if (role === "school_manager") return { title: `سلام ${name}`, sub: "پنل مدیر مدرسه", emoji: "🏫" };
-  if (role === "branch_manager") return { title: `سلام ${name}`, sub: "پنل مدیر شعبه", emoji: "🌿" };
-  if (role === "teacher") return { title: `سلام استاد ${name}`, sub: "پنل معلم", emoji: "👨‍🏫" };
-  if (role === "parent") return { title: `سلام ${name}`, sub: "پنل والدین", emoji: "👨‍👩‍👧" };
-  if (role === "consultant") return { title: `سلام ${name}`, sub: "پنل مشاور", emoji: "💡" };
-  return { title: `سلام ${name}!`, sub: "امروز چی می‌خوای یاد بگیری؟", emoji: "👋" };
+function getMobileGreeting(role: string, name: string): { title: string; sub: string } {
+  if (role === "admin") return { title: `سلام ${name}`, sub: "مدیریت سیستم اوکید" };
+  if (role === "school_manager") return { title: `سلام ${name}`, sub: "پنل مدیر مدرسه" };
+  if (role === "branch_manager") return { title: `سلام ${name}`, sub: "پنل مدیر شعبه" };
+  if (role === "teacher") return { title: `سلام استاد ${name}`, sub: "پنل معلم" };
+  if (role === "parent") return { title: `سلام ${name}`, sub: "پنل والدین" };
+  if (role === "consultant") return { title: `سلام ${name}`, sub: "پنل مشاور" };
+  return { title: `سلام ${name}!`, sub: "امروز چی می‌خوای یاد بگیری؟" };
 }
 
 function NavCard({ item, active, onClick, TEXT }: { item: NavItem; active: boolean; onClick: () => void; TEXT: string }) {
@@ -210,7 +210,9 @@ function NavCard({ item, active, onClick, TEXT }: { item: NavItem; active: boole
           }
         }}
       >
-        <div style={{ fontSize: 32, lineHeight: 1 }}>{item.emoji}</div>
+        <div style={{ width: 44, height: 44, borderRadius: 14, background: active ? "rgba(255,255,255,0.30)" : `${item.color}28`, border: `1.5px solid ${active ? "rgba(255,255,255,0.55)" : item.color + "50"}`, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", flexShrink: 0 }}>
+          <item.icon size={22} color={active ? "white" : item.color} />
+        </div>
         <div style={{
           fontSize: 12, fontWeight: 700, textAlign: "center", lineHeight: 1.3,
           color: active ? "#fff" : TEXT,
@@ -328,7 +330,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                   boxShadow: active ? `0 4px 14px ${item.color}44` : "none",
                   textShadow: active ? "0 1px 4px rgba(0,0,0,0.25)" : "none",
                 }}>
-                  <span style={{ color: active ? "rgba(255,255,255,0.9)" : item.color }}>{item.icon}</span>
+                  <item.icon size={18} color={active ? "rgba(255,255,255,0.9)" : item.color} />
                   {item.label}
                 </Link>
               );
@@ -399,7 +401,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           {/* Greeting */}
           <div style={{ padding: "12px 16px", position: "relative", zIndex: 2 }}>
             <div style={{ ...glassPanel, borderRadius: 18, padding: "14px 18px", display: "flex", alignItems: "center", gap: 14 }}>
-              <div style={{ fontSize: 36 }}>{greeting.emoji}</div>
+              {(() => { const DashIcon = nav[0].icon; return (<div style={{ width: 48, height: 48, borderRadius: 15, background: theme.logoGrad, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: `0 4px 14px ${accent}55` }}><DashIcon size={24} color="white" /></div>); })()}
               <div>
                 <div style={{ fontSize: 15, fontWeight: 800, color: TEXT }}>{greeting.title}</div>
                 <div style={{ fontSize: 12, color: TEXT2, marginTop: 3 }}>{greeting.sub}</div>

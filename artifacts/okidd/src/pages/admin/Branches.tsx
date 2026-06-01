@@ -2,14 +2,14 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { showToast } from "../../lib/toast";
-import { Plus, ChevronDown, ChevronUp, Trash2, BookOpen, Users, GraduationCap, X, GitBranch, School } from "lucide-react";
+import { Plus, ChevronDown, ChevronUp, Trash2, BookOpen, Users, GraduationCap, X, GitBranch, School, AlertTriangle } from "lucide-react";
 
 function ConfirmDialog({ title, name, onConfirm, onCancel, loading }: { title: string; name: string; onConfirm: () => void; onCancel: () => void; loading?: boolean }) {
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(4px)", zIndex: 400, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
       <div style={{ background: "#fffef5", border: "1px solid rgba(248,113,113,0.5)", borderRadius: 20, padding: 28, width: "100%", maxWidth: 400, boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}>
         <div style={{ textAlign: "center", marginBottom: 20 }}>
-          <div style={{ fontSize: 36, marginBottom: 10 }}>🗑️</div>
+          <div style={{ width: 52, height: 52, borderRadius: 16, background: "rgba(248,113,113,0.15)", border: "1.5px solid rgba(248,113,113,0.3)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px" }}><Trash2 size={26} color="#f87171" /></div>
           <h3 style={{ margin: "0 0 8px", color: "#78350f", fontSize: 17, fontWeight: 700 }}>{title}</h3>
           <p style={{ margin: 0, color: "#92400e", fontSize: 14 }}>«<strong style={{ color: "#f87171" }}>{name}</strong>» حذف خواهد شد.</p>
           <p style={{ margin: "8px 0 0", color: "#f87171", fontSize: 12 }}>این عملیات قابل بازگشت نیست.</p>
@@ -323,7 +323,7 @@ export default function AdminBranches() {
           {/* Duplicate user warning */}
           {bDuplicates.length > 0 && (
             <div style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 12, padding: 14, marginBottom: 14 }}>
-              <p style={{ color: "#fbbf24", fontSize: 13, fontWeight: 600, margin: "0 0 8px" }}>⚠️ کاربری با این شماره موبایل یا کد ملی در سیستم وجود دارد.</p>
+              <p style={{ color: "#fbbf24", fontSize: 13, fontWeight: 600, margin: "0 0 8px", display: "flex", alignItems: "center", gap: 6 }}><AlertTriangle size={14} color="#fbbf24" /> کاربری با این شماره موبایل یا کد ملی در سیستم وجود دارد.</p>
               <p style={{ color: "#92400e", fontSize: 12, margin: "0 0 10px" }}>یک کاربر انتخاب کنید یا کاربر جدید بسازید:</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 10 }}>
                 {bDuplicates.map((u: any) => (

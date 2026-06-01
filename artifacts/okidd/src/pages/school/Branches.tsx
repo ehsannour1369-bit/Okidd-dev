@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { showToast } from "../../lib/toast";
-import { Plus, ChevronDown, ChevronUp, Trash2, BookOpen, Users, GraduationCap, X } from "lucide-react";
+import { Plus, ChevronDown, ChevronUp, Trash2, BookOpen, Users, GraduationCap, X, UserRound } from "lucide-react";
 
 const IS = { width: "100%", background: "rgba(245,243,255,0.90)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#1e1b4b", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
 
@@ -157,7 +157,7 @@ export default function SchoolBranches() {
                     return (
                       <div key={gl.id} style={{ marginBottom: 8, background: "rgba(245,243,255,0.65)", borderRadius: 12, border: "1px solid rgba(139,92,246,0.15)" }}>
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", cursor: "pointer" }} onClick={() => setExpGL(toggle(expGL, gl.id))}>
-                          <span style={{ color: "#1e1b4b", fontWeight: 600, fontSize: 14 }}>🎓 {gl.name}</span>
+                          <span style={{ color: "#1e1b4b", fontWeight: 600, fontSize: 14, display: "inline-flex", alignItems: "center", gap: 6 }}><GraduationCap size={15} color="#6366f1" /> {gl.name}</span>
                           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                             <span style={{ fontSize: 11, color: "#4f46e5" }}>{glGrades.length} پایه</span>
                             <button onClick={e => { e.stopPropagation(); delGLMut.mutate(gl.id); }} style={{ background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.2)", borderRadius: 6, color: "#f87171", padding: "3px 6px", cursor: "pointer" }}><Trash2 size={12} /></button>
@@ -277,7 +277,7 @@ export default function SchoolBranches() {
                 {classStudents.map((s: any) => (
                   <div key={s.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: "rgba(245,243,255,0.90)", borderRadius: 10 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontSize: 16 }}>{s.gender === "female" ? "👧" : "👦"}</span>
+                      <div style={{ width: 28, height: 28, borderRadius: 8, background: s.gender === "female" ? "rgba(236,72,153,0.2)" : "rgba(99,102,241,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><UserRound size={13} color={s.gender === "female" ? "#ec4899" : "#6366f1"} /></div>
                       <div>
                         <div style={{ color: "#1e1b4b", fontSize: 13 }}>{s.name}</div>
                         <div style={{ color: "#4f46e5", fontSize: 11, direction: "ltr" }}>{s.email}</div>

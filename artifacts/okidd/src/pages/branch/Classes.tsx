@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { showToast } from "../../lib/toast";
-import { BookMarked, Users, GraduationCap, BookOpen, Trash2, X } from "lucide-react";
+import { BookMarked, Users, GraduationCap, BookOpen, Trash2, X, UserRound } from "lucide-react";
 
 const IS = { width: "100%", background: "rgba(13,10,26,0.5)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#f8f5ff", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
 
@@ -125,9 +125,9 @@ export default function BranchClasses() {
               </div>
             </div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {chip(`📚 ${classBooks.filter((b: any) => b.classId === cls.id).length ?? 0} کتاب`)}
-              {chip(`👨‍🎓 ${classStudents.filter((s: any) => s.classId === cls.id).length ?? 0} دانش‌آموز`)}
-              {chip(`👨‍🏫 ${classTeachers.filter((t: any) => t.classId === cls.id).length ?? 0} معلم`)}
+              {chip(`${classBooks.filter((b: any) => b.classId === cls.id).length ?? 0} کتاب`)}
+              {chip(`${classStudents.filter((s: any) => s.classId === cls.id).length ?? 0} دانش‌آموز`)}
+              {chip(`${classTeachers.filter((t: any) => t.classId === cls.id).length ?? 0} معلم`)}
             </div>
           </div>
         ))}
@@ -176,7 +176,7 @@ export default function BranchClasses() {
                 {classStudents.map((s: any) => (
                   <div key={s.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: "rgba(13,10,26,0.5)", borderRadius: 10 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontSize: 16 }}>{s.gender === "female" ? "👧" : "👦"}</span>
+                      <div style={{ width: 28, height: 28, borderRadius: 8, background: s.gender === "female" ? "rgba(236,72,153,0.2)" : "rgba(99,102,241,0.18)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><UserRound size={13} color={s.gender === "female" ? "#ec4899" : "#818cf8"} /></div>
                       <div>
                         <div style={{ color: "#f8f5ff", fontSize: 13 }}>{s.name}</div>
                         <div style={{ color: "#8b5cf6", fontSize: 11, direction: "ltr" }}>{s.email}</div>

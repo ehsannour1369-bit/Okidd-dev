@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { useState } from "react";
-import { Clock, Star, GraduationCap, Users, BookOpen } from "lucide-react";
+import { Clock, Star, GraduationCap, Users, BookOpen, UserRound, type LucideIcon } from "lucide-react";
 
 type ReportTab = "teachers" | "students";
 
@@ -78,7 +78,7 @@ export default function SchoolReport() {
       s.className?.includes(studentSearch)
   );
 
-  const tabBtn = (label: string, value: ReportTab, emoji: string) => (
+  const tabBtn = (label: string, value: ReportTab, Icon: LucideIcon) => (
     <button
       onClick={() => setTab(value)}
       style={{
@@ -101,7 +101,7 @@ export default function SchoolReport() {
         border: `1px solid ${tab === value ? "transparent" : "rgba(99,102,241,0.15)"}`,
       }}
     >
-      <span style={{ fontSize: 18 }}>{emoji}</span>
+      <Icon size={17} color={tab === value ? "white" : "#6366f1"} />
       {label}
     </button>
   );
@@ -119,8 +119,8 @@ export default function SchoolReport() {
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: 12, marginBottom: 24 }}>
-        {tabBtn("گزارش معلمان", "teachers", "👨‍🏫")}
-        {tabBtn("گزارش دانش‌آموزان", "students", "🧑‍🎓")}
+        {tabBtn("گزارش معلمان", "teachers", GraduationCap)}
+        {tabBtn("گزارش دانش‌آموزان", "students", Users)}
       </div>
 
       {/* Teacher Report */}
@@ -272,7 +272,7 @@ export default function SchoolReport() {
                       >
                         <td style={tdStyle}>
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <span style={{ fontSize: 20 }}>{s.gender === "female" ? "👧" : "👦"}</span>
+                            <div style={{ width: 32, height: 32, borderRadius: 10, background: s.gender === "female" ? "rgba(236,72,153,0.2)" : "rgba(99,102,241,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><UserRound size={15} color={s.gender === "female" ? "#ec4899" : "#6366f1"} /></div>
                             <div>
                               <div style={{ color: "#1e1b4b", fontWeight: 600, fontSize: 13 }}>{s.name}</div>
                               <div style={{ color: "#4f46e5", fontSize: 11, direction: "ltr" }}>{s.email}</div>

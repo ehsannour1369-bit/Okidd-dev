@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { api } from "../../lib/api";
 import { showToast } from "../../lib/toast";
-import { Plus, Power, Edit2, Search, ChevronDown, ChevronUp, GitBranch, Users, Package, X, Trash2, Settings2 } from "lucide-react";
+import { Plus, Power, Edit2, Search, ChevronDown, ChevronUp, GitBranch, Users, Package, X, Trash2, Settings2, AlertTriangle, Calendar } from "lucide-react";
 
 interface BranchDetail {
   branchId: number; branchName: string; studentCount: number;
@@ -129,7 +129,7 @@ function DuplicateSelector({ candidates, onSelect, onCreateNew }: {
   return (
     <div style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
       <p style={{ color: "#fbbf24", fontSize: 13, fontWeight: 600, margin: "0 0 10px" }}>
-        ⚠️ کاربری با این شماره موبایل یا کد ملی در سیستم وجود دارد.
+        <AlertTriangle size={14} style={{ display: "inline", verticalAlign: "middle", marginLeft: 5 }} /> کاربری با این شماره موبایل یا کد ملی در سیستم وجود دارد.
       </p>
       <p style={{ color: "#92400e", fontSize: 12, margin: "0 0 12px" }}>لطفاً یک کاربر انتخاب کنید یا کاربر جدید بسازید:</p>
       <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
@@ -282,8 +282,8 @@ function DetailsPopup({ school, onClose }: { school: School; onClose: () => void
             {openBranch === b.branchId && (
               <div style={{ padding: "12px 16px", background: "rgba(255,252,235,0.70)", display: "flex", gap: 24, flexWrap: "wrap" }}>
                 <Stat icon={<Users size={14} />} label="دانش‌آموزان فعال" value={b.studentCount} color="#d97706" />
-                {b.managerName && <Stat icon={<span>👤</span>} label="مدیر شعبه" value={b.managerName} color="#34d399" />}
-                {b.academicYear && <Stat icon={<span>📅</span>} label="سال تحصیلی" value={b.academicYear} color="#60a5fa" />}
+                {b.managerName && <Stat icon={<Users size={14} />} label="مدیر شعبه" value={b.managerName} color="#34d399" />}
+                {b.academicYear && <Stat icon={<Calendar size={14} />} label="سال تحصیلی" value={b.academicYear} color="#60a5fa" />}
               </div>
             )}
           </div>
@@ -560,7 +560,7 @@ export default function AdminSchools() {
                   <td style={tdStyle}>
                     <div style={{ fontWeight: 600, color: "#78350f", fontSize: 14 }}>{school.name}</div>
                     {school.address && <div style={{ color: "#b45309", fontSize: 12, marginTop: 2 }}>{school.address}</div>}
-                    {school.managerName && <div style={{ color: "#d97706", fontSize: 11, marginTop: 2 }}>👤 {school.managerName}</div>}
+                    {school.managerName && <div style={{ color: "#d97706", fontSize: 11, marginTop: 2, display: "flex", alignItems: "center", gap: 4 }}><Users size={11} /> {school.managerName}</div>}
                   </td>
 
                   {/* Branches */}
@@ -658,7 +658,7 @@ export default function AdminSchools() {
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(4px)", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
             <div style={{ background: "#fffef5", border: "1px solid rgba(248,113,113,0.5)", borderRadius: 20, padding: 28, width: "100%", maxWidth: 420, boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}>
               <div style={{ textAlign: "center", marginBottom: 20 }}>
-                <div style={{ fontSize: 40, marginBottom: 12 }}>🗑️</div>
+                <div style={{ width: 56, height: 56, borderRadius: 18, background: "rgba(248,113,113,0.15)", border: "1.5px solid rgba(248,113,113,0.3)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}><Trash2 size={28} color="#f87171" /></div>
                 <h3 style={{ margin: "0 0 8px", color: "#78350f", fontSize: 18, fontWeight: 700 }}>حذف مدرسه</h3>
                 <p style={{ margin: 0, color: "#92400e", fontSize: 14 }}>
                   آیا مطمئن هستید که می‌خواهید مدرسه<br />

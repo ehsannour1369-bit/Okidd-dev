@@ -376,7 +376,7 @@ export default function StudentDashboard() {
                 <button onClick={() => setScreen("home")} style={{ background: "rgba(255,255,255,0.7)", border: "1.5px solid rgba(200,200,230,0.5)", borderRadius: "50%", width: 36, height: 36, color: "#1e1b4b", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <ChevronRight size={20} />
                 </button>
-                <div style={{ fontWeight: 800, fontSize: 20, color: "#1e1b4b" }}>🏫 مدرسه من</div>
+                <div style={{ fontWeight: 800, fontSize: 20, color: "#1e1b4b", display: "flex", alignItems: "center", gap: 8 }}><Building2 size={20} color="#f97316" /> مدرسه من</div>
               </div>
 
               {/* School name banner */}
@@ -389,7 +389,7 @@ export default function StudentDashboard() {
                     {schoolInfo?.name ?? "در حال بارگذاری..."}
                   </div>
                   <div style={{ fontSize: 12, color: ORANGE, fontWeight: 600 }}>
-                    {schoolInfo?.status === "active" ? "✅ فعال" : "—"}
+                    {schoolInfo?.status === "active" ? "فعال" : "—"}
                   </div>
                 </div>
               </div>
@@ -452,11 +452,11 @@ export default function StudentDashboard() {
                 <button onClick={() => setScreen("home")} style={{ background: "rgba(255,255,255,0.7)", border: "1.5px solid rgba(200,200,230,0.5)", borderRadius: "50%", width: 36, height: 36, color: "#1e1b4b", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <ChevronRight size={20} />
                 </button>
-                <div style={{ fontWeight: 800, fontSize: 20, color: "#1e1b4b" }}>📚 کدام کتاب؟</div>
+                <div style={{ fontWeight: 800, fontSize: 20, color: "#1e1b4b", display: "flex", alignItems: "center", gap: 8 }}><BookOpen size={20} color="#3b82f6" /> کدام کتاب؟</div>
               </div>
               {enrolledBooks.length === 0 ? (
                 <div style={{ textAlign: "center", padding: 40 }}>
-                  <div style={{ fontSize: 40, marginBottom: 12 }}>📭</div>
+                  <div style={{ width: 56, height: 56, borderRadius: 18, background: "rgba(59,130,246,0.12)", border: "1.5px solid rgba(59,130,246,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}><BookOpen size={28} color="#3b82f6" /></div>
                   <div style={{ color: "#5b21b6" }}>هنوز به هیچ کتابی دسترسی ندارید</div>
                 </div>
               ) : (
@@ -467,7 +467,7 @@ export default function StudentDashboard() {
                       style={{ padding: "20px 12px", background: `linear-gradient(135deg, ${BLUE}1a, ${BLUE}0d)`, backdropFilter: "blur(8px)", border: `1.5px solid ${BLUE}35`, borderRadius: 18, cursor: "pointer", fontFamily: "Vazirmatn", transition: "all 0.2s", textAlign: "center", boxShadow: `0 4px 16px ${BLUE}15` }}
                       onMouseOver={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "scale(1.04)"; el.style.background = `linear-gradient(135deg, ${BLUE}28, ${BLUE}14)`; }}
                       onMouseOut={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "scale(1)"; el.style.background = `linear-gradient(135deg, ${BLUE}1a, ${BLUE}0d)`; }}>
-                      <div style={{ fontSize: 36, marginBottom: 10 }}>📖</div>
+                      <div style={{ width: 48, height: 48, borderRadius: 14, background: `${BLUE}18`, border: `1.5px solid ${BLUE}35`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px" }}><BookOpen size={22} color={BLUE} /></div>
                       <div style={{ fontWeight: 700, color: "#1e1b4b", fontSize: 13, marginBottom: 6 }}>{book.title}</div>
                       <div style={{ fontSize: 11, color: "#5b21b6" }}>{book.completedLessons}/{book.lessonCount} درس</div>
                       <div style={{ height: 4, background: `${BLUE}18`, borderRadius: 999, marginTop: 8, overflow: "hidden" }}>
@@ -510,7 +510,7 @@ export default function StudentDashboard() {
                       <div style={{ flex: 1 }}>
                         <div style={{ color: isAccessible ? "#1e1b4b" : "#9ca3af", fontWeight: 600, fontSize: 14 }}>درس {lessonId}</div>
                         <div style={{ color: "#5b21b6", fontSize: 12, opacity: 0.75 }}>
-                          {isCompleted ? "✅ تکمیل شده" : isAccessible ? "باز شده" : isUnlocked ? "🔒 درس قبلی را تکمیل کنید" : "🔒 قفل"}
+                          {isCompleted ? "تکمیل شده" : isAccessible ? "باز شده" : isUnlocked ? "درس قبلی را تکمیل کنید" : "قفل"}
                         </div>
                       </div>
                       {isCurrent && isAccessible && !isCompleted && (
@@ -563,7 +563,7 @@ export default function StudentDashboard() {
           <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
             {(["received", "sent"] as const).map(t => (
               <button key={t} onClick={() => setNotifTab(t)} style={{ flex: 1, padding: "7px 0", borderRadius: 10, border: `1.5px solid ${notifTab === t ? accentDark : "rgba(200,200,230,0.5)"}`, background: notifTab === t ? `${accentDark}14` : "rgba(255,255,255,0.55)", color: notifTab === t ? accentDark : "#5b21b6", fontSize: 11, fontFamily: "Vazirmatn", cursor: "pointer", fontWeight: notifTab === t ? 700 : 400 }}>
-                {t === "received" ? `🔔 دریافتی${receivedNotifs.length > 0 ? ` (${receivedNotifs.length})` : ""}` : `✉️ ارسالی${sentNotifs.length > 0 ? ` (${sentNotifs.length})` : ""}`}
+                {t === "received" ? `دریافتی${receivedNotifs.length > 0 ? ` (${receivedNotifs.length})` : ""}` : `ارسالی${sentNotifs.length > 0 ? ` (${sentNotifs.length})` : ""}`}
               </button>
             ))}
           </div>
@@ -573,7 +573,7 @@ export default function StudentDashboard() {
           {showNotifForm && (
             <div style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(12px)", border: "1.5px solid rgba(200,200,240,0.5)", borderRadius: 14, padding: 12, marginBottom: 12 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "#1e1b4b" }}>ارسال پیام ✉️</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#1e1b4b" }}>ارسال پیام</div>
                 <button onClick={() => setShowNotifForm(false)} style={{ background: "none", border: "none", color: accentDark, cursor: "pointer" }}><X size={14} /></button>
               </div>
               <div style={{ display: "grid", gap: 8 }}>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
-import { Plus, Power, Edit2, Search, Download, FileText, Eye, X, BookOpen, Clock, Star, Users, Trash2 } from "lucide-react";
+import { Plus, Power, Edit2, Search, Download, FileText, Eye, X, BookOpen, Clock, Star, Users, Trash2, UserRound } from "lucide-react";
 
 interface User { id: number; name: string; email: string; role: string; status: string; schoolName?: string; gender?: string; nationalId?: string; }
 
@@ -89,8 +89,8 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
     <Modal title={`جزئیات: ${detail.name}`} onClose={onClose} wide>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24, padding: "16px 20px", background: "rgba(180,83,9,0.08)", border: "1px solid rgba(180,83,9,0.12)", borderRadius: 14 }}>
-        <div style={{ width: 56, height: 56, borderRadius: 16, background: "linear-gradient(135deg, #7c3aed, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>
-          {detail.role === "student" ? (isGirl ? "👧" : "👦") : detail.role === "teacher" ? "👨‍🏫" : detail.role === "parent" ? "👨‍👩‍👧" : "👤"}
+        <div style={{ width: 56, height: 56, borderRadius: 16, background: "linear-gradient(135deg, #7c3aed, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Users size={26} color="white" />
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 800, fontSize: 18, color: "#78350f" }}>{detail.name}</div>
@@ -134,7 +134,7 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
           )}
           {detail.books?.length > 0 && (
             <div>
-              <div style={{ fontWeight: 700, color: "#92400e", fontSize: 13, marginBottom: 8 }}>📚 کتاب‌ها و پیشرفت</div>
+              <div style={{ fontWeight: 700, color: "#92400e", fontSize: 13, marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}><BookOpen size={13} color="#92400e" /> کتاب‌ها و پیشرفت</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {detail.books.map((book: any) => {
                   const pct = book.lessonCount > 0 ? Math.round((book.completedLessons / book.lessonCount) * 100) : 0;
@@ -144,7 +144,7 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
                         <span style={{ fontWeight: 600, color: "#78350f", fontSize: 13 }}>{book.title}</span>
                         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                           <span style={{ fontSize: 11, color: "#b45309" }}>{book.completedLessons}/{book.lessonCount} درس</span>
-                          <span style={{ background: "rgba(245,158,11,0.15)", color: "#fbbf24", borderRadius: 6, padding: "1px 7px", fontSize: 11 }}>⭐ {(book.totalScore ?? 0).toLocaleString("fa-IR")}</span>
+                          <span style={{ background: "rgba(245,158,11,0.15)", color: "#fbbf24", borderRadius: 6, padding: "1px 7px", fontSize: 11, display: "inline-flex", alignItems: "center", gap: 3 }}><Star size={10} color="#fbbf24" /> {(book.totalScore ?? 0).toLocaleString("fa-IR")}</span>
                         </div>
                       </div>
                       <div style={{ height: 5, background: "rgba(180,83,9,0.12)", borderRadius: 999, overflow: "hidden" }}>
@@ -184,7 +184,7 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {detail.children.map((child: any) => (
                 <div key={child.id} style={{ background: "rgba(255,252,235,0.82)", borderRadius: 10, padding: "8px 12px", display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 18 }}>{child.gender === "female" ? "👧" : "👦"}</span>
+                  <div style={{ width: 28, height: 28, borderRadius: 8, background: child.gender === "female" ? "rgba(236,72,153,0.2)" : "rgba(99,102,241,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}><UserRound size={14} color={child.gender === "female" ? "#ec4899" : "#6366f1"} /></div>
                   <div>
                     <div style={{ fontWeight: 600, color: "#78350f", fontSize: 13 }}>{child.name}</div>
                     <div style={{ fontSize: 11, color: "#b45309" }}>{child.email}</div>
@@ -321,7 +321,7 @@ export default function AdminUsers() {
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(4px)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
             <div style={{ background: "#fffef5", border: "1px solid rgba(248,113,113,0.5)", borderRadius: 20, padding: 28, width: "100%", maxWidth: 420, boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}>
               <div style={{ textAlign: "center", marginBottom: 20 }}>
-                <div style={{ fontSize: 40, marginBottom: 12 }}>🗑️</div>
+                <div style={{ width: 56, height: 56, borderRadius: 18, background: "rgba(248,113,113,0.15)", border: "1.5px solid rgba(248,113,113,0.3)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}><Trash2 size={28} color="#f87171" /></div>
                 <h3 style={{ margin: "0 0 8px", color: "#78350f", fontSize: 18, fontWeight: 700 }}>حذف کاربر</h3>
                 <p style={{ margin: 0, color: "#92400e", fontSize: 14 }}>
                   آیا مطمئن هستید که می‌خواهید کاربر<br />

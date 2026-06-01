@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { showToast } from "../../lib/toast";
-import { Plus, Trash2, ClipboardList } from "lucide-react";
+import { Plus, Trash2, ClipboardList, Calendar, Clock, FileText } from "lucide-react";
 
 interface ExamEntry { id: number; lessonName: string; examDate: string; examPages?: string; examTime?: string; }
 
@@ -54,9 +54,9 @@ export default function SchoolExams() {
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, color: "#1e1b4b", fontSize: 15 }}>{exam.lessonName}</div>
               <div style={{ display: "flex", gap: 12, marginTop: 4, flexWrap: "wrap" }}>
-                <span style={{ color: "#fbbf24", fontSize: 13 }}>📅 {exam.examDate}</span>
-                {exam.examTime && <span style={{ color: "#3730a3", fontSize: 13 }}>🕐 {exam.examTime}</span>}
-                {exam.examPages && <span style={{ color: "#4f46e5", fontSize: 13 }}>📄 {exam.examPages}</span>}
+                <span style={{ color: "#fbbf24", fontSize: 13, display: "inline-flex", alignItems: "center", gap: 4 }}><Calendar size={12} /> {exam.examDate}</span>
+                {exam.examTime && <span style={{ color: "#3730a3", fontSize: 13, display: "inline-flex", alignItems: "center", gap: 4 }}><Clock size={12} /> {exam.examTime}</span>}
+                {exam.examPages && <span style={{ color: "#4f46e5", fontSize: 13, display: "inline-flex", alignItems: "center", gap: 4 }}><FileText size={12} /> {exam.examPages}</span>}
               </div>
             </div>
             <button onClick={() => { if (confirm("حذف شود؟")) deleteMut.mutate(exam.id); }} style={{ background: "rgba(248,113,113,0.15)", border: "1px solid rgba(248,113,113,0.3)", borderRadius: 8, color: "#f87171", padding: "6px 10px", cursor: "pointer" }}><Trash2 size={14} /></button>

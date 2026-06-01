@@ -105,7 +105,7 @@ export default function StudentNotifications() {
           <button onClick={() => navigate("/student")} style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.22)", border: "1.5px solid rgba(255,255,255,0.4)", borderRadius: 12, padding: "8px 14px", color: "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 600, cursor: "pointer", backdropFilter: "blur(8px)" }}>
             <ChevronRight size={16} /> برگشت
           </button>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: "white", margin: 0, textShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>🔔 اعلانات</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "white", margin: 0, textShadow: "0 2px 10px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", gap: 8 }}><Bell size={20} /> اعلانات</h1>
         </div>
         <button onClick={() => setShowForm(!showForm)}
           style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", background: `linear-gradient(135deg, ${accentColor}, ${user?.gender === "female" ? "#f472b6" : "#a855f7"})`, border: "none", borderRadius: 12, color: "white", fontSize: 14, fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", boxShadow: `0 4px 15px ${accentColor}40` }}>
@@ -117,7 +117,7 @@ export default function StudentNotifications() {
       {showForm && (
         <div style={{ ...GLASS, borderRadius: 18, padding: 22, marginBottom: 20 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <h3 style={{ color: "#2d1b69", fontSize: 15, fontWeight: 700, margin: 0 }}>ارسال پیام جدید ✉️</h3>
+            <h3 style={{ color: "#2d1b69", fontSize: 15, fontWeight: 700, margin: 0 }}>ارسال پیام جدید</h3>
             <button onClick={() => setShowForm(false)} style={{ background: "none", border: "none", color: accentColor, cursor: "pointer" }}><X size={18} /></button>
           </div>
           <div style={{ display: "grid", gap: 12 }}>

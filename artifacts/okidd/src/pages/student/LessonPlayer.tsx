@@ -273,7 +273,7 @@ export default function LessonPlayer() {
       {/* Free mode badge */}
       {freeMode && (
         <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", background: "rgba(34,197,94,0.1)", border: "1.5px solid rgba(34,197,94,0.3)", borderRadius: 20, color: "#16a34a", fontSize: 12, fontWeight: 700, flexShrink: 0 }}>
-          📖 مرور آزاد
+          <BookOpen size={13} /> مرور آزاد
         </div>
       )}
       {/* Close */}
@@ -314,7 +314,7 @@ export default function LessonPlayer() {
       <Header />
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 20px" }}>
         <div style={{ ...GLASS, borderRadius: 28, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 18, padding: "48px 56px", textAlign: "center", maxWidth: 460 }}>
-          <div style={{ width: 90, height: 90, borderRadius: "50%", background: `linear-gradient(135deg,${accent},${accentLight})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 44, boxShadow: `0 8px 28px ${accentBorder}` }}>🎉</div>
+          <div style={{ width: 90, height: 90, borderRadius: "50%", background: `linear-gradient(135deg,${accent},${accentLight})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 8px 28px ${accentBorder}` }}><Trophy size={42} color="white" /></div>
           <h2 style={{ color: "#1e1b4b", fontWeight: 800, fontSize: 24, margin: 0 }}>آفرین! درس تکمیل شد</h2>
           <p style={{ color: "#6b7280", fontSize: 14, margin: 0 }}>شما {content.length} محتوا را در این درس مشاهده کردید</p>
           <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(251,191,36,0.12)", border: "1.5px solid rgba(251,191,36,0.3)", borderRadius: 12, padding: "10px 22px", color: "#d97706", fontSize: 15, fontWeight: 700 }}>
@@ -478,11 +478,11 @@ export default function LessonPlayer() {
           <div style={{ minWidth: 0 }}>
             <div style={{ fontWeight: 700, color: "#1e1b4b", fontSize: 14, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{currentContent.title}</div>
             <div style={{ fontSize: 12, color: "#6b7280" }}>
-              {!contentCompleted && isGame  && "🎮 بازی را کامل کنید"}
-              {!contentCompleted && !isGame && "⏳ در حال پخش..."}
-              {contentCompleted && !freeMode && !isLastContent && "⏩ چند لحظه دیگر..."}
-              {contentCompleted && (freeMode || isLastContent) && savedScore && "⭐ امتیاز ثبت شد"}
-              {contentCompleted && (freeMode || isLastContent) && !savedScore && "✅ آماده ادامه"}
+              {!contentCompleted && isGame  && "بازی را کامل کنید"}
+              {!contentCompleted && !isGame && "در حال پخش..."}
+              {contentCompleted && !freeMode && !isLastContent && "چند لحظه دیگر..."}
+              {contentCompleted && (freeMode || isLastContent) && savedScore && "امتیاز ثبت شد"}
+              {contentCompleted && (freeMode || isLastContent) && !savedScore && "آماده ادامه"}
             </div>
           </div>
         </div>

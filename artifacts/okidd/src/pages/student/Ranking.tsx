@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
-import { Trophy, Star, Users, BookOpen, GraduationCap, TrendingUp, ChevronRight } from "lucide-react";
+import { Trophy, Star, Users, BookOpen, GraduationCap, TrendingUp, ChevronRight, Gamepad2, PenLine, Film, Sparkles, ClipboardCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from "recharts";
@@ -18,11 +18,11 @@ const GLASS: React.CSSProperties = {
 };
 
 const BREAKDOWN_ITEMS = [
-  { key: "balloon", label: "بادکنک", emoji: "🎈" },
-  { key: "animation", label: "انیمیشن", emoji: "🎬" },
-  { key: "game", label: "بازی", emoji: "🎮" },
-  { key: "quiz", label: "آزمونک", emoji: "📝" },
-  { key: "exercise", label: "تمرین", emoji: "✏️" },
+  { key: "balloon", label: "بادکنک", icon: Sparkles },
+  { key: "animation", label: "انیمیشن", icon: Film },
+  { key: "game", label: "بازی", icon: Gamepad2 },
+  { key: "quiz", label: "آزمونک", icon: ClipboardCheck },
+  { key: "exercise", label: "تمرین", icon: PenLine },
 ];
 
 type RankTab = "class" | "grade" | "book";
@@ -33,7 +33,7 @@ function CustomTooltip({ active, payload, label }: any) {
     <div style={{ background: "rgba(255,255,255,0.95)", border: "1.5px solid rgba(99,102,241,0.25)", borderRadius: 12, padding: "10px 14px", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", boxShadow: "0 8px 24px rgba(80,40,160,0.15)" }}>
       <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>{label}</div>
       <div style={{ fontSize: 15, fontWeight: 800, color: "#4f46e5" }}>
-        ⭐ {(payload[0]?.value ?? 0).toLocaleString("fa-IR")} امتیاز
+        ★ {(payload[0]?.value ?? 0).toLocaleString("fa-IR")} امتیاز
       </div>
       {payload[1] && (
         <div style={{ fontSize: 12, color: "#10b981", fontWeight: 600, marginTop: 2 }}>
@@ -123,14 +123,14 @@ export default function StudentRanking() {
           <ChevronRight size={16} /> برگشت
         </button>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "white", margin: 0, textShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>
-          🏆 رتبه‌بندی
+          <Trophy size={20} style={{ display:"inline", verticalAlign:"middle", marginLeft:6 }} /> رتبه‌بندی
         </h1>
       </div>
 
       {/* Score breakdown card */}
       <div style={{ ...GLASS, background: "rgba(255,255,255,0.38)", borderRadius: 22, padding: 20, marginBottom: 20 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <div style={{ fontWeight: 800, color: "#1e1b4b", fontSize: 15 }}>⭐ مجموع امتیازات شما</div>
+          <div style={{ display:"flex", alignItems:"center", gap:6, fontWeight: 800, color: "#1e1b4b", fontSize: 15 }}><Star size={16} color="#f59e0b" /> مجموع امتیازات شما</div>
           <div style={{ fontSize: 26, fontWeight: 800, color: accentDark }}>{totalScore.toLocaleString("fa-IR")}</div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(88px, 1fr))", gap: 8 }}>
@@ -138,7 +138,7 @@ export default function StudentRanking() {
             const pts = breakdown?.[item.key] ?? 0;
             return (
               <div key={item.key} style={{ background: "rgba(255,255,255,0.5)", border: "1.5px solid rgba(255,255,255,0.75)", borderRadius: 14, padding: "10px 8px", textAlign: "center", opacity: pts === 0 ? 0.5 : 1 }}>
-                <div style={{ fontSize: 22, marginBottom: 4 }}>{item.emoji}</div>
+                {(() => { const BI = item.icon; return (<div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(99,102,241,0.15)", border: "1.5px solid rgba(99,102,241,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 4px" }}><BI size={18} color="#6366f1" /></div>); })()}
                 <div style={{ fontSize: 11, color: "#5b21b6", fontWeight: 600, marginBottom: 2 }}>{item.label}</div>
                 <div style={{ fontSize: 14, fontWeight: 800, color: pts > 0 ? accentDark : "#9ca3af" }}>
                   {pts.toLocaleString("fa-IR")}
@@ -226,7 +226,7 @@ export default function StudentRanking() {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
                         <span style={{ fontSize: 12, fontWeight: 600, color: "#1e1b4b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {ls.completed ? "✅ " : "⭕ "}{ls.lessonTitle}
+                          {ls.lessonTitle}
                         </span>
                         <span style={{ fontSize: 12, fontWeight: 800, color: ls.score > 0 ? accentDark : "#9ca3af", flexShrink: 0, marginRight: 6 }}>
                           {ls.score.toLocaleString("fa-IR")}
@@ -294,13 +294,13 @@ export default function StudentRanking() {
       {/* No class/grade message */}
       {tab === "class" && !classId && (
         <div style={{ ...GLASS, borderRadius: 16, padding: 32, textAlign: "center" }}>
-          <div style={{ fontSize: 32, marginBottom: 10 }}>👥</div>
+          <div style={{ width: 52, height: 52, borderRadius: 16, background: "rgba(99,102,241,0.15)", border: "1.5px solid rgba(99,102,241,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px" }}><Users size={26} color="#6366f1" /></div>
           <div style={{ color: "#5b21b6", fontSize: 14 }}>هنوز به کلاسی اضافه نشده‌اید</div>
         </div>
       )}
       {tab === "grade" && !gradeId && (
         <div style={{ ...GLASS, borderRadius: 16, padding: 32, textAlign: "center" }}>
-          <div style={{ fontSize: 32, marginBottom: 10 }}>🎓</div>
+          <div style={{ width: 52, height: 52, borderRadius: 16, background: "rgba(99,102,241,0.15)", border: "1.5px solid rgba(99,102,241,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px" }}><GraduationCap size={26} color="#6366f1" /></div>
           <div style={{ color: "#5b21b6", fontSize: 14 }}>اطلاعات پایه یافت نشد</div>
         </div>
       )}

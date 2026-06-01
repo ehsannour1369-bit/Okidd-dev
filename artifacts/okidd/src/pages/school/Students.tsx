@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { showToast } from "../../lib/toast";
-import { Plus, X } from "lucide-react";
+import { Plus, X, UserRound } from "lucide-react";
 
 const IS = { width: "100%", background: "rgba(245,243,255,0.90)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#1e1b4b", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
 
@@ -51,7 +51,7 @@ export default function SchoolStudents() {
               <tr key={s.id}>
                 <td style={{ padding: "11px 16px", borderBottom: "1px solid rgba(139,92,246,0.08)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 34, height: 34, borderRadius: 10, background: s.gender === "female" ? "rgba(236,72,153,0.2)" : "rgba(99,102,241,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>{s.gender === "female" ? "👧" : "👦"}</div>
+                    <div style={{ width: 34, height: 34, borderRadius: 10, background: s.gender === "female" ? "rgba(236,72,153,0.2)" : "rgba(99,102,241,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}><UserRound size={16} color={s.gender === "female" ? "#ec4899" : "#6366f1"} /></div>
                     <div style={{ fontWeight: 600, color: "#1e1b4b" }}>{s.name}</div>
                   </div>
                 </td>

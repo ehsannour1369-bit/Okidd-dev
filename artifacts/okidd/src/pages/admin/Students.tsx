@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { showToast } from "../../lib/toast";
-import { Plus, X, School } from "lucide-react";
+import { Plus, X, School, Users, UserRound } from "lucide-react";
 
 const IS = { width: "100%", background: "rgba(255,252,235,0.90)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#78350f", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
 
@@ -52,7 +52,7 @@ export default function AdminStudents() {
 
       {!selectedSchoolId && (
         <div style={{ textAlign: "center", padding: 60, color: "#b45309" }}>
-          <p style={{ fontSize: 32, marginBottom: 16 }}>👥</p>
+          <p style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}><span style={{ width: 52, height: 52, borderRadius: 16, background: "rgba(245,158,11,0.15)", border: "1.5px solid rgba(245,158,11,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}><Users size={26} color="#b45309" /></span></p>
           <p>برای مدیریت دانش‌آموزان، ابتدا یک مدرسه انتخاب کنید</p>
         </div>
       )}
@@ -79,7 +79,7 @@ export default function AdminStudents() {
                   <tr key={s.id}>
                     <td style={{ padding: "11px 16px", borderBottom: "1px solid rgba(139,92,246,0.08)" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <div style={{ width: 34, height: 34, borderRadius: 10, background: s.gender === "female" ? "rgba(236,72,153,0.2)" : "rgba(180,83,9,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>{s.gender === "female" ? "👧" : "👦"}</div>
+                        <div style={{ width: 34, height: 34, borderRadius: 10, background: s.gender === "female" ? "rgba(236,72,153,0.2)" : "rgba(180,83,9,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}><UserRound size={16} color={s.gender === "female" ? "#ec4899" : "#b45309"} /></div>
                         <div style={{ fontWeight: 600, color: "#78350f" }}>{s.name}</div>
                       </div>
                     </td>
