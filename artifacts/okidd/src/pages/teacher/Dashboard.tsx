@@ -117,7 +117,7 @@ export default function TeacherDashboard() {
 
       {/* Card 2: Progress Chart */}
       <div style={{ marginBottom: 16 }}>
-        {card("نمودار پیشرفت", "📊", "باز کردن دسترسی دروس برای کلاس‌ها", progressOpen, () => { setProgressOpen(o => !o); setSchoolsOpen(false); setPerfOpen(false); setSelectedClass(null); })}
+        {card("پراگرس چارت", "📊", "باز کردن دسترسی دروس برای کلاس‌ها", progressOpen, () => { setProgressOpen(o => !o); setSchoolsOpen(false); setPerfOpen(false); setSelectedClass(null); })}
         {progressOpen && (
           <div style={{ background: "rgba(18,14,42,0.95)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "0 0 16px 16px", padding: 20, marginTop: -8, borderTop: "none" }}>
             <div style={{ marginBottom: 14 }}>
