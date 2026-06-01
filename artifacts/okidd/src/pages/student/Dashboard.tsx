@@ -8,7 +8,7 @@ import {
   Bell, Plus, Send as SendIcon, MessageCircle,
   BookOpen, GraduationCap, Trophy, Play,
   Building2, MapPin, Phone, Users, X, LogOut,
-  Camera, Eye, EyeOff, User,
+  Camera, Eye, EyeOff, User, Sparkles,
 } from "lucide-react";
 import NotificationThread from "../../components/NotificationThread";
 
@@ -240,9 +240,11 @@ export default function StudentDashboard() {
         {/* ── Top bar: score + greeting + profile ── */}
         <div style={{ ...headerAnim, display: "flex", justifyContent: "space-between", alignItems: "center", padding: schoolInfo?.logoUrl ? "10px 18px 0" : "18px 18px 0", direction: "ltr" }}>
           {/* Score */}
-          <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.72)", backdropFilter: "blur(14px)", border: "1.5px solid rgba(255,255,255,0.9)", borderRadius: 999, padding: "9px 18px", boxShadow: "0 4px 18px rgba(0,0,0,0.07)" }}>
-            <span style={{ fontSize: 18 }}>⭐</span>
-            <span style={{ color: "#1e1b4b", fontWeight: 800, fontSize: 16 }}>{displayScore.toLocaleString("fa-IR")}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 7, background: "rgba(255,255,255,0.72)", backdropFilter: "blur(14px)", border: `1.5px solid ${accent}45`, borderRadius: 999, padding: "8px 16px", boxShadow: `0 4px 20px ${accent}22, inset 0 0 0 1px rgba(255,255,255,0.85)` }}>
+            <span className="score-sparkle-icon" style={{ color: accent, display: "flex", filter: `drop-shadow(0 0 5px ${accent}99)` }}>
+              <Sparkles size={18} strokeWidth={2.5} />
+            </span>
+            <span style={{ color: accentDark, fontWeight: 900, fontSize: 15, letterSpacing: "0.02em" }}>{displayScore.toLocaleString("fa-IR")}</span>
           </div>
           {/* Greeting */}
           <div className="glow-greeting" style={{ fontWeight: 800, fontSize: 15, textAlign: "center", lineHeight: 1.5, flex: 1, padding: "0 8px" }}>
@@ -808,6 +810,16 @@ export default function StudentDashboard() {
           5%   { opacity:1 }
           20%  { opacity:0; transform:rotate(-35deg) translateX(220px) }
           100% { opacity:0; transform:rotate(-35deg) translateX(220px) }
+        }
+
+        /* ── Score sparkle icon ── */
+        .score-sparkle-icon {
+          animation: sparkle-pulse 2.4s ease-in-out infinite;
+        }
+        @keyframes sparkle-pulse {
+          0%,100% { transform: scale(1) rotate(0deg); opacity: 0.9; }
+          40%     { transform: scale(1.22) rotate(18deg); opacity: 1; }
+          70%     { transform: scale(0.95) rotate(-6deg); opacity: 0.85; }
         }
 
         /* ── Intro entrance animations ── */
