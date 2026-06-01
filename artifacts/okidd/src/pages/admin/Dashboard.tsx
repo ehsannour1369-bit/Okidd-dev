@@ -11,21 +11,19 @@ interface AdminStats {
 }
 
 const P = "#f59e0b";
-const PD = "#d97706";
 const S = "#ef4444";
-const TEXT = "#78350f";
-const TEXT2 = "#92400e";
 
-function glassCard(color: string, extra?: React.CSSProperties): React.CSSProperties {
+function colorCard(color: string, dark: string, extra?: React.CSSProperties): React.CSSProperties {
   return {
-    background: "rgba(255,255,255,0.72)",
-    backdropFilter: "blur(18px)",
-    border: "1.5px solid rgba(255,255,255,0.92)",
+    background: `linear-gradient(145deg, ${color}c0, ${dark}90)`,
+    backdropFilter: "blur(22px)",
+    WebkitBackdropFilter: "blur(22px)",
+    border: `1.5px solid ${color}cc`,
     borderRadius: 22,
     position: "relative",
     overflow: "hidden",
-    boxShadow: `0 8px 32px ${color}20, 0 2px 8px rgba(0,0,0,0.06)`,
-    transition: "all 0.25s cubic-bezier(0.4,0,0.2,1)",
+    boxShadow: `0 8px 32px ${color}55, inset 0 1px 0 rgba(255,255,255,0.28)`,
+    transition: "all 0.26s cubic-bezier(0.4,0,0.2,1)",
     ...extra,
   };
 }
@@ -67,19 +65,19 @@ export default function AdminDashboard() {
         {/* Header */}
         <div style={{ ...cardAnim(0), marginBottom: 28 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 50, height: 50, borderRadius: 16, background: `linear-gradient(135deg, ${P}, ${S})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 6px 20px ${P}55` }}>
+            <div style={{ width: 50, height: 50, borderRadius: 16, background: `linear-gradient(135deg, ${P}, ${S})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 6px 20px ${P}77` }}>
               <TrendingUp size={24} color="white" />
             </div>
             <div>
-              <h1 style={{ fontSize: 22, fontWeight: 900, color: TEXT, margin: 0 }}>داشبورد مدیر کل</h1>
-              <p style={{ color: TEXT2, fontSize: 13, margin: 0 }}>نمای کلی سیستم</p>
+              <h1 style={{ fontSize: 22, fontWeight: 900, color: "#78350f", margin: 0 }}>داشبورد مدیر کل</h1>
+              <p style={{ color: "#92400e", fontSize: 13, margin: 0 }}>نمای کلی سیستم</p>
             </div>
           </div>
         </div>
 
         {/* Stats grid */}
         {isLoading ? (
-          <div style={{ color: TEXT2, textAlign: "center", padding: 60 }}>در حال بارگذاری...</div>
+          <div style={{ color: "#92400e", textAlign: "center", padding: 60 }}>در حال بارگذاری...</div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 14, marginBottom: 28 }}>
             {STAT_CARDS.map((sc, idx) => {
@@ -89,16 +87,17 @@ export default function AdminDashboard() {
                 : (stats as any)[sc.key];
               const inner = (
                 <div
-                  style={{ ...glassCard(sc.color, { padding: "22px 16px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", aspectRatio: "1/1", cursor: sc.link ? "pointer" : "default" }), ...cardAnim(idx + 1) }}
-                  onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-5px)"; el.style.boxShadow = `0 18px 48px ${sc.color}30`; }}
-                  onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = `0 8px 32px ${sc.color}20, 0 2px 8px rgba(0,0,0,0.06)`; }}
+                  style={{ ...colorCard(sc.color, sc.dark, { padding: "22px 16px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", aspectRatio: "1/1", cursor: sc.link ? "pointer" : "default" }), ...cardAnim(idx + 1) }}
+                  onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-6px) scale(1.03)"; el.style.boxShadow = `0 22px 52px ${sc.color}70`; }}
+                  onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = `0 8px 32px ${sc.color}55, inset 0 1px 0 rgba(255,255,255,0.28)`; }}
                 >
-                  <div style={{ width: 52, height: 52, borderRadius: 16, background: `linear-gradient(135deg, ${sc.color}40, ${sc.dark}28)`, border: `1.5px solid ${sc.color}55`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12, boxShadow: `0 4px 14px ${sc.color}30` }}>
-                    <Icon size={24} color={sc.dark} />
+                  {/* Shine overlay */}
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
+                  <div style={{ width: 52, height: 52, borderRadius: 16, background: "rgba(255,255,255,0.25)", backdropFilter: "blur(8px)", border: "1.5px solid rgba(255,255,255,0.5)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12, boxShadow: "0 4px 14px rgba(0,0,0,0.12)" }}>
+                    <Icon size={24} color="white" />
                   </div>
-                  <div style={{ fontSize: 26, fontWeight: 900, color: TEXT, marginBottom: 4 }}>{typeof value === "number" ? value.toLocaleString("fa-IR") : value}</div>
-                  <div style={{ fontSize: 12, color: sc.dark, fontWeight: 700 }}>{sc.label}</div>
-                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4, background: `linear-gradient(90deg, ${sc.color}, ${sc.color}40)`, borderRadius: "0 0 22px 22px" }} />
+                  <div style={{ fontSize: 26, fontWeight: 900, color: "white", marginBottom: 4, textShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>{typeof value === "number" ? value.toLocaleString("fa-IR") : value}</div>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.88)", fontWeight: 700 }}>{sc.label}</div>
                 </div>
               );
               return sc.link
@@ -109,43 +108,45 @@ export default function AdminDashboard() {
         )}
 
         {/* Recent transactions */}
-        <div style={{ ...glassCard(P, { padding: 24 }), ...cardAnim(8) }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
-            <h2 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
-              <CreditCard size={18} color={PD} /> آخرین تراکنش‌ها
-            </h2>
-            <Link href="/admin/transactions" style={{ color: PD, fontSize: 13, textDecoration: "none", fontWeight: 700 }}>مشاهده همه ←</Link>
-          </div>
-          {stats.recentTransactions.length === 0 ? (
-            <p style={{ color: TEXT2, textAlign: "center", padding: 20, margin: 0 }}>هیچ تراکنشی ثبت نشده</p>
-          ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr>
-                  {["مدرسه", "مبلغ", "وضعیت", "تاریخ"].map(h => (
-                    <th key={h} style={{ textAlign: "right", padding: "8px 12px", color: TEXT2, fontSize: 12, fontWeight: 700, borderBottom: `1px solid ${P}30` }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {stats.recentTransactions.map((tx) => (
-                  <tr key={tx.id}>
-                    <td style={{ padding: "10px 12px", fontSize: 14, color: TEXT, borderBottom: `1px solid ${P}15`, fontWeight: 600 }}>{tx.schoolName ?? `مدرسه ${tx.schoolId}`}</td>
-                    <td style={{ padding: "10px 12px", fontSize: 14, color: "#16a34a", borderBottom: `1px solid ${P}15`, fontWeight: 700 }}>{Number(tx.amount).toLocaleString("fa-IR")} ت</td>
-                    <td style={{ padding: "10px 12px", borderBottom: `1px solid ${P}15` }}>
-                      <span style={{ background: tx.status === "paid" ? "rgba(34,197,94,0.15)" : "rgba(251,191,36,0.18)", color: tx.status === "paid" ? "#16a34a" : "#d97706", border: `1px solid ${tx.status === "paid" ? "rgba(34,197,94,0.4)" : "rgba(251,191,36,0.4)"}`, borderRadius: 999, padding: "2px 10px", fontSize: 12, fontWeight: 700 }}>
-                        {tx.status === "paid" ? "پرداخت شده" : "در انتظار"}
-                      </span>
-                    </td>
-                    <td style={{ padding: "10px 12px", fontSize: 13, color: TEXT2, borderBottom: `1px solid ${P}15` }}>
-                      {tx.paymentDate ? new Date(tx.paymentDate).toLocaleDateString("fa-IR") : "—"}
-                    </td>
+        <div style={{ ...colorCard(P, "#d97706", { padding: 24 }), ...cardAnim(8) }}>
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(180deg, rgba(255,255,255,0.14) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 800, color: "white", margin: 0, display: "flex", alignItems: "center", gap: 8, textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>
+                <CreditCard size={18} color="rgba(255,255,255,0.9)" /> آخرین تراکنش‌ها
+              </h2>
+              <Link href="/admin/transactions" style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, textDecoration: "none", fontWeight: 700 }}>مشاهده همه ←</Link>
+            </div>
+            {stats.recentTransactions.length === 0 ? (
+              <p style={{ color: "rgba(255,255,255,0.75)", textAlign: "center", padding: 20, margin: 0 }}>هیچ تراکنشی ثبت نشده</p>
+            ) : (
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr>
+                    {["مدرسه", "مبلغ", "وضعیت", "تاریخ"].map(h => (
+                      <th key={h} style={{ textAlign: "right", padding: "8px 12px", color: "rgba(255,255,255,0.75)", fontSize: 12, fontWeight: 700, borderBottom: "1px solid rgba(255,255,255,0.25)" }}>{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4, background: `linear-gradient(90deg, ${P}, ${P}40)`, borderRadius: "0 0 22px 22px" }} />
+                </thead>
+                <tbody>
+                  {stats.recentTransactions.map((tx) => (
+                    <tr key={tx.id}>
+                      <td style={{ padding: "10px 12px", fontSize: 14, color: "white", borderBottom: "1px solid rgba(255,255,255,0.12)", fontWeight: 600 }}>{tx.schoolName ?? `مدرسه ${tx.schoolId}`}</td>
+                      <td style={{ padding: "10px 12px", fontSize: 14, color: "rgba(255,255,255,0.95)", borderBottom: "1px solid rgba(255,255,255,0.12)", fontWeight: 700 }}>{Number(tx.amount).toLocaleString("fa-IR")} ت</td>
+                      <td style={{ padding: "10px 12px", borderBottom: "1px solid rgba(255,255,255,0.12)" }}>
+                        <span style={{ background: tx.status === "paid" ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.14)", color: "white", borderRadius: 999, padding: "2px 10px", fontSize: 12, fontWeight: 700, border: "1px solid rgba(255,255,255,0.35)" }}>
+                          {tx.status === "paid" ? "پرداخت شده" : "در انتظار"}
+                        </span>
+                      </td>
+                      <td style={{ padding: "10px 12px", fontSize: 13, color: "rgba(255,255,255,0.75)", borderBottom: "1px solid rgba(255,255,255,0.12)" }}>
+                        {tx.paymentDate ? new Date(tx.paymentDate).toLocaleDateString("fa-IR") : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
       </div>
 

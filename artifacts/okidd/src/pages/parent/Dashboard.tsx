@@ -8,19 +8,18 @@ const P = "#f43f5e";
 const PD = "#e11d48";
 const S = "#ec4899";
 const SD = "#db2777";
-const TEXT = "#4c0519";
-const TEXT2 = "#881337";
 
-function glassCard(color: string, extra?: React.CSSProperties): React.CSSProperties {
+function colorCard(color: string, dark: string, extra?: React.CSSProperties): React.CSSProperties {
   return {
-    background: "rgba(255,255,255,0.72)",
-    backdropFilter: "blur(18px)",
-    border: "1.5px solid rgba(255,255,255,0.92)",
+    background: `linear-gradient(145deg, ${color}c0, ${dark}90)`,
+    backdropFilter: "blur(22px)",
+    WebkitBackdropFilter: "blur(22px)",
+    border: `1.5px solid ${color}cc`,
     borderRadius: 22,
     position: "relative",
     overflow: "hidden",
-    boxShadow: `0 8px 32px ${color}20, 0 2px 8px rgba(0,0,0,0.06)`,
-    transition: "all 0.25s cubic-bezier(0.4,0,0.2,1)",
+    boxShadow: `0 8px 32px ${color}55, inset 0 1px 0 rgba(255,255,255,0.28)`,
+    transition: "all 0.26s cubic-bezier(0.4,0,0.2,1)",
     ...extra,
   };
 }
@@ -82,8 +81,8 @@ export default function ParentDashboard() {
   }
 
   const isGirl = currentChild?.gender === "female";
-  const childAccent = isGirl ? S : "#818cf8";
-  const childAccentDark = isGirl ? SD : "#4f46e5";
+  const childColor = isGirl ? S : "#818cf8";
+  const childDark = isGirl ? SD : "#4f46e5";
   const myRank = rankings.find((r: any) => r.studentId === currentChildId);
 
   function cardAnim(idx: number): React.CSSProperties {
@@ -112,73 +111,73 @@ export default function ParentDashboard() {
         {/* Header */}
         <div style={{ ...cardAnim(0), marginBottom: 22 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 50, height: 50, borderRadius: 16, background: `linear-gradient(135deg, ${P}, ${S})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 6px 20px ${P}55` }}>
+            <div style={{ width: 50, height: 50, borderRadius: 16, background: `linear-gradient(135deg, ${P}, ${S})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 6px 20px ${P}77` }}>
               <Heart size={24} color="white" />
             </div>
             <div>
-              <h1 style={{ fontSize: 22, fontWeight: 900, color: TEXT, margin: 0 }}>پنل والدین</h1>
-              <p style={{ color: TEXT2, fontSize: 13, margin: 0 }}>خوش آمدید، {user?.name}</p>
+              <h1 style={{ fontSize: 22, fontWeight: 900, color: "#4c0519", margin: 0 }}>پنل والدین</h1>
+              <p style={{ color: "#881337", fontSize: 13, margin: 0 }}>خوش آمدید، {user?.name}</p>
             </div>
           </div>
         </div>
 
         {/* No children */}
         {children.length === 0 && (
-          <div style={{ ...glassCard(P, { padding: 40, textAlign: "center" }), ...cardAnim(1) }}>
+          <div style={{ ...colorCard(P, PD, { padding: 40, textAlign: "center" }), ...cardAnim(1) }}>
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "45%", background: "linear-gradient(180deg, rgba(255,255,255,0.16) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
             <div style={{ fontSize: 44, marginBottom: 12 }}>👨‍👩‍👧</div>
-            <div style={{ color: TEXT2, fontSize: 15, fontWeight: 600 }}>هیچ فرزندی ثبت نشده است</div>
-            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4, background: `linear-gradient(90deg, ${P}, ${P}40)`, borderRadius: "0 0 22px 22px" }} />
+            <div style={{ color: "rgba(255,255,255,0.88)", fontSize: 15, fontWeight: 600 }}>هیچ فرزندی ثبت نشده است</div>
           </div>
         )}
 
         {/* Child selector */}
         {children.length > 0 && (
-          <div style={{ ...glassCard(P, { padding: "18px 20px", marginBottom: 18 }), ...cardAnim(1) }}>
-            <div style={{ fontSize: 12, color: TEXT2, marginBottom: 12, fontWeight: 700 }}>انتخاب فرزند</div>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <div style={{ ...colorCard(P, PD, { padding: "18px 20px", marginBottom: 18 }), ...cardAnim(1) }}>
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(180deg, rgba(255,255,255,0.16) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
+            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)", marginBottom: 12, fontWeight: 700, position: "relative", zIndex: 1 }}>انتخاب فرزند</div>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", position: "relative", zIndex: 1 }}>
               {children.map(child => {
                 const isActive = currentChildId === child.id;
-                const ca = child.gender === "female" ? S : "#818cf8";
-                const cad = child.gender === "female" ? SD : "#4f46e5";
+                const cc = child.gender === "female" ? S : "#818cf8";
+                const ccd = child.gender === "female" ? SD : "#4f46e5";
                 return (
                   <button key={child.id} onClick={() => { setSelectedChildId(child.id); setExpandedBook(null); }}
-                    style={{ flex: 1, minWidth: 110, padding: "14px 16px", background: isActive ? `linear-gradient(135deg, ${ca}, ${cad})` : `${ca}14`, border: `2px solid ${isActive ? ca : `${ca}35`}`, borderRadius: 16, cursor: "pointer", fontFamily: "Vazirmatn", color: isActive ? "white" : TEXT, boxShadow: isActive ? `0 8px 24px ${ca}44` : "none", transition: "all 0.2s", transform: isActive ? "scale(1.03)" : "scale(1)" }}>
+                    style={{ flex: 1, minWidth: 110, padding: "14px 16px", background: isActive ? "rgba(255,255,255,0.30)" : "rgba(255,255,255,0.12)", border: `2px solid ${isActive ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.25)"}`, borderRadius: 16, cursor: "pointer", fontFamily: "Vazirmatn", color: "white", backdropFilter: "blur(8px)", transition: "all 0.2s", transform: isActive ? "scale(1.04)" : "scale(1)", boxShadow: isActive ? "0 8px 24px rgba(0,0,0,0.18)" : "none" }}>
                     <div style={{ fontSize: 26, marginBottom: 5 }}>{child.gender === "female" ? "👧" : "👦"}</div>
-                    <div style={{ fontWeight: 700, fontSize: 14 }}>{child.name}</div>
+                    <div style={{ fontWeight: 700, fontSize: 14, textShadow: "0 1px 4px rgba(0,0,0,0.2)" }}>{child.name}</div>
                     <div style={{ fontSize: 11, opacity: 0.75, marginTop: 2 }}>{child.status === "active" ? "فعال" : "غیرفعال"}</div>
                   </button>
                 );
               })}
             </div>
-            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4, background: `linear-gradient(90deg, ${P}, ${P}40)`, borderRadius: "0 0 22px 22px" }} />
           </div>
         )}
 
-        {/* Quick info cards: notifications & exams */}
+        {/* Quick notif/exam counters */}
         {(notifications.length > 0 || examSchedule.length > 0) && (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))", gap: 12, marginBottom: 18, ...cardAnim(2) }}>
             {notifications.length > 0 && (
-              <div style={glassCard("#f59e0b", { padding: "16px 18px", display: "flex", alignItems: "center", gap: 12 })}>
-                <div style={{ width: 42, height: 42, borderRadius: 13, background: "rgba(245,158,11,0.18)", border: "1.5px solid rgba(245,158,11,0.40)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Bell size={20} color="#d97706" />
+              <div style={colorCard("#f59e0b", "#d97706", { padding: "16px 18px", display: "flex", alignItems: "center", gap: 12 })}>
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
+                <div style={{ width: 42, height: 42, borderRadius: 13, background: "rgba(255,255,255,0.22)", border: "1.5px solid rgba(255,255,255,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Bell size={20} color="white" />
                 </div>
-                <div>
-                  <div style={{ fontWeight: 900, color: TEXT, fontSize: 20 }}>{notifications.length.toLocaleString("fa-IR")}</div>
-                  <div style={{ fontSize: 12, color: "#d97706", fontWeight: 700 }}>اعلان مدرسه</div>
+                <div style={{ position: "relative", zIndex: 1 }}>
+                  <div style={{ fontWeight: 900, color: "white", fontSize: 22, textShadow: "0 2px 8px rgba(0,0,0,0.18)" }}>{notifications.length.toLocaleString("fa-IR")}</div>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.82)", fontWeight: 700 }}>اعلان مدرسه</div>
                 </div>
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4, background: "linear-gradient(90deg, #f59e0b, #f59e0b40)", borderRadius: "0 0 22px 22px" }} />
               </div>
             )}
             {examSchedule.length > 0 && (
-              <div style={glassCard(S, { padding: "16px 18px", display: "flex", alignItems: "center", gap: 12 })}>
-                <div style={{ width: 42, height: 42, borderRadius: 13, background: `${S}18`, border: `1.5px solid ${S}40`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Calendar size={20} color={SD} />
+              <div style={colorCard(S, SD, { padding: "16px 18px", display: "flex", alignItems: "center", gap: 12 })}>
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
+                <div style={{ width: 42, height: 42, borderRadius: 13, background: "rgba(255,255,255,0.22)", border: "1.5px solid rgba(255,255,255,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Calendar size={20} color="white" />
                 </div>
-                <div>
-                  <div style={{ fontWeight: 900, color: TEXT, fontSize: 20 }}>{examSchedule.length.toLocaleString("fa-IR")}</div>
-                  <div style={{ fontSize: 12, color: SD, fontWeight: 700 }}>امتحان پیش رو</div>
+                <div style={{ position: "relative", zIndex: 1 }}>
+                  <div style={{ fontWeight: 900, color: "white", fontSize: 22, textShadow: "0 2px 8px rgba(0,0,0,0.18)" }}>{examSchedule.length.toLocaleString("fa-IR")}</div>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.82)", fontWeight: 700 }}>امتحان پیش رو</div>
                 </div>
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4, background: `linear-gradient(90deg, ${S}, ${S}40)`, borderRadius: "0 0 22px 22px" }} />
               </div>
             )}
           </div>
@@ -187,7 +186,7 @@ export default function ParentDashboard() {
         {/* Child detail */}
         {currentChild && childSummary && (
           <div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: TEXT, marginBottom: 14, ...cardAnim(3) }}>
+            <div style={{ fontSize: 15, fontWeight: 800, color: "#4c0519", marginBottom: 14, ...cardAnim(3) }}>
               {isGirl ? "👧" : "👦"} گزارش عملکرد {currentChild.name}
             </div>
 
@@ -196,63 +195,64 @@ export default function ParentDashboard() {
               {STAT_META.map((sm, idx) => {
                 const Icon = sm.icon;
                 return (
-                  <div key={sm.key} style={{ ...glassCard(sm.color, { padding: "16px 14px" }), ...cardAnim(idx + 4) }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: 10, background: `${sm.color}22`, border: `1px solid ${sm.color}40`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <Icon size={15} color={sm.dark} />
+                  <div key={sm.key} style={{ ...colorCard(sm.color, sm.dark, { padding: "16px 14px" }), ...cardAnim(idx + 4) }}>
+                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, position: "relative", zIndex: 1 }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(255,255,255,0.22)", border: "1.5px solid rgba(255,255,255,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <Icon size={15} color="white" />
                       </div>
-                      <span style={{ color: sm.dark, fontSize: 11, fontWeight: 700 }}>{sm.label}</span>
+                      <span style={{ color: "rgba(255,255,255,0.82)", fontSize: 11, fontWeight: 700 }}>{sm.label}</span>
                     </div>
-                    <div style={{ color: TEXT, fontWeight: 800, fontSize: 14 }}>{statValues[sm.key]}</div>
-                    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${sm.color}, ${sm.color}30)`, borderRadius: "0 0 22px 22px" }} />
+                    <div style={{ color: "white", fontWeight: 800, fontSize: 14, position: "relative", zIndex: 1, textShadow: "0 1px 6px rgba(0,0,0,0.18)" }}>{statValues[sm.key]}</div>
                   </div>
                 );
               })}
             </div>
 
-            {/* Classes */}
+            {/* Classes chips */}
             {childSummary.classes?.length > 0 && (
               <div style={{ marginBottom: 14, display: "flex", flexWrap: "wrap", gap: 6, ...cardAnim(10) }}>
                 {childSummary.classes.map((cls: any) => (
-                  <span key={cls.id} style={{ background: `${childAccent}16`, border: `1px solid ${childAccent}35`, borderRadius: 8, padding: "4px 12px", fontSize: 12, color: childAccentDark, fontWeight: 600 }}>📚 {cls.name}</span>
+                  <span key={cls.id} style={{ background: `${childColor}28`, border: `1px solid ${childColor}55`, borderRadius: 8, padding: "4px 12px", fontSize: 12, color: childDark, fontWeight: 600 }}>📚 {cls.name}</span>
                 ))}
               </div>
             )}
 
             {/* Books with progress */}
             {childSummary.books?.length > 0 && (
-              <div style={{ ...glassCard(childAccent, { padding: 20, marginBottom: 18 }), ...cardAnim(11) }}>
-                <div style={{ fontWeight: 800, color: TEXT, marginBottom: 14, fontSize: 15 }}>📚 کتاب‌ها و پیشرفت درسی</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ ...colorCard(childColor, childDark, { padding: 20, marginBottom: 18 }), ...cardAnim(11) }}>
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "35%", background: "linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
+                <div style={{ fontWeight: 800, color: "white", marginBottom: 14, fontSize: 15, textShadow: "0 1px 6px rgba(0,0,0,0.2)", position: "relative", zIndex: 1 }}>📚 کتاب‌ها و پیشرفت درسی</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative", zIndex: 1 }}>
                   {childSummary.books.map((book: any) => {
                     const pct = book.lessonCount > 0 ? Math.round((book.completedLessons / book.lessonCount) * 100) : 0;
                     const isExpanded = expandedBook === book.id;
                     return (
-                      <div key={book.id} style={{ background: `${childAccent}0c`, borderRadius: 14, overflow: "hidden", border: `1px solid ${childAccent}25` }}>
+                      <div key={book.id} style={{ background: "rgba(255,255,255,0.14)", borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,0.28)" }}>
                         <div onClick={() => setExpandedBook(isExpanded ? null : book.id)} style={{ padding: "13px 16px", cursor: "pointer" }}>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                              <span style={{ fontWeight: 700, color: TEXT, fontSize: 13 }}>{book.title}</span>
-                              {book.totalScore > 0 && <span style={{ background: "rgba(245,158,11,0.14)", color: "#d97706", borderRadius: 6, padding: "1px 7px", fontSize: 11, fontWeight: 700 }}>⭐ {book.totalScore.toLocaleString("fa-IR")}</span>}
+                              <span style={{ fontWeight: 700, color: "white", fontSize: 13, textShadow: "0 1px 4px rgba(0,0,0,0.18)" }}>{book.title}</span>
+                              {book.totalScore > 0 && <span style={{ background: "rgba(255,255,255,0.22)", color: "white", borderRadius: 6, padding: "1px 7px", fontSize: 11, fontWeight: 700 }}>⭐ {book.totalScore.toLocaleString("fa-IR")}</span>}
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                              <span style={{ fontSize: 12, color: childAccentDark }}>{book.completedLessons}/{book.lessonCount}</span>
-                              {isExpanded ? <ChevronUp size={13} color={childAccentDark} /> : <ChevronDown size={13} color={childAccentDark} />}
+                              <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>{book.completedLessons}/{book.lessonCount}</span>
+                              {isExpanded ? <ChevronUp size={13} color="rgba(255,255,255,0.8)" /> : <ChevronDown size={13} color="rgba(255,255,255,0.8)" />}
                             </div>
                           </div>
-                          <div style={{ height: 6, background: `${childAccent}18`, borderRadius: 999, overflow: "hidden" }}>
-                            <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg, ${childAccent}, ${P})`, borderRadius: 999, transition: "width 0.5s" }} />
+                          <div style={{ height: 6, background: "rgba(255,255,255,0.20)", borderRadius: 999, overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${pct}%`, background: "rgba(255,255,255,0.75)", borderRadius: 999, transition: "width 0.5s" }} />
                           </div>
-                          <div style={{ fontSize: 11, color: childAccentDark, marginTop: 4, fontWeight: 600 }}>{pct}% پیشرفت</div>
+                          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", marginTop: 4, fontWeight: 600 }}>{pct}% پیشرفت</div>
                         </div>
                         {isExpanded && book.lessons && (
-                          <div style={{ padding: "0 16px 14px", borderTop: `1px solid ${childAccent}18` }}>
-                            <div style={{ fontSize: 12, color: childAccentDark, marginBottom: 10, paddingTop: 10, fontWeight: 600 }}>جزئیات دروس</div>
+                          <div style={{ padding: "0 16px 14px", borderTop: "1px solid rgba(255,255,255,0.18)" }}>
+                            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)", marginBottom: 10, paddingTop: 10, fontWeight: 600 }}>جزئیات دروس</div>
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", gap: 6 }}>
                               {book.lessons.map((lesson: any) => (
-                                <div key={lesson.lessonId} style={{ background: lesson.completed ? "rgba(34,197,94,0.12)" : "rgba(100,100,100,0.07)", border: `1px solid ${lesson.completed ? "rgba(34,197,94,0.35)" : "rgba(100,100,100,0.18)"}`, borderRadius: 8, padding: "6px 10px" }}>
-                                  <div style={{ fontSize: 11, color: lesson.completed ? "#16a34a" : "#6b7280", fontWeight: 700 }}>درس {lesson.lessonId.toLocaleString("fa-IR")}</div>
-                                  <div style={{ fontSize: 10, color: lesson.completed ? "#16a34a" : "#9ca3af", marginTop: 2 }}>{lesson.completed ? `✅ ${lesson.score > 0 ? `+${lesson.score}` : ""}` : "❌ ناتمام"}</div>
+                                <div key={lesson.lessonId} style={{ background: lesson.completed ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.08)", border: `1px solid ${lesson.completed ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.18)"}`, borderRadius: 8, padding: "6px 10px" }}>
+                                  <div style={{ fontSize: 11, color: "white", fontWeight: 700 }}>درس {lesson.lessonId.toLocaleString("fa-IR")}</div>
+                                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", marginTop: 2 }}>{lesson.completed ? `✅ ${lesson.score > 0 ? `+${lesson.score}` : ""}` : "❌ ناتمام"}</div>
                                 </div>
                               ))}
                             </div>
@@ -262,50 +262,49 @@ export default function ParentDashboard() {
                     );
                   })}
                 </div>
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4, background: `linear-gradient(90deg, ${childAccent}, ${childAccent}40)`, borderRadius: "0 0 22px 22px" }} />
               </div>
             )}
 
             {/* Notifications */}
             {notifications.length > 0 && (
-              <div style={{ ...glassCard("#f59e0b", { padding: 20, marginBottom: 18 }), ...cardAnim(12) }}>
-                <div style={{ fontWeight: 800, color: TEXT, marginBottom: 12, fontSize: 15, display: "flex", alignItems: "center", gap: 8 }}>
-                  <Bell size={15} color="#d97706" /> اعلانات مدرسه
+              <div style={{ ...colorCard("#f59e0b", "#d97706", { padding: 20, marginBottom: 18 }), ...cardAnim(12) }}>
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "35%", background: "linear-gradient(180deg, rgba(255,255,255,0.16) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
+                <div style={{ fontWeight: 800, color: "white", marginBottom: 12, fontSize: 15, display: "flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1, textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>
+                  <Bell size={15} color="rgba(255,255,255,0.9)" /> اعلانات مدرسه
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
                   {notifications.slice(0, 5).map((n: any) => (
-                    <div key={n.id} style={{ background: "rgba(245,158,11,0.08)", borderRadius: 10, padding: "10px 14px", borderRight: "3px solid #f59e0b" }}>
-                      <div style={{ fontWeight: 700, color: TEXT, fontSize: 13, marginBottom: 3 }}>{n.title}</div>
-                      <div style={{ fontSize: 12, color: "#92400e" }}>{n.message}</div>
+                    <div key={n.id} style={{ background: "rgba(255,255,255,0.14)", borderRadius: 10, padding: "10px 14px", borderRight: "3px solid rgba(255,255,255,0.5)" }}>
+                      <div style={{ fontWeight: 700, color: "white", fontSize: 13, marginBottom: 3, textShadow: "0 1px 4px rgba(0,0,0,0.18)" }}>{n.title}</div>
+                      <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>{n.message}</div>
                     </div>
                   ))}
                 </div>
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4, background: "linear-gradient(90deg, #f59e0b, #f59e0b40)", borderRadius: "0 0 22px 22px" }} />
               </div>
             )}
 
             {/* Exam schedule */}
             {examSchedule.length > 0 && (
-              <div style={{ ...glassCard(S, { padding: 20 }), ...cardAnim(13) }}>
-                <div style={{ fontWeight: 800, color: TEXT, marginBottom: 12, fontSize: 15, display: "flex", alignItems: "center", gap: 8 }}>
-                  <Calendar size={15} color={SD} /> تقویم امتحانی
+              <div style={{ ...colorCard(P, PD, { padding: 20 }), ...cardAnim(13) }}>
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "35%", background: "linear-gradient(180deg, rgba(255,255,255,0.16) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
+                <div style={{ fontWeight: 800, color: "white", marginBottom: 12, fontSize: 15, display: "flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1, textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>
+                  <Calendar size={15} color="rgba(255,255,255,0.9)" /> تقویم امتحانی
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
                   {examSchedule.slice(0, 5).map((exam: any) => (
-                    <div key={exam.id} style={{ background: `${S}0e`, borderRadius: 10, padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", border: `1px solid ${S}20` }}>
+                    <div key={exam.id} style={{ background: "rgba(255,255,255,0.14)", borderRadius: 10, padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid rgba(255,255,255,0.22)" }}>
                       <div>
-                        <div style={{ fontWeight: 700, color: TEXT, fontSize: 13 }}>{exam.subject ?? exam.title ?? "امتحان"}</div>
-                        <div style={{ fontSize: 11, color: TEXT2, marginTop: 2 }}>{exam.description ?? ""}</div>
+                        <div style={{ fontWeight: 700, color: "white", fontSize: 13, textShadow: "0 1px 4px rgba(0,0,0,0.18)" }}>{exam.subject ?? exam.title ?? "امتحان"}</div>
+                        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", marginTop: 2 }}>{exam.description ?? ""}</div>
                       </div>
                       {exam.examDate && (
-                        <div style={{ background: `${S}18`, borderRadius: 8, padding: "4px 10px", fontSize: 12, color: SD, fontWeight: 700 }}>
+                        <div style={{ background: "rgba(255,255,255,0.20)", borderRadius: 8, padding: "4px 10px", fontSize: 12, color: "white", fontWeight: 700 }}>
                           {new Date(exam.examDate).toLocaleDateString("fa-IR")}
                         </div>
                       )}
                     </div>
                   ))}
                 </div>
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4, background: `linear-gradient(90deg, ${S}, ${S}40)`, borderRadius: "0 0 22px 22px" }} />
               </div>
             )}
           </div>
