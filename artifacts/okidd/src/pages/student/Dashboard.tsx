@@ -175,6 +175,12 @@ export default function StudentDashboard() {
       {/* Glow rings */}
       <div className="glow-ring gr1" />
       <div className="glow-ring gr2" />
+      {/* Stars */}
+      {[...Array(22)].map((_, i) => <div key={i} className={`star s${(i % 5) + 1}`} style={{ top: `${Math.floor((i * 37 + 11) % 95)}%`, left: `${Math.floor((i * 53 + 7) % 95)}%`, animationDelay: `${(i * 0.41).toFixed(2)}s` }} />)}
+      {/* Shooting stars */}
+      <div className="shoot sh1" />
+      <div className="shoot sh2" />
+      <div className="shoot sh3" />
 
       <div style={{ position: "relative", zIndex: 1, minHeight: "100vh" }}>
 
@@ -601,6 +607,36 @@ export default function StudentDashboard() {
         @keyframes pulse-glow {
           0%,100%{ opacity:0.5; transform:scale(1) }
           50%    { opacity:1;   transform:scale(1.35) }
+        }
+
+        /* ── Stars ── */
+        .star { position: absolute; pointer-events: none; z-index: 0; border-radius: 50%; }
+        .s1 { width:3px;  height:3px;  background:#818cf8; animation: twinkle 2.4s ease-in-out infinite; }
+        .s2 { width:4px;  height:4px;  background:#c084fc; animation: twinkle 3.1s ease-in-out infinite; }
+        .s3 { width:2px;  height:2px;  background:#60a5fa; animation: twinkle 2.0s ease-in-out infinite; }
+        .s4 { width:3px;  height:3px;  background:#f472b6; animation: twinkle 2.8s ease-in-out infinite; }
+        .s5 { width:5px;  height:5px;  background:#fbbf24; animation: twinkle 3.5s ease-in-out infinite; box-shadow: 0 0 6px 2px #fbbf2488; }
+        @keyframes twinkle {
+          0%,100%{ opacity:0.15; transform:scale(0.8) }
+          50%    { opacity:1;    transform:scale(1.4) }
+        }
+
+        /* ── Shooting stars ── */
+        .shoot { position:absolute; pointer-events:none; z-index:0;
+                 height:2px; border-radius:999px;
+                 background:linear-gradient(90deg,rgba(255,255,255,0),#a5b4fc,rgba(255,255,255,0));
+                 opacity:0; }
+        .sh1 { top:12%; right:80%; width:120px; transform:rotate(-35deg);
+               animation: shoot1 5s ease-in-out infinite 1s; }
+        .sh2 { top:30%; right:60%; width:90px;  transform:rotate(-30deg);
+               animation: shoot1 7s ease-in-out infinite 3.5s; }
+        .sh3 { top:55%; right:75%; width:150px; transform:rotate(-40deg);
+               animation: shoot1 9s ease-in-out infinite 6s; }
+        @keyframes shoot1 {
+          0%   { opacity:0; transform:rotate(-35deg) translateX(0) }
+          5%   { opacity:1 }
+          20%  { opacity:0; transform:rotate(-35deg) translateX(220px) }
+          100% { opacity:0; transform:rotate(-35deg) translateX(220px) }
         }
       `}</style>
     </div>
