@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
+import { useNotificationReads } from "../../hooks/useNotificationReads";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import {
@@ -66,6 +67,15 @@ export default function TeacherDashboard() {
   const [confirmLogout, setConfirmLogout] = useState(false);
 
   useEffect(() => { const t = setTimeout(() => setMounted(true), 80); return () => clearTimeout(t); }, []);
+
+  const { data: teacherNotifications = [] } = useQuery<any[]>({
+    queryKey: ["notifications", "teacher", user?.id],
+    queryFn:  () => api.get(`/notifications?targetUserId=${user?.id}`),
+    enabled:  !!user?.id,
+    refetchInterval: 30000,
+  });
+  const { countUnread } = useNotificationReads(user?.id);
+  const unreadCount = countUnread(teacherNotifications);
 
   const { data: schools = [] }         = useQuery<any[]>({ queryKey: ["teacher-schools", user?.id], queryFn: () => api.get(`/users/${user?.id}/teacher-schools`), enabled: !!user?.id });
   const { data: allClasses = [] }      = useQuery<any[]>({ queryKey: ["classes", "teacher", user?.id], queryFn: () => api.get(`/classes?teacherId=${user?.id}`), enabled: !!user?.id });
@@ -146,9 +156,14 @@ export default function TeacherDashboard() {
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <button
               onClick={() => navigate("/teacher/notifications")}
-              style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(245,158,11,0.15)", border: "1.5px solid rgba(245,158,11,0.40)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+              style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(245,158,11,0.15)", border: "1.5px solid rgba(245,158,11,0.40)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", position: "relative" }}
             >
               <Bell size={18} color={AMBER_D} />
+              {unreadCount > 0 && (
+                <span style={{ position: "absolute", top: -3, right: -3, minWidth: 17, height: 17, borderRadius: 999, background: "#ef4444", border: "2px solid white", color: "white", fontSize: 10, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px", fontFamily: "Vazirmatn" }}>
+                  {unreadCount > 99 ? "۹۹+" : unreadCount.toLocaleString("fa-IR")}
+                </span>
+              )}
             </button>
             <button
               onClick={() => setConfirmLogout(true)}
@@ -389,11 +404,16 @@ export default function TeacherDashboard() {
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ""; }}
           >
             <div style={shine()} />
-            <div style={{ ...glassIcon(ORANGE, 44) }}>
+            <div style={{ ...glassIcon(ORANGE, 44), position: "relative" }}>
               <Bell size={20} color="white" />
+              {unreadCount > 0 && (
+                <span style={{ position: "absolute", top: -4, right: -4, minWidth: 18, height: 18, borderRadius: 999, background: "#ef4444", border: "2px solid rgba(255,255,255,0.9)", color: "white", fontSize: 10, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px", fontFamily: "Vazirmatn" }}>
+                  {unreadCount > 99 ? "۹۹+" : unreadCount.toLocaleString("fa-IR")}
+                </span>
+              )}
             </div>
             <div style={{ flex: 1, position: "relative", zIndex: 1 }}>
-              <div style={{ fontWeight: 800, fontSize: 15, color: "white", textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>اعلانات</div>
+              <div style={{ fontWeight: 800, fontSize: 15, color: "white", textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>اعلانات{unreadCount > 0 ? ` (${unreadCount.toLocaleString("fa-IR")} جدید)` : ""}</div>
               <div style={{ color: "rgba(255,255,255,0.78)", fontSize: 12 }}>مشاهده و ارسال اعلانات</div>
             </div>
             <ChevronLeft size={18} color="rgba(255,255,255,0.8)" style={{ position: "relative", zIndex: 1 }} />

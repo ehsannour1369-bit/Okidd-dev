@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
+import { useNotificationReads } from "../../hooks/useNotificationReads";
 import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import {
@@ -111,7 +112,10 @@ export default function StudentDashboard() {
     queryKey: ["notifications", user?.schoolId, "student"],
     queryFn: () => api.get(`/notifications?schoolId=${user?.schoolId}&targetRole=student`),
     enabled: !!user?.schoolId,
+    refetchInterval: 30000,
   });
+  const { countUnread } = useNotificationReads(user?.id);
+  const unreadNotifCount = countUnread(receivedNotifs);
   const { data: sentNotifs = [] } = useQuery<any[]>({
     queryKey: ["notifications", "student-sent", user?.id],
     queryFn: () => api.get(`/notifications?fromUserId=${user?.id}`),
@@ -345,21 +349,21 @@ export default function StudentDashboard() {
                 onMouseLeave={e => hoverOut(e.currentTarget, PURPLE)}>
                 <div style={{ ...glassIconStyle(PURPLE, 44), position: "relative" }}>
                   <Bell size={20} color={PURPLE} />
-                  {receivedNotifs.length > 0 && (
-                    <span style={{ position: "absolute", top: -4, right: -4, width: 17, height: 17, background: "#ef4444", borderRadius: "50%", border: "2px solid white", fontSize: 9, color: "white", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      {receivedNotifs.length > 9 ? "9+" : receivedNotifs.length}
+                  {unreadNotifCount > 0 && (
+                    <span style={{ position: "absolute", top: -4, right: -4, minWidth: 17, height: 17, background: "#ef4444", borderRadius: 999, border: "2px solid white", fontSize: 9, color: "white", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px" }}>
+                      {unreadNotifCount > 99 ? "۹۹+" : unreadNotifCount.toLocaleString("fa-IR")}
                     </span>
                   )}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700, fontSize: 16, color: "#1e1b4b" }}>اعلانات</div>
                   <div style={{ fontSize: 12, color: "#4b5563", marginTop: 4 }}>
-                    {receivedNotifs.length > 0 ? `${receivedNotifs.length} اعلان دریافتی` : "بدون اعلان جدید"}
+                    {unreadNotifCount > 0 ? `${unreadNotifCount.toLocaleString("fa-IR")} اعلان خوانده‌نشده` : "بدون اعلان جدید"}
                   </div>
                 </div>
-                {receivedNotifs.length > 0 && (
+                {unreadNotifCount > 0 && (
                   <div style={{ background: `linear-gradient(135deg,${PURPLE},#6d28d9)`, borderRadius: 999, padding: "4px 14px", color: "white", fontSize: 13, fontWeight: 700, boxShadow: `0 4px 14px ${PURPLE}55` }}>
-                    {receivedNotifs.length}
+                    {unreadNotifCount.toLocaleString("fa-IR")}
                   </div>
                 )}
               </div>
@@ -563,7 +567,7 @@ export default function StudentDashboard() {
           <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
             {(["received", "sent"] as const).map(t => (
               <button key={t} onClick={() => setNotifTab(t)} style={{ flex: 1, padding: "7px 0", borderRadius: 10, border: `1.5px solid ${notifTab === t ? accentDark : "rgba(200,200,230,0.5)"}`, background: notifTab === t ? `${accentDark}14` : "rgba(255,255,255,0.55)", color: notifTab === t ? accentDark : "#5b21b6", fontSize: 11, fontFamily: "Vazirmatn", cursor: "pointer", fontWeight: notifTab === t ? 700 : 400 }}>
-                {t === "received" ? `دریافتی${receivedNotifs.length > 0 ? ` (${receivedNotifs.length})` : ""}` : `ارسالی${sentNotifs.length > 0 ? ` (${sentNotifs.length})` : ""}`}
+                {t === "received" ? `دریافتی${unreadNotifCount > 0 ? ` (${unreadNotifCount.toLocaleString("fa-IR")})` : ""}` : `ارسالی${sentNotifs.length > 0 ? ` (${sentNotifs.length})` : ""}`}
               </button>
             ))}
           </div>

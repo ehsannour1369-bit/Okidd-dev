@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
+import { useNotificationReads } from "../../hooks/useNotificationReads";
 import {
   Bell, BookOpen, Clock, Star, Calendar, ChevronDown, ChevronUp,
   Trophy, Heart, UserRound, Users, LogOut, ChevronRight, ChevronLeft,
@@ -88,6 +89,14 @@ export default function ParentDashboard() {
     queryFn:  () => api.get(`/exam-schedule?schoolId=${user?.schoolId}`),
     enabled:  !!user?.schoolId,
   });
+  const { data: notifications = [] } = useQuery<any[]>({
+    queryKey: ["notifications", "parent", user?.schoolId],
+    queryFn:  () => api.get(`/notifications?schoolId=${user?.schoolId}`),
+    enabled:  !!user?.schoolId,
+    refetchInterval: 30000,
+  });
+  const { countUnread } = useNotificationReads(user?.id);
+  const unreadCount = countUnread(notifications);
 
   /* Dynamic theme based on selected child's gender */
   const isGirl     = currentChild?.gender === "female";
@@ -191,9 +200,14 @@ export default function ParentDashboard() {
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <button
               onClick={() => navigate("/parent/notifications")}
-              style={{ width: 40, height: 40, borderRadius: "50%", background: `${accent}18`, border: `1.5px solid ${accent}45`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "background 0.4s, border 0.4s" }}
+              style={{ width: 40, height: 40, borderRadius: "50%", background: `${accent}18`, border: `1.5px solid ${accent}45`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "background 0.4s, border 0.4s", position: "relative" }}
             >
               <Bell size={18} color={accentDark} />
+              {unreadCount > 0 && (
+                <span style={{ position: "absolute", top: -3, right: -3, minWidth: 17, height: 17, borderRadius: 999, background: "#ef4444", border: "2px solid white", color: "white", fontSize: 10, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px", fontFamily: "Vazirmatn" }}>
+                  {unreadCount > 99 ? "۹۹+" : unreadCount.toLocaleString("fa-IR")}
+                </span>
+              )}
             </button>
             <button
               onClick={() => setConfirmLogout(true)}
