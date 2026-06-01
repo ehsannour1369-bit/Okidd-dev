@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
-import { School, Users, GraduationCap, UserCheck, CreditCard, TrendingUp } from "lucide-react";
+import { School, Users, GraduationCap, UserCheck, CreditCard, TrendingUp, GitBranch, BookOpen, Package, FileText, BookMarked, LayoutDashboard } from "lucide-react";
 import { Link } from "wouter";
 import { useEffect, useState } from "react";
 
@@ -37,6 +37,21 @@ const STAT_CARDS = [
   { label: "درآمد کل", key: "totalRevenue", icon: CreditCard, color: "#f97316", dark: "#ea580c", link: "/admin/transactions", isMoney: true },
 ];
 
+const NAV_GRID = [
+  { label: "مدارس", path: "/admin/schools", icon: School, color: "#ef4444", dark: "#dc2626", emoji: "🏫" },
+  { label: "شعبه‌ها و کلاس‌ها", path: "/admin/branches", icon: GitBranch, color: "#f97316", dark: "#ea580c", emoji: "🌿" },
+  { label: "معلمان", path: "/admin/teachers", icon: GraduationCap, color: "#fbbf24", dark: "#f59e0b", emoji: "👨‍🏫" },
+  { label: "دانش‌آموزان", path: "/admin/students", icon: Users, color: "#fb923c", dark: "#f97316", emoji: "🧑‍🎓" },
+  { label: "کلاس‌ها", path: "/admin/classes", icon: BookMarked, color: "#f59e0b", dark: "#d97706", emoji: "📚" },
+  { label: "کاربران", path: "/admin/users", icon: Users, color: "#fcd34d", dark: "#f59e0b", emoji: "👥" },
+  { label: "کتاب‌ها", path: "/admin/books", icon: BookOpen, color: "#ef4444", dark: "#dc2626", emoji: "📖" },
+  { label: "پکیج‌ها", path: "/admin/packages", icon: Package, color: "#f97316", dark: "#ea580c", emoji: "🎁" },
+  { label: "تراکنش‌ها", path: "/admin/transactions", icon: CreditCard, color: "#fbbf24", dark: "#f59e0b", emoji: "💳" },
+  { label: "محتوا", path: "/admin/content", icon: FileText, color: "#f87171", dark: "#ef4444", emoji: "📝" },
+  { label: "مشاوره", path: "/admin/consultants", icon: UserCheck, color: "#fb923c", dark: "#f97316", emoji: "💡" },
+  { label: "داشبورد", path: "/admin", icon: LayoutDashboard, color: "#f59e0b", dark: "#d97706", emoji: "📊" },
+];
+
 export default function AdminDashboard() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { const t = setTimeout(() => setMounted(true), 80); return () => clearTimeout(t); }, []);
@@ -50,20 +65,19 @@ export default function AdminDashboard() {
 
   function cardAnim(idx: number): React.CSSProperties {
     if (!mounted) return { opacity: 0, transform: "translateY(22px)" };
-    return { animation: `dashUp 0.5s cubic-bezier(0.16,1,0.3,1) ${idx * 0.07}s both` };
+    return { animation: `dashUp 0.5s cubic-bezier(0.16,1,0.3,1) ${idx * 0.06}s both` };
   }
 
   return (
     <div style={{ margin: -24, padding: 24, minHeight: "calc(100vh - 60px)", background: "linear-gradient(160deg,#fffbeb 0%,#fef3c7 40%,#fff1f2 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", position: "relative", overflow: "hidden" }}>
 
-      {/* Blobs */}
       <div style={{ position: "absolute", top: "-12%", right: "-8%", width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle,rgba(251,191,36,0.40) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat1 9s ease-in-out infinite" }} />
       <div style={{ position: "absolute", bottom: "5%", left: "-8%", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle,rgba(239,68,68,0.22) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat2 12s ease-in-out infinite" }} />
       <div style={{ position: "absolute", top: "42%", right: "32%", width: 180, height: 180, borderRadius: "50%", background: "radial-gradient(circle,rgba(249,115,22,0.22) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat1 15s ease-in-out infinite reverse" }} />
 
       <div style={{ position: "relative", zIndex: 1 }}>
         {/* Header */}
-        <div style={{ ...cardAnim(0), marginBottom: 28 }}>
+        <div style={{ ...cardAnim(0), marginBottom: 24 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <div style={{ width: 50, height: 50, borderRadius: 16, background: `linear-gradient(135deg, ${P}, ${S})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 6px 20px ${P}77` }}>
               <TrendingUp size={24} color="white" />
@@ -79,7 +93,7 @@ export default function AdminDashboard() {
         {isLoading ? (
           <div style={{ color: "#92400e", textAlign: "center", padding: 60 }}>در حال بارگذاری...</div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 14, marginBottom: 28 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(155px, 1fr))", gap: 13, marginBottom: 30 }}>
             {STAT_CARDS.map((sc, idx) => {
               const Icon = sc.icon;
               const value = sc.key === "totalRevenue"
@@ -91,7 +105,6 @@ export default function AdminDashboard() {
                   onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-6px) scale(1.03)"; el.style.boxShadow = `0 22px 52px ${sc.color}70`; }}
                   onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = `0 8px 32px ${sc.color}55, inset 0 1px 0 rgba(255,255,255,0.28)`; }}
                 >
-                  {/* Shine overlay */}
                   <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
                   <div style={{ width: 52, height: 52, borderRadius: 16, background: "rgba(255,255,255,0.25)", backdropFilter: "blur(8px)", border: "1.5px solid rgba(255,255,255,0.5)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12, boxShadow: "0 4px 14px rgba(0,0,0,0.12)" }}>
                     <Icon size={24} color="white" />
@@ -107,8 +120,33 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* Nav grid — all sections */}
+        <div style={cardAnim(8)}>
+          <h2 style={{ fontSize: 16, fontWeight: 800, color: "#78350f", marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 20 }}>🗂️</span> بخش‌های مدیریتی
+          </h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: 11 }}>
+            {NAV_GRID.filter(n => n.path !== "/admin").map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <Link key={item.path} href={item.path} style={{ textDecoration: "none" }}>
+                  <div
+                    style={{ ...colorCard(item.color, item.dark, { padding: "18px 10px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", gap: 8, cursor: "pointer", minHeight: 110 }), ...cardAnim(idx + 9) }}
+                    onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-5px) scale(1.04)"; el.style.boxShadow = `0 20px 48px ${item.color}70`; }}
+                    onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = `0 8px 32px ${item.color}55, inset 0 1px 0 rgba(255,255,255,0.28)`; }}
+                  >
+                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
+                    <div style={{ fontSize: 30, lineHeight: 1 }}>{item.emoji}</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "white", textShadow: "0 1px 4px rgba(0,0,0,0.25)", position: "relative", zIndex: 1 }}>{item.label}</div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Recent transactions */}
-        <div style={{ ...colorCard(P, "#d97706", { padding: 24 }), ...cardAnim(8) }}>
+        <div style={{ ...colorCard(P, "#d97706", { padding: 24, marginTop: 24 }), ...cardAnim(22) }}>
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(180deg, rgba(255,255,255,0.14) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
           <div style={{ position: "relative", zIndex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>

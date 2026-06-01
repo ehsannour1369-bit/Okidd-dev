@@ -244,7 +244,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const { accent, accentDark, TEXT, TEXT2 } = theme;
 
   const showDesktopSidebar = isAdmin && !isMobile;
-  const showHamburger = !isStudent && (!isAdmin || isMobile);
+  const showHamburger = !isStudent && !isAdmin && user.role !== "school_manager";
 
   const greeting = getMobileGreeting(user.role, user.name);
 

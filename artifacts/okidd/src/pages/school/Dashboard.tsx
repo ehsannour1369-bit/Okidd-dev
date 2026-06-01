@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { Link } from "wouter";
-import { School, BookMarked, Users, GraduationCap, Upload, ImageIcon, Trash2, LayoutDashboard } from "lucide-react";
+import { School, BookMarked, Users, GraduationCap, Upload, ImageIcon, Trash2, LayoutDashboard, GitBranch, Bell, ClipboardList, BarChart2 } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 
 interface SchoolStats { totalBranches: number; totalClasses: number; totalTeachers: number; totalStudents: number; totalBooks: number; }
@@ -27,6 +27,17 @@ const STAT_CARDS = [
   { label: "کلاس‌ها", key: "totalClasses", icon: BookMarked, color: "#3b82f6", dark: "#2563eb", link: "/school/classes" },
   { label: "معلمان", key: "totalTeachers", icon: GraduationCap, color: "#f59e0b", dark: "#d97706", link: "/school/teachers" },
   { label: "دانش‌آموزان", key: "totalStudents", icon: Users, color: "#22c55e", dark: "#16a34a", link: "/school/students" },
+];
+
+const NAV_GRID = [
+  { label: "شعبه‌ها", path: "/school/branches", icon: GitBranch, color: "#3b82f6", dark: "#2563eb", emoji: "🌿" },
+  { label: "معلمان", path: "/school/teachers", icon: GraduationCap, color: "#818cf8", dark: "#6366f1", emoji: "👨‍🏫" },
+  { label: "دانش‌آموزان", path: "/school/students", icon: Users, color: "#60a5fa", dark: "#3b82f6", emoji: "🧑‍🎓" },
+  { label: "کلاس‌ها", path: "/school/classes", icon: BookMarked, color: "#a5b4fc", dark: "#818cf8", emoji: "📚" },
+  { label: "پراگرس چارت", path: "/school/progress", icon: BarChart2, color: "#6366f1", dark: "#4f46e5", emoji: "📊" },
+  { label: "گزارش عملکرد", path: "/school/report", icon: BarChart2, color: "#818cf8", dark: "#6366f1", emoji: "📈" },
+  { label: "اعلان‌ها", path: "/school/notifications", icon: Bell, color: "#3b82f6", dark: "#2563eb", emoji: "🔔" },
+  { label: "برنامه امتحانات", path: "/school/exams", icon: ClipboardList, color: "#60a5fa", dark: "#3b82f6", emoji: "📅" },
 ];
 
 export default function SchoolDashboard() {
@@ -82,7 +93,7 @@ export default function SchoolDashboard() {
 
   function cardAnim(idx: number): React.CSSProperties {
     if (!mounted) return { opacity: 0, transform: "translateY(22px)" };
-    return { animation: `dashUp 0.5s cubic-bezier(0.16,1,0.3,1) ${idx * 0.07}s both` };
+    return { animation: `dashUp 0.5s cubic-bezier(0.16,1,0.3,1) ${idx * 0.06}s both` };
   }
 
   const P = "#6366f1";
@@ -97,7 +108,7 @@ export default function SchoolDashboard() {
 
       <div style={{ position: "relative", zIndex: 1 }}>
         {/* Header */}
-        <div style={{ ...cardAnim(0), marginBottom: 28 }}>
+        <div style={{ ...cardAnim(0), marginBottom: 24 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <div style={{ width: 50, height: 50, borderRadius: 16, background: `linear-gradient(135deg, ${P}, ${S})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 6px 20px ${P}77` }}>
               <LayoutDashboard size={24} color="white" />
@@ -141,7 +152,7 @@ export default function SchoolDashboard() {
         {isLoading ? (
           <div style={{ color: "#3730a3", textAlign: "center", padding: 60 }}>در حال بارگذاری...</div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 14 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(155px, 1fr))", gap: 13, marginBottom: 30 }}>
             {STAT_CARDS.map((sc, idx) => {
               const Icon = sc.icon;
               return (
@@ -163,6 +174,31 @@ export default function SchoolDashboard() {
             })}
           </div>
         )}
+
+        {/* Nav grid — all sections */}
+        <div style={cardAnim(7)}>
+          <h2 style={{ fontSize: 16, fontWeight: 800, color: "#1e1b4b", marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 20 }}>🗂️</span> بخش‌های مدیریتی
+          </h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: 11 }}>
+            {NAV_GRID.map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <Link key={item.path} href={item.path} style={{ textDecoration: "none" }}>
+                  <div
+                    style={{ ...colorCard(item.color, item.dark, { padding: "18px 10px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", gap: 8, cursor: "pointer", minHeight: 110 }), ...cardAnim(idx + 8) }}
+                    onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-5px) scale(1.04)"; el.style.boxShadow = `0 20px 48px ${item.color}70`; }}
+                    onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = `0 8px 32px ${item.color}55, inset 0 1px 0 rgba(255,255,255,0.28)`; }}
+                  >
+                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
+                    <div style={{ fontSize: 30, lineHeight: 1 }}>{item.emoji}</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "white", textShadow: "0 1px 4px rgba(0,0,0,0.25)", position: "relative", zIndex: 1 }}>{item.label}</div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       <style>{`
