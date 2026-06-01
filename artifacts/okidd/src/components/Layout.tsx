@@ -416,6 +416,29 @@ export default function Layout({ children }: { children: ReactNode }) {
                   whiteSpace: "nowrap",
                 }}>{getRoleLabel(user.role)}</div>
               )}
+              {(["teacher","school_manager","branch_manager","parent"].includes(user.role)) && (() => {
+                const notifPath = user.role === "teacher" ? "/teacher/notifications"
+                  : user.role === "school_manager" ? "/school/notifications"
+                  : user.role === "branch_manager" ? "/branch/notifications"
+                  : "/parent/notifications";
+                const isActive = location === notifPath;
+                return (
+                  <Link href={notifPath}>
+                    <button title="اعلان‌ها" style={{
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      width: 38, height: 38, borderRadius: 10, cursor: "pointer",
+                      background: isActive ? "rgba(249,115,22,0.25)" : "rgba(249,115,22,0.1)",
+                      border: `1px solid ${isActive ? "rgba(249,115,22,0.6)" : "rgba(249,115,22,0.3)"}`,
+                      color: "#f97316", transition: "all 0.2s ease",
+                    }}
+                      onMouseOver={e => { e.currentTarget.style.background = "rgba(249,115,22,0.25)"; }}
+                      onMouseOut={e => { e.currentTarget.style.background = isActive ? "rgba(249,115,22,0.25)" : "rgba(249,115,22,0.1)"; }}
+                    >
+                      <Bell size={17} />
+                    </button>
+                  </Link>
+                );
+              })()}
               <button onClick={logout} title="خروج" style={{
                 display: "flex", alignItems: "center", gap: 5,
                 padding: isMobile ? "7px 10px" : "7px 14px",
