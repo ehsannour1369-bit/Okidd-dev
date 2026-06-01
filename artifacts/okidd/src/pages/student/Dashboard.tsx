@@ -81,6 +81,7 @@ export default function StudentDashboard() {
   /* Profile panel */
   const [profileOpen, setProfileOpen]     = useState(false);
   const [showPassword, setShowPassword]   = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const avatarRef = useRef<HTMLInputElement>(null);
 
@@ -596,8 +597,8 @@ export default function StudentDashboard() {
       {/* ══════════ PROFILE PANEL ══════════ */}
       {profileOpen && (
         <>
-          <div onClick={() => setProfileOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 800, background: "rgba(0,0,0,0.35)", backdropFilter: "blur(4px)" }} />
-          <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 801, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(28px)", borderRadius: "28px 28px 0 0", padding: "28px 24px 40px", boxShadow: "0 -10px 50px rgba(0,0,0,0.14)", direction: "rtl", fontFamily: "Vazirmatn" }}>
+          <div onClick={() => { setProfileOpen(false); setConfirmLogout(false); }} style={{ position: "fixed", inset: 0, zIndex: 800, background: "rgba(0,0,0,0.35)", backdropFilter: "blur(4px)" }} />
+          <div onClick={e => e.stopPropagation()} style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 801, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(28px)", borderRadius: "28px 28px 0 0", padding: "28px 24px 40px", boxShadow: "0 -10px 50px rgba(0,0,0,0.14)", direction: "rtl", fontFamily: "Vazirmatn" }}>
             {/* Handle bar */}
             <div style={{ width: 40, height: 4, background: "rgba(0,0,0,0.15)", borderRadius: 99, margin: "0 auto 24px" }} />
 
@@ -648,10 +649,24 @@ export default function StudentDashboard() {
               </div>
             </div>
 
-            {/* Logout button */}
-            <button onClick={() => { setProfileOpen(false); logout(); }} style={{ width: "100%", padding: "14px 0", background: "linear-gradient(135deg,#ef4444,#dc2626)", border: "none", borderRadius: 16, color: "white", fontFamily: "Vazirmatn", fontSize: 15, fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 6px 20px rgba(239,68,68,0.4)" }}>
-              <LogOut size={18} /> خروج از حساب
-            </button>
+            {/* Logout button — two-step confirmation */}
+            {!confirmLogout ? (
+              <button onClick={() => setConfirmLogout(true)} style={{ width: "100%", padding: "13px 0", background: "rgba(239,68,68,0.08)", border: "1.5px solid rgba(239,68,68,0.3)", borderRadius: 16, color: "#ef4444", fontFamily: "Vazirmatn", fontSize: 15, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                <LogOut size={17} /> خروج از حساب
+              </button>
+            ) : (
+              <div style={{ background: "rgba(254,226,226,0.6)", border: "1.5px solid rgba(239,68,68,0.3)", borderRadius: 16, padding: "14px 16px" }}>
+                <div style={{ fontSize: 13, color: "#b91c1c", fontWeight: 700, textAlign: "center", marginBottom: 12 }}>مطمئنی می‌خوای خارج بشی؟</div>
+                <div style={{ display: "flex", gap: 10 }}>
+                  <button onClick={() => setConfirmLogout(false)} style={{ flex: 1, padding: "10px 0", background: "rgba(255,255,255,0.8)", border: "1.5px solid rgba(200,200,220,0.5)", borderRadius: 12, color: "#374151", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                    نه، بمان
+                  </button>
+                  <button onClick={() => { setProfileOpen(false); setConfirmLogout(false); logout(); }} style={{ flex: 1, padding: "10px 0", background: "linear-gradient(135deg,#ef4444,#dc2626)", border: "none", borderRadius: 12, color: "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 800, cursor: "pointer", boxShadow: "0 4px 14px rgba(239,68,68,0.4)" }}>
+                    بله، خروج
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
           <style>{`.spin { animation: spin 0.6s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </>
