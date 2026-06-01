@@ -259,31 +259,6 @@ export default function ParentDashboard() {
         {/* ── Scrollable content ── */}
         <div style={{ flex: 1, overflowY: "auto", padding: "14px 20px 36px" }}>
 
-          {/* Quick counters */}
-          {(notifications.length > 0 || examSchedule.length > 0) && (
-            <div style={{ display: "flex", gap: 10, marginBottom: 12, ...cardAnim(2) }}>
-              {notifications.length > 0 && (
-                <div style={{ ...glassCard("#f59e0b", "#d97706", { flex: 1, padding: "14px 16px", display: "flex", alignItems: "center", gap: 10 }) }}>
-                  <div style={shine()} />
-                  <div style={{ ...glassIcon("#f59e0b", 40) }}><Bell size={18} color="white" /></div>
-                  <div style={{ position: "relative", zIndex: 1 }}>
-                    <div style={{ fontWeight: 900, color: "white", fontSize: 20 }}>{notifications.length.toLocaleString("fa-IR")}</div>
-                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.82)", fontWeight: 700 }}>اعلان مدرسه</div>
-                  </div>
-                </div>
-              )}
-              {examSchedule.length > 0 && (
-                <div style={{ ...glassCard("#f43f5e", "#e11d48", { flex: 1, padding: "14px 16px", display: "flex", alignItems: "center", gap: 10 }) }}>
-                  <div style={shine()} />
-                  <div style={{ ...glassIcon("#f43f5e", 40) }}><Calendar size={18} color="white" /></div>
-                  <div style={{ position: "relative", zIndex: 1 }}>
-                    <div style={{ fontWeight: 900, color: "white", fontSize: 20 }}>{examSchedule.length.toLocaleString("fa-IR")}</div>
-                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.82)", fontWeight: 700 }}>امتحان پیش‌رو</div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Child stats */}
           {currentChild && childSummary && (
@@ -378,22 +353,40 @@ export default function ParentDashboard() {
               )}
 
               {/* Notifications */}
-              {notifications.length > 0 && (
-                <div style={{ ...glassCard("#f59e0b", "#d97706", { padding: 18, marginBottom: 12 }), ...cardAnim(12) }}>
-                  <div style={shine()} />
-                  <div style={{ fontWeight: 800, color: "white", marginBottom: 10, fontSize: 14, display: "flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1, textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>
-                    <Bell size={14} /> اعلانات مدرسه
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
-                    {notifications.slice(0, 5).map((n: any) => (
+              <div style={{ ...glassCard("#f59e0b", "#d97706", { padding: 18, marginBottom: 12 }), ...cardAnim(12) }}>
+                <div style={shine()} />
+                <div style={{ fontWeight: 800, color: "white", marginBottom: 10, fontSize: 14, display: "flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1, textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>
+                  <Bell size={14} /> اعلانات مدرسه
+                  {notifications.length > 0 && (
+                    <span style={{
+                      minWidth: 20, height: 20, borderRadius: 999,
+                      background: "#dc2626",
+                      border: "2px solid rgba(255,255,255,0.80)",
+                      color: "white", fontSize: 10, fontWeight: 900,
+                      display: "inline-flex", alignItems: "center", justifyContent: "center",
+                      padding: "0 5px",
+                      boxShadow: "0 2px 8px rgba(220,38,38,0.55)",
+                      lineHeight: 1,
+                    }}>
+                      {notifications.length.toLocaleString("fa-IR")}
+                    </span>
+                  )}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
+                  {notifications.length === 0 ? (
+                    <div style={{ textAlign: "center", padding: "14px 0", color: "rgba(255,255,255,0.62)", fontSize: 13, fontWeight: 600 }}>
+                      اعلانی وجود ندارد
+                    </div>
+                  ) : (
+                    notifications.slice(0, 5).map((n: any) => (
                       <div key={n.id} style={{ background: "rgba(255,255,255,0.14)", borderRadius: 10, padding: "10px 14px", borderRight: "3px solid rgba(255,255,255,0.5)" }}>
                         <div style={{ fontWeight: 700, color: "white", fontSize: 13, marginBottom: 3, textShadow: "0 1px 4px rgba(0,0,0,0.18)" }}>{n.title}</div>
-                        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>{n.message}</div>
+                        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>{n.body}</div>
                       </div>
-                    ))}
-                  </div>
+                    ))
+                  )}
                 </div>
-              )}
+              </div>
 
               {/* Exam schedule — weekly calendar */}
               <div style={{ ...glassCard("#f43f5e", "#e11d48", { padding: 18, marginBottom: 12 }), ...cardAnim(13) }}>
