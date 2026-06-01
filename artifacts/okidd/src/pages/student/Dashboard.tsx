@@ -192,8 +192,10 @@ export default function StudentDashboard() {
             <span style={{ color: "#1e1b4b", fontWeight: 800, fontSize: 16 }}>{displayScore.toLocaleString("fa-IR")}</span>
           </div>
           {/* Greeting */}
-          <div style={{ color: "#1e1b4b", fontWeight: 800, fontSize: 17, textAlign: "center", lineHeight: 1.35 }}>
-            {user?.name?.split(" ")[0]} عزیزم خوش اومدی
+          <div className="glow-greeting" style={{ fontWeight: 800, fontSize: 15, textAlign: "center", lineHeight: 1.5, flex: 1, padding: "0 8px" }}>
+            <span>{user?.name?.split(" ")[0]} عزیزم به مدرسه </span>
+            <span className="glow-school">{schoolInfo?.name ?? "..."}</span>
+            <span> خوش آمدی</span>
           </div>
           {/* Logout */}
           <button onClick={logout} title="خروج" style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.72)", backdropFilter: "blur(14px)", border: "1.5px solid rgba(255,255,255,0.9)", boxShadow: "0 4px 16px rgba(0,0,0,0.07)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#ef4444" }}>
@@ -607,6 +609,26 @@ export default function StudentDashboard() {
         @keyframes pulse-glow {
           0%,100%{ opacity:0.5; transform:scale(1) }
           50%    { opacity:1;   transform:scale(1.35) }
+        }
+
+        /* ── Greeting glow ── */
+        .glow-greeting { color: #1e1b4b; animation: text-shimmer 4s ease-in-out infinite; }
+        .glow-school {
+          background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899, #6366f1);
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          animation: shimmer-move 3s linear infinite;
+          filter: drop-shadow(0 0 6px rgba(139,92,246,0.6));
+        }
+        @keyframes shimmer-move {
+          0%   { background-position: 0% center }
+          100% { background-position: 200% center }
+        }
+        @keyframes text-shimmer {
+          0%,100% { opacity: 1 }
+          50%     { opacity: 0.82 }
         }
 
         /* ── Stars ── */
