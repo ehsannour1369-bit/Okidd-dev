@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
-import { Trophy, Star, Users, BookOpen, GraduationCap, TrendingUp } from "lucide-react";
+import { Trophy, Star, Users, BookOpen, GraduationCap, TrendingUp, ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from "recharts";
 
 interface RankingEntry { studentId: number; studentName: string; score: number; rank: number; }
@@ -47,6 +48,7 @@ function CustomTooltip({ active, payload, label }: any) {
 
 export default function StudentRanking() {
   const { user } = useAuthStore();
+  const [, navigate] = useLocation();
   const isGirl = user?.gender === "female";
   const accent = isGirl ? "#e879f9" : "#818cf8";
   const accentDark = isGirl ? "#c026d3" : "#4f46e5";
@@ -111,9 +113,14 @@ export default function StudentRanking() {
 
   return (
     <div style={{ padding: "24px 20px 40px", minHeight: "100vh", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: "white", marginBottom: 20, textShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>
-        🏆 رتبه‌بندی
-      </h1>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+        <button onClick={() => navigate("/student")} style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.22)", border: "1.5px solid rgba(255,255,255,0.4)", borderRadius: 12, padding: "8px 14px", color: "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 600, cursor: "pointer", backdropFilter: "blur(8px)" }}>
+          <ChevronRight size={16} /> برگشت
+        </button>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "white", margin: 0, textShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>
+          🏆 رتبه‌بندی
+        </h1>
+      </div>
 
       {/* Score breakdown card */}
       <div style={{ ...GLASS, background: "rgba(255,255,255,0.38)", borderRadius: 22, padding: 20, marginBottom: 20 }}>

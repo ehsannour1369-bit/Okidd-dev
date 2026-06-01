@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
-import { BookOpen, CheckCircle2, Play, FileText, Film, Gamepad2, ClipboardCheck, PenLine, PlayCircle } from "lucide-react";
+import { BookOpen, CheckCircle2, Play, FileText, Film, Gamepad2, ClipboardCheck, PenLine, PlayCircle, ChevronRight } from "lucide-react";
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 
@@ -97,11 +97,24 @@ export default function StudentBooks() {
 
   const completedLessonIds = new Set(progress.filter(p => p.completed).map(p => p.lessonId));
 
+  // Smart back: lesson → book → dashboard
+  const handleBack = () => {
+    if (selectedLesson) { setSelectedLesson(null); return; }
+    if (selectedBook) { setSelectedBook(null); return; }
+    navigate("/student");
+  };
+  const backLabel = selectedLesson ? "بازگشت به دروس" : selectedBook ? "بازگشت به کتاب‌ها" : "برگشت";
+
   return (
     <div style={{ padding: "24px 20px", minHeight: "100vh", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: "white", marginBottom: 24, textShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>
-        📚 کتاب‌هایم
-      </h1>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+        <button onClick={handleBack} style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.22)", border: "1.5px solid rgba(255,255,255,0.4)", borderRadius: 12, padding: "8px 14px", color: "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 600, cursor: "pointer", backdropFilter: "blur(8px)" }}>
+          <ChevronRight size={16} /> {backLabel}
+        </button>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "white", margin: 0, textShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>
+          📚 کتاب‌هایم
+        </h1>
+      </div>
 
       {!selectedBook ? (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16 }}>

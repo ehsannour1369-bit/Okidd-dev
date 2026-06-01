@@ -3,7 +3,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { showToast } from "../../lib/toast";
-import { Bell, Calendar, Plus, X, MessageCircle, ChevronDown, ChevronUp, Send as SendIcon } from "lucide-react";
+import { Bell, Calendar, Plus, X, MessageCircle, ChevronDown, ChevronUp, Send as SendIcon, ChevronRight } from "lucide-react";
+import { useLocation } from "wouter";
 import NotificationThread from "../../components/NotificationThread";
 
 const GLASS: React.CSSProperties = {
@@ -34,6 +35,7 @@ const TARGET_OPTIONS = [
 
 export default function StudentNotifications() {
   const { user } = useAuthStore();
+  const [, navigate] = useLocation();
   const qc = useQueryClient();
   const [tab, setTab] = useState<"received" | "sent">("received");
   const [showForm, setShowForm] = useState(false);
@@ -99,7 +101,12 @@ export default function StudentNotifications() {
     <div style={{ padding: "24px 20px", minHeight: "100vh", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "white", textShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>🔔 اعلانات و پیام‌ها</h1>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <button onClick={() => navigate("/student")} style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.22)", border: "1.5px solid rgba(255,255,255,0.4)", borderRadius: 12, padding: "8px 14px", color: "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 600, cursor: "pointer", backdropFilter: "blur(8px)" }}>
+            <ChevronRight size={16} /> برگشت
+          </button>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "white", margin: 0, textShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>🔔 اعلانات</h1>
+        </div>
         <button onClick={() => setShowForm(!showForm)}
           style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", background: `linear-gradient(135deg, ${accentColor}, ${user?.gender === "female" ? "#f472b6" : "#a855f7"})`, border: "none", borderRadius: 12, color: "white", fontSize: 14, fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", boxShadow: `0 4px 15px ${accentColor}40` }}>
           <Plus size={16} /> پیام جدید
