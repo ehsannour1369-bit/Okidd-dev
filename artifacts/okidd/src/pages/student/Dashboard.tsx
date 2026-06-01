@@ -192,8 +192,8 @@ export default function StudentDashboard() {
             <span style={{ color: "#1e1b4b", fontWeight: 800, fontSize: 16 }}>{displayScore.toLocaleString("fa-IR")}</span>
           </div>
           {/* Greeting */}
-          <div style={{ color: "#374151", fontWeight: 700, fontSize: 14 }}>
-            {isGirl ? "🌸" : "🚀"} سلام {user?.name?.split(" ")[0]}
+          <div style={{ color: "#1e1b4b", fontWeight: 800, fontSize: 17, textAlign: "center", lineHeight: 1.35 }}>
+            {user?.name?.split(" ")[0]} عزیزم خوش اومدی
           </div>
           {/* Logout */}
           <button onClick={logout} title="خروج" style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.72)", backdropFilter: "blur(14px)", border: "1.5px solid rgba(255,255,255,0.9)", boxShadow: "0 4px 16px rgba(0,0,0,0.07)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#ef4444" }}>
