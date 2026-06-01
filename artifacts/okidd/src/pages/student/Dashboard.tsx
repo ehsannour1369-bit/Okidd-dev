@@ -23,14 +23,14 @@ const PURPLE = "#8b5cf6";
 /* Colored glassmorphism card */
 function glassCard(color: string, extra?: React.CSSProperties): React.CSSProperties {
   return {
-    background: `linear-gradient(145deg, ${color}30, ${color}18)`,
+    background: `linear-gradient(145deg, ${color}70, ${color}45)`,
     backdropFilter: "blur(22px)",
     WebkitBackdropFilter: "blur(22px)",
-    border: `1.5px solid ${color}50`,
+    border: `1.5px solid ${color}90`,
     borderRadius: 24,
     cursor: "pointer",
     transition: "transform 0.28s cubic-bezier(.34,1.56,.64,1), box-shadow 0.28s ease",
-    boxShadow: `0 6px 28px ${color}30, inset 0 1px 0 rgba(255,255,255,0.45)`,
+    boxShadow: `0 6px 28px ${color}55, inset 0 1px 0 rgba(255,255,255,0.35)`,
     position: "relative",
     overflow: "hidden",
     ...extra,
