@@ -245,26 +245,24 @@ function LessonUnlockBook({ book, classId, unlocks, dates }: { book: any; classI
           const isUnlocked = unlockedIds.has(lessonId);
           const date = dateMap[lessonId];
           return (
-            <div key={lessonId} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-              <button onClick={() => mutate({ lessonId, unlock: !isUnlocked })} style={{
-                width: 44, height: 44, borderRadius: 10, cursor: "pointer", fontFamily: "Vazirmatn",
-                background: isUnlocked ? "rgba(34,197,94,0.2)" : "rgba(248,113,113,0.1)",
-                border: `1px solid ${isUnlocked ? "rgba(34,197,94,0.5)" : "rgba(248,113,113,0.3)"}`,
-                color: isUnlocked ? "#4ade80" : "#f87171", fontSize: 12, fontWeight: 600,
-                display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 1,
-              }}>
+            <button key={lessonId} onClick={() => mutate({ lessonId, unlock: !isUnlocked })} style={{
+              minWidth: 72, height: 56, borderRadius: 10, cursor: "pointer", fontFamily: "Vazirmatn",
+              background: isUnlocked ? "rgba(34,197,94,0.2)" : "rgba(248,113,113,0.1)",
+              border: `1px solid ${isUnlocked ? "rgba(34,197,94,0.5)" : "rgba(248,113,113,0.3)"}`,
+              color: isUnlocked ? "#4ade80" : "#f87171",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              flexDirection: "column", gap: 3, padding: "6px 10px",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 700 }}>
                 {isUnlocked ? <Unlock size={10} /> : <Lock size={10} />}
                 {lessonId}
-              </button>
-              {date && (
-                <span style={{
-                  fontSize: 9, color: "#60a5fa", textAlign: "center",
-                  background: "rgba(59,130,246,0.1)", borderRadius: 4,
-                  padding: "1px 4px", direction: "ltr", whiteSpace: "nowrap",
-                  maxWidth: 44, overflow: "hidden", textOverflow: "ellipsis",
-                }}>{date}</span>
+              </div>
+              {date ? (
+                <span style={{ fontSize: 10, color: "#60a5fa", direction: "ltr", fontWeight: 500 }}>{date}</span>
+              ) : (
+                <span style={{ fontSize: 10, color: "rgba(255,255,255,0.2)" }}>—</span>
               )}
-            </div>
+            </button>
           );
         })}
       </div>
