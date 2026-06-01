@@ -184,8 +184,17 @@ export default function StudentDashboard() {
 
       <div style={{ position: "relative", zIndex: 1, minHeight: "100vh" }}>
 
+        {/* ── Logo banner ── */}
+        {schoolInfo?.logoUrl && (
+          <div style={{ display: "flex", justifyContent: "center", paddingTop: 18, paddingBottom: 2 }}>
+            <div style={{ width: 82, height: 82, borderRadius: 22, background: "rgba(255,255,255,0.82)", backdropFilter: "blur(16px)", border: "1.5px solid rgba(255,255,255,0.9)", boxShadow: "0 6px 28px rgba(0,0,0,0.09)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <img src={schoolInfo.logoUrl} alt="لوگو" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+            </div>
+          </div>
+        )}
+
         {/* ── Top bar: score + greeting + logout ── */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 18px 0", direction: "ltr" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: schoolInfo?.logoUrl ? "10px 18px 0" : "18px 18px 0", direction: "ltr" }}>
           {/* Score */}
           <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.72)", backdropFilter: "blur(14px)", border: "1.5px solid rgba(255,255,255,0.9)", borderRadius: 999, padding: "9px 18px", boxShadow: "0 4px 18px rgba(0,0,0,0.07)" }}>
             <span style={{ fontSize: 18 }}>⭐</span>

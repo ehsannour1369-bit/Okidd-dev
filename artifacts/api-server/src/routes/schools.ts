@@ -195,6 +195,18 @@ router.delete("/schools/:id", async (req, res) => {
   res.status(204).end();
 });
 
+// ─── Update logo ──────────────────────────────────────────────────────────────
+router.patch("/schools/:id/logo", async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { logoUrl } = req.body;
+  const [school] = await db.update(schoolsTable)
+    .set({ logoUrl: logoUrl ?? null })
+    .where(eq(schoolsTable.id, id))
+    .returning();
+  if (!school) { res.status(404).json({ error: "Not found" }); return; }
+  res.json({ logoUrl: school.logoUrl });
+});
+
 // ─── Assign existing user as manager ─────────────────────────────────────────
 router.patch("/schools/:id/assign-manager", async (req, res) => {
   const id = parseInt(req.params.id);

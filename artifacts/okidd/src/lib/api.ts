@@ -29,4 +29,15 @@ export const api = {
   put: <T>(path: string, body: unknown) => apiRequest<T>("PUT", path, body),
   patch: <T>(path: string, body?: unknown) => apiRequest<T>("PATCH", path, body),
   delete: <T>(path: string) => apiRequest<T>("DELETE", path),
+  upload: async <T>(path: string, formData: FormData): Promise<T> => {
+    const token = useAuthStore.getState().token;
+    const headers: Record<string, string> = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    const res = await fetch(`${BASE}${path}`, { method: "POST", headers, body: formData });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: res.statusText }));
+      throw new Error(err.error || res.statusText);
+    }
+    return res.json();
+  },
 };

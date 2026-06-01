@@ -12,6 +12,7 @@ export const schoolsTable = pgTable("schools", {
   managerName: text("manager_name"),
   managerPhone: text("manager_phone"),
   managerNationalId: text("manager_national_id"),
+  logoUrl: text("logo_url"),
   status: text("status").notNull().default("inactive"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
