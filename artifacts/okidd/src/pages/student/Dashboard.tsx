@@ -208,7 +208,7 @@ export default function StudentDashboard() {
 
   /* ─────────────────────────────────── RENDER ─────────────────────────────────── */
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#e8eeff 0%,#f0eaff 40%,#eafaf3 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", position: "relative", overflow: "hidden" }}>
+    <div style={{ height: "100dvh", background: "linear-gradient(160deg,#e8eeff 0%,#f0eaff 40%,#eafaf3 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", position: "relative", overflow: "hidden" }}>
 
       {/* Animated background blobs with glow */}
       <div className="blob b1" />
@@ -226,7 +226,7 @@ export default function StudentDashboard() {
       <div className="shoot sh2" />
       <div className="shoot sh3" />
 
-      <div style={{ position: "relative", zIndex: 1, minHeight: "100vh" }}>
+      <div style={{ position: "relative", zIndex: 1, height: "100%", display: "flex", flexDirection: "column" }}>
 
         {/* ── Logo banner ── */}
         {schoolInfo?.logoUrl && (
@@ -262,22 +262,22 @@ export default function StudentDashboard() {
 
         {/* ══════════ HOME ══════════ */}
         {screen === "home" && (
-          <div style={{ padding: "16px 16px 32px" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 13, maxWidth: 560, margin: "0 auto" }}>
+          <div style={{ flex: 1, padding: "10px 14px 8px", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gridTemplateRows: "1.8fr 1fr 1fr 1fr", gap: 10, flex: 1, maxWidth: 560, margin: "0 auto", width: "100%" }}>
 
               {/* ① PLAY — full width */}
               <div
-                style={{ gridColumn: "span 2", ...glassCard(accent, { padding: "26px 22px", display: "flex", alignItems: "center", gap: 18, background: `linear-gradient(145deg, ${accent}38, ${accentDark}20)`, border: `1.5px solid ${accent}60` }), ...cardAnim('up', 0) }}
+                style={{ gridColumn: "span 2", ...glassCard(accent, { padding: "14px 18px", display: "flex", alignItems: "center", gap: 14, background: `linear-gradient(145deg, ${accent}38, ${accentDark}20)`, border: `1.5px solid ${accent}60` }), ...cardAnim('up', 0) }}
                 onClick={() => enrolledBooks.length > 0 ? navigate(`/student/lesson-player?bookId=${enrolledBooks[0].id}&lessonId=0`) : setScreen("books")}
                 onMouseEnter={e => hoverIn(e.currentTarget, accent)}
                 onMouseLeave={e => hoverOut(e.currentTarget, accent)}
               >
-                <div style={{ ...glassIconStyle(accent, 72) }}>
-                  <Play size={34} color={accentDark} fill={accentDark} />
+                <div style={{ ...glassIconStyle(accent, 58) }}>
+                  <Play size={27} color={accentDark} fill={accentDark} />
                 </div>
                 <div>
-                  <div style={{ fontWeight: 800, fontSize: 22, color: "#1e1b4b", lineHeight: 1.2 }}>شروع یادگیری!</div>
-                  <div style={{ fontSize: 13, color: accentDark, marginTop: 5 }}>
+                  <div style={{ fontWeight: 800, fontSize: 19, color: "#1e1b4b", lineHeight: 1.2 }}>شروع یادگیری!</div>
+                  <div style={{ fontSize: 12, color: accentDark, marginTop: 4 }}>
                     {enrolledBooks.length > 0 ? `${enrolledBooks.length} کتاب در دسترس` : "کتابی ثبت نشده"}
                   </div>
                 </div>
@@ -285,66 +285,66 @@ export default function StudentDashboard() {
               </div>
 
               {/* ② کتاب‌هایم — Blue  (RTL: right col) */}
-              <div style={{ ...glassCard(BLUE, { padding: "22px 18px" }), ...cardAnim('right', 0.15) }}
+              <div style={{ ...glassCard(BLUE, { padding: "14px 12px" }), ...cardAnim('right', 0.15) }}
                 onClick={() => navigate("/student/books")}
                 onMouseEnter={e => hoverIn(e.currentTarget, BLUE)}
                 onMouseLeave={e => hoverOut(e.currentTarget, BLUE)}>
-                <div style={{ ...glassIconStyle(BLUE), marginBottom: 14 }}>
-                  <BookOpen size={26} color={BLUE} />
+                <div style={{ ...glassIconStyle(BLUE, 44), marginBottom: 8 }}>
+                  <BookOpen size={21} color={BLUE} />
                 </div>
-                <div style={{ fontWeight: 700, fontSize: 16, color: "#1e1b4b" }}>کتاب‌هایم</div>
-                <div style={{ fontSize: 12, color: "#4b5563", marginTop: 5 }}>{enrolledBooks.length} کتاب</div>
+                <div style={{ fontWeight: 700, fontSize: 14, color: "#1e1b4b" }}>کتاب‌هایم</div>
+                <div style={{ fontSize: 11, color: "#4b5563", marginTop: 3 }}>{enrolledBooks.length} کتاب</div>
                 <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${BLUE}70, ${BLUE}20)`, borderRadius: "0 0 24px 24px" }} />
               </div>
 
               {/* ③ معلم من — Pink  (RTL: left col) */}
-              <div style={{ ...glassCard(PINK, { padding: "22px 18px" }), ...cardAnim('left', 0.15) }}
+              <div style={{ ...glassCard(PINK, { padding: "14px 12px" }), ...cardAnim('left', 0.15) }}
                 onClick={() => navigate("/student/teacher")}
                 onMouseEnter={e => hoverIn(e.currentTarget, PINK)}
                 onMouseLeave={e => hoverOut(e.currentTarget, PINK)}>
-                <div style={{ ...glassIconStyle(PINK), marginBottom: 14 }}>
-                  <GraduationCap size={26} color={PINK} />
+                <div style={{ ...glassIconStyle(PINK, 44), marginBottom: 8 }}>
+                  <GraduationCap size={21} color={PINK} />
                 </div>
-                <div style={{ fontWeight: 700, fontSize: 16, color: "#1e1b4b" }}>معلم من</div>
-                <div style={{ fontSize: 12, color: "#4b5563", marginTop: 5 }}>مشاهده کلاس</div>
+                <div style={{ fontWeight: 700, fontSize: 14, color: "#1e1b4b" }}>معلم من</div>
+                <div style={{ fontSize: 11, color: "#4b5563", marginTop: 3 }}>مشاهده کلاس</div>
                 <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${PINK}70, ${PINK}20)`, borderRadius: "0 0 24px 24px" }} />
               </div>
 
               {/* ④ مدرسه من — Orange  (RTL: right col, row 2) */}
-              <div style={{ ...glassCard(ORANGE, { padding: "22px 18px" }), ...cardAnim('right', 0.3) }}
+              <div style={{ ...glassCard(ORANGE, { padding: "14px 12px" }), ...cardAnim('right', 0.3) }}
                 onClick={() => setScreen("school")}
                 onMouseEnter={e => hoverIn(e.currentTarget, ORANGE)}
                 onMouseLeave={e => hoverOut(e.currentTarget, ORANGE)}>
-                <div style={{ ...glassIconStyle(ORANGE), marginBottom: 14 }}>
-                  <Building2 size={26} color={ORANGE} />
+                <div style={{ ...glassIconStyle(ORANGE, 44), marginBottom: 8 }}>
+                  <Building2 size={21} color={ORANGE} />
                 </div>
-                <div style={{ fontWeight: 700, fontSize: 16, color: "#1e1b4b" }}>مدرسه من</div>
-                <div style={{ fontSize: 12, color: "#4b5563", marginTop: 5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div style={{ fontWeight: 700, fontSize: 14, color: "#1e1b4b" }}>مدرسه من</div>
+                <div style={{ fontSize: 11, color: "#4b5563", marginTop: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {schoolInfo?.name ?? "—"}
                 </div>
                 <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${ORANGE}70, ${ORANGE}20)`, borderRadius: "0 0 24px 24px" }} />
               </div>
 
               {/* ⑤ رتبه‌ام — Green  (RTL: left col, row 2) */}
-              <div style={{ ...glassCard(GREEN, { padding: "22px 18px" }), ...cardAnim('left', 0.3) }}
+              <div style={{ ...glassCard(GREEN, { padding: "14px 12px" }), ...cardAnim('left', 0.3) }}
                 onClick={() => navigate("/student/ranking")}
                 onMouseEnter={e => hoverIn(e.currentTarget, GREEN)}
                 onMouseLeave={e => hoverOut(e.currentTarget, GREEN)}>
-                <div style={{ ...glassIconStyle(GREEN), marginBottom: 14 }}>
-                  <Trophy size={26} color={GREEN} />
+                <div style={{ ...glassIconStyle(GREEN, 44), marginBottom: 8 }}>
+                  <Trophy size={21} color={GREEN} />
                 </div>
-                <div style={{ fontWeight: 700, fontSize: 16, color: "#1e1b4b" }}>رتبه‌ام</div>
-                <div style={{ fontSize: 12, color: "#4b5563", marginTop: 5 }}>{displayScore.toLocaleString("fa-IR")} امتیاز</div>
+                <div style={{ fontWeight: 700, fontSize: 14, color: "#1e1b4b" }}>رتبه‌ام</div>
+                <div style={{ fontSize: 11, color: "#4b5563", marginTop: 3 }}>{displayScore.toLocaleString("fa-IR")} امتیاز</div>
                 <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${GREEN}70, ${GREEN}20)`, borderRadius: "0 0 24px 24px" }} />
               </div>
 
               {/* ⑥ اعلانات — Purple, full width */}
-              <div style={{ gridColumn: "span 2", ...glassCard(PURPLE, { padding: "20px 22px", display: "flex", alignItems: "center", gap: 16 }), ...cardAnim('up', 0.45) }}
+              <div style={{ gridColumn: "span 2", ...glassCard(PURPLE, { padding: "12px 18px", display: "flex", alignItems: "center", gap: 14 }), ...cardAnim('up', 0.45) }}
                 onClick={() => setNotifOpen(true)}
                 onMouseEnter={e => hoverIn(e.currentTarget, PURPLE)}
                 onMouseLeave={e => hoverOut(e.currentTarget, PURPLE)}>
-                <div style={{ ...glassIconStyle(PURPLE, 54), position: "relative" }}>
-                  <Bell size={24} color={PURPLE} />
+                <div style={{ ...glassIconStyle(PURPLE, 44), position: "relative" }}>
+                  <Bell size={20} color={PURPLE} />
                   {receivedNotifs.length > 0 && (
                     <span style={{ position: "absolute", top: -4, right: -4, width: 17, height: 17, background: "#ef4444", borderRadius: "50%", border: "2px solid white", fontSize: 9, color: "white", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>
                       {receivedNotifs.length > 9 ? "9+" : receivedNotifs.length}
