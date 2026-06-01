@@ -26,6 +26,7 @@ import SchoolTeachers from "./pages/school/Teachers";
 import SchoolStudents from "./pages/school/Students";
 import SchoolNotifications from "./pages/school/Notifications";
 import SchoolExams from "./pages/school/Exams";
+import SchoolReport from "./pages/school/Report";
 
 import BranchDashboard from "./pages/branch/Dashboard";
 import BranchClasses from "./pages/branch/Classes";
@@ -120,6 +121,7 @@ function AppRouter() {
       <Route path="/school/students"><LayoutRoute component={SchoolStudents} roles={["school_manager"]} /></Route>
       <Route path="/school/notifications"><LayoutRoute component={SchoolNotifications} roles={["school_manager"]} /></Route>
       <Route path="/school/exams"><LayoutRoute component={SchoolExams} roles={["school_manager"]} /></Route>
+      <Route path="/school/report"><LayoutRoute component={SchoolReport} roles={["school_manager"]} /></Route>
 
       {/* Branch Manager */}
       <Route path="/branch"><LayoutRoute component={BranchDashboard} roles={["branch_manager"]} /></Route>

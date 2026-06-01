@@ -21,6 +21,7 @@ import studentProgressRouter from "./studentProgress";
 import consultantsRouter from "./consultants";
 import consultationsRouter from "./consultations";
 import gameScoresRouter from "./gameScores";
+import schoolReportRouter from "./schoolReport";
 
 const router: IRouter = Router();
 
@@ -46,5 +47,6 @@ router.use(studentProgressRouter);
 router.use(consultantsRouter);
 router.use(consultationsRouter);
 router.use(gameScoresRouter);
+router.use(schoolReportRouter);
 
 export default router;
