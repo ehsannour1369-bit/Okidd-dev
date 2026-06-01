@@ -12,6 +12,9 @@ export interface AuthUser {
   branchId?: number | null;
   gender?: string | null;
   status: string;
+  avatarUrl?: string | null;
+  phone?: string | null;
+  nationalId?: string | null;
 }
 
 interface AuthState {

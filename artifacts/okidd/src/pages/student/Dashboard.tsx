@@ -1,13 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import {
   Lock, CheckCircle, ChevronRight, ChevronDown, ChevronUp,
   Bell, Plus, Send as SendIcon, MessageCircle,
   BookOpen, GraduationCap, Trophy, Play,
   Building2, MapPin, Phone, Users, X, LogOut,
+  Camera, Eye, EyeOff, User,
 } from "lucide-react";
 import NotificationThread from "../../components/NotificationThread";
 
@@ -76,6 +77,12 @@ export default function StudentDashboard() {
   const [showNotifForm, setShowNotifForm] = useState(false);
   const [notifForm, setNotifForm]         = useState({ title: "", body: "", targetRole: "teacher" });
   const [expandedNotifIds, setExpandedNotifIds] = useState<Set<number>>(new Set());
+
+  /* Profile panel */
+  const [profileOpen, setProfileOpen]     = useState(false);
+  const [showPassword, setShowPassword]   = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const avatarRef = useRef<HTMLInputElement>(null);
 
   const { data: enrolledBooks = [] } = useQuery<any[]>({
     queryKey: ["enrolled-books", user?.id],
@@ -155,6 +162,23 @@ export default function StudentDashboard() {
   );
 
 
+  /* Avatar upload */
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !user?.id) return;
+    setAvatarUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const { url } = await api.upload<{ url: string }>("/content/upload", form);
+      const updated = await api.patch<any>(`/users/${user.id}/avatar`, { avatarUrl: url });
+      useAuthStore.getState().setAuth({ ...user, avatarUrl: updated.avatarUrl }, useAuthStore.getState().token!);
+    } catch { /* silent */ } finally {
+      setAvatarUploading(false);
+      if (avatarRef.current) avatarRef.current.value = "";
+    }
+  }
+
   const drawerInput: React.CSSProperties = {
     width: "100%", background: "rgba(255,255,255,0.7)",
     border: "1px solid rgba(200,200,220,0.5)", borderRadius: 9,
@@ -206,9 +230,11 @@ export default function StudentDashboard() {
             <span className="glow-school">{schoolInfo?.name ?? "..."}</span>
             <span> خوش آمدی</span>
           </div>
-          {/* Logout */}
-          <button onClick={logout} title="خروج" style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.72)", backdropFilter: "blur(14px)", border: "1.5px solid rgba(255,255,255,0.9)", boxShadow: "0 4px 16px rgba(0,0,0,0.07)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#ef4444" }}>
-            <LogOut size={18} />
+          {/* Profile button */}
+          <button onClick={() => setProfileOpen(true)} style={{ width: 44, height: 44, borderRadius: "50%", background: user?.avatarUrl ? "transparent" : `linear-gradient(135deg,${accent},${accentDark})`, backdropFilter: "blur(14px)", border: `2px solid ${accent}`, boxShadow: `0 4px 16px ${accent}50`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0, overflow: "hidden", flexShrink: 0 }}>
+            {user?.avatarUrl
+              ? <img src={user.avatarUrl} alt="پروفایل" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              : <User size={20} color="white" />}
           </button>
         </div>
 
@@ -566,6 +592,70 @@ export default function StudentDashboard() {
         </div>
       </div>
       {notifOpen && <div onClick={() => setNotifOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 499 }} />}
+
+      {/* ══════════ PROFILE PANEL ══════════ */}
+      {profileOpen && (
+        <>
+          <div onClick={() => setProfileOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 800, background: "rgba(0,0,0,0.35)", backdropFilter: "blur(4px)" }} />
+          <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 801, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(28px)", borderRadius: "28px 28px 0 0", padding: "28px 24px 40px", boxShadow: "0 -10px 50px rgba(0,0,0,0.14)", direction: "rtl", fontFamily: "Vazirmatn" }}>
+            {/* Handle bar */}
+            <div style={{ width: 40, height: 4, background: "rgba(0,0,0,0.15)", borderRadius: 99, margin: "0 auto 24px" }} />
+
+            {/* Avatar */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 28 }}>
+              <div style={{ position: "relative", width: 96, height: 96, marginBottom: 12 }}>
+                <div style={{ width: 96, height: 96, borderRadius: "50%", overflow: "hidden", background: `linear-gradient(135deg,${accent},${accentDark})`, border: `3px solid ${accent}`, boxShadow: `0 6px 24px ${accent}60`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {user?.avatarUrl
+                    ? <img src={user.avatarUrl} alt="پروفایل" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    : <User size={40} color="white" />}
+                </div>
+                {/* Camera button overlay */}
+                <button onClick={() => avatarRef.current?.click()} disabled={avatarUploading} style={{ position: "absolute", bottom: 0, left: 0, width: 30, height: 30, borderRadius: "50%", background: `linear-gradient(135deg,${accent},${accentDark})`, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+                  {avatarUploading ? <div style={{ width: 10, height: 10, border: "2px solid white", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} /> : <Camera size={14} color="white" />}
+                </button>
+              </div>
+              <input ref={avatarRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleAvatarUpload} />
+              <div style={{ fontWeight: 800, fontSize: 18, color: "#1e1b4b" }}>{user?.name}</div>
+              <div style={{ fontSize: 12, color: accent, marginTop: 3, fontWeight: 600 }}>دانش‌آموز</div>
+            </div>
+
+            {/* Info rows */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
+              {/* Username */}
+              <div style={{ background: "rgba(248,247,255,0.9)", border: "1.5px solid rgba(200,190,255,0.35)", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: `${accent}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <User size={16} color={accentDark} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 10, color: "#9ca3af", marginBottom: 2 }}>نام کاربری</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#1e1b4b", direction: "ltr", textAlign: "right" }}>{user?.email}</div>
+                </div>
+              </div>
+              {/* Password */}
+              <div style={{ background: "rgba(248,247,255,0.9)", border: "1.5px solid rgba(200,190,255,0.35)", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: `${accent}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Lock size={16} color={accentDark} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 10, color: "#9ca3af", marginBottom: 2 }}>رمز عبور</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: "#1e1b4b", letterSpacing: showPassword ? 0 : 3, direction: "ltr", textAlign: "right" }}>
+                    {showPassword ? (user?.nationalId ?? "—") : "••••••••••"}
+                  </div>
+                </div>
+                <button onClick={() => setShowPassword(v => !v)} style={{ background: "none", border: "none", cursor: "pointer", color: accentDark, padding: 4 }}>
+                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Logout button */}
+            <button onClick={() => { setProfileOpen(false); logout(); }} style={{ width: "100%", padding: "14px 0", background: "linear-gradient(135deg,#ef4444,#dc2626)", border: "none", borderRadius: 16, color: "white", fontFamily: "Vazirmatn", fontSize: 15, fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 6px 20px rgba(239,68,68,0.4)" }}>
+              <LogOut size={18} /> خروج از حساب
+            </button>
+          </div>
+          <style>{`.spin { animation: spin 0.6s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </>
+      )}
 
       <style>{`
         /* ── Blobs ── */

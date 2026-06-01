@@ -13,6 +13,7 @@ export const usersTable = pgTable("users", {
   schoolId: integer("school_id"),
   nationalId: text("national_id"),
   gender: text("gender").default("male"),
+  avatarUrl: text("avatar_url"),
   parentId: integer("parent_id"),
   lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

@@ -45,6 +45,18 @@ router.put("/users/:id", async (req, res) => {
   res.json(safeUser);
 });
 
+router.patch("/users/:id/avatar", async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { avatarUrl } = req.body;
+  const [user] = await db.update(usersTable)
+    .set({ avatarUrl: avatarUrl ?? null })
+    .where(eq(usersTable.id, id))
+    .returning();
+  if (!user) { res.status(404).json({ error: "Not found" }); return; }
+  const { password: _pw, ...safeUser } = user;
+  res.json(safeUser);
+});
+
 router.delete("/users/:id", async (req, res) => {
   const id = parseInt(req.params.id);
   await db.delete(usersTable).where(eq(usersTable.id, id));
