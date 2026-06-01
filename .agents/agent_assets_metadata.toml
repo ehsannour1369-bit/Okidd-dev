@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "iClXzcvdrgqUBQrOtnTAZ"
+uri = "file://screenshots/okidd-ui-screenshots.zip"
+type = "unspecified"
+title = "oKidd UI/UX Screenshots — همه نقش‌ها"

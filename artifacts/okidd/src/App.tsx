@@ -41,6 +41,7 @@ import TeacherMySchools from "./pages/teacher/MySchools";
 import TeacherClasses from "./pages/teacher/Classes";
 import TeacherProgress from "./pages/teacher/Progress";
 import TeacherNotifications from "./pages/teacher/Notifications";
+import DevAuth from "./pages/DevAuth";
 
 import ParentDashboard from "./pages/parent/Dashboard";
 import ParentChildren from "./pages/parent/Children";
@@ -134,6 +135,7 @@ function AppRouter() {
       <Route path="/branch/notifications"><LayoutRoute component={BranchNotifications} roles={["branch_manager"]} /></Route>
       <Route path="/branch/exams"><LayoutRoute component={BranchExams} roles={["branch_manager"]} /></Route>
 
+      <Route path="/dev-auth" component={DevAuth} />
       {/* Teacher */}
       <Route path="/teacher"><LayoutRoute component={TeacherDashboard} roles={["teacher"]} /></Route>
       <Route path="/teacher/schools"><LayoutRoute component={TeacherMySchools} roles={["teacher"]} /></Route>
