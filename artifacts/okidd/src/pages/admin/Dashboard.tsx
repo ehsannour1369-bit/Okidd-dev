@@ -10,20 +10,21 @@ interface AdminStats {
   recentTransactions: any[];
 }
 
-const P = "#f59e0b";   // gold
-const PD = "#d97706";  // gold-dark
-const S = "#ef4444";   // red
-const SD = "#b91c1c";  // red-dark
+const P = "#f59e0b";
+const PD = "#d97706";
+const S = "#ef4444";
+const TEXT = "#78350f";
+const TEXT2 = "#92400e";
 
-function glassCard(color: string, dark: string, extra?: React.CSSProperties): React.CSSProperties {
+function glassCard(color: string, extra?: React.CSSProperties): React.CSSProperties {
   return {
-    background: `linear-gradient(145deg, ${color}2e, ${dark}18)`,
+    background: "rgba(255,255,255,0.72)",
     backdropFilter: "blur(18px)",
-    border: `1.5px solid ${color}55`,
+    border: "1.5px solid rgba(255,255,255,0.92)",
     borderRadius: 22,
     position: "relative",
     overflow: "hidden",
-    boxShadow: `0 8px 32px rgba(0,0,0,0.25), 0 0 0 1px ${color}18`,
+    boxShadow: `0 8px 32px ${color}20, 0 2px 8px rgba(0,0,0,0.06)`,
     transition: "all 0.25s cubic-bezier(0.4,0,0.2,1)",
     ...extra,
   };
@@ -55,30 +56,30 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div style={{ margin: -24, padding: 24, minHeight: "calc(100vh - 60px)", background: "linear-gradient(160deg,#1a0e05 0%,#0f0a1a 40%,#1a0a08 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", position: "relative", overflow: "hidden" }}>
+    <div style={{ margin: -24, padding: 24, minHeight: "calc(100vh - 60px)", background: "linear-gradient(160deg,#fffbeb 0%,#fef3c7 40%,#fff1f2 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", position: "relative", overflow: "hidden" }}>
 
       {/* Blobs */}
-      <div style={{ position: "absolute", top: "-15%", right: "-10%", width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle,#f59e0b28 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat1 9s ease-in-out infinite" }} />
-      <div style={{ position: "absolute", bottom: "5%", left: "-8%", width: 320, height: 320, borderRadius: "50%", background: "radial-gradient(circle,#ef444422 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat2 12s ease-in-out infinite" }} />
-      <div style={{ position: "absolute", top: "40%", right: "30%", width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle,#f9731618 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat1 15s ease-in-out infinite reverse" }} />
+      <div style={{ position: "absolute", top: "-12%", right: "-8%", width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle,rgba(251,191,36,0.40) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat1 9s ease-in-out infinite" }} />
+      <div style={{ position: "absolute", bottom: "5%", left: "-8%", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle,rgba(239,68,68,0.22) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat2 12s ease-in-out infinite" }} />
+      <div style={{ position: "absolute", top: "42%", right: "32%", width: 180, height: 180, borderRadius: "50%", background: "radial-gradient(circle,rgba(249,115,22,0.22) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat1 15s ease-in-out infinite reverse" }} />
 
       <div style={{ position: "relative", zIndex: 1 }}>
         {/* Header */}
         <div style={{ ...cardAnim(0), marginBottom: 28 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 8 }}>
-            <div style={{ width: 48, height: 48, borderRadius: 16, background: `linear-gradient(135deg, ${P}, ${S})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 6px 20px ${P}44` }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 50, height: 50, borderRadius: 16, background: `linear-gradient(135deg, ${P}, ${S})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 6px 20px ${P}55` }}>
               <TrendingUp size={24} color="white" />
             </div>
             <div>
-              <h1 style={{ fontSize: 22, fontWeight: 900, color: "#fff8e8", margin: 0 }}>داشبورد مدیر کل</h1>
-              <p style={{ color: `${P}cc`, fontSize: 13, margin: 0 }}>نمای کلی سیستم</p>
+              <h1 style={{ fontSize: 22, fontWeight: 900, color: TEXT, margin: 0 }}>داشبورد مدیر کل</h1>
+              <p style={{ color: TEXT2, fontSize: 13, margin: 0 }}>نمای کلی سیستم</p>
             </div>
           </div>
         </div>
 
         {/* Stats grid */}
         {isLoading ? (
-          <div style={{ color: `${P}99`, textAlign: "center", padding: 60 }}>در حال بارگذاری...</div>
+          <div style={{ color: TEXT2, textAlign: "center", padding: 60 }}>در حال بارگذاری...</div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 14, marginBottom: 28 }}>
             {STAT_CARDS.map((sc, idx) => {
@@ -88,16 +89,16 @@ export default function AdminDashboard() {
                 : (stats as any)[sc.key];
               const inner = (
                 <div
-                  style={{ ...glassCard(sc.color, sc.dark, { padding: "22px 16px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", aspectRatio: "1/1", cursor: sc.link ? "pointer" : "default" }), ...cardAnim(idx + 1) }}
+                  style={{ ...glassCard(sc.color, { padding: "22px 16px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", aspectRatio: "1/1", cursor: sc.link ? "pointer" : "default" }), ...cardAnim(idx + 1) }}
                   onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-5px)"; el.style.boxShadow = `0 18px 48px ${sc.color}30`; }}
-                  onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = `0 8px 32px rgba(0,0,0,0.25), 0 0 0 1px ${sc.color}18`; }}
+                  onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = `0 8px 32px ${sc.color}20, 0 2px 8px rgba(0,0,0,0.06)`; }}
                 >
-                  <div style={{ width: 52, height: 52, borderRadius: 16, background: `linear-gradient(135deg, ${sc.color}50, ${sc.dark}38)`, border: `1.5px solid ${sc.color}60`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12, boxShadow: `0 4px 14px ${sc.color}30` }}>
-                    <Icon size={24} color={sc.color} />
+                  <div style={{ width: 52, height: 52, borderRadius: 16, background: `linear-gradient(135deg, ${sc.color}40, ${sc.dark}28)`, border: `1.5px solid ${sc.color}55`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12, boxShadow: `0 4px 14px ${sc.color}30` }}>
+                    <Icon size={24} color={sc.dark} />
                   </div>
-                  <div style={{ fontSize: 26, fontWeight: 900, color: "#fff8e8", marginBottom: 4 }}>{typeof value === "number" ? value.toLocaleString("fa-IR") : value}</div>
-                  <div style={{ fontSize: 12, color: `${sc.color}cc`, fontWeight: 600 }}>{sc.label}</div>
-                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${sc.color}90, ${sc.color}20)`, borderRadius: "0 0 22px 22px" }} />
+                  <div style={{ fontSize: 26, fontWeight: 900, color: TEXT, marginBottom: 4 }}>{typeof value === "number" ? value.toLocaleString("fa-IR") : value}</div>
+                  <div style={{ fontSize: 12, color: sc.dark, fontWeight: 700 }}>{sc.label}</div>
+                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4, background: `linear-gradient(90deg, ${sc.color}, ${sc.color}40)`, borderRadius: "0 0 22px 22px" }} />
                 </div>
               );
               return sc.link
@@ -108,35 +109,35 @@ export default function AdminDashboard() {
         )}
 
         {/* Recent transactions */}
-        <div style={{ ...glassCard(P, PD, { padding: 24 }), ...cardAnim(8) }}>
+        <div style={{ ...glassCard(P, { padding: 24 }), ...cardAnim(8) }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
-            <h2 style={{ fontSize: 16, fontWeight: 800, color: "#fff8e8", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
-              <CreditCard size={18} color={P} /> آخرین تراکنش‌ها
+            <h2 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+              <CreditCard size={18} color={PD} /> آخرین تراکنش‌ها
             </h2>
-            <Link href="/admin/transactions" style={{ color: P, fontSize: 13, textDecoration: "none", fontWeight: 600 }}>مشاهده همه ←</Link>
+            <Link href="/admin/transactions" style={{ color: PD, fontSize: 13, textDecoration: "none", fontWeight: 700 }}>مشاهده همه ←</Link>
           </div>
           {stats.recentTransactions.length === 0 ? (
-            <p style={{ color: `${P}88`, textAlign: "center", padding: 20, margin: 0 }}>هیچ تراکنشی ثبت نشده</p>
+            <p style={{ color: TEXT2, textAlign: "center", padding: 20, margin: 0 }}>هیچ تراکنشی ثبت نشده</p>
           ) : (
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr>
                   {["مدرسه", "مبلغ", "وضعیت", "تاریخ"].map(h => (
-                    <th key={h} style={{ textAlign: "right", padding: "8px 12px", color: `${P}aa`, fontSize: 12, fontWeight: 700, borderBottom: `1px solid ${P}22` }}>{h}</th>
+                    <th key={h} style={{ textAlign: "right", padding: "8px 12px", color: TEXT2, fontSize: 12, fontWeight: 700, borderBottom: `1px solid ${P}30` }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {stats.recentTransactions.map((tx, i) => (
-                  <tr key={tx.id} style={{ animation: `dashUp 0.4s cubic-bezier(0.16,1,0.3,1) ${(i + 9) * 0.06}s both` }}>
-                    <td style={{ padding: "10px 12px", fontSize: 14, color: "#fff8e8", borderBottom: `1px solid ${P}12` }}>{tx.schoolName ?? `مدرسه ${tx.schoolId}`}</td>
-                    <td style={{ padding: "10px 12px", fontSize: 14, color: "#4ade80", borderBottom: `1px solid ${P}12`, fontWeight: 700 }}>{Number(tx.amount).toLocaleString("fa-IR")} ت</td>
-                    <td style={{ padding: "10px 12px", borderBottom: `1px solid ${P}12` }}>
-                      <span style={{ background: tx.status === "paid" ? "rgba(34,197,94,0.18)" : "rgba(251,191,36,0.18)", color: tx.status === "paid" ? "#4ade80" : "#fbbf24", border: `1px solid ${tx.status === "paid" ? "rgba(34,197,94,0.35)" : "rgba(251,191,36,0.35)"}`, borderRadius: 999, padding: "2px 10px", fontSize: 12, fontWeight: 700 }}>
+                {stats.recentTransactions.map((tx) => (
+                  <tr key={tx.id}>
+                    <td style={{ padding: "10px 12px", fontSize: 14, color: TEXT, borderBottom: `1px solid ${P}15`, fontWeight: 600 }}>{tx.schoolName ?? `مدرسه ${tx.schoolId}`}</td>
+                    <td style={{ padding: "10px 12px", fontSize: 14, color: "#16a34a", borderBottom: `1px solid ${P}15`, fontWeight: 700 }}>{Number(tx.amount).toLocaleString("fa-IR")} ت</td>
+                    <td style={{ padding: "10px 12px", borderBottom: `1px solid ${P}15` }}>
+                      <span style={{ background: tx.status === "paid" ? "rgba(34,197,94,0.15)" : "rgba(251,191,36,0.18)", color: tx.status === "paid" ? "#16a34a" : "#d97706", border: `1px solid ${tx.status === "paid" ? "rgba(34,197,94,0.4)" : "rgba(251,191,36,0.4)"}`, borderRadius: 999, padding: "2px 10px", fontSize: 12, fontWeight: 700 }}>
                         {tx.status === "paid" ? "پرداخت شده" : "در انتظار"}
                       </span>
                     </td>
-                    <td style={{ padding: "10px 12px", fontSize: 13, color: `${P}99`, borderBottom: `1px solid ${P}12` }}>
+                    <td style={{ padding: "10px 12px", fontSize: 13, color: TEXT2, borderBottom: `1px solid ${P}15` }}>
                       {tx.paymentDate ? new Date(tx.paymentDate).toLocaleDateString("fa-IR") : "—"}
                     </td>
                   </tr>
@@ -144,7 +145,7 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           )}
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${P}80, ${P}20)`, borderRadius: "0 0 22px 22px" }} />
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4, background: `linear-gradient(90deg, ${P}, ${P}40)`, borderRadius: "0 0 22px 22px" }} />
         </div>
       </div>
 
