@@ -61,6 +61,11 @@ export default function TeacherProgress() {
                     </div>
                     <div>
                       <div style={{ fontWeight: 600, color: "#f8f5ff", fontSize: 14 }}>درس {i + 1}: {lesson.title}</div>
+                      {unlocked && unlockEntry?.createdAt && (
+                        <div style={{ fontSize: 11, color: "#4ade80", marginTop: 2 }}>
+                          باز شده: {new Date(unlockEntry.createdAt).toLocaleDateString("fa-IR")}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <button onClick={() => { if (unlocked && unlockEntry) lockMut.mutate(unlockEntry.id); else unlockMut.mutate({ classId: selectedClass.id, lessonId: lesson.id, bookId: selectedBook.id }); }}
