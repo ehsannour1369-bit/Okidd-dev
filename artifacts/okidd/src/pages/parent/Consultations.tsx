@@ -4,6 +4,7 @@ import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { showToast } from "../../lib/toast";
 import { Plus, X, Calendar, Clock, MessageSquare, UserCheck, CheckCircle, Clock4, XCircle } from "lucide-react";
+import PageTopBar from "../../components/PageTopBar";
 
 const PURPLE = "#7c3aed";
 const PURPLE_L = "#a855f7";
@@ -103,6 +104,7 @@ export default function ParentConsultations() {
 
   return (
     <div dir="rtl" style={{ fontFamily: "Vazirmatn, sans-serif" }}>
+      <PageTopBar />
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ fontSize: 20, fontWeight: 800, color: TEXT, margin: 0 }}>مشاوره‌ها</h1>
         <p style={{ color: TEXT2, fontSize: 13, marginTop: 4 }}>درخواست و پیگیری مشاوره تحصیلی</p>

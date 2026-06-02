@@ -4,6 +4,7 @@ import { useAuthStore } from "../../store/auth";
 import { Link } from "wouter";
 import { BookMarked, Users, GraduationCap, Bell, ClipboardList, GitBranch, MapPin, Building2, LayoutDashboard } from "lucide-react";
 import { useEffect, useState } from "react";
+import PageTopBar from "../../components/PageTopBar";
 
 interface BranchInfo { id: number; name: string; address?: string; schoolId: number; school?: { id: number; name: string }; }
 interface BranchAssignment { id: number; branchId: number; academicYear: string; isActive: boolean; branch: BranchInfo | null; school: { id: number; name: string } | null; }
@@ -68,13 +69,13 @@ export default function BranchDashboard() {
   }
 
   if (loadingAssignment) return (
-    <div style={{ margin: -24, padding: 24, minHeight: "calc(100vh - 60px)", background: "linear-gradient(160deg,#f0fdfa 0%,#ccfbf1 40%,#ecfdf5 100%)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Vazirmatn" }}>
+    <div style={{ margin: -24, padding: 24, minHeight: "100vh", background: "linear-gradient(160deg,#f0fdfa 0%,#ccfbf1 40%,#ecfdf5 100%)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Vazirmatn" }}>
       <div style={{ color: "#0f766e", fontSize: 16 }}>در حال بارگذاری...</div>
     </div>
   );
 
   if (!assignment && !user?.branchId) return (
-    <div style={{ margin: -24, padding: 24, minHeight: "calc(100vh - 60px)", background: "linear-gradient(160deg,#f0fdfa 0%,#ccfbf1 40%,#ecfdf5 100%)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Vazirmatn", direction: "rtl" }}>
+    <div style={{ margin: -24, padding: 24, minHeight: "100vh", background: "linear-gradient(160deg,#f0fdfa 0%,#ccfbf1 40%,#ecfdf5 100%)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Vazirmatn", direction: "rtl" }}>
       <div style={{ textAlign: "center" }}>
         <GitBranch size={48} style={{ color: P, marginBottom: 16 }} />
         <h2 style={{ color: "#134e4a", marginBottom: 8 }}>شعبه‌ای اختصاص داده نشده</h2>
@@ -88,13 +89,14 @@ export default function BranchDashboard() {
   const branchAddress = assignment?.branch?.address;
 
   return (
-    <div style={{ margin: -24, padding: 24, minHeight: "calc(100vh - 60px)", background: "linear-gradient(160deg,#f0fdfa 0%,#ccfbf1 35%,#ecfdf5 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", position: "relative", overflow: "hidden" }}>
+    <div style={{ margin: -24, padding: 24, minHeight: "100vh", background: "linear-gradient(160deg,#f0fdfa 0%,#ccfbf1 35%,#ecfdf5 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", position: "relative", overflow: "hidden" }}>
 
       <div style={{ position: "absolute", top: "-12%", right: "-8%", width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle,rgba(13,148,136,0.30) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat1 9s ease-in-out infinite" }} />
       <div style={{ position: "absolute", bottom: "5%", left: "-8%", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle,rgba(16,185,129,0.24) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat2 12s ease-in-out infinite" }} />
       <div style={{ position: "absolute", top: "48%", left: "36%", width: 180, height: 180, borderRadius: "50%", background: "radial-gradient(circle,rgba(6,182,212,0.18) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat1 14s ease-in-out infinite reverse" }} />
 
       <div style={{ position: "relative", zIndex: 1 }}>
+        <PageTopBar />
         {/* Header */}
         <div style={{ ...cardAnim(0), marginBottom: 22 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { LayoutDashboard, Calendar, MessageSquare, CheckCircle, Clock, Users } from "lucide-react";
+import PageTopBar from "../../components/PageTopBar";
 
 export default function ConsultantDashboard() {
   const { user } = useAuthStore();
@@ -29,6 +30,7 @@ export default function ConsultantDashboard() {
 
   return (
     <div>
+      <PageTopBar />
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f8f5ff", margin: 0 }}>داشبورد مشاور</h1>
         <p style={{ color: "#8b5cf6", fontSize: 14, marginTop: 4 }}>اطلاعات کلی و آمار مشاوره‌ها</p>

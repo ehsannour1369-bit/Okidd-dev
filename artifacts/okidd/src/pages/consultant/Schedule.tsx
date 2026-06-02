@@ -4,6 +4,7 @@ import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { showToast } from "../../lib/toast";
 import { X, Calendar, Clock, MessageSquare, CheckCircle, XCircle, UserCheck, CheckCircle2, CheckCircleIcon } from "lucide-react";
+import PageTopBar from "../../components/PageTopBar";
 
 const IS = { width: "100%", background: "rgba(13,10,26,0.5)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#f8f5ff", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
 
@@ -51,6 +52,7 @@ export default function ConsultantSchedule() {
 
   return (
     <div>
+      <PageTopBar />
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f8f5ff", margin: 0 }}>برنامه مشاوره‌ها</h1>
         <p style={{ color: "#8b5cf6", fontSize: 14, marginTop: 4 }}>مدیریت درخواست‌های والدین</p>

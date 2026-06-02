@@ -4,6 +4,7 @@ import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { showToast } from "../../lib/toast";
 import { BookMarked, Users, GraduationCap, BookOpen, Trash2, X, UserRound } from "lucide-react";
+import PageTopBar from "../../components/PageTopBar";
 
 const TEAL   = "#0d9488";
 const TEAL_L = "#14b8a6";
@@ -100,6 +101,7 @@ export default function BranchClasses() {
 
   return (
     <div dir="rtl" style={{ fontFamily: "Vazirmatn, sans-serif" }}>
+      <PageTopBar />
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ fontSize: 20, fontWeight: 800, color: TEXT, margin: 0 }}>کلاس‌ها</h1>
         <p style={{ color: TEXT2, fontSize: 13, marginTop: 4 }}>مدیریت کلاس‌ها، معلمان، دانش‌آموزان و کتاب‌ها</p>

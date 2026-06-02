@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { showToast } from "../../lib/toast";
 import { Lock, Unlock } from "lucide-react";
+import PageTopBar from "../../components/PageTopBar";
 
 export default function TeacherProgress() {
   const { user } = useAuthStore();
@@ -24,6 +25,7 @@ export default function TeacherProgress() {
 
   return (
     <div>
+      <PageTopBar />
       <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f8f5ff", marginBottom: 24 }}>Progress Chart</h1>
       <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
         <div style={{ flex: 1, minWidth: 200 }}>

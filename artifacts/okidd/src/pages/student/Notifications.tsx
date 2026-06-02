@@ -105,7 +105,7 @@ export default function StudentNotifications() {
     : "linear-gradient(135deg, #4facfe 0%, #818cf8 42%, #a78bfa 72%, #c084fc 100%)";
 
   return (
-    <div style={{ margin: -24, padding: 24, minHeight: "calc(100vh - 60px)", background: bgGrad, fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
+    <div style={{ margin: -24, padding: 24, minHeight: "100vh", background: bgGrad, fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

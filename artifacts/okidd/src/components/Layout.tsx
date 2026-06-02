@@ -10,6 +10,7 @@ import {
   BookMarked, Home, Star, ClipboardList, GitBranch, UserCheck,
   Menu, X, BarChart2, ChevronRight,
 } from "lucide-react";
+import SidebarContext from "../contexts/SidebarContext";
 
 type IconComp = ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
 interface NavItem {
@@ -338,6 +339,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   };
 
   return (
+    <SidebarContext.Provider value={{ openSidebar: () => setSidebarOpen(true) }}>
     <div style={{ display: "flex", minHeight: "100vh", direction: "rtl" }}>
 
       {/* ═══════════════ DESKTOP SIDEBAR (admin only) ═══════════════ */}
@@ -513,101 +515,6 @@ export default function Layout({ children }: { children: ReactNode }) {
             : undefined,
       }}>
 
-        {/* Topbar — hidden for student, admin, school_manager, and teacher/parent on their dashboard */}
-        {!isStudent && user.role !== "admin" && user.role !== "school_manager" && !isTeacherOrParentDash && (
-          <div style={{
-            height: 58,
-            background: "rgba(255,255,255,0.82)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            borderBottom: `2px solid ${accent}28`,
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            padding: isMobile ? "0 14px" : "0 26px",
-            position: "sticky", top: 0, zIndex: 40,
-            boxShadow: `0 2px 20px ${accent}14`,
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              {isOnSubPage && <BackBtn />}
-              {showHamburger && (
-                <button onClick={() => setSidebarOpen(true)} style={{
-                  background: theme.logoGrad, border: "none",
-                  borderRadius: 13, color: "#fff", cursor: "pointer",
-                  padding: "8px 14px", display: "flex", alignItems: "center",
-                  gap: 6, boxShadow: `0 4px 14px ${accent}50`,
-                  transition: "all 0.2s ease",
-                }}
-                  onMouseOver={e => { (e.currentTarget as HTMLElement).style.transform = "scale(1.04)"; }}
-                  onMouseOut={e => { (e.currentTarget as HTMLElement).style.transform = ""; }}
-                >
-                  <Menu size={20} />
-                </button>
-              )}
-              <div style={{ fontSize: isMobile ? 12 : 14, color: TEXT2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: isMobile ? 150 : 320 }}>
-                خوش آمدید،&nbsp;<span style={{ color: TEXT, fontWeight: 700 }}>{user.name}</span>
-              </div>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              {!isMobile && (
-                <div style={{
-                  background: `linear-gradient(135deg, ${accent}22, ${accent}12)`,
-                  border: `1.5px solid ${accent}50`,
-                  borderRadius: 20, padding: "5px 14px", fontSize: 12,
-                  color: accentDark, fontWeight: 700, whiteSpace: "nowrap",
-                }}>{getRoleLabel(user.role)}</div>
-              )}
-
-              {(["teacher","branch_manager","parent"].includes(user.role)) && (() => {
-                const notifPath = user.role === "teacher" ? "/teacher/notifications"
-                  : user.role === "branch_manager" ? "/branch/notifications"
-                  : "/parent/notifications";
-                return (
-                  <BellBadge
-                    userId={user.id}
-                    schoolId={user.schoolId ?? undefined}
-                    role={user.role}
-                    href={notifPath}
-                    isActive={location === notifPath}
-                    accent={accent}
-                    accentDark={accentDark}
-                  />
-                );
-              })()}
-
-              <button onClick={logout} title="خروج" style={{
-                display: "flex", alignItems: "center", gap: 5,
-                padding: isMobile ? "7px 10px" : "7px 14px", borderRadius: 11,
-                background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.28)",
-                color: "#dc2626", cursor: "pointer", fontSize: 13,
-                fontFamily: "Vazirmatn, sans-serif", fontWeight: 600,
-                transition: "all 0.2s ease", whiteSpace: "nowrap",
-              }}
-                onMouseOver={e => { e.currentTarget.style.background = "rgba(239,68,68,0.20)"; }}
-                onMouseOut={e => { e.currentTarget.style.background = "rgba(239,68,68,0.10)"; }}
-              >
-                <LogOut size={15} />
-                {!isMobile && "خروج"}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Back bar — for roles without topbar (admin, school_manager, student) */}
-        {!hasTopbar && isOnSubPage && (
-          <div style={{
-            position: "sticky", top: 0, zIndex: 41,
-            padding: isMobile ? "8px 14px" : "10px 24px",
-            background: isStudent
-              ? "rgba(255,255,255,0.18)"
-              : "rgba(255,255,255,0.78)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            borderBottom: `1px solid ${isStudent ? "rgba(255,255,255,0.30)" : accent + "28"}`,
-            display: "flex", alignItems: "center",
-          }}>
-            <BackBtn />
-          </div>
-        )}
 
         {/* Page content */}
         <div style={{ padding: (isStudent || isTeacherOrParentDash) ? 0 : (isMobile ? "12px" : "24px") }}>{children}</div>
@@ -619,5 +526,6 @@ export default function Layout({ children }: { children: ReactNode }) {
         @keyframes blobFloat2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-12px,8px) scale(1.04)} }
       `}</style>
     </div>
+    </SidebarContext.Provider>
   );
 }

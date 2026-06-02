@@ -6,6 +6,7 @@ import {
   BookOpen, Star, UserRound, Clock, Calendar,
   ChevronDown, ChevronUp, Trophy, GraduationCap,
 } from "lucide-react";
+import PageTopBar from "../../components/PageTopBar";
 
 function glassCard(color: string, dark: string, extra?: React.CSSProperties): React.CSSProperties {
   return {
@@ -114,7 +115,7 @@ export default function ParentChildren() {
   };
 
   return (
-    <div dir="rtl" style={{ fontFamily: "Vazirmatn, sans-serif", margin: "-12px", background: bgGrad, minHeight: "calc(100vh - 60px)", transition: "background 0.4s" }}>
+    <div dir="rtl" style={{ fontFamily: "Vazirmatn, sans-serif", margin: "-12px", background: bgGrad, minHeight: "100vh", transition: "background 0.4s" }}>
       {/* Fixed bg layer */}
       <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}>
         <div style={{ position: "absolute", top: "5%", right: "-10%", width: "55%", paddingTop: "55%", borderRadius: "50%", background: isGirl ? "rgba(232,121,249,0.18)" : "rgba(129,140,248,0.18)", filter: "blur(56px)" }} />
@@ -122,7 +123,7 @@ export default function ParentChildren() {
       </div>
 
       <div style={{ position: "relative", zIndex: 1, padding: "20px 16px 40px" }}>
-
+        <PageTopBar />
         {/* Page title */}
         <div style={{ fontWeight: 800, fontSize: 18, color: TEXT, marginBottom: 16, ...cardAnim(0), display: "flex", alignItems: "center", gap: 8 }}>
           <UserRound size={18} style={{ color: accent }} />

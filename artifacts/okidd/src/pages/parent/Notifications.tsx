@@ -5,6 +5,7 @@ import { useAuthStore } from "../../store/auth";
 import { useNotificationReads } from "../../hooks/useNotificationReads";
 import NotificationThread from "../../components/NotificationThread";
 import { Bell, Calendar, CheckCheck, MessageCircle, ChevronDown, ChevronUp } from "lucide-react";
+import PageTopBar from "../../components/PageTopBar";
 
 const ROSE   = "#f43f5e";
 const PINK   = "#ec4899";
@@ -33,7 +34,7 @@ export default function ParentNotifications() {
 
   return (
     <div style={{
-      margin: -24, padding: 24, minHeight: "calc(100vh - 60px)",
+      margin: -24, padding: 24, minHeight: "100vh",
       background: "linear-gradient(160deg,#0f0a2e 0%,#1e1240 40%,#150c3a 100%)",
       fontFamily: "Vazirmatn, sans-serif", direction: "rtl",
       position: "relative", overflow: "hidden",
@@ -43,6 +44,7 @@ export default function ParentNotifications() {
       <div style={{ position: "absolute", top: "45%", left: "38%", width: 190, height: 190, borderRadius: "50%", background: `radial-gradient(circle,${AMBER}1a 0%,transparent 70%)`, pointerEvents: "none", animation: "blobFloat1 14s ease-in-out infinite reverse" }} />
 
       <div style={{ position: "relative", zIndex: 1, maxWidth: 700, margin: "0 auto" }}>
+        <PageTopBar />
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>

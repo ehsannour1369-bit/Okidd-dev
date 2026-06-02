@@ -6,6 +6,7 @@ import { useNotificationReads } from "../../hooks/useNotificationReads";
 import NotificationThread from "../../components/NotificationThread";
 import { showToast } from "../../lib/toast";
 import { Bell, Send, Plus, Filter, Calendar, ChevronDown, CheckCheck, MessageCircle, ChevronUp } from "lucide-react";
+import PageTopBar from "../../components/PageTopBar";
 
 const TEAL   = "#0d9488";
 const TEAL_D = "#0f766e";
@@ -108,7 +109,7 @@ export default function BranchNotifications() {
 
   return (
     <div style={{
-      margin: -24, padding: 24, minHeight: "calc(100vh - 60px)",
+      margin: -24, padding: 24, minHeight: "100vh",
       background: "linear-gradient(160deg,#f0fdfa 0%,#ccfbf1 35%,#ecfdf5 100%)",
       fontFamily: "Vazirmatn, sans-serif", direction: "rtl",
       position: "relative", overflow: "hidden",
@@ -117,6 +118,7 @@ export default function BranchNotifications() {
       <div style={{ position: "absolute", bottom: "5%", left: "-6%", width: 270, height: 270, borderRadius: "50%", background: `radial-gradient(circle,rgba(16,185,129,0.22) 0%,transparent 70%)`, pointerEvents: "none", animation: "blobFloat2 12s ease-in-out infinite" }} />
 
       <div style={{ position: "relative", zIndex: 1, maxWidth: 720, margin: "0 auto" }}>
+        <PageTopBar />
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, marginBottom: 24 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>

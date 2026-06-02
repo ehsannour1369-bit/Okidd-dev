@@ -4,6 +4,7 @@ import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { showToast } from "../../lib/toast";
 import { GraduationCap, Mail, Phone, Plus, X } from "lucide-react";
+import PageTopBar from "../../components/PageTopBar";
 
 const IS = { width: "100%", background: "rgba(245,243,255,0.90)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#1e1b4b", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
 
@@ -31,6 +32,7 @@ export default function SchoolTeachers() {
 
   return (
     <div>
+      {user?.role === "branch_manager" && <PageTopBar />}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1e1b4b", margin: 0 }}>معلمان</h1>
