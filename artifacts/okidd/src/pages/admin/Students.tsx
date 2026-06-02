@@ -72,7 +72,8 @@ export default function AdminStudents() {
           </div>
 
           <div style={{ background: "rgba(255,255,255,0.82)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, overflow: "hidden" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 500 }}>
               <thead>
                 <tr>{["نام", "ایمیل", "کد ملی", "جنسیت", "وضعیت"].map(h => <th key={h} style={{ textAlign: "right", padding: "12px 16px", color: "#92400e", fontSize: 13, fontWeight: 600, background: "rgba(255,252,235,0.90)", borderBottom: "1px solid rgba(139,92,246,0.15)" }}>{h}</th>)}</tr>
               </thead>
@@ -97,6 +98,7 @@ export default function AdminStudents() {
                 ))}
               </tbody>
             </table>
+            </div>
             {students.length === 0 && <p style={{ color: "#b45309", textAlign: "center", padding: 30 }}>دانش‌آموزی یافت نشد</p>}
           </div>
         </>

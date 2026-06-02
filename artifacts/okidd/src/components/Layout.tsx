@@ -297,7 +297,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const { accent, accentDark, TEXT, TEXT2 } = theme;
 
   const showDesktopSidebar = isAdmin && !isMobile;
-  const showHamburger = !isStudent && !isAdmin && user.role !== "school_manager";
+  const showHamburger = !isStudent && !showDesktopSidebar;
 
   const dashboardPath = nav[0].path;
   const isOnSubPage = location !== dashboardPath;

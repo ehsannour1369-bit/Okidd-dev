@@ -84,7 +84,8 @@ export default function AdminTransactions() {
         </div>
       </div>
       <div style={{ background: "rgba(255,255,255,0.82)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
           <thead>
             <tr>{["مدرسه", "پکیج", "مبلغ", "تخفیف", "روش پرداخت", "وضعیت", "عملیات"].map(h => <th key={h} style={{ textAlign: "right", padding: "12px 14px", color: "#92400e", fontSize: 13, fontWeight: 600, background: "rgba(255,252,235,0.90)", borderBottom: "1px solid rgba(139,92,246,0.15)" }}>{h}</th>)}</tr>
           </thead>
@@ -111,6 +112,7 @@ export default function AdminTransactions() {
             ))}
           </tbody>
         </table>
+        </div>
         {txs.length === 0 && <p style={{ color: "#b45309", textAlign: "center", padding: 30 }}>هیچ تراکنشی ثبت نشده</p>}
       </div>
       {showModal && (

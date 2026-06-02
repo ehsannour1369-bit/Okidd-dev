@@ -279,7 +279,8 @@ export default function AdminUsers() {
         </select>
       </div>
       <div style={{ background: "rgba(255,255,255,0.82)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 500 }}>
           <thead>
             <tr>{["نام", "ایمیل", "نقش", "وضعیت", "عملیات"].map(h => <th key={h} style={{ textAlign: "right", padding: "12px 16px", color: "#92400e", fontSize: 13, fontWeight: 600, background: "rgba(255,252,235,0.90)", borderBottom: "1px solid rgba(139,92,246,0.15)" }}>{h}</th>)}</tr>
           </thead>
@@ -313,6 +314,7 @@ export default function AdminUsers() {
             ))}
           </tbody>
         </table>
+        </div>
         {filtered.length === 0 && <p style={{ color: "#b45309", textAlign: "center", padding: 30 }}>کاربری یافت نشد</p>}
       </div>
 

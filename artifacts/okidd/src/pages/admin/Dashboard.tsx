@@ -4,8 +4,9 @@ import { useAuthStore } from "../../store/auth";
 import { Link } from "wouter";
 import {
   School, Users, GraduationCap, UserCheck, CreditCard, TrendingUp,
-  GitBranch, BookOpen, Package, FileText, BookMarked, LogOut, BarChart2,
+  GitBranch, BookOpen, Package, FileText, BookMarked, BarChart2,
 } from "lucide-react";
+import PageTopBar from "../../components/PageTopBar";
 import { useEffect, useState } from "react";
 import DashCarousel, { CarouselCard } from "../../components/DashCarousel";
 
@@ -16,7 +17,7 @@ interface AdminStats {
 }
 
 export default function AdminDashboard() {
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const [mounted, setMounted] = useState(false);
   useEffect(() => { const t = setTimeout(() => setMounted(true), 60); return () => clearTimeout(t); }, []);
 
@@ -63,28 +64,17 @@ export default function AdminDashboard() {
 
       <div style={{ position: "relative", zIndex: 1, padding: 24, maxWidth: 960, margin: "0 auto" }}>
 
+        <PageTopBar />
+
         {/* Integrated header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28, ...anim(0) }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 52, height: 52, borderRadius: 17, background: "linear-gradient(135deg,#f59e0b,#ef4444)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 22px rgba(245,158,11,0.55)" }}>
-              <TrendingUp size={24} color="white" />
-            </div>
-            <div>
-              <h1 style={{ fontSize: 20, fontWeight: 900, color: "#78350f", margin: 0 }}>داشبورد مدیر کل</h1>
-              <div style={{ fontSize: 13, color: "#92400e", marginTop: 2 }}>سلام، <strong>{user?.name}</strong></div>
-            </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28, ...anim(0) }}>
+          <div style={{ width: 52, height: 52, borderRadius: 17, background: "linear-gradient(135deg,#f59e0b,#ef4444)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 22px rgba(245,158,11,0.55)", flexShrink: 0 }}>
+            <TrendingUp size={24} color="white" />
           </div>
-          <button onClick={logout} style={{
-            display: "flex", alignItems: "center", gap: 7, padding: "9px 18px",
-            borderRadius: 13, background: "rgba(239,68,68,0.10)",
-            border: "1.5px solid rgba(239,68,68,0.30)", color: "#dc2626",
-            cursor: "pointer", fontSize: 13, fontFamily: "Vazirmatn", fontWeight: 700,
-          }}
-            onMouseOver={e => (e.currentTarget.style.background = "rgba(239,68,68,0.20)")}
-            onMouseOut={e => (e.currentTarget.style.background = "rgba(239,68,68,0.10)")}
-          >
-            <LogOut size={15} /> خروج
-          </button>
+          <div>
+            <h1 style={{ fontSize: 20, fontWeight: 900, color: "#78350f", margin: 0 }}>داشبورد مدیر کل</h1>
+            <div style={{ fontSize: 13, color: "#92400e", marginTop: 2 }}>سلام، <strong>{user?.name}</strong></div>
+          </div>
         </div>
 
         {/* Carousel */}
@@ -112,7 +102,8 @@ export default function AdminDashboard() {
                   <h2 style={{ fontSize: 15, fontWeight: 800, color: "white", margin: 0, textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>آخرین تراکنش‌ها</h2>
                   <Link href="/admin/transactions" style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, textDecoration: "none", fontWeight: 700 }}>مشاهده همه ←</Link>
                 </div>
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 360 }}>
                   <thead>
                     <tr>{["مدرسه", "مبلغ", "وضعیت", "تاریخ"].map(h => (
                       <th key={h} style={{ textAlign: "right", padding: "8px 12px", color: "rgba(255,255,255,0.75)", fontSize: 12, fontWeight: 700, borderBottom: "1px solid rgba(255,255,255,0.22)" }}>{h}</th>
@@ -135,6 +126,7 @@ export default function AdminDashboard() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </div>
           </div>

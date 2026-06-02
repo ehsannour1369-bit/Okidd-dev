@@ -3,8 +3,9 @@ import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import {
   School, BookMarked, Users, GraduationCap, Upload, ImageIcon,
-  Trash2, LayoutDashboard, GitBranch, Bell, ClipboardList, BarChart2, LogOut,
+  Trash2, LayoutDashboard, GitBranch, Bell, ClipboardList, BarChart2,
 } from "lucide-react";
+import PageTopBar from "../../components/PageTopBar";
 import { useRef, useState, useEffect } from "react";
 import DashCarousel, { CarouselCard } from "../../components/DashCarousel";
 
@@ -17,7 +18,7 @@ const P = "#6366f1";
 const PD = "#4f46e5";
 
 export default function SchoolDashboard() {
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const qc = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -95,28 +96,17 @@ export default function SchoolDashboard() {
 
       <div style={{ position: "relative", zIndex: 1, padding: 24, maxWidth: 960, margin: "0 auto" }}>
 
+        <PageTopBar />
+
         {/* Integrated header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, ...anim(0) }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 52, height: 52, borderRadius: 17, background: `linear-gradient(135deg,${P},#3b82f6)`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 6px 22px ${P}55` }}>
-              <LayoutDashboard size={24} color="white" />
-            </div>
-            <div>
-              <h1 style={{ fontSize: 20, fontWeight: 900, color: "#1e1b4b", margin: 0 }}>داشبورد مدرسه</h1>
-              <div style={{ fontSize: 13, color: "#3730a3", marginTop: 2 }}>سلام، <strong>{user?.name}</strong></div>
-            </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24, ...anim(0) }}>
+          <div style={{ width: 52, height: 52, borderRadius: 17, background: `linear-gradient(135deg,${P},#3b82f6)`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 6px 22px ${P}55`, flexShrink: 0 }}>
+            <LayoutDashboard size={24} color="white" />
           </div>
-          <button onClick={logout} style={{
-            display: "flex", alignItems: "center", gap: 7, padding: "9px 18px",
-            borderRadius: 13, background: "rgba(239,68,68,0.10)",
-            border: "1.5px solid rgba(239,68,68,0.30)", color: "#dc2626",
-            cursor: "pointer", fontSize: 13, fontFamily: "Vazirmatn", fontWeight: 700,
-          }}
-            onMouseOver={e => (e.currentTarget.style.background = "rgba(239,68,68,0.20)")}
-            onMouseOut={e => (e.currentTarget.style.background = "rgba(239,68,68,0.10)")}
-          >
-            <LogOut size={15} /> خروج
-          </button>
+          <div>
+            <h1 style={{ fontSize: 20, fontWeight: 900, color: "#1e1b4b", margin: 0 }}>داشبورد مدرسه</h1>
+            <div style={{ fontSize: 13, color: "#3730a3", marginTop: 2 }}>سلام، <strong>{user?.name}</strong></div>
+          </div>
         </div>
 
         {/* Logo card */}
