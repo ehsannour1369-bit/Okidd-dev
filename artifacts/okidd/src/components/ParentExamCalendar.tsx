@@ -134,6 +134,20 @@ export default function ParentExamCalendar({ children, TEXT, TEXT2, accent, acce
 
   const isCurrentMonth = year === TODAY.getFullYear() && month === TODAY.getMonth();
 
+  /* ── popover position (computed outside JSX) ── */
+  const popoverStyle = (() => {
+    if (!popover) return {};
+    const PW = 288, PH = 420, GAP = 8;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const chipCenterX = popover.anchor.left + popover.anchor.width / 2;
+    const left = Math.max(GAP, Math.min(chipCenterX - PW / 2, vw - PW - GAP));
+    const hasRoomBelow = popover.anchor.bottom + GAP + PH <= vh - GAP;
+    const top = hasRoomBelow
+      ? popover.anchor.bottom + GAP
+      : Math.max(GAP, popover.anchor.top - GAP - PH);
+    return { top, left, maxHeight: vh - 2 * GAP };
+  })();
+
   return (
     <div ref={wrapRef} style={{ fontFamily: "Vazirmatn, sans-serif", position: "relative" }} dir="rtl"
       onClick={() => setPopover(null)}>
@@ -265,14 +279,14 @@ export default function ParentExamCalendar({ children, TEXT, TEXT2, accent, acce
           style={{
             position: "fixed",
             zIndex: 300,
-            top: Math.min(popover.anchor.bottom + 8, window.innerHeight - 220),
-            left: Math.max(8, Math.min(popover.anchor.left, window.innerWidth - 288)),
-            width: 280,
+            ...popoverStyle,
+            width: 288,
+            overflowY: "auto",
             background: "rgba(255,255,255,0.98)",
             border: `2px solid ${popover.event.color}44`,
             borderRadius: 18,
             padding: 18,
-            boxShadow: `0 16px 48px rgba(0,0,0,0.18), 0 0 0 1px ${popover.event.color}18`,
+            boxShadow: `0 16px 48px rgba(0,0,0,0.20), 0 0 0 1px ${popover.event.color}18`,
           }}>
           {/* Popover header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
@@ -297,26 +311,7 @@ export default function ParentExamCalendar({ children, TEXT, TEXT2, accent, acce
           )}
 
           {/* Type + Mode badges row */}
-          {(popover.event.exam.examType || popover.event.exam.examMode) && (
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-              {popover.event.exam.examType && (() => {
-                const c = EXAM_TYPE_COLORS[popover.event.exam.examType] ?? { bg: "rgba(99,102,241,0.12)", text: "#4338ca" };
-                return (
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", background: c.bg, borderRadius: 999, fontSize: 12, fontWeight: 700, color: c.text }}>
-                    <Tag size={10} /> {popover.event.exam.examType}
-                  </span>
-                );
-              })()}
-              {popover.event.exam.examMode && (() => {
-                const c = EXAM_MODE_COLORS[popover.event.exam.examMode] ?? { bg: "rgba(16,185,129,0.12)", text: "#059669" };
-                return (
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", background: c.bg, borderRadius: 999, fontSize: 12, fontWeight: 700, color: c.text }}>
-                    <Monitor size={10} /> {popover.event.exam.examMode}
-                  </span>
-                );
-              })()}
-            </div>
-          )}
+          <ExamBadges examType={popover.event.exam.examType} examMode={popover.event.exam.examMode} />
 
           {/* Details */}
           <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
@@ -342,6 +337,26 @@ export default function ParentExamCalendar({ children, TEXT, TEXT2, accent, acce
             )}
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+function ExamBadges({ examType, examMode }: { examType?: string; examMode?: string }) {
+  if (!examType && !examMode) return null;
+  const tc = examType ? (EXAM_TYPE_COLORS[examType] ?? { bg: "rgba(99,102,241,0.12)", text: "#4338ca" }) : null;
+  const mc = examMode ? (EXAM_MODE_COLORS[examMode] ?? { bg: "rgba(16,185,129,0.12)", text: "#059669" }) : null;
+  return (
+    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+      {tc && (
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", background: tc.bg, borderRadius: 999, fontSize: 12, fontWeight: 700, color: tc.text }}>
+          <Tag size={10} /> {examType}
+        </span>
+      )}
+      {mc && (
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", background: mc.bg, borderRadius: 999, fontSize: 12, fontWeight: 700, color: mc.text }}>
+          <Monitor size={10} /> {examMode}
+        </span>
       )}
     </div>
   );
