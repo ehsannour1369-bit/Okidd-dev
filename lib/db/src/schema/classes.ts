@@ -15,6 +15,7 @@ export const classTeachersTable = pgTable("class_teachers", {
   id: serial("id").primaryKey(),
   classId: integer("class_id").notNull(),
   teacherId: integer("teacher_id").notNull(),
+  bookId: integer("book_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

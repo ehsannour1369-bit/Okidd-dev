@@ -87,24 +87,42 @@ router.delete("/classes/:id/students/:studentId", async (req, res) => {
 // Teachers
 router.get("/classes/:id/teachers", async (req, res) => {
   const classId = parseInt(req.params.id);
-  const rows = await db.select({ teacherId: classTeachersTable.teacherId }).from(classTeachersTable).where(eq(classTeachersTable.classId, classId));
-  const teacherIds = rows.map(r => r.teacherId);
-  if (teacherIds.length === 0) { res.json([]); return; }
-  const teachers = await db.select().from(usersTable).where(inArray(usersTable.id, teacherIds));
-  res.json(teachers.map(({ password: _pw, ...u }) => u));
+  const rows = await db.select().from(classTeachersTable).where(eq(classTeachersTable.classId, classId));
+  if (rows.length === 0) { res.json([]); return; }
+  const teacherIds = [...new Set(rows.map(r => r.teacherId))];
+  const bookIds = [...new Set(rows.map(r => r.bookId).filter((b): b is number => b != null))];
+  const [teachers, books] = await Promise.all([
+    db.select().from(usersTable).where(inArray(usersTable.id, teacherIds)),
+    bookIds.length > 0 ? db.select().from(booksTable).where(inArray(booksTable.id, bookIds)) : Promise.resolve([]),
+  ]);
+  const teacherMap = new Map(teachers.map(t => [t.id, t]));
+  const bookMap = new Map((books as any[]).map((b: any) => [b.id, b]));
+  res.json(rows.map(row => {
+    const t = teacherMap.get(row.teacherId);
+    const book = row.bookId ? bookMap.get(row.bookId) : null;
+    if (!t) return null;
+    const { password: _pw, ...safeT } = t;
+    return { assignmentId: row.id, classId: row.classId, teacherId: row.teacherId, bookId: row.bookId ?? null, bookTitle: (book as any)?.title ?? null, ...safeT };
+  }).filter(Boolean));
 });
 
 router.post("/classes/:id/teachers", async (req, res) => {
   const classId = parseInt(req.params.id);
-  const { teacherId } = req.body;
-  await db.insert(classTeachersTable).values({ classId, teacherId }).onConflictDoNothing();
-  res.status(201).json({ ok: true });
+  const { teacherId, bookId } = req.body;
+  const [row] = await db.insert(classTeachersTable).values({ classId, teacherId, bookId: bookId ?? null }).returning();
+  res.status(201).json(row);
 });
 
+// Delete a specific teacher-book assignment by assignmentId, or all for a teacher
 router.delete("/classes/:id/teachers/:teacherId", async (req, res) => {
   const classId = parseInt(req.params.id);
   const teacherId = parseInt(req.params.teacherId);
-  await db.delete(classTeachersTable).where(and(eq(classTeachersTable.classId, classId), eq(classTeachersTable.teacherId, teacherId)));
+  const bookId = req.query.bookId ? parseInt(req.query.bookId as string) : null;
+  if (bookId) {
+    await db.delete(classTeachersTable).where(and(eq(classTeachersTable.classId, classId), eq(classTeachersTable.teacherId, teacherId), eq(classTeachersTable.bookId, bookId)));
+  } else {
+    await db.delete(classTeachersTable).where(and(eq(classTeachersTable.classId, classId), eq(classTeachersTable.teacherId, teacherId)));
+  }
   res.status(204).end();
 });
 

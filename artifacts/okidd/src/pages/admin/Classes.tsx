@@ -4,6 +4,7 @@ import { api } from "../../lib/api";
 import { showToast } from "../../lib/toast";
 import { BookMarked, Users, GraduationCap, School, X, Plus } from "lucide-react";
 import PageTopBar from "../../components/PageTopBar";
+import { ClassDetailModal, AMBER_THEME } from "../../components/ClassDetailModal";
 
 const C = {
   amber: "#d97706", amberL: "#f59e0b",
@@ -21,7 +22,7 @@ const IS: React.CSSProperties = {
 };
 
 const SCHOOL_TYPE_LABEL: Record<string, string> = { boys: "پسرانه", girls: "دخترانه", mixed: "مختلط" };
-const SCHOOL_TYPE_COLOR: Record<string, string>  = { boys: "#3b82f6",  girls: "#ec4899",  mixed: "#8b5cf6" };
+const SCHOOL_TYPE_COLOR: Record<string, string>  = { boys: "#3b82f6", girls: "#ec4899", mixed: "#8b5cf6" };
 
 function Pill({ label, color = C.amber }: { label: string; color?: string }) {
   return (
@@ -50,6 +51,7 @@ function Overlay({ title, onClose, children }: { title: string; onClose: () => v
 export default function AdminClasses() {
   const qc = useQueryClient();
   const [selectedSchoolId, setSelectedSchoolId] = useState<number | null>(null);
+  const [selectedClass, setSelectedClass] = useState<any>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [newBranch, setNewBranch] = useState("");
   const [newGL, setNewGL] = useState("");
@@ -94,11 +96,10 @@ export default function AdminClasses() {
     <div dir="rtl" style={{ fontFamily: "Vazirmatn, sans-serif" }}>
       <PageTopBar />
 
-      {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
         <div>
           <h1 style={{ fontSize: 20, fontWeight: 800, color: C.text, margin: 0 }}>کلاس‌ها</h1>
-          <p style={{ color: C.text2, fontSize: 13, marginTop: 4 }}>مدیریت کلاس‌های تمام مدارس</p>
+          <p style={{ color: C.text2, fontSize: 13, marginTop: 4 }}>مدیریت کلاس‌های تمام مدارس — روی هر کلاس کلیک کنید</p>
         </div>
         {selectedSchoolId && (
           <button onClick={() => setCreateOpen(true)} style={{
@@ -116,11 +117,7 @@ export default function AdminClasses() {
       <div style={{ marginBottom: 24, padding: "16px 18px", background: C.bg, border: `1px solid ${C.border}`, borderRadius: 14, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <School size={20} color={C.amber} style={{ flexShrink: 0 }} />
         <label style={{ color: C.text2, fontSize: 14, fontWeight: 600, flexShrink: 0 }}>انتخاب مدرسه:</label>
-        <select
-          value={selectedSchoolId ?? ""}
-          onChange={e => setSelectedSchoolId(e.target.value ? parseInt(e.target.value) : null)}
-          style={{ ...IS, maxWidth: 380 }}
-        >
+        <select value={selectedSchoolId ?? ""} onChange={e => { setSelectedSchoolId(e.target.value ? parseInt(e.target.value) : null); setSelectedClass(null); }} style={{ ...IS, maxWidth: 380 }}>
           <option value="">یک مدرسه انتخاب کنید...</option>
           {schools.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
@@ -133,7 +130,6 @@ export default function AdminClasses() {
         )}
       </div>
 
-      {/* Empty / prompt */}
       {!selectedSchoolId && (
         <div style={{ textAlign: "center", padding: "60px 20px", color: C.text2 }}>
           <BookMarked size={52} style={{ opacity: 0.2, marginBottom: 16 }} />
@@ -141,12 +137,10 @@ export default function AdminClasses() {
         </div>
       )}
 
-      {/* Classes grouped by branch */}
       {selectedSchoolId && branches.map((branch: any) => {
         const bGLs = gradeLevels.filter((gl: any) => gl.branchId === branch.id);
         const bGradeIds = new Set(grades.filter((g: any) => bGLs.some((gl: any) => gl.id === g.gradeLevelId)).map((g: any) => g.id));
         const bClasses = schoolClasses.filter((c: any) => bGradeIds.has(c.gradeId));
-
         return (
           <div key={branch.id} style={{ marginBottom: 28 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, padding: "10px 14px", background: `${C.amber}08`, border: `1px solid ${C.border}`, borderRadius: 12 }}>
@@ -154,7 +148,6 @@ export default function AdminClasses() {
               <h2 style={{ margin: 0, color: C.text, fontSize: 16, fontWeight: 800, flex: 1 }}>{branch.name}</h2>
               <Pill label={`${bClasses.length} کلاس`} />
             </div>
-
             {bGLs.map((gl: any) => {
               const glGrades = grades.filter((g: any) => g.gradeLevelId === gl.id);
               return (
@@ -175,9 +168,9 @@ export default function AdminClasses() {
                           : (
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>
                               {gClasses.map((cls: any) => (
-                                <div key={cls.id} style={{
+                                <div key={cls.id} onClick={() => setSelectedClass(cls)} style={{
                                   background: C.bg, border: `1.5px solid ${C.border}`, borderRadius: 14,
-                                  padding: "14px 16px", transition: "all 0.2s",
+                                  padding: "14px 16px", transition: "all 0.2s", cursor: "pointer",
                                   boxShadow: `0 2px 10px ${C.amber}0a`,
                                 }}
                                   onMouseOver={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = `${C.amber}44`; el.style.transform = "translateY(-2px)"; el.style.boxShadow = `0 6px 20px ${C.amber}15`; }}
@@ -217,7 +210,17 @@ export default function AdminClasses() {
         );
       })}
 
-      {/* Create modal */}
+      {selectedClass && selectedSchoolId && (
+        <ClassDetailModal
+          cls={selectedClass}
+          schoolId={selectedSchoolId}
+          theme={AMBER_THEME}
+          canDelete
+          onClose={() => setSelectedClass(null)}
+          onDeleted={() => { setSelectedClass(null); qc.invalidateQueries({ queryKey: ["classes"] }); refetchClasses(); }}
+        />
+      )}
+
       {createOpen && (
         <Overlay title="ساخت کلاس جدید" onClose={() => setCreateOpen(false)}>
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
