@@ -5,32 +5,12 @@ import { showToast } from "../lib/toast";
 import {
   BookMarked, Users, GraduationCap, BookOpen,
   X, Plus, UserMinus, UserPlus, CheckCircle2,
-  Circle, ChevronDown, ChevronUp, Clock, Star, Trash2,
+  Circle, ChevronDown, ChevronUp, Clock, Star, Trash2, Pencil, Check,
 } from "lucide-react";
+import type { ClassDetailTheme } from "./classDetailThemes";
 
-export interface ClassDetailTheme {
-  primary: string;
-  light: string;
-  text: string;
-  text2: string;
-  border: string;
-}
-
-export const PURPLE_THEME: ClassDetailTheme = {
-  primary: "#7c3aed", light: "#a855f7",
-  text: "#1e1b4b", text2: "#4f46e5",
-  border: "rgba(139,92,246,0.18)",
-};
-export const TEAL_THEME: ClassDetailTheme = {
-  primary: "#0d9488", light: "#14b8a6",
-  text: "#134e4a", text2: "#0f766e",
-  border: "rgba(13,148,136,0.18)",
-};
-export const AMBER_THEME: ClassDetailTheme = {
-  primary: "#d97706", light: "#f59e0b",
-  text: "#78350f", text2: "#92400e",
-  border: "rgba(217,119,6,0.18)",
-};
+export type { ClassDetailTheme } from "./classDetailThemes";
+export { PURPLE_THEME, TEAL_THEME, AMBER_THEME } from "./classDetailThemes";
 
 const IS = (theme: ClassDetailTheme): React.CSSProperties => ({
   width: "100%", background: "rgba(255,255,255,0.9)",
@@ -41,8 +21,8 @@ const IS = (theme: ClassDetailTheme): React.CSSProperties => ({
 });
 
 /* ─── BookProgressSection ────────────────────────────────── */
-function BookProgressSection({ book, classId, taughtIds, theme }: {
-  book: any; classId: number; taughtIds: Set<number>; theme: ClassDetailTheme;
+function BookProgressSection({ book, taughtIds, theme }: {
+  book: any; taughtIds: Set<number>; theme: ClassDetailTheme;
 }) {
   const [open, setOpen] = useState(false);
   const { data: lessons = [] } = useQuery<any[]>({
@@ -119,6 +99,13 @@ export interface ClassDetailModalProps {
 
 type TabKey = "students" | "progress" | "teachers" | "books";
 
+interface EditAssignment {
+  assignmentId: number;
+  teacherId: number;
+  currentBookId: number | null;
+  newBookId: string;
+}
+
 export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onDeleted }: ClassDetailModalProps) {
   const qc = useQueryClient();
   const [tab, setTab] = useState<TabKey>("students");
@@ -129,47 +116,115 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
   const [addTeacherBookId, setAddTeacherBookId] = useState("");
   const [addBookId, setAddBookId] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [editAssignment, setEditAssignment] = useState<EditAssignment | null>(null);
 
-  /* queries */
-  const { data: performance = [] } = useQuery<any[]>({ queryKey: ["class-perf", cls.id], queryFn: () => api.get(`/classes/${cls.id}/performance`) });
-  const { data: books = [], refetch: refetchBooks } = useQuery<any[]>({ queryKey: ["class-books", cls.id], queryFn: () => api.get(`/classes/${cls.id}/books`) });
-  const { data: progressChart = [] } = useQuery<any[]>({ queryKey: ["progress-chart", cls.id], queryFn: () => api.get(`/progress-chart?classId=${cls.id}`) });
-  const { data: teachers = [], refetch: refetchTeachers } = useQuery<any[]>({ queryKey: ["class-teachers", cls.id], queryFn: () => api.get(`/classes/${cls.id}/teachers`) });
-  const { data: allStudents = [] } = useQuery<any[]>({ queryKey: ["school-students", schoolId], queryFn: () => api.get(`/users?role=student&schoolId=${schoolId}`), enabled: tab === "students" });
-  const { data: allTeachers = [] } = useQuery<any[]>({ queryKey: ["school-teachers", schoolId], queryFn: () => api.get(`/users?role=teacher&schoolId=${schoolId}`), enabled: tab === "teachers" });
-  const { data: allBooks = [] } = useQuery<any[]>({ queryKey: ["books"], queryFn: () => api.get("/books"), enabled: tab === "books" });
+  /* ── queries — load all upfront, no lazy tab conditions ── */
+  const { data: performance = [] } = useQuery<any[]>({
+    queryKey: ["class-perf", cls.id],
+    queryFn: () => api.get(`/classes/${cls.id}/performance`),
+  });
+  const { data: books = [], refetch: refetchBooks } = useQuery<any[]>({
+    queryKey: ["class-books", cls.id],
+    queryFn: () => api.get(`/classes/${cls.id}/books`),
+  });
+  const { data: progressChart = [] } = useQuery<any[]>({
+    queryKey: ["progress-chart", cls.id],
+    queryFn: () => api.get(`/progress-chart?classId=${cls.id}`),
+  });
+  const { data: teachers = [], refetch: refetchTeachers } = useQuery<any[]>({
+    queryKey: ["class-teachers", cls.id],
+    queryFn: () => api.get(`/classes/${cls.id}/teachers`),
+  });
+  const { data: allStudents = [] } = useQuery<any[]>({
+    queryKey: ["school-students", schoolId],
+    queryFn: () => api.get(`/users?role=student&schoolId=${schoolId}`),
+    enabled: !!schoolId,
+  });
+  const { data: allTeachers = [] } = useQuery<any[]>({
+    queryKey: ["school-teachers", schoolId],
+    queryFn: () => api.get(`/users?role=teacher&schoolId=${schoolId}`),
+    enabled: !!schoolId,
+  });
+  const { data: allBooks = [] } = useQuery<any[]>({
+    queryKey: ["books"],
+    queryFn: () => api.get("/books"),
+  });
 
   const enrolledIds = new Set(performance.map((s: any) => s.id));
   const taughtIds = new Set(progressChart.map((p: any) => p.lessonId));
+  const availableStudents = allStudents.filter((s: any) => !enrolledIds.has(s.id));
+  const availableBooks = allBooks.filter((b: any) => !books.some((cb: any) => cb.id === b.id));
 
-  /* mutations – students */
+  /* ── mutations – students ── */
   const addStudMut = useMutation({
     mutationFn: (sid: number) => api.post(`/classes/${cls.id}/students`, { studentId: sid }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["class-perf", cls.id] }); qc.invalidateQueries({ queryKey: ["classes"] }); setAddStudentId(""); showToast("دانش‌آموز اضافه شد ✓"); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["class-perf", cls.id] });
+      qc.invalidateQueries({ queryKey: ["classes"] });
+      setAddStudentId("");
+      showToast("دانش‌آموز اضافه شد ✓");
+    },
     onError: (e: any) => showToast(e?.message ?? "خطا", "error"),
   });
   const removeStudMut = useMutation({
     mutationFn: (sid: number) => api.delete(`/classes/${cls.id}/students/${sid}`),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["class-perf", cls.id] }); qc.invalidateQueries({ queryKey: ["classes"] }); setConfirmRemoveStudent(null); showToast("دانش‌آموز از کلاس حذف شد"); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["class-perf", cls.id] });
+      qc.invalidateQueries({ queryKey: ["classes"] });
+      setConfirmRemoveStudent(null);
+      showToast("دانش‌آموز از کلاس حذف شد");
+    },
     onError: (e: any) => showToast(e?.message ?? "خطا", "error"),
   });
-  /* mutations – teachers */
+
+  /* ── mutations – teachers ── */
   const addTeachMut = useMutation({
     mutationFn: ({ teacherId, bookId }: { teacherId: number; bookId: number | null }) =>
       api.post(`/classes/${cls.id}/teachers`, { teacherId, bookId }),
-    onSuccess: () => { refetchTeachers(); qc.invalidateQueries({ queryKey: ["classes"] }); setAddTeacherId(""); setAddTeacherBookId(""); showToast("معلم اضافه شد ✓"); },
+    onSuccess: () => {
+      refetchTeachers();
+      qc.invalidateQueries({ queryKey: ["classes"] });
+      setAddTeacherId("");
+      setAddTeacherBookId("");
+      showToast("معلم اضافه شد ✓");
+    },
     onError: (e: any) => showToast(e?.message ?? "خطا", "error"),
   });
   const removeTeachMut = useMutation({
     mutationFn: ({ teacherId, bookId }: { teacherId: number; bookId?: number }) =>
       api.delete(`/classes/${cls.id}/teachers/${teacherId}${bookId ? `?bookId=${bookId}` : ""}`),
-    onSuccess: () => { refetchTeachers(); qc.invalidateQueries({ queryKey: ["classes"] }); showToast("اختصاص معلم حذف شد"); },
+    onSuccess: () => {
+      refetchTeachers();
+      qc.invalidateQueries({ queryKey: ["classes"] });
+      showToast("اختصاص معلم حذف شد");
+    },
     onError: (e: any) => showToast(e?.message ?? "خطا", "error"),
   });
-  /* mutations – books */
+
+  /* change book: delete old assignment + add new one */
+  const changeBookMut = useMutation({
+    mutationFn: async ({ teacherId, oldBookId, newBookId }: { teacherId: number; oldBookId: number | null; newBookId: number }) => {
+      if (oldBookId) {
+        await api.delete(`/classes/${cls.id}/teachers/${teacherId}?bookId=${oldBookId}`);
+      }
+      await api.post(`/classes/${cls.id}/teachers`, { teacherId, bookId: newBookId });
+    },
+    onSuccess: () => {
+      refetchTeachers();
+      setEditAssignment(null);
+      showToast("کتاب معلم تغییر یافت ✓");
+    },
+    onError: (e: any) => showToast(e?.message ?? "خطا", "error"),
+  });
+
+  /* ── mutations – books ── */
   const addBookMut = useMutation({
     mutationFn: (bid: number) => api.post(`/classes/${cls.id}/books`, { bookId: bid }),
-    onSuccess: () => { refetchBooks(); setAddBookId(""); showToast("کتاب اضافه شد ✓"); },
+    onSuccess: () => {
+      refetchBooks();
+      setAddBookId("");
+      showToast("کتاب اضافه شد ✓");
+    },
     onError: (e: any) => showToast(e?.message ?? "خطا", "error"),
   });
   const removeBookMut = useMutation({
@@ -177,25 +232,41 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
     onSuccess: () => { refetchBooks(); showToast("کتاب حذف شد"); },
     onError: (e: any) => showToast(e?.message ?? "خطا", "error"),
   });
-  /* mutation – delete class */
+
+  /* ── mutation – delete class ── */
   const deleteMut = useMutation({
     mutationFn: () => api.delete(`/classes/${cls.id}`),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["classes"] }); onDeleted?.(); onClose(); showToast("کلاس حذف شد"); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["classes"] });
+      onDeleted?.();
+      onClose();
+      showToast("کلاس حذف شد");
+    },
     onError: (e: any) => showToast(e?.message ?? "خطا", "error"),
   });
 
   const filteredStudents = performance.filter((s: any) =>
     !search || s.name?.includes(search) || s.nationalId?.includes(search)
   );
-  const availableStudents = allStudents.filter((s: any) => !enrolledIds.has(s.id));
-  const availableBooks = allBooks.filter((b: any) => !books.some((cb: any) => cb.id === b.id));
+
+  const uniqueTeacherCount = [...new Set(teachers.map((t: any) => t.teacherId))].length;
 
   const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
     { key: "students",  label: `دانش‌آموزان (${performance.length})`, icon: <Users size={13} /> },
-    { key: "progress",  label: `پیشرفت درسی`,                          icon: <BookMarked size={13} /> },
-    { key: "teachers",  label: `معلمان (${[...new Set(teachers.map((t: any) => t.teacherId))].length})`, icon: <GraduationCap size={13} /> },
+    { key: "progress",  label: "پیشرفت درسی",                          icon: <BookMarked size={13} /> },
+    { key: "teachers",  label: `معلمان (${uniqueTeacherCount})`,        icon: <GraduationCap size={13} /> },
     { key: "books",     label: `کتاب‌ها (${books.length})`,             icon: <BookOpen size={13} /> },
   ];
+
+  /* Group teacher assignments by teacher */
+  const teacherGroups = (() => {
+    const grouped = new Map<number, { teacher: any; assignments: any[] }>();
+    for (const a of teachers) {
+      if (!grouped.has(a.teacherId)) grouped.set(a.teacherId, { teacher: a, assignments: [] });
+      grouped.get(a.teacherId)!.assignments.push(a);
+    }
+    return Array.from(grouped.values());
+  })();
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.42)", backdropFilter: "blur(6px)", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
@@ -221,7 +292,7 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 20 }}>
           {[
             { label: "دانش‌آموز", value: performance.length, color: "#3b82f6" },
-            { label: "معلم", value: [...new Set(teachers.map((t: any) => t.teacherId))].length, color: "#d97706" },
+            { label: "معلم", value: uniqueTeacherCount, color: "#d97706" },
             { label: "کتاب", value: books.length, color: theme.primary },
             { label: "درس تدریس‌شده", value: taughtIds.size, color: "#10b981" },
           ].map(s => (
@@ -256,7 +327,10 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
           <div>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="جستجوی دانش‌آموز..." style={{ ...IS(theme), marginBottom: 14 }} />
             {filteredStudents.length === 0
-              ? <div style={{ textAlign: "center", padding: "28px 0", color: theme.text2 }}><Users size={32} style={{ opacity: 0.2, marginBottom: 8 }} /><p style={{ margin: 0, fontSize: 13 }}>دانش‌آموزی یافت نشد</p></div>
+              ? <div style={{ textAlign: "center", padding: "28px 0", color: theme.text2 }}>
+                  <Users size={32} style={{ opacity: 0.2, marginBottom: 8 }} />
+                  <p style={{ margin: 0, fontSize: 13 }}>دانش‌آموزی یافت نشد</p>
+                </div>
               : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 7, maxHeight: 300, overflowY: "auto", marginBottom: 14 }}>
                   {filteredStudents.map((s: any) => (
@@ -271,7 +345,7 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
                           {s.lastPresenceAt && <span style={{ display: "flex", alignItems: "center", gap: 2 }}><Clock size={9} /> {new Date(s.lastPresenceAt).toLocaleDateString("fa-IR")}</span>}
                         </div>
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 3, marginLeft: 6 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
                         <Star size={11} color="#f59e0b" fill="#f59e0b" />
                         <span style={{ fontSize: 12, fontWeight: 700, color: "#d97706" }}>{s.totalScore ?? 0}</span>
                       </div>
@@ -302,7 +376,9 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
                   <option value="">انتخاب از لیست مدرسه...</option>
                   {availableStudents.map((s: any) => <option key={s.id} value={s.id}>{s.name} — {s.nationalId}</option>)}
                 </select>
-                <button onClick={() => addStudentId && addStudMut.mutate(parseInt(addStudentId))} disabled={!addStudentId || addStudMut.isPending}
+                <button
+                  onClick={() => addStudentId && addStudMut.mutate(parseInt(addStudentId))}
+                  disabled={!addStudentId || addStudMut.isPending}
                   style={{ padding: "10px 14px", background: `linear-gradient(135deg,${theme.primary},${theme.light})`, border: "none", borderRadius: 10, color: "white", fontFamily: "Vazirmatn, sans-serif", fontWeight: 700, fontSize: 13, cursor: "pointer", flexShrink: 0, opacity: !addStudentId ? 0.5 : 1 }}>
                   <Plus size={15} />
                 </button>
@@ -315,7 +391,12 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
         {tab === "progress" && (
           <div>
             {books.length === 0
-              ? <div style={{ textAlign: "center", padding: "36px 0", color: theme.text2 }}><BookMarked size={36} style={{ opacity: 0.2, marginBottom: 10 }} /><p style={{ margin: 0, fontSize: 13 }}>هنوز کتابی به کلاس اختصاص داده نشده</p></div>
+              ? (
+                <div style={{ textAlign: "center", padding: "36px 0", color: theme.text2 }}>
+                  <BookMarked size={36} style={{ opacity: 0.2, marginBottom: 10 }} />
+                  <p style={{ margin: 0, fontSize: 13 }}>هنوز کتابی به کلاس اختصاص داده نشده</p>
+                </div>
+              )
               : (
                 <>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, padding: "10px 14px", background: `${theme.primary}0a`, borderRadius: 11 }}>
@@ -323,7 +404,7 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
                     <span style={{ fontSize: 12, fontWeight: 700, color: "#10b981", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 99, padding: "3px 10px" }}>{taughtIds.size} درس تدریس‌شده</span>
                   </div>
                   {books.map((book: any) => (
-                    <BookProgressSection key={book.id} book={book} classId={cls.id} taughtIds={taughtIds} theme={theme} />
+                    <BookProgressSection key={book.id} book={book} taughtIds={taughtIds} theme={theme} />
                   ))}
                 </>
               )
@@ -360,48 +441,96 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
               </div>
             </div>
 
-            {/* Teachers list grouped by teacher */}
-            {teachers.length === 0
-              ? <div style={{ textAlign: "center", padding: "28px 0", color: theme.text2 }}><GraduationCap size={36} style={{ opacity: 0.2, marginBottom: 8 }} /><p style={{ margin: 0, fontSize: 13 }}>هنوز معلمی اختصاص داده نشده</p></div>
-              : (() => {
-                const grouped = new Map<number, { teacher: any; assignments: any[] }>();
-                for (const a of teachers) {
-                  if (!grouped.has(a.teacherId)) grouped.set(a.teacherId, { teacher: a, assignments: [] });
-                  grouped.get(a.teacherId)!.assignments.push(a);
-                }
-                const groups = Array.from(grouped.values());
-                return groups.map(({ teacher: t, assignments }) => (
-                  <div key={t.teacherId} style={{ background: "rgba(255,255,255,0.85)", border: `1px solid ${theme.border}`, borderRadius: 12, padding: "12px 14px", marginBottom: 8 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: assignments.length > 0 ? 10 : 0 }}>
-                      <div style={{ width: 38, height: 38, borderRadius: 10, background: `linear-gradient(135deg,${theme.primary},${theme.light})`, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: 15, flexShrink: 0 }}>
-                        {t.name?.charAt(0) ?? "م"}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 700, color: theme.text, fontSize: 14 }}>{t.name}</div>
-                        <div style={{ fontSize: 11, color: theme.text2 }}>{t.email}</div>
-                      </div>
-                      <button onClick={() => removeTeachMut.mutate({ teacherId: t.teacherId })} title="حذف همه اختصاص‌های این معلم"
-                        style={{ width: 28, height: 28, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.18)", borderRadius: 7, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", flexShrink: 0 }}>
-                        <Trash2 size={12} />
-                      </button>
+            {/* Teachers list */}
+            {teacherGroups.length === 0
+              ? (
+                <div style={{ textAlign: "center", padding: "28px 0", color: theme.text2 }}>
+                  <GraduationCap size={36} style={{ opacity: 0.2, marginBottom: 8 }} />
+                  <p style={{ margin: 0, fontSize: 13 }}>هنوز معلمی اختصاص داده نشده</p>
+                </div>
+              )
+              : teacherGroups.map(({ teacher: t, assignments }) => (
+                <div key={t.teacherId} style={{ background: "rgba(255,255,255,0.85)", border: `1px solid ${theme.border}`, borderRadius: 12, padding: "12px 14px", marginBottom: 8 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: assignments.length > 0 ? 10 : 0 }}>
+                    <div style={{ width: 38, height: 38, borderRadius: 10, background: `linear-gradient(135deg,${theme.primary},${theme.light})`, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: 15, flexShrink: 0 }}>
+                      {t.name?.charAt(0) ?? "م"}
                     </div>
-                    {assignments.map((a: any) => (
-                      <div key={a.assignmentId} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", background: a.bookId ? `${theme.primary}08` : "rgba(0,0,0,0.03)", border: `1px solid ${theme.primary}18`, borderRadius: 8, marginBottom: 4 }}>
-                        <BookOpen size={12} color={a.bookId ? theme.primary : theme.text2} />
-                        <span style={{ flex: 1, fontSize: 12, color: a.bookId ? theme.text : theme.text2, fontWeight: a.bookId ? 600 : 400 }}>
-                          {a.bookTitle ?? "—  بدون کتاب مشخص"}
-                        </span>
-                        {a.bookId && (
-                          <button onClick={() => removeTeachMut.mutate({ teacherId: a.teacherId, bookId: a.bookId })}
-                            style={{ width: 22, height: 22, background: "rgba(239,68,68,0.08)", border: "none", borderRadius: 5, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444" }}>
-                            <X size={10} />
-                          </button>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, color: theme.text, fontSize: 14 }}>{t.name}</div>
+                      {t.email && <div style={{ fontSize: 11, color: theme.text2 }}>{t.email}</div>}
+                    </div>
+                    <button
+                      onClick={() => removeTeachMut.mutate({ teacherId: t.teacherId })}
+                      title="حذف همه اختصاص‌های این معلم"
+                      style={{ width: 28, height: 28, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.18)", borderRadius: 7, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", flexShrink: 0 }}>
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+
+                  {/* Book assignments for this teacher */}
+                  {assignments.map((a: any) => {
+                    const editing = editAssignment?.assignmentId === a.assignmentId ? editAssignment : null;
+                    return (
+                      <div key={a.assignmentId} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", background: a.bookId ? `${theme.primary}09` : "rgba(0,0,0,0.03)", border: `1px solid ${theme.primary}1a`, borderRadius: 9, marginBottom: 5 }}>
+                        <BookOpen size={13} color={a.bookId ? theme.primary : theme.text2} style={{ flexShrink: 0 }} />
+
+                        {editing ? (
+                          /* Inline edit mode */
+                          <>
+                            <select
+                              value={editing.newBookId}
+                              onChange={e => setEditAssignment(prev => prev ? { ...prev, newBookId: e.target.value } : null)}
+                              style={{ ...IS(theme), flex: 1, padding: "5px 8px", fontSize: 12 }}
+                              autoFocus
+                            >
+                              <option value="">انتخاب کتاب جدید...</option>
+                              {books.filter((b: any) => b.id !== a.bookId).map((b: any) => (
+                                <option key={b.id} value={b.id}>{b.title}</option>
+                              ))}
+                            </select>
+                            <button
+                              onClick={() => {
+                                if (!editing.newBookId) { showToast("کتاب جدید را انتخاب کنید", "error"); return; }
+                                changeBookMut.mutate({ teacherId: a.teacherId, oldBookId: a.bookId, newBookId: parseInt(editing.newBookId) });
+                              }}
+                              disabled={!editing.newBookId || changeBookMut.isPending}
+                              style={{ width: 28, height: 28, background: `${theme.primary}18`, border: `1px solid ${theme.primary}44`, borderRadius: 7, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: theme.primary, flexShrink: 0 }}>
+                              <Check size={12} />
+                            </button>
+                            <button
+                              onClick={() => setEditAssignment(null)}
+                              style={{ width: 28, height: 28, background: "rgba(0,0,0,0.06)", border: "none", borderRadius: 7, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: theme.text2, flexShrink: 0 }}>
+                              <X size={12} />
+                            </button>
+                          </>
+                        ) : (
+                          /* Normal display mode */
+                          <>
+                            <span style={{ flex: 1, fontSize: 12, color: a.bookId ? theme.text : theme.text2, fontWeight: a.bookId ? 600 : 400 }}>
+                              {a.bookTitle ?? "— بدون کتاب مشخص"}
+                            </span>
+                            {/* Change book button */}
+                            {a.bookId && (
+                              <button
+                                onClick={() => setEditAssignment({ assignmentId: a.assignmentId, teacherId: a.teacherId, currentBookId: a.bookId, newBookId: "" })}
+                                title="تغییر کتاب"
+                                style={{ width: 24, height: 24, background: `${theme.primary}12`, border: `1px solid ${theme.primary}2a`, borderRadius: 6, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: theme.primary, flexShrink: 0 }}>
+                                <Pencil size={10} />
+                              </button>
+                            )}
+                            {/* Remove this assignment */}
+                            <button
+                              onClick={() => removeTeachMut.mutate({ teacherId: a.teacherId, bookId: a.bookId ?? undefined })}
+                              style={{ width: 24, height: 24, background: "rgba(239,68,68,0.07)", border: "none", borderRadius: 6, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", flexShrink: 0 }}>
+                              <X size={10} />
+                            </button>
+                          </>
                         )}
                       </div>
-                    ))}
-                  </div>
-                ));
-              })()
+                    );
+                  })}
+                </div>
+              ))
             }
           </div>
         )}
@@ -414,13 +543,20 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
                 <option value="">افزودن کتاب به کلاس...</option>
                 {availableBooks.map((b: any) => <option key={b.id} value={b.id}>{b.title}</option>)}
               </select>
-              <button onClick={() => addBookId && addBookMut.mutate(parseInt(addBookId))} disabled={!addBookId || addBookMut.isPending}
+              <button
+                onClick={() => addBookId && addBookMut.mutate(parseInt(addBookId))}
+                disabled={!addBookId || addBookMut.isPending}
                 style={{ padding: "10px 14px", background: `linear-gradient(135deg,${theme.primary},${theme.light})`, border: "none", borderRadius: 10, color: "white", fontFamily: "Vazirmatn, sans-serif", fontWeight: 700, fontSize: 13, cursor: "pointer", flexShrink: 0, opacity: !addBookId ? 0.5 : 1 }}>
                 <Plus size={15} />
               </button>
             </div>
             {books.length === 0
-              ? <div style={{ textAlign: "center", padding: "28px 0", color: theme.text2 }}><BookOpen size={36} style={{ opacity: 0.2, marginBottom: 8 }} /><p style={{ margin: 0, fontSize: 13 }}>کتابی به کلاس اضافه نشده</p></div>
+              ? (
+                <div style={{ textAlign: "center", padding: "28px 0", color: theme.text2 }}>
+                  <BookOpen size={36} style={{ opacity: 0.2, marginBottom: 8 }} />
+                  <p style={{ margin: 0, fontSize: 13 }}>کتابی به کلاس اضافه نشده</p>
+                </div>
+              )
               : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                   {books.map((b: any) => (
@@ -430,9 +566,10 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 700, color: theme.text, fontSize: 13 }}>{b.title}</div>
-                        {b.lessonCount && <div style={{ fontSize: 11, color: theme.text2 }}>{b.lessonCount} درس</div>}
+                        {b.lessonCount != null && <div style={{ fontSize: 11, color: theme.text2 }}>{b.lessonCount} درس</div>}
                       </div>
-                      <button onClick={() => removeBookMut.mutate(b.id)}
+                      <button
+                        onClick={() => removeBookMut.mutate(b.id)}
                         style={{ width: 28, height: 28, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.18)", borderRadius: 7, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444" }}>
                         <Trash2 size={12} />
                       </button>
