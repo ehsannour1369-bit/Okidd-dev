@@ -20,9 +20,55 @@ const IS = (theme: ClassDetailTheme): React.CSSProperties => ({
   direction: "rtl", boxSizing: "border-box",
 });
 
+/* ─── helpers ────────────────────────────────────────────── */
+function parseScheduleDate(s: string): Date | null {
+  if (!s?.trim()) return null;
+  // ISO: YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    const d = new Date(s + "T00:00:00");
+    return isNaN(d.getTime()) ? null : d;
+  }
+  // Jalali: YYYY/MM/DD — approximate conversion
+  if (/^\d{4}\/\d{2}\/\d{2}$/.test(s)) {
+    const [jy, jm, jd] = s.split("/").map(Number);
+    const monthLengths = [0, 31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
+    let days = jd - 1;
+    for (let m = 1; m < jm; m++) days += monthLengths[m];
+    const nowruz = new Date(jy + 621, 2, 20); // March 20
+    return new Date(nowruz.getTime() + days * 86400000);
+  }
+  return null;
+}
+
+type LessonStatus = "taught" | "overdue" | "upcoming" | "unscheduled";
+
+function lessonStatus(
+  seqNum: number,
+  unlockedSet: Set<number>,
+  dateMap: Record<number, string>,
+): LessonStatus {
+  const taught = unlockedSet.has(seqNum);
+  if (taught) return "taught";
+  const planned = parseScheduleDate(dateMap[seqNum]);
+  if (!planned) return "unscheduled";
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return planned < today ? "overdue" : "upcoming";
+}
+
+const STATUS_STYLE: Record<LessonStatus, { bg: string; border: string; icon: string; label: string; labelColor: string; labelBg: string }> = {
+  taught:      { bg: "rgba(16,185,129,0.07)",  border: "rgba(16,185,129,0.22)",  icon: "#10b981", label: "✓ تدریس شده", labelColor: "#10b981", labelBg: "rgba(16,185,129,0.12)" },
+  overdue:     { bg: "rgba(239,68,68,0.07)",   border: "rgba(239,68,68,0.25)",   icon: "#ef4444", label: "عقب‌افتاده",   labelColor: "#ef4444", labelBg: "rgba(239,68,68,0.12)" },
+  upcoming:    { bg: "rgba(234,179,8,0.06)",   border: "rgba(234,179,8,0.22)",   icon: "#ca8a04", label: "در انتظار",   labelColor: "#ca8a04", labelBg: "rgba(234,179,8,0.12)" },
+  unscheduled: { bg: "rgba(100,116,139,0.05)", border: "rgba(100,116,139,0.14)", icon: "#94a3b8", label: "بدون تاریخ",  labelColor: "#94a3b8", labelBg: "rgba(100,116,139,0.08)" },
+};
+
 /* ─── BookProgressSection ────────────────────────────────── */
-function BookProgressSection({ book, taughtIds, theme }: {
-  book: any; taughtIds: Set<number>; theme: ClassDetailTheme;
+function BookProgressSection({ book, unlockedNums, dateMap, theme }: {
+  book: any;
+  unlockedNums: Set<number>;
+  dateMap: Record<number, string>;
+  theme: ClassDetailTheme;
 }) {
   const [open, setOpen] = useState(false);
   const { data: lessons = [] } = useQuery<any[]>({
@@ -30,13 +76,21 @@ function BookProgressSection({ book, taughtIds, theme }: {
     queryFn: () => api.get(`/lessons?bookId=${book.id}`),
     enabled: open,
   });
-  const total = book.lessonCount ?? lessons.length;
-  const taught = lessons.filter((l: any) => taughtIds.has(l.id)).length;
-  const pct = total > 0 ? Math.round((taught / total) * 100) : 0;
-  const barColor = pct === 100 ? "#10b981" : pct > 50 ? "#3b82f6" : theme.primary;
+
+  const total = book.lessonCount ?? 0;
+  const taughtCount = Array.from({ length: total }, (_, i) => i + 1)
+    .filter(n => unlockedNums.has(n)).length;
+  const overdueCount = Array.from({ length: total }, (_, i) => i + 1)
+    .filter(n => lessonStatus(n, unlockedNums, dateMap) === "overdue").length;
+
+  const pct = total > 0 ? Math.round((taughtCount / total) * 100) : 0;
+  const barColor = pct === 100 ? "#10b981" : overdueCount > 0 ? "#ef4444" : pct > 50 ? "#3b82f6" : theme.primary;
+
+  /* Use actual lessons sorted by orderIndex, or fall back to sequential numbers */
+  const sortedLessons = [...lessons].sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
 
   return (
-    <div style={{ background: "rgba(255,255,255,0.7)", border: `1px solid ${theme.border}`, borderRadius: 14, overflow: "hidden", marginBottom: 10 }}>
+    <div style={{ background: "rgba(255,255,255,0.7)", border: `1px solid ${overdueCount > 0 ? "rgba(239,68,68,0.25)" : theme.border}`, borderRadius: 14, overflow: "hidden", marginBottom: 10 }}>
       <button onClick={() => setOpen(v => !v)} style={{ width: "100%", background: "none", border: "none", padding: "14px 16px", cursor: "pointer", fontFamily: "Vazirmatn, sans-serif", textAlign: "right" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 36, height: 36, borderRadius: 9, background: `linear-gradient(135deg,${theme.primary},${theme.light})`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -44,7 +98,11 @@ function BookProgressSection({ book, taughtIds, theme }: {
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 700, color: theme.text, fontSize: 14 }}>{book.title}</div>
-            <div style={{ fontSize: 12, color: theme.text2, marginTop: 2 }}>{taught} از {total} درس تدریس شده</div>
+            <div style={{ fontSize: 12, color: theme.text2, marginTop: 2, display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <span style={{ color: "#10b981" }}>✓ {taughtCount} تدریس‌شده</span>
+              {overdueCount > 0 && <span style={{ color: "#ef4444" }}>⚠ {overdueCount} عقب‌افتاده</span>}
+              <span>از {total} درس</span>
+            </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ fontWeight: 800, fontSize: 14, color: barColor }}>{pct}%</span>
@@ -55,26 +113,51 @@ function BookProgressSection({ book, taughtIds, theme }: {
           <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg,${barColor},${barColor}cc)`, borderRadius: 99, transition: "width 0.6s ease" }} />
         </div>
       </button>
+
       {open && (
         <div style={{ borderTop: `1px solid ${theme.border}`, padding: "10px 16px 16px" }}>
-          {lessons.length === 0
-            ? <p style={{ color: theme.text2, fontSize: 13, textAlign: "center", padding: "12px 0" }}>درسی برای این کتاب ثبت نشده</p>
+          {/* Legend */}
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 10, padding: "6px 10px", background: "rgba(0,0,0,0.03)", borderRadius: 8 }}>
+            {(["taught", "overdue", "upcoming", "unscheduled"] as LessonStatus[]).map(st => (
+              <span key={st} style={{ fontSize: 10, color: STATUS_STYLE[st].labelColor, fontWeight: 600, display: "flex", alignItems: "center", gap: 3 }}>
+                <span style={{ width: 8, height: 8, borderRadius: "50%", background: STATUS_STYLE[st].labelBg, border: `1.5px solid ${STATUS_STYLE[st].labelColor}`, display: "inline-block" }} />
+                {STATUS_STYLE[st].label}
+              </span>
+            ))}
+          </div>
+
+          {total === 0
+            ? <p style={{ color: theme.text2, fontSize: 13, textAlign: "center", padding: "12px 0" }}>تعداد درس‌های این کتاب مشخص نیست</p>
             : (
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {lessons.map((l: any, idx: number) => {
-                  const isTaught = taughtIds.has(l.id);
+                {Array.from({ length: total }, (_, i) => {
+                  const seqNum = i + 1;
+                  const lesson = sortedLessons[i];
+                  const st = lessonStatus(seqNum, unlockedNums, dateMap);
+                  const s = STATUS_STYLE[st];
+                  const plannedDate = dateMap[seqNum];
                   return (
-                    <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 10, background: isTaught ? "rgba(16,185,129,0.07)" : "rgba(139,92,246,0.04)", border: `1px solid ${isTaught ? "rgba(16,185,129,0.2)" : "rgba(139,92,246,0.1)"}` }}>
-                      {isTaught ? <CheckCircle2 size={16} color="#10b981" /> : <Circle size={16} color="rgba(139,92,246,0.35)" />}
-                      <div style={{ flex: 1 }}>
-                        <span style={{ fontSize: 13, fontWeight: isTaught ? 700 : 500, color: isTaught ? "#065f46" : theme.text }}>
-                          درس {idx + 1}: {l.title}
+                    <div key={seqNum} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 10, background: s.bg, border: `1px solid ${s.border}` }}>
+                      {st === "taught"
+                        ? <CheckCircle2 size={16} color={s.icon} style={{ flexShrink: 0 }} />
+                        : st === "overdue"
+                          ? <Circle size={16} color={s.icon} style={{ flexShrink: 0 }} />
+                          : <Circle size={16} color={s.icon} style={{ opacity: 0.6, flexShrink: 0 }} />
+                      }
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <span style={{ fontSize: 13, fontWeight: st === "taught" ? 700 : 500, color: st === "taught" ? "#065f46" : st === "overdue" ? "#991b1b" : theme.text }}>
+                          درس {seqNum}{lesson?.title ? `: ${lesson.title}` : ""}
                         </span>
-                        {l.description && <div style={{ fontSize: 11, color: theme.text2, marginTop: 2 }}>{l.description}</div>}
+                        {lesson?.description && <div style={{ fontSize: 11, color: theme.text2, marginTop: 2 }}>{lesson.description}</div>}
                       </div>
-                      <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 99, background: isTaught ? "rgba(16,185,129,0.1)" : "rgba(139,92,246,0.06)", color: isTaught ? "#10b981" : "rgba(139,92,246,0.5)" }}>
-                        {isTaught ? "✓ تدریس شده" : "در انتظار"}
-                      </span>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0 }}>
+                        <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 99, background: s.labelBg, color: s.labelColor, whiteSpace: "nowrap" }}>
+                          {s.label}
+                        </span>
+                        {plannedDate && (
+                          <span style={{ fontSize: 10, color: theme.text2, direction: "ltr" }}>{plannedDate}</span>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -127,9 +210,15 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
     queryKey: ["class-books", cls.id],
     queryFn: () => api.get(`/classes/${cls.id}/books`),
   });
-  const { data: progressChart = [] } = useQuery<any[]>({
+  /* school's planned schedule per lesson */
+  const { data: scheduleChart = [] } = useQuery<any[]>({
     queryKey: ["progress-chart", cls.id],
     queryFn: () => api.get(`/progress-chart?classId=${cls.id}`),
+  });
+  /* actual taught lessons (sequential lesson numbers) */
+  const { data: lessonUnlocks = [] } = useQuery<any[]>({
+    queryKey: ["lesson-unlocks", cls.id],
+    queryFn: () => api.get(`/lesson-unlocks?classId=${cls.id}`),
   });
   const { data: teachers = [], refetch: refetchTeachers } = useQuery<any[]>({
     queryKey: ["class-teachers", cls.id],
@@ -151,9 +240,18 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
   });
 
   const enrolledIds = new Set(performance.map((s: any) => s.id));
-  const taughtIds = new Set(progressChart.map((p: any) => p.lessonId));
   const availableStudents = allStudents.filter((s: any) => !enrolledIds.has(s.id));
   const availableBooks = allBooks.filter((b: any) => !books.some((cb: any) => cb.id === b.id));
+
+  /* per-book unlocked lesson numbers & planned dates from school schedule */
+  const unlockedByBook = (bookId: number): Set<number> =>
+    new Set(lessonUnlocks.filter((u: any) => u.bookId === bookId).map((u: any) => u.lessonId));
+  const dateMapByBook = (bookId: number): Record<number, string> => {
+    const m: Record<number, string> = {};
+    for (const row of scheduleChart) if ((row as any).bookId === bookId) m[(row as any).lessonId] = (row as any).teachDate;
+    return m;
+  };
+  const totalTaughtCount = lessonUnlocks.length;
 
   /* ── mutations – students ── */
   const addStudMut = useMutation({
@@ -292,7 +390,7 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
             { label: "دانش‌آموز", value: performance.length, color: "#3b82f6" },
             { label: "معلم", value: uniqueTeacherCount, color: "#d97706" },
             { label: "کتاب", value: books.length, color: theme.primary },
-            { label: "درس تدریس‌شده", value: taughtIds.size, color: "#10b981" },
+            { label: "درس تدریس‌شده", value: totalTaughtCount, color: "#10b981" },
           ].map(s => (
             <div key={s.label} style={{ background: `${s.color}0d`, border: `1px solid ${s.color}22`, borderRadius: 10, padding: "10px 8px", textAlign: "center" }}>
               <div style={{ fontSize: 20, fontWeight: 900, color: s.color }}>{s.value}</div>
@@ -399,10 +497,16 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
                 <>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, padding: "10px 14px", background: `${theme.primary}0a`, borderRadius: 11 }}>
                     <span style={{ fontSize: 13, fontWeight: 700, color: theme.text }}>{books.length} کتاب در این کلاس</span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "#10b981", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 99, padding: "3px 10px" }}>{taughtIds.size} درس تدریس‌شده</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#10b981", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 99, padding: "3px 10px" }}>{totalTaughtCount} درس تدریس‌شده</span>
                   </div>
                   {books.map((book: any) => (
-                    <BookProgressSection key={book.id} book={book} taughtIds={taughtIds} theme={theme} />
+                    <BookProgressSection
+                      key={book.id}
+                      book={book}
+                      unlockedNums={unlockedByBook(book.id)}
+                      dateMap={dateMapByBook(book.id)}
+                      theme={theme}
+                    />
                   ))}
                 </>
               )
