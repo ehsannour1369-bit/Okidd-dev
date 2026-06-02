@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
+import PageTopBar from "../../components/PageTopBar";
 import { Link } from "wouter";
 import { BookMarked, Users, GraduationCap, School } from "lucide-react";
 
@@ -22,6 +23,7 @@ export default function AdminClasses() {
 
   return (
     <div>
+      <PageTopBar />
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "#78350f", margin: 0 }}>کلاس‌ها</h1>
         <p style={{ color: "#b45309", fontSize: 14, marginTop: 4 }}>مشاهده همه کلاس‌های مدرسه</p>

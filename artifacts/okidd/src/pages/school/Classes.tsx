@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
+import PageTopBar from "../../components/PageTopBar";
 import { Link } from "wouter";
 import { BookMarked, Users, GraduationCap } from "lucide-react";
 
@@ -19,6 +20,7 @@ export default function SchoolClasses() {
 
   return (
     <div>
+      <PageTopBar />
       <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1e1b4b", marginBottom: 24 }}>کلاس‌ها</h1>
       {branches.map(branch => {
         const branchGLs = gradeLevels.filter(gl => gl.branchId === branch.id);

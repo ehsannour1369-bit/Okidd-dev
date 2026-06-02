@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
+import PageTopBar from "../../components/PageTopBar";
 import { showToast } from "../../lib/toast";
 import { Plus, ChevronDown, ChevronUp, Trash2, BookOpen, Users, GraduationCap, X, UserRound } from "lucide-react";
 
@@ -109,6 +110,7 @@ export default function SchoolBranches() {
 
   return (
     <div>
+      <PageTopBar />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1e1b4b", margin: 0 }}>مدیریت شعبه‌ها</h1>

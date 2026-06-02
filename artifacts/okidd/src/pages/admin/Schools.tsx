@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { api } from "../../lib/api";
+import PageTopBar from "../../components/PageTopBar";
 import { showToast } from "../../lib/toast";
 import { Plus, Power, Edit2, Search, ChevronDown, ChevronUp, GitBranch, Users, Package, X, Trash2, Settings2, AlertTriangle, Calendar } from "lucide-react";
 
@@ -509,6 +510,7 @@ export default function AdminSchools() {
 
   return (
     <div>
+      <PageTopBar />
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
         <div>

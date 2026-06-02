@@ -14,6 +14,8 @@ const CFG: Record<string, {
   teacher:        { accent: "#f59e0b", dark: "#d97706", dashPath: "/teacher",    notifPath: "/teacher/notifications",   hasBell: true  },
   parent:         { accent: "#f43f5e", dark: "#e11d48", dashPath: "/parent",     notifPath: "/parent/notifications",    hasBell: true  },
   consultant:     { accent: "#06b6d4", dark: "#0891b2", dashPath: "/consultant", notifPath: "/consultant/schedule",     hasBell: false },
+  admin:          { accent: "#f59e0b", dark: "#d97706", dashPath: "/admin",      notifPath: "",                          hasBell: false },
+  school_manager: { accent: "#6366f1", dark: "#4f46e5", dashPath: "/school",     notifPath: "/school/notifications",    hasBell: true  },
 };
 
 export default function PageTopBar() {

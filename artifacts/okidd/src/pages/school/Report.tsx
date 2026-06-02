@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
+import PageTopBar from "../../components/PageTopBar";
 import { useState } from "react";
 import { Clock, Star, GraduationCap, Users, BookOpen, UserRound, type LucideIcon } from "lucide-react";
 
@@ -108,6 +109,7 @@ export default function SchoolReport() {
 
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+      <PageTopBar />
       <div style={{ marginBottom: 28 }}>
         <h1 style={{ fontSize: 24, fontWeight: 800, color: "#1e1b4b", margin: 0 }}>
           گزارش عملکرد

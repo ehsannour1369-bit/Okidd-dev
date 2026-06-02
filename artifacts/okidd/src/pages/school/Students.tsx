@@ -32,7 +32,7 @@ export default function SchoolStudents() {
 
   return (
     <div>
-      {user?.role === "branch_manager" && <PageTopBar />}
+      <PageTopBar />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1e1b4b", margin: 0 }}>دانش‌آموزان</h1>

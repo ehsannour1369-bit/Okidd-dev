@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
+import PageTopBar from "../../components/PageTopBar";
 import { Plus, Power, Edit2, Search, Download, FileText, Eye, X, BookOpen, Clock, Star, Users, Trash2, UserRound } from "lucide-react";
 
 interface User { id: number; name: string; email: string; role: string; status: string; schoolName?: string; gender?: string; nationalId?: string; }
@@ -249,6 +250,7 @@ export default function AdminUsers() {
 
   return (
     <div>
+      <PageTopBar />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "#78350f", margin: 0 }}>کاربران</h1>

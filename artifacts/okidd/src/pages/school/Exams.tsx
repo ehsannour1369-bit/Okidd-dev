@@ -84,7 +84,7 @@ export default function SchoolExams() {
 
   return (
     <div dir="rtl" style={{ fontFamily: "Vazirmatn, sans-serif" }}>
-      {user?.role === "branch_manager" && <PageTopBar />}
+      <PageTopBar />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1e1b4b", margin: 0 }}>برنامه امتحانات</h1>
         <button onClick={() => setShowForm(v => !v)}

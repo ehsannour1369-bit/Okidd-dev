@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
+import PageTopBar from "../../components/PageTopBar";
 import { showToast } from "../../lib/toast";
 import { Plus, Trash2, Bell, Filter, ChevronDown } from "lucide-react";
 
@@ -139,6 +140,7 @@ export default function SchoolNotifications() {
 
   return (
     <div>
+      <PageTopBar />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1e1b4b", margin: 0 }}>اعلان‌ها</h1>
         <button onClick={() => setShowForm(!showForm)} style={{
