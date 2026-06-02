@@ -201,12 +201,10 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
     onError: (e: any) => showToast(e?.message ?? "خطا", "error"),
   });
 
-  /* change book: delete old assignment + add new one */
+  /* change book: delete specific assignment by assignmentId + add new one */
   const changeBookMut = useMutation({
-    mutationFn: async ({ teacherId, oldBookId, newBookId }: { teacherId: number; oldBookId: number | null; newBookId: number }) => {
-      if (oldBookId) {
-        await api.delete(`/classes/${cls.id}/teachers/${teacherId}?bookId=${oldBookId}`);
-      }
+    mutationFn: async ({ assignmentId, teacherId, newBookId }: { assignmentId: number; teacherId: number; newBookId: number }) => {
+      await api.delete(`/classes/${cls.id}/teachers/${teacherId}?assignmentId=${assignmentId}`);
       await api.post(`/classes/${cls.id}/teachers`, { teacherId, bookId: newBookId });
     },
     onSuccess: () => {
@@ -491,7 +489,7 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
                             <button
                               onClick={() => {
                                 if (!editing.newBookId) { showToast("کتاب جدید را انتخاب کنید", "error"); return; }
-                                changeBookMut.mutate({ teacherId: a.teacherId, oldBookId: a.bookId, newBookId: parseInt(editing.newBookId) });
+                                changeBookMut.mutate({ assignmentId: a.assignmentId, teacherId: a.teacherId, newBookId: parseInt(editing.newBookId) });
                               }}
                               disabled={!editing.newBookId || changeBookMut.isPending}
                               style={{ width: 28, height: 28, background: `${theme.primary}18`, border: `1px solid ${theme.primary}44`, borderRadius: 7, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: theme.primary, flexShrink: 0 }}>
@@ -506,21 +504,20 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
                         ) : (
                           /* Normal display mode */
                           <>
-                            <span style={{ flex: 1, fontSize: 12, color: a.bookId ? theme.text : theme.text2, fontWeight: a.bookId ? 600 : 400 }}>
+                            <span style={{ flex: 1, fontSize: 12, color: a.bookId ? theme.text : theme.text2, fontWeight: a.bookId ? 600 : 400, fontStyle: a.bookId ? "normal" : "italic" }}>
                               {a.bookTitle ?? "— بدون کتاب مشخص"}
                             </span>
-                            {/* Change book button */}
-                            {a.bookId && (
-                              <button
-                                onClick={() => setEditAssignment({ assignmentId: a.assignmentId, teacherId: a.teacherId, currentBookId: a.bookId, newBookId: "" })}
-                                title="تغییر کتاب"
-                                style={{ width: 24, height: 24, background: `${theme.primary}12`, border: `1px solid ${theme.primary}2a`, borderRadius: 6, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: theme.primary, flexShrink: 0 }}>
-                                <Pencil size={10} />
-                              </button>
-                            )}
-                            {/* Remove this assignment */}
+                            {/* Change / assign book button — always shown */}
+                            <button
+                              onClick={() => setEditAssignment({ assignmentId: a.assignmentId, teacherId: a.teacherId, currentBookId: a.bookId, newBookId: "" })}
+                              title={a.bookId ? "تغییر کتاب" : "اختصاص کتاب"}
+                              style={{ width: 24, height: 24, background: `${theme.primary}12`, border: `1px solid ${theme.primary}2a`, borderRadius: 6, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: theme.primary, flexShrink: 0 }}>
+                              <Pencil size={10} />
+                            </button>
+                            {/* Remove this specific assignment by assignmentId */}
                             <button
                               onClick={() => removeTeachMut.mutate({ teacherId: a.teacherId, bookId: a.bookId ?? undefined })}
+                              title="حذف این اختصاص"
                               style={{ width: 24, height: 24, background: "rgba(239,68,68,0.07)", border: "none", borderRadius: 6, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", flexShrink: 0 }}>
                               <X size={10} />
                             </button>

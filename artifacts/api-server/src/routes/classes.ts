@@ -113,12 +113,15 @@ router.post("/classes/:id/teachers", async (req, res) => {
   res.status(201).json(row);
 });
 
-// Delete a specific teacher-book assignment by assignmentId, or all for a teacher
+// Delete a specific teacher assignment by assignmentId, bookId, or all for a teacher
 router.delete("/classes/:id/teachers/:teacherId", async (req, res) => {
   const classId = parseInt(req.params.id);
   const teacherId = parseInt(req.params.teacherId);
+  const assignmentId = req.query.assignmentId ? parseInt(req.query.assignmentId as string) : null;
   const bookId = req.query.bookId ? parseInt(req.query.bookId as string) : null;
-  if (bookId) {
+  if (assignmentId) {
+    await db.delete(classTeachersTable).where(and(eq(classTeachersTable.classId, classId), eq(classTeachersTable.id, assignmentId)));
+  } else if (bookId) {
     await db.delete(classTeachersTable).where(and(eq(classTeachersTable.classId, classId), eq(classTeachersTable.teacherId, teacherId), eq(classTeachersTable.bookId, bookId)));
   } else {
     await db.delete(classTeachersTable).where(and(eq(classTeachersTable.classId, classId), eq(classTeachersTable.teacherId, teacherId)));
