@@ -182,56 +182,55 @@ export default function ParentDashboard() {
           </div>
         </div>
 
-        {/* ── Child selector ── */}
-        {children.length === 0 && (
-          <div style={{ padding: "16px 20px 0", ...cardAnim(1) }}>
-            <div style={{ ...glassCard(accent, accentDark, { padding: 32, textAlign: "center" }) }}>
-              <div style={shine()} />
-              <div style={{ ...glassIcon(accent, 56), margin: "0 auto 12px" }}>
-                <Users size={26} color="white" />
-              </div>
-              <div style={{ color: "rgba(255,255,255,0.88)", fontSize: 15, fontWeight: 600 }}>هیچ فرزندی ثبت نشده است</div>
-            </div>
-          </div>
-        )}
-
-        {children.length > 0 && (
-          <div style={{ padding: "14px 20px 0", ...cardAnim(1) }}>
-            <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 2 }}>
-              {children.map(child => {
-                const isActive  = currentChildId === child.id;
-                const cc        = child.gender === "female" ? "#e879f9" : "#818cf8";
-                const ccd       = child.gender === "female" ? "#c026d3" : "#4f46e5";
-                return (
-                  <button
-                    key={child.id}
-                    onClick={() => { setSelectedChildId(child.id); }}
-                    style={{
-                      flexShrink: 0, minWidth: 110, padding: "12px 14px",
-                      background: isActive ? `linear-gradient(135deg,${cc}bb,${ccd}99)` : `${cc}18`,
-                      border: `2px solid ${isActive ? cc + "dd" : cc + "44"}`,
-                      borderRadius: 18, cursor: "pointer", fontFamily: "Vazirmatn",
-                      backdropFilter: "blur(12px)",
-                      transition: "all 0.25s",
-                      transform: isActive ? "scale(1.04)" : "scale(1)",
-                      boxShadow: isActive ? `0 8px 24px ${cc}44` : "none",
-                    }}
-                  >
-                    <div style={{ width: 36, height: 36, borderRadius: 11, background: isActive ? "rgba(255,255,255,0.28)" : `${cc}20`, border: "1.5px solid rgba(255,255,255,0.45)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 6px" }}>
-                      <UserRound size={18} color={isActive ? "white" : ccd} />
-                    </div>
-                    <div style={{ fontWeight: 700, fontSize: 13, color: isActive ? "white" : TEXT, textShadow: isActive ? "0 1px 4px rgba(0,0,0,0.2)" : "none" }}>{child.name}</div>
-                    <div style={{ fontSize: 11, color: isActive ? "rgba(255,255,255,0.75)" : TEXT2, marginTop: 2 }}>{child.gender === "female" ? "دختر" : "پسر"}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
         {/* ── Scrollable content ── */}
         <div style={{ flex: 1, overflowY: "auto", padding: "14px 20px 36px" }}>
 
+          {/* ── Child selector ── */}
+          {children.length === 0 && (
+            <div style={{ marginBottom: 14, ...cardAnim(1) }}>
+              <div style={{ ...glassCard(accent, accentDark, { padding: 32, textAlign: "center" }) }}>
+                <div style={shine()} />
+                <div style={{ ...glassIcon(accent, 56), margin: "0 auto 12px" }}>
+                  <Users size={26} color="white" />
+                </div>
+                <div style={{ color: "rgba(255,255,255,0.88)", fontSize: 15, fontWeight: 600 }}>هیچ فرزندی ثبت نشده است</div>
+              </div>
+            </div>
+          )}
+
+          {children.length > 0 && (
+            <div style={{ marginBottom: 14, ...cardAnim(1) }}>
+              <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 2 }}>
+                {children.map(child => {
+                  const isActive = currentChildId === child.id;
+                  const cc       = child.gender === "female" ? "#e879f9" : "#818cf8";
+                  const ccd      = child.gender === "female" ? "#c026d3" : "#4f46e5";
+                  return (
+                    <button
+                      key={child.id}
+                      onClick={() => setSelectedChildId(child.id)}
+                      style={{
+                        flexShrink: 0, minWidth: 110, padding: "12px 14px",
+                        background: isActive ? `linear-gradient(135deg,${cc}bb,${ccd}99)` : `${cc}18`,
+                        border: `2px solid ${isActive ? cc + "dd" : cc + "44"}`,
+                        borderRadius: 18, cursor: "pointer", fontFamily: "Vazirmatn",
+                        backdropFilter: "blur(12px)",
+                        transition: "all 0.25s",
+                        transform: isActive ? "scale(1.04)" : "scale(1)",
+                        boxShadow: isActive ? `0 8px 24px ${cc}44` : "none",
+                      }}
+                    >
+                      <div style={{ width: 36, height: 36, borderRadius: 11, background: isActive ? "rgba(255,255,255,0.28)" : `${cc}20`, border: "1.5px solid rgba(255,255,255,0.45)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 6px" }}>
+                        <UserRound size={18} color={isActive ? "white" : ccd} />
+                      </div>
+                      <div style={{ fontWeight: 700, fontSize: 13, color: isActive ? "white" : TEXT, textShadow: isActive ? "0 1px 4px rgba(0,0,0,0.2)" : "none" }}>{child.name}</div>
+                      <div style={{ fontSize: 11, color: isActive ? "rgba(255,255,255,0.75)" : TEXT2, marginTop: 2 }}>{child.gender === "female" ? "دختر" : "پسر"}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Child stats */}
           {currentChild && childSummary && (
