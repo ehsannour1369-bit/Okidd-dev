@@ -149,13 +149,13 @@ router.post("/classes/:id/students", async (req, res) => {
     const violations: string[] = [];
     for (const { bookId } of bookRows) {
       const [purchased, used] = await Promise.all([getPurchasedCount(schoolId, bookId), getUsedCount(schoolId, bookId)]);
-      if (purchased > 0 && used >= purchased) {
+      if (used >= purchased) {
         const [book] = await db.select({ title: booksTable.title }).from(booksTable).where(eq(booksTable.id, bookId));
-        violations.push(book?.title ?? `کتاب #${bookId}`);
+        violations.push(`${book?.title ?? `کتاب #${bookId}`} (خریداری‌شده: ${purchased}، در حال استفاده: ${used})`);
       }
     }
     if (violations.length > 0) {
-      res.status(400).json({ error: `مجوز کتاب‌های زیر تکمیل شده است: ${violations.join("، ")}. برای افزودن دانش‌آموز ابتدا مجوز بیشتری خریداری کنید.` });
+      res.status(400).json({ error: `مجوز کافی برای کتاب‌های زیر وجود ندارد: ${violations.join("، ")}. برای افزودن دانش‌آموز ابتدا مجوز بیشتری خریداری کنید.` });
       return;
     }
   }
@@ -239,8 +239,8 @@ router.post("/classes/:id/books", async (req, res) => {
       db.select({ count: count() }).from(classStudentsTable).where(eq(classStudentsTable.classId, classId)),
     ]);
     const classStudentCount = Number(studs[0]?.count ?? 0);
-    if (purchased > 0 && used + classStudentCount > purchased) {
-      const remaining = Math.max(0, purchased - used);
+    const remaining = Math.max(0, purchased - used);
+    if (used + classStudentCount > purchased) {
       const [book] = await db.select({ title: booksTable.title }).from(booksTable).where(eq(booksTable.id, bookId));
       res.status(400).json({
         error: `مجوز کافی برای کتاب «${book?.title ?? bookId}» وجود ندارد. خریداری‌شده: ${purchased}، در حال استفاده: ${used}، باقی‌مانده: ${remaining}، نیاز دارد: ${classStudentCount}`,
