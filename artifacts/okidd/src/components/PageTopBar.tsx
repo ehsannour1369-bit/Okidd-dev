@@ -4,32 +4,76 @@ import { useSidebar } from "../contexts/SidebarContext";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { useNotificationReads } from "../hooks/useNotificationReads";
-import { Menu, ChevronRight, Bell, LogOut } from "lucide-react";
+import { Menu, ChevronRight, Bell, LogOut, Wallet } from "lucide-react";
 
 const CFG: Record<string, {
   accent: string; dark: string;
   dashPath: string; notifPath: string; hasBell: boolean;
+  walletPath?: string;
 }> = {
-  branch_manager: { accent: "#0d9488", dark: "#0f766e", dashPath: "/branch",     notifPath: "/branch/notifications",    hasBell: true  },
+  branch_manager: { accent: "#0d9488", dark: "#0f766e", dashPath: "/branch",     notifPath: "/branch/notifications",    hasBell: true,  walletPath: "/branch/wallet"  },
   teacher:        { accent: "#f59e0b", dark: "#d97706", dashPath: "/teacher",    notifPath: "/teacher/notifications",   hasBell: true  },
   parent:         { accent: "#f43f5e", dark: "#e11d48", dashPath: "/parent",     notifPath: "/parent/notifications",    hasBell: true  },
   consultant:     { accent: "#06b6d4", dark: "#0891b2", dashPath: "/consultant", notifPath: "/consultant/schedule",     hasBell: false },
   admin:          { accent: "#f59e0b", dark: "#d97706", dashPath: "/admin",      notifPath: "",                          hasBell: false },
-  school_manager: { accent: "#6366f1", dark: "#4f46e5", dashPath: "/school",     notifPath: "/school/notifications",    hasBell: true  },
+  school_manager: { accent: "#6366f1", dark: "#4f46e5", dashPath: "/school",     notifPath: "/school/notifications",    hasBell: true,  walletPath: "/school/wallet"  },
 };
+
+function WalletChip({ schoolId, walletPath, accent, dark }: { schoolId: number; walletPath: string; accent: string; dark: string }) {
+  const { data } = useQuery<{ balance: number }>({
+    queryKey: ["wallet-balance", schoolId],
+    queryFn: () => api.get(`/wallets/${schoolId}`),
+    enabled: !!schoolId,
+    staleTime: 30_000,
+  });
+
+  const balance = data?.balance ?? 0;
+
+  return (
+    <Link href={walletPath}>
+      <button
+        title="کیف پول"
+        style={{
+          display: "flex", alignItems: "center", gap: 5,
+          padding: "7px 11px", borderRadius: 12,
+          background: `${accent}18`, border: `1.5px solid ${accent}50`,
+          cursor: "pointer", color: dark,
+          fontFamily: "Vazirmatn, sans-serif", fontSize: 12, fontWeight: 700,
+          whiteSpace: "nowrap",
+        }}
+      >
+        <Wallet size={14} />
+        {balance.toLocaleString("fa-IR")} ت
+      </button>
+    </Link>
+  );
+}
 
 export default function PageTopBar() {
   const { user, logout } = useAuthStore();
   const [location, navigate] = useLocation();
   const { openSidebar } = useSidebar();
 
+  const isBranchManager = user?.role === "branch_manager";
+
+  const { data: branchData } = useQuery<{ schoolId: number }>({
+    queryKey: ["branch", user?.branchId],
+    queryFn: () => api.get(`/branches/${user!.branchId}`),
+    enabled: isBranchManager && !!user?.branchId,
+    staleTime: 60_000,
+  });
+
   if (!user) return null;
   const cfg = CFG[user.role];
   if (!cfg) return null;
 
-  const { accent, dark, dashPath, notifPath, hasBell } = cfg;
+  const { accent, dark, dashPath, notifPath, hasBell, walletPath } = cfg;
   const isOnSubPage   = location !== dashPath;
   const isOnNotifPage = location === notifPath;
+
+  const effectiveSchoolId = isBranchManager
+    ? (branchData?.schoolId ?? null)
+    : (user.schoolId ?? null);
 
   const { data: notifs = [] } = useQuery<{ id: number }[]>({
     queryKey: user.role === "teacher"
@@ -82,6 +126,14 @@ export default function PageTopBar() {
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        {walletPath && effectiveSchoolId && (
+          <WalletChip
+            schoolId={effectiveSchoolId}
+            walletPath={walletPath}
+            accent={accent}
+            dark={dark}
+          />
+        )}
         {hasBell && !isOnNotifPage && (
           <Link href={notifPath}>
             <button
