@@ -3,6 +3,7 @@ import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { useNotificationReads } from "../../hooks/useNotificationReads";
 import ParentExamCalendar from "../../components/ParentExamCalendar";
+import ProfilePanel from "../../components/ProfilePanel";
 import {
   Bell, BookOpen, Clock, Star, Calendar,
   Trophy, Heart, UserRound, Users,
@@ -179,6 +180,7 @@ export default function ParentDashboard() {
                 </span>
               )}
             </button>
+            <ProfilePanel accent={accent} dark={accentDark} />
           </div>
         </div>
 
