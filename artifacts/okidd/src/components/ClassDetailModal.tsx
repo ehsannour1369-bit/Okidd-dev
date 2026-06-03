@@ -6,7 +6,9 @@ import {
   BookMarked, Users, GraduationCap, BookOpen,
   X, Plus, UserMinus, UserPlus, CheckCircle2,
   Circle, ChevronDown, ChevronUp, Clock, Star, Trash2, Pencil, Check,
+  AlertTriangle, ShieldAlert,
 } from "lucide-react";
+import type { LicenseRow } from "./BookLicenseSummary";
 import type { ClassDetailTheme } from "./classDetailThemes";
 
 export type { ClassDetailTheme } from "./classDetailThemes";
@@ -239,6 +241,13 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
     queryFn: () => api.get("/books"),
   });
 
+  const { data: licenseRows = [] } = useQuery<LicenseRow[]>({
+    queryKey: ["book-license-summary", schoolId],
+    queryFn: () => api.get(`/book-license-summary?schoolId=${schoolId}`),
+    enabled: !!schoolId,
+  });
+  const licenseMap = Object.fromEntries(licenseRows.map(r => [r.bookId, r]));
+
   const enrolledIds = new Set(performance.map((s: any) => s.id));
   const availableStudents = allStudents.filter((s: any) => !enrolledIds.has(s.id));
   const availableBooks = allBooks.filter((b: any) => !books.some((cb: any) => cb.id === b.id));
@@ -254,15 +263,25 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
   const totalTaughtCount = lessonUnlocks.length;
 
   /* ── mutations – students ── */
+  const [studentLicenseError, setStudentLicenseError] = useState<string | null>(null);
   const addStudMut = useMutation({
     mutationFn: (sid: number) => api.post(`/classes/${cls.id}/students`, { studentId: sid }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["class-perf", cls.id] });
       qc.invalidateQueries({ queryKey: ["classes"] });
+      qc.invalidateQueries({ queryKey: ["book-license-summary", schoolId] });
       setAddStudentId("");
+      setStudentLicenseError(null);
       showToast("دانش‌آموز اضافه شد ✓");
     },
-    onError: (e: any) => showToast(e?.message ?? "خطا", "error"),
+    onError: (e: any) => {
+      const msg = e?.message ?? "خطا";
+      if (msg.includes("مجوز")) {
+        setStudentLicenseError(msg);
+      } else {
+        showToast(msg, "error");
+      }
+    },
   });
   const removeStudMut = useMutation({
     mutationFn: (sid: number) => api.delete(`/classes/${cls.id}/students/${sid}`),
@@ -314,14 +333,24 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
   });
 
   /* ── mutations – books ── */
+  const [bookLicenseError, setBookLicenseError] = useState<string | null>(null);
   const addBookMut = useMutation({
     mutationFn: (bid: number) => api.post(`/classes/${cls.id}/books`, { bookId: bid }),
     onSuccess: () => {
       refetchBooks();
+      qc.invalidateQueries({ queryKey: ["book-license-summary", schoolId] });
       setAddBookId("");
+      setBookLicenseError(null);
       showToast("کتاب اضافه شد ✓");
     },
-    onError: (e: any) => showToast(e?.message ?? "خطا", "error"),
+    onError: (e: any) => {
+      const msg = e?.message ?? "خطا";
+      if (msg.includes("مجوز")) {
+        setBookLicenseError(msg);
+      } else {
+        showToast(msg, "error");
+      }
+    },
   });
   const removeBookMut = useMutation({
     mutationFn: (bid: number) => api.delete(`/classes/${cls.id}/books/${bid}`),
@@ -468,7 +497,11 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
                 <UserPlus size={13} color={theme.primary} /> اضافه کردن دانش‌آموز
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <select value={addStudentId} onChange={e => setAddStudentId(e.target.value)} style={{ ...IS(theme), flex: 1 }}>
+                <select
+                  value={addStudentId}
+                  onChange={e => { setAddStudentId(e.target.value); setStudentLicenseError(null); }}
+                  style={{ ...IS(theme), flex: 1 }}
+                >
                   <option value="">انتخاب از لیست مدرسه...</option>
                   {availableStudents.map((s: any) => <option key={s.id} value={s.id}>{s.name} — {s.nationalId}</option>)}
                 </select>
@@ -479,6 +512,18 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
                   <Plus size={15} />
                 </button>
               </div>
+              {studentLicenseError && (
+                <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 10, padding: "10px 12px", borderRadius: 10, background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.22)" }}>
+                  <ShieldAlert size={16} color="#ef4444" style={{ flexShrink: 0, marginTop: 1 }} />
+                  <div style={{ flex: 1, fontSize: 11, color: "#7f1d1d", lineHeight: 1.6 }}>
+                    <span style={{ display: "block", fontWeight: 700, color: "#dc2626", marginBottom: 2 }}>افزودن دانش‌آموز ناموفق بود</span>
+                    {studentLicenseError}
+                  </div>
+                  <button onClick={() => setStudentLicenseError(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: 0, flexShrink: 0 }}>
+                    <X size={13} />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -639,18 +684,82 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
         {/* ── Tab: Books ── */}
         {tab === "books" && (
           <div>
-            <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-              <select value={addBookId} onChange={e => setAddBookId(e.target.value)} style={{ ...IS(theme), flex: 1 }}>
+            {/* Add book row */}
+            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+              <select
+                value={addBookId}
+                onChange={e => { setAddBookId(e.target.value); setBookLicenseError(null); }}
+                style={{ ...IS(theme), flex: 1 }}
+              >
                 <option value="">افزودن کتاب به کلاس...</option>
-                {availableBooks.map((b: any) => <option key={b.id} value={b.id}>{b.title}</option>)}
+                {availableBooks.map((b: any) => {
+                  const lic = licenseMap[b.id];
+                  const full = lic && lic.purchased > 0 && lic.remaining <= 0;
+                  return (
+                    <option key={b.id} value={b.id}>
+                      {b.title}{full ? " 🔴 (تکمیل)" : lic?.purchased > 0 ? ` ✅ (${lic.remaining} باقی)` : ""}
+                    </option>
+                  );
+                })}
               </select>
               <button
                 onClick={() => addBookId && addBookMut.mutate(parseInt(addBookId))}
                 disabled={!addBookId || addBookMut.isPending}
-                style={{ padding: "10px 14px", background: `linear-gradient(135deg,${theme.primary},${theme.light})`, border: "none", borderRadius: 10, color: "white", fontFamily: "Vazirmatn, sans-serif", fontWeight: 700, fontSize: 13, cursor: "pointer", flexShrink: 0, opacity: !addBookId ? 0.5 : 1 }}>
+                style={{ padding: "10px 14px", background: `linear-gradient(135deg,${theme.primary},${theme.light})`, border: "none", borderRadius: 10, color: "white", fontFamily: "Vazirmatn, sans-serif", fontWeight: 700, fontSize: 13, cursor: "pointer", flexShrink: 0, opacity: !addBookId ? 0.5 : 1 }}
+              >
                 <Plus size={15} />
               </button>
             </div>
+
+            {/* Inline license preview for selected book */}
+            {addBookId && (() => {
+              const lic = licenseMap[parseInt(addBookId)];
+              if (!lic || lic.purchased === 0) return null;
+              const pct = Math.round((lic.used / lic.purchased) * 100);
+              const over = lic.remaining <= 0;
+              return (
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 10,
+                  padding: "10px 14px", marginBottom: 10, borderRadius: 12,
+                  background: over ? "rgba(239,68,68,0.06)" : "rgba(16,185,129,0.06)",
+                  border: `1px solid ${over ? "rgba(239,68,68,0.25)" : "rgba(16,185,129,0.22)"}`,
+                }}>
+                  {over
+                    ? <ShieldAlert size={18} color="#ef4444" />
+                    : <CheckCircle2 size={18} color="#10b981" />}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: over ? "#ef4444" : "#065f46" }}>
+                      {over ? "مجوز کافی ندارید" : `${lic.remaining} مجوز باقی‌مانده`}
+                    </div>
+                    <div style={{ height: 4, background: "rgba(0,0,0,0.07)", borderRadius: 99, marginTop: 4 }}>
+                      <div style={{ height: "100%", width: `${Math.min(100, pct)}%`, borderRadius: 99, background: over ? "#ef4444" : pct >= 90 ? "#f59e0b" : "#10b981", transition: "width 0.5s ease" }} />
+                    </div>
+                  </div>
+                  <span style={{ fontSize: 11, color: over ? "#ef4444" : "#6b7280", whiteSpace: "nowrap" }}>
+                    {lic.used}/{lic.purchased}
+                  </span>
+                </div>
+              );
+            })()}
+
+            {/* License error block */}
+            {bookLicenseError && (
+              <div style={{
+                display: "flex", gap: 10, alignItems: "flex-start",
+                padding: "12px 14px", marginBottom: 10, borderRadius: 12,
+                background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.25)",
+              }}>
+                <AlertTriangle size={18} color="#ef4444" style={{ flexShrink: 0, marginTop: 1 }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#dc2626", marginBottom: 3 }}>افزودن کتاب ناموفق بود</div>
+                  <div style={{ fontSize: 11, color: "#7f1d1d", lineHeight: 1.6 }}>{bookLicenseError}</div>
+                </div>
+                <button onClick={() => setBookLicenseError(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: 0, flexShrink: 0 }}>
+                  <X size={14} />
+                </button>
+              </div>
+            )}
+
             {books.length === 0
               ? (
                 <div style={{ textAlign: "center", padding: "28px 0", color: theme.text2 }}>
@@ -660,22 +769,43 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
               )
               : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-                  {books.map((b: any) => (
-                    <div key={b.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "11px 14px", background: "rgba(255,255,255,0.85)", border: `1px solid ${theme.border}`, borderRadius: 11 }}>
-                      <div style={{ width: 34, height: 34, borderRadius: 9, background: `linear-gradient(135deg,${theme.primary},${theme.light})`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <BookOpen size={15} color="white" />
+                  {books.map((b: any) => {
+                    const lic = licenseMap[b.id];
+                    const over = lic && lic.purchased > 0 && lic.remaining <= 0;
+                    const warn = lic && lic.purchased > 0 && lic.remaining > 0 && (lic.used / lic.purchased) >= 0.9;
+                    return (
+                      <div key={b.id} style={{
+                        display: "flex", alignItems: "center", gap: 10, padding: "11px 14px",
+                        background: over ? "rgba(254,242,242,0.9)" : "rgba(255,255,255,0.85)",
+                        border: `1px solid ${over ? "rgba(239,68,68,0.3)" : warn ? "rgba(245,158,11,0.3)" : theme.border}`,
+                        borderRadius: 11,
+                      }}>
+                        <div style={{ width: 34, height: 34, borderRadius: 9, background: `linear-gradient(135deg,${over ? "#ef4444" : theme.primary},${over ? "#f87171" : theme.light})`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <BookOpen size={15} color="white" />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 700, color: theme.text, fontSize: 13 }}>{b.title}</div>
+                          <div style={{ display: "flex", gap: 6, marginTop: 2, alignItems: "center" }}>
+                            {b.lessonCount != null && <span style={{ fontSize: 11, color: theme.text2 }}>{b.lessonCount} درس</span>}
+                            {lic?.purchased > 0 && (
+                              <span style={{
+                                fontSize: 10, borderRadius: 99, padding: "1px 7px", fontWeight: 600,
+                                background: over ? "rgba(239,68,68,0.12)" : warn ? "rgba(245,158,11,0.12)" : "rgba(16,185,129,0.1)",
+                                color: over ? "#ef4444" : warn ? "#f59e0b" : "#059669",
+                              }}>
+                                {over ? `🔴 تکمیل (${lic.used}/${lic.purchased})` : warn ? `⚠ ${lic.remaining} باقی` : `✅ ${lic.remaining} باقی`}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => removeBookMut.mutate(b.id)}
+                          style={{ width: 28, height: 28, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.18)", borderRadius: 7, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444" }}>
+                          <Trash2 size={12} />
+                        </button>
                       </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 700, color: theme.text, fontSize: 13 }}>{b.title}</div>
-                        {b.lessonCount != null && <div style={{ fontSize: 11, color: theme.text2 }}>{b.lessonCount} درس</div>}
-                      </div>
-                      <button
-                        onClick={() => removeBookMut.mutate(b.id)}
-                        style={{ width: 28, height: 28, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.18)", borderRadius: 7, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444" }}>
-                        <Trash2 size={12} />
-                      </button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )
             }
