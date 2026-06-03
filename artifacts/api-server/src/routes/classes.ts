@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { db, classesTable, classStudentsTable, classTeachersTable, classBooksTable, usersTable, booksTable, gradesTable, gradeLevelsTable, branchesTable, schoolsTable, presenceLogTable, studentProgressTable, packagesTable, packageBooksTable } from "@workspace/db";
-import { eq, inArray, count, and } from "drizzle-orm";
+import { db, classesTable, classStudentsTable, classTeachersTable, classBooksTable, usersTable, booksTable, gradesTable, gradeLevelsTable, branchesTable, schoolsTable, presenceLogTable, studentProgressTable, bookLicenseTransactionsTable } from "@workspace/db";
+import { eq, inArray, count, and, sum } from "drizzle-orm";
 
 const router = Router();
 
@@ -18,14 +18,12 @@ async function getSchoolIdForClass(classId: number): Promise<number | null> {
   return branch?.schoolId ?? null;
 }
 
-/** Count purchased licenses for a book in a school */
+/** Count purchased licenses for a book in a school (from real transactions only) */
 async function getPurchasedCount(schoolId: number, bookId: number): Promise<number> {
-  const pkgs = await db.select({ id: packagesTable.id }).from(packagesTable).where(eq(packagesTable.schoolId, schoolId));
-  if (pkgs.length === 0) return 0;
-  const pkgIds = pkgs.map(p => p.id);
-  const pbRows = await db.select().from(packageBooksTable)
-    .where(and(inArray(packageBooksTable.packageId, pkgIds), eq(packageBooksTable.bookId, bookId)));
-  return pbRows.reduce((s, r) => s + r.quantity, 0);
+  const result = await db.select({ total: sum(bookLicenseTransactionsTable.quantity) })
+    .from(bookLicenseTransactionsTable)
+    .where(and(eq(bookLicenseTransactionsTable.schoolId, schoolId), eq(bookLicenseTransactionsTable.bookId, bookId)));
+  return Number(result[0]?.total ?? 0);
 }
 
 /** Count currently used licenses for a book in a school (distinct students in classes with this book) */

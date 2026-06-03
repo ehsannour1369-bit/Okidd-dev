@@ -22,6 +22,7 @@ import consultantsRouter from "./consultants";
 import consultationsRouter from "./consultations";
 import gameScoresRouter from "./gameScores";
 import schoolReportRouter from "./schoolReport";
+import licenseTransactionsRouter from "./licenseTransactions";
 
 const router: IRouter = Router();
 
@@ -48,5 +49,6 @@ router.use(consultantsRouter);
 router.use(consultationsRouter);
 router.use(gameScoresRouter);
 router.use(schoolReportRouter);
+router.use(licenseTransactionsRouter);
 
 export default router;

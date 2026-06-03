@@ -8,7 +8,7 @@ import {
   LayoutDashboard, School, Users, BookOpen, Package, CreditCard,
   Bell, FileText, LogOut, GraduationCap,
   BookMarked, Home, Star, ClipboardList, GitBranch, UserCheck,
-  Menu, X, BarChart2, ChevronRight,
+  Menu, X, BarChart2, ChevronRight, ShieldCheck,
 } from "lucide-react";
 import SidebarContext from "../contexts/SidebarContext";
 
@@ -32,6 +32,7 @@ const adminNav: NavItem[] = [
   { label: "کتاب‌ها", path: "/admin/books", icon: BookOpen, color: "#ef4444", bgGradient: "linear-gradient(135deg, #dc2626, #ef4444)" },
   { label: "پکیج‌ها", path: "/admin/packages", icon: Package, color: "#f97316", bgGradient: "linear-gradient(135deg, #ea580c, #f97316)" },
   { label: "تراکنش‌ها", path: "/admin/transactions", icon: CreditCard, color: "#fbbf24", bgGradient: "linear-gradient(135deg, #f59e0b, #fbbf24)" },
+  { label: "مجوز کتاب", path: "/admin/license-transactions", icon: ShieldCheck, color: "#a855f7", bgGradient: "linear-gradient(135deg, #7c3aed, #a855f7)" },
   { label: "محتوا", path: "/admin/content", icon: FileText, color: "#f87171", bgGradient: "linear-gradient(135deg, #ef4444, #f87171)" },
   { label: "مشاوره", path: "/admin/consultants", icon: UserCheck, color: "#fb923c", bgGradient: "linear-gradient(135deg, #f97316, #fb923c)" },
 ];

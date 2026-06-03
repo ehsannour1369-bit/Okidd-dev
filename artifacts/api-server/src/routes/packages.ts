@@ -2,9 +2,9 @@ import { Router } from "express";
 import {
   db, packagesTable, packageBooksTable, booksTable,
   branchesTable, gradeLevelsTable, gradesTable, classesTable,
-  classBooksTable, classStudentsTable,
+  classBooksTable, classStudentsTable, bookLicenseTransactionsTable,
 } from "@workspace/db";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, sum } from "drizzle-orm";
 
 const router = Router();
 
@@ -86,16 +86,12 @@ router.get("/book-license-summary", async (req, res) => {
   const sid = parseInt(schoolId);
   const bid = branchId ? parseInt(branchId) : null;
 
-  // 1. Purchased: packages → package_books
-  const schoolPackages = await db.select({ id: packagesTable.id }).from(packagesTable)
-    .where(eq(packagesTable.schoolId, sid));
-  const pkgIds = schoolPackages.map(p => p.id);
+  // 1. Purchased: SUM from book_license_transactions (real paid transactions only)
   const purchased: Record<number, number> = {};
-  if (pkgIds.length > 0) {
-    const pbRows = await db.select().from(packageBooksTable).where(inArray(packageBooksTable.packageId, pkgIds));
-    for (const row of pbRows) {
-      purchased[row.bookId] = (purchased[row.bookId] ?? 0) + row.quantity;
-    }
+  const txRows = await db.select().from(bookLicenseTransactionsTable)
+    .where(eq(bookLicenseTransactionsTable.schoolId, sid));
+  for (const row of txRows) {
+    purchased[row.bookId] = (purchased[row.bookId] ?? 0) + row.quantity;
   }
 
   // 2. All classes for this school (optionally filtered to one branch)

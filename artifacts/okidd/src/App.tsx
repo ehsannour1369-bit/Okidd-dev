@@ -18,6 +18,7 @@ import AdminTeachers from "./pages/admin/Teachers";
 import AdminStudents from "./pages/admin/Students";
 import AdminClasses from "./pages/admin/Classes";
 import AdminConsultants from "./pages/admin/Consultants";
+import AdminLicenseTransactions from "./pages/admin/LicenseTransactions";
 
 import SchoolDashboard from "./pages/school/Dashboard";
 import SchoolBranches from "./pages/school/Branches";
@@ -115,6 +116,7 @@ function AppRouter() {
       <Route path="/admin/students"><LayoutRoute component={AdminStudents} roles={["admin"]} /></Route>
       <Route path="/admin/classes"><LayoutRoute component={AdminClasses} roles={["admin"]} /></Route>
       <Route path="/admin/consultants"><LayoutRoute component={AdminConsultants} roles={["admin"]} /></Route>
+      <Route path="/admin/license-transactions"><LayoutRoute component={AdminLicenseTransactions} roles={["admin"]} /></Route>
 
       {/* School Manager */}
       <Route path="/school"><LayoutRoute component={SchoolDashboard} roles={["school_manager"]} /></Route>
