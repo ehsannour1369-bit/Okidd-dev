@@ -20,6 +20,15 @@ async function getSchoolClasses(schoolId: number) {
   return db.select().from(classesTable).where(inArray(classesTable.gradeId, gradeRows.map(g => g.id)));
 }
 
+async function getBranchClassIds(branchId: number): Promise<number[]> {
+  const glRows = await db.select({ id: gradeLevelsTable.id }).from(gradeLevelsTable).where(eq(gradeLevelsTable.branchId, branchId));
+  if (!glRows.length) return [];
+  const gradeRows = await db.select({ id: gradesTable.id }).from(gradesTable).where(inArray(gradesTable.gradeLevelId, glRows.map(g => g.id)));
+  if (!gradeRows.length) return [];
+  const classes = await db.select({ id: classesTable.id }).from(classesTable).where(inArray(classesTable.gradeId, gradeRows.map(g => g.id)));
+  return classes.map(c => c.id);
+}
+
 router.get("/school-classes", async (req, res) => {
   const { schoolId } = req.query as Record<string, string>;
   if (!schoolId) { res.status(400).json({ error: "schoolId required" }); return; }
@@ -28,11 +37,15 @@ router.get("/school-classes", async (req, res) => {
 });
 
 router.get("/school-report/teachers", async (req, res) => {
-  const { schoolId } = req.query as Record<string, string>;
-  if (!schoolId) { res.status(400).json({ error: "schoolId required" }); return; }
-  const sid = parseInt(schoolId);
-
-  const classIds = await getSchoolClassIds(sid);
+  const { schoolId, branchId } = req.query as Record<string, string>;
+  let classIds: number[];
+  if (branchId) {
+    classIds = await getBranchClassIds(parseInt(branchId));
+  } else if (schoolId) {
+    classIds = await getSchoolClassIds(parseInt(schoolId));
+  } else {
+    res.status(400).json({ error: "schoolId or branchId required" }); return;
+  }
   if (!classIds.length) { res.json([]); return; }
 
   const teacherRows = await db
@@ -66,11 +79,15 @@ router.get("/school-report/teachers", async (req, res) => {
 });
 
 router.get("/school-report/students", async (req, res) => {
-  const { schoolId } = req.query as Record<string, string>;
-  if (!schoolId) { res.status(400).json({ error: "schoolId required" }); return; }
-  const sid = parseInt(schoolId);
-
-  const classIds = await getSchoolClassIds(sid);
+  const { schoolId, branchId } = req.query as Record<string, string>;
+  let classIds: number[];
+  if (branchId) {
+    classIds = await getBranchClassIds(parseInt(branchId));
+  } else if (schoolId) {
+    classIds = await getSchoolClassIds(parseInt(schoolId));
+  } else {
+    res.status(400).json({ error: "schoolId or branchId required" }); return;
+  }
   if (!classIds.length) { res.json([]); return; }
 
   const studentRows = await db
@@ -117,6 +134,7 @@ router.get("/school-report/students", async (req, res) => {
       totalScore,
       bookProgress,
       className: classNameMap[studentClassMap[s.id]] ?? null,
+      classId: studentClassMap[s.id] ?? null,
     };
   });
 

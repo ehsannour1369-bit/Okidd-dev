@@ -17,6 +17,7 @@ import AdminTeachers from "./pages/admin/Teachers";
 import AdminStudents from "./pages/admin/Students";
 import AdminClasses from "./pages/admin/Classes";
 import AdminConsultants from "./pages/admin/Consultants";
+import AdminWallets from "./pages/admin/Wallets";
 
 import SchoolDashboard from "./pages/school/Dashboard";
 import SchoolBranches from "./pages/school/Branches";
@@ -41,6 +42,7 @@ import BranchExams from "./pages/school/Exams";
 import BranchShop from "./pages/branch/Shop";
 import BranchOrders from "./pages/branch/Orders";
 import BranchWallet from "./pages/branch/Wallet";
+import BranchReport from "./pages/branch/Report";
 
 import TeacherDashboard from "./pages/teacher/Dashboard";
 import TeacherMySchools from "./pages/teacher/MySchools";
@@ -120,6 +122,7 @@ function AppRouter() {
       <Route path="/admin/students"><LayoutRoute component={AdminStudents} roles={["admin"]} /></Route>
       <Route path="/admin/classes"><LayoutRoute component={AdminClasses} roles={["admin"]} /></Route>
       <Route path="/admin/consultants"><LayoutRoute component={AdminConsultants} roles={["admin"]} /></Route>
+      <Route path="/admin/wallets"><LayoutRoute component={AdminWallets} roles={["admin"]} /></Route>
 
       {/* School Manager */}
       <Route path="/school"><LayoutRoute component={SchoolDashboard} roles={["school_manager"]} /></Route>
@@ -142,6 +145,7 @@ function AppRouter() {
       <Route path="/branch/teachers"><LayoutRoute component={BranchTeachers} roles={["branch_manager"]} /></Route>
       <Route path="/branch/notifications"><LayoutRoute component={BranchNotifications} roles={["branch_manager"]} /></Route>
       <Route path="/branch/exams"><LayoutRoute component={BranchExams} roles={["branch_manager"]} /></Route>
+      <Route path="/branch/report"><LayoutRoute component={BranchReport} roles={["branch_manager"]} /></Route>
       <Route path="/branch/shop"><LayoutRoute component={BranchShop} roles={["branch_manager"]} /></Route>
       <Route path="/branch/orders"><LayoutRoute component={BranchOrders} roles={["branch_manager"]} /></Route>
       <Route path="/branch/wallet"><LayoutRoute component={BranchWallet} roles={["branch_manager"]} /></Route>

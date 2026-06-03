@@ -23,7 +23,7 @@ function fmtDuration(mins: number) {
 }
 
 const BREAKDOWN_META = [
-  { key: "lesson",    label: "دروس",     color: "#6366f1", icon: BookOpen },
+  { key: "lesson",    label: "دروس",     color: "#0d9488", icon: BookOpen },
   { key: "game",      label: "بازی",     color: "#f59e0b", icon: Gamepad2 },
   { key: "quiz",      label: "کوییز",    color: "#ec4899", icon: Brain },
   { key: "exercise",  label: "تمرین",    color: "#10b981", icon: Dumbbell },
@@ -32,20 +32,23 @@ const BREAKDOWN_META = [
   { key: "video",     label: "ویدیو",    color: "#a855f7", icon: Film },
 ];
 
+const P = "#0d9488";
+const PD = "#0f766e";
+
 const thStyle: React.CSSProperties = {
   textAlign: "right", padding: "10px 14px",
-  color: "#3730a3", fontSize: 12, fontWeight: 600,
-  background: "rgba(245,243,255,0.88)",
-  borderBottom: "1px solid rgba(139,92,246,0.2)",
+  color: "#134e4a", fontSize: 12, fontWeight: 600,
+  background: "rgba(240,253,250,0.95)",
+  borderBottom: "1px solid rgba(13,148,136,0.2)",
   whiteSpace: "nowrap",
 };
 const tdStyle: React.CSSProperties = {
   padding: "10px 14px",
-  borderBottom: "1px solid rgba(139,92,246,0.07)",
+  borderBottom: "1px solid rgba(13,148,136,0.07)",
   verticalAlign: "middle",
 };
 
-export default function SchoolReport() {
+export default function BranchReport() {
   const { user } = useAuthStore();
   const [tab, setTab]             = useState<ReportTab>("teachers");
   const [studentSearch, setStudentSearch] = useState("");
@@ -53,15 +56,17 @@ export default function SchoolReport() {
   const [detailStudent, setDetailStudent] = useState<any>(null);
   const [sortBy, setSortBy]       = useState<"score" | "time" | "lessons">("score");
 
+  const qParam = user?.branchId ? `branchId=${user.branchId}` : `schoolId=${user?.schoolId ?? 0}`;
+
   const { data: teachers = [], isLoading: loadingTeachers } = useQuery<any[]>({
-    queryKey: ["school-report-teachers", user?.schoolId],
-    queryFn:  () => api.get(`/school-report/teachers?schoolId=${user?.schoolId ?? 0}`),
-    enabled:  !!user?.schoolId,
+    queryKey: ["branch-report-teachers", user?.branchId],
+    queryFn:  () => api.get(`/school-report/teachers?${qParam}`),
+    enabled:  !!(user?.branchId || user?.schoolId),
   });
   const { data: students = [], isLoading: loadingStudents } = useQuery<any[]>({
-    queryKey: ["school-report-students", user?.schoolId],
-    queryFn:  () => api.get(`/school-report/students?schoolId=${user?.schoolId ?? 0}`),
-    enabled:  !!user?.schoolId,
+    queryKey: ["branch-report-students", user?.branchId],
+    queryFn:  () => api.get(`/school-report/students?${qParam}`),
+    enabled:  !!(user?.branchId || user?.schoolId),
   });
   const { data: breakdown } = useQuery<any>({
     queryKey: ["student-breakdown", detailStudent?.id],
@@ -75,11 +80,11 @@ export default function SchoolReport() {
   const filteredStudents = students
     .filter(s => !studentSearch || s.name?.includes(studentSearch) || s.email?.includes(studentSearch) || s.className?.includes(studentSearch))
     .sort((a: any, b: any) => {
-      if (sortBy === "score")   return b.totalScore - a.totalScore;
-      if (sortBy === "time")    return (b.totalMinutesInApp ?? 0) - (a.totalMinutesInApp ?? 0);
-      const donA = (a.bookProgress ?? []).reduce((s: number, bp: any) => s + bp.completedLessons, 0);
-      const donB = (b.bookProgress ?? []).reduce((s: number, bp: any) => s + bp.completedLessons, 0);
-      return donB - donA;
+      if (sortBy === "score") return b.totalScore - a.totalScore;
+      if (sortBy === "time")  return (b.totalMinutesInApp ?? 0) - (a.totalMinutesInApp ?? 0);
+      const dA = (a.bookProgress ?? []).reduce((s: number, bp: any) => s + bp.completedLessons, 0);
+      const dB = (b.bookProgress ?? []).reduce((s: number, bp: any) => s + bp.completedLessons, 0);
+      return dB - dA;
     });
 
   /* ── Class aggregation ── */
@@ -106,12 +111,12 @@ export default function SchoolReport() {
       padding: "10px 20px", borderRadius: 12, cursor: "pointer",
       fontFamily: "Vazirmatn, sans-serif", fontSize: 14, fontWeight: 700,
       display: "flex", alignItems: "center", gap: 7, transition: "all 0.2s",
-      background: tab === value ? "linear-gradient(135deg,#7c3aed,#a855f7)" : "rgba(245,243,255,0.80)",
-      color: tab === value ? "#fff" : "#3730a3",
-      boxShadow: tab === value ? "0 4px 16px rgba(124,58,237,0.40)" : "none",
-      border: `1px solid ${tab === value ? "transparent" : "rgba(99,102,241,0.15)"}`,
+      background: tab === value ? `linear-gradient(135deg,${P},${PD})` : "rgba(240,253,250,0.85)",
+      color: tab === value ? "#fff" : PD,
+      boxShadow: tab === value ? `0 4px 16px ${P}50` : "none",
+      border: `1px solid ${tab === value ? "transparent" : P + "30"}`,
     }}>
-      <Icon size={16} color={tab === value ? "white" : "#6366f1"} /> {label}
+      <Icon size={16} color={tab === value ? "white" : P} /> {label}
     </button>
   );
 
@@ -119,57 +124,56 @@ export default function SchoolReport() {
     <div style={{ maxWidth: 1100, margin: "0 auto", fontFamily: "Vazirmatn, sans-serif" }}>
       <PageTopBar />
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: "#1e1b4b", margin: 0 }}>گزارش عملکرد</h1>
-        <p style={{ color: "#4f46e5", fontSize: 14, marginTop: 4 }}>گزارش کامل عملکرد معلمان، دانش‌آموزان و کلاس‌ها</p>
+        <h1 style={{ fontSize: 24, fontWeight: 800, color: "#134e4a", margin: 0 }}>گزارش عملکرد شعبه</h1>
+        <p style={{ color: PD, fontSize: 14, marginTop: 4 }}>گزارش کامل عملکرد معلمان، دانش‌آموزان و کلاس‌های این شعبه</p>
       </div>
 
-      {/* Tabs */}
       <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap" }}>
-        {tabBtn("گزارش معلمان", "teachers", GraduationCap)}
-        {tabBtn("گزارش دانش‌آموزان", "students", Users)}
-        {tabBtn("عملکرد کلاس‌ها", "classes", BarChart2)}
+        {tabBtn("معلمان", "teachers", GraduationCap)}
+        {tabBtn("دانش‌آموزان", "students", Users)}
+        {tabBtn("کلاس‌ها", "classes", BarChart2)}
       </div>
 
       {/* ── Teachers Tab ── */}
       {tab === "teachers" && (
         <div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 12, flexWrap: "wrap" }}>
-            <span style={{ color: "#3730a3", fontSize: 14, display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ color: PD, fontSize: 14, display: "flex", alignItems: "center", gap: 6 }}>
               <GraduationCap size={15} color="#f59e0b" /> {filteredTeachers.length} معلم
             </span>
             <input value={teacherSearch} onChange={e => setTeacherSearch(e.target.value)} placeholder="جستجوی معلم..."
-              style={{ background: "rgba(255,255,255,0.80)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, padding: "8px 14px", color: "#1e1b4b", fontFamily: "Vazirmatn, sans-serif", fontSize: 13, outline: "none", width: 220 }} />
+              style={{ background: "rgba(255,255,255,0.90)", border: `1px solid ${P}44`, borderRadius: 10, padding: "8px 14px", color: "#134e4a", fontFamily: "Vazirmatn, sans-serif", fontSize: 13, outline: "none", width: 220 }} />
           </div>
-          {loadingTeachers ? <div style={{ color: "#3730a3", textAlign: "center", padding: 40 }}>در حال بارگذاری...</div> : (
-            <div style={{ background: "rgba(255,255,255,0.97)", borderRadius: 16, border: "1px solid rgba(139,92,246,0.2)", overflow: "hidden" }}>
+          {loadingTeachers ? <div style={{ color: PD, textAlign: "center", padding: 40 }}>در حال بارگذاری...</div> : (
+            <div style={{ background: "rgba(255,255,255,0.97)", borderRadius: 16, border: `1px solid ${P}22`, overflow: "hidden" }}>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 640 }}>
                   <thead><tr>{["معلم", "تلفن", "ایمیل", "کلاس‌ها", "آخرین ورود"].map(h => <th key={h} style={thStyle}>{h}</th>)}</tr></thead>
                   <tbody>
                     {filteredTeachers.map((t: any) => (
-                      <tr key={t.id} onMouseOver={e => (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.06)"} onMouseOut={e => (e.currentTarget as HTMLElement).style.background = ""}>
+                      <tr key={t.id} onMouseOver={e => (e.currentTarget as HTMLElement).style.background = `${P}0a`} onMouseOut={e => (e.currentTarget as HTMLElement).style.background = ""}>
                         <td style={tdStyle}>
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <div style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(135deg,#f59e0b,#fbbf24)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: "#1a1a2e", flexShrink: 0 }}>{t.name?.[0] ?? "م"}</div>
+                            <div style={{ width: 34, height: 34, borderRadius: "50%", background: `linear-gradient(135deg,${P},${PD})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: "white", flexShrink: 0 }}>{t.name?.[0] ?? "م"}</div>
                             <div>
-                              <div style={{ color: "#1e1b4b", fontWeight: 600, fontSize: 13 }}>{t.name}</div>
-                              <div style={{ color: "#4f46e5", fontSize: 11 }}>{t.status === "active" ? "فعال" : "غیرفعال"}</div>
+                              <div style={{ color: "#134e4a", fontWeight: 600, fontSize: 13 }}>{t.name}</div>
+                              <div style={{ color: PD, fontSize: 11 }}>{t.status === "active" ? "فعال" : "غیرفعال"}</div>
                             </div>
                           </div>
                         </td>
-                        <td style={tdStyle}><span style={{ color: "#3730a3", fontSize: 13, direction: "ltr", display: "block" }}>{t.phone ?? "—"}</span></td>
-                        <td style={tdStyle}><span style={{ color: "#4f46e5", fontSize: 12, direction: "ltr", display: "block" }}>{t.email ?? "—"}</span></td>
+                        <td style={tdStyle}><span style={{ color: PD, fontSize: 13, direction: "ltr", display: "block" }}>{t.phone ?? "—"}</span></td>
+                        <td style={tdStyle}><span style={{ color: P, fontSize: 12, direction: "ltr", display: "block" }}>{t.email ?? "—"}</span></td>
                         <td style={tdStyle}>
                           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                             {t.classNames?.length > 0 ? t.classNames.map((cn: string, i: number) => (
-                              <span key={i} style={{ padding: "2px 8px", borderRadius: 999, fontSize: 11, background: "rgba(99,102,241,0.15)", color: "#3730a3", border: "1px solid rgba(139,92,246,0.3)" }}>{cn}</span>
+                              <span key={i} style={{ padding: "2px 8px", borderRadius: 999, fontSize: 11, background: `${P}18`, color: PD, border: `1px solid ${P}35` }}>{cn}</span>
                             )) : <span style={{ color: "#6b7280", fontSize: 12 }}>—</span>}
                           </div>
                         </td>
                         <td style={tdStyle}>
                           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                            <Clock size={12} color="#60a5fa" />
-                            <span style={{ color: "#3730a3", fontSize: 12 }}>{fmtDate(t.lastLoginAt)}</span>
+                            <Clock size={12} color="#2dd4bf" />
+                            <span style={{ color: PD, fontSize: 12 }}>{fmtDate(t.lastLoginAt)}</span>
                           </div>
                         </td>
                       </tr>
@@ -186,30 +190,28 @@ export default function SchoolReport() {
       {tab === "students" && (
         <div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 12, flexWrap: "wrap" }}>
-            <span style={{ color: "#3730a3", fontSize: 14, display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ color: PD, fontSize: 14, display: "flex", alignItems: "center", gap: 6 }}>
               <Users size={15} color="#ec4899" /> {filteredStudents.length} دانش‌آموز
             </span>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
               <select value={sortBy} onChange={e => setSortBy(e.target.value as any)}
-                style={{ background: "rgba(255,255,255,0.80)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, padding: "8px 12px", color: "#1e1b4b", fontFamily: "Vazirmatn, sans-serif", fontSize: 13, outline: "none" }}>
+                style={{ background: "rgba(255,255,255,0.90)", border: `1px solid ${P}44`, borderRadius: 10, padding: "8px 12px", color: "#134e4a", fontFamily: "Vazirmatn, sans-serif", fontSize: 13, outline: "none" }}>
                 <option value="score">مرتب‌سازی: امتیاز</option>
                 <option value="time">مرتب‌سازی: زمان</option>
                 <option value="lessons">مرتب‌سازی: دروس</option>
               </select>
               <input value={studentSearch} onChange={e => setStudentSearch(e.target.value)} placeholder="جستجو..."
-                style={{ background: "rgba(255,255,255,0.80)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, padding: "8px 14px", color: "#1e1b4b", fontFamily: "Vazirmatn, sans-serif", fontSize: 13, outline: "none", width: 180 }} />
+                style={{ background: "rgba(255,255,255,0.90)", border: `1px solid ${P}44`, borderRadius: 10, padding: "8px 14px", color: "#134e4a", fontFamily: "Vazirmatn, sans-serif", fontSize: 13, outline: "none", width: 180 }} />
             </div>
           </div>
-          {loadingStudents ? <div style={{ color: "#3730a3", textAlign: "center", padding: 40 }}>در حال بارگذاری...</div> : filteredStudents.length === 0 ? (
-            <div style={{ textAlign: "center", padding: 40, background: "rgba(255,255,255,0.80)", borderRadius: 16, color: "#4f46e5" }}>دانش‌آموزی یافت نشد</div>
+          {loadingStudents ? <div style={{ color: PD, textAlign: "center", padding: 40 }}>در حال بارگذاری...</div> : filteredStudents.length === 0 ? (
+            <div style={{ textAlign: "center", padding: 40, background: "rgba(255,255,255,0.90)", borderRadius: 16, color: PD }}>دانش‌آموزی یافت نشد</div>
           ) : (
-            <div style={{ background: "rgba(255,255,255,0.97)", borderRadius: 16, border: "1px solid rgba(139,92,246,0.2)", overflow: "hidden" }}>
+            <div style={{ background: "rgba(255,255,255,0.97)", borderRadius: 16, border: `1px solid ${P}22`, overflow: "hidden" }}>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 760 }}>
                   <thead>
-                    <tr>
-                      {["#", "دانش‌آموز", "کلاس", "آخرین حضور", "زمان در برنامه", "امتیاز کل", "پیشرفت درسی"].map(h => <th key={h} style={thStyle}>{h}</th>)}
-                    </tr>
+                    <tr>{["#", "دانش‌آموز", "کلاس", "آخرین حضور", "زمان در برنامه", "امتیاز کل", "پیشرفت درسی"].map(h => <th key={h} style={thStyle}>{h}</th>)}</tr>
                   </thead>
                   <tbody>
                     {filteredStudents.map((s: any, idx: number) => {
@@ -220,49 +222,49 @@ export default function SchoolReport() {
                         <tr key={s.id}
                           onClick={() => setDetailStudent(detailStudent?.id === s.id ? null : s)}
                           style={{ cursor: "pointer" }}
-                          onMouseOver={e => (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.06)"}
-                          onMouseOut={e => (e.currentTarget as HTMLElement).style.background = detailStudent?.id === s.id ? "rgba(124,58,237,0.10)" : ""}
+                          onMouseOver={e => (e.currentTarget as HTMLElement).style.background = `${P}0a`}
+                          onMouseOut={e => (e.currentTarget as HTMLElement).style.background = detailStudent?.id === s.id ? `${P}10` : ""}
                         >
                           <td style={tdStyle}>
-                            <span style={{ width: 26, height: 26, borderRadius: 8, background: idx < 3 ? "rgba(245,158,11,0.18)" : "rgba(99,102,241,0.10)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800, color: idx < 3 ? "#d97706" : "#6366f1" }}>
+                            <span style={{ width: 26, height: 26, borderRadius: 8, background: idx < 3 ? "rgba(245,158,11,0.18)" : `${P}12`, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800, color: idx < 3 ? "#d97706" : P }}>
                               {idx < 3 ? ["🥇","🥈","🥉"][idx] : (idx+1).toLocaleString("fa-IR")}
                             </span>
                           </td>
                           <td style={tdStyle}>
                             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                              <div style={{ width: 32, height: 32, borderRadius: 10, background: s.gender === "female" ? "rgba(236,72,153,0.2)" : "rgba(99,102,241,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                                <UserRound size={15} color={s.gender === "female" ? "#ec4899" : "#6366f1"} />
+                              <div style={{ width: 32, height: 32, borderRadius: 10, background: s.gender === "female" ? "rgba(236,72,153,0.18)" : `${P}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                <UserRound size={15} color={s.gender === "female" ? "#ec4899" : P} />
                               </div>
                               <div>
-                                <div style={{ color: "#1e1b4b", fontWeight: 600, fontSize: 13 }}>{s.name}</div>
-                                <div style={{ color: "#4f46e5", fontSize: 11, direction: "ltr" }}>{s.email}</div>
+                                <div style={{ color: "#134e4a", fontWeight: 600, fontSize: 13 }}>{s.name}</div>
+                                <div style={{ color: P, fontSize: 11, direction: "ltr" }}>{s.email}</div>
                               </div>
                             </div>
                           </td>
                           <td style={tdStyle}>
-                            <span style={{ padding: "3px 10px", borderRadius: 999, fontSize: 12, background: "rgba(59,130,246,0.15)", color: "#93c5fd", border: "1px solid rgba(59,130,246,0.25)" }}>{s.className ?? "—"}</span>
+                            <span style={{ padding: "3px 10px", borderRadius: 999, fontSize: 12, background: `${P}15`, color: P, border: `1px solid ${P}30` }}>{s.className ?? "—"}</span>
                           </td>
                           <td style={tdStyle}>
                             <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                              <Clock size={12} color="#60a5fa" />
-                              <span style={{ color: "#3730a3", fontSize: 12 }}>{fmtDate(s.lastPresenceAt)}</span>
+                              <Clock size={12} color="#2dd4bf" />
+                              <span style={{ color: PD, fontSize: 12 }}>{fmtDate(s.lastPresenceAt)}</span>
                             </div>
                           </td>
                           <td style={tdStyle}><span style={{ color: "#15803d", fontSize: 13, fontWeight: 600 }}>{fmtDuration(s.totalMinutesInApp ?? 0)}</span></td>
                           <td style={tdStyle}>
                             <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                               <Star size={13} color="#fbbf24" />
-                              <span style={{ color: "#fbbf24", fontWeight: 700, fontSize: 13 }}>{(s.totalScore ?? 0).toLocaleString("fa-IR")}</span>
+                              <span style={{ color: "#d97706", fontWeight: 700, fontSize: 13 }}>{(s.totalScore ?? 0).toLocaleString("fa-IR")}</span>
                             </div>
                           </td>
                           <td style={tdStyle}>
                             <div>
                               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                                <span style={{ fontSize: 11, color: "#3730a3" }}>{doneLessons} از {totalLessons} درس</span>
-                                <span style={{ fontSize: 11, color: "#4f46e5", fontWeight: 700 }}>{overallPct}%</span>
+                                <span style={{ fontSize: 11, color: PD }}>{doneLessons} از {totalLessons} درس</span>
+                                <span style={{ fontSize: 11, color: P, fontWeight: 700 }}>{overallPct}%</span>
                               </div>
-                              <div style={{ height: 5, background: "rgba(99,102,241,0.12)", borderRadius: 999, overflow: "hidden", width: 100 }}>
-                                <div style={{ height: "100%", width: `${overallPct}%`, background: "linear-gradient(90deg,#7c3aed,#a855f7)", borderRadius: 999, transition: "width 0.5s" }} />
+                              <div style={{ height: 5, background: `${P}18`, borderRadius: 999, overflow: "hidden", width: 100 }}>
+                                <div style={{ height: "100%", width: `${overallPct}%`, background: `linear-gradient(90deg,${P},${PD})`, borderRadius: 999, transition: "width 0.5s" }} />
                               </div>
                             </div>
                           </td>
@@ -280,25 +282,25 @@ export default function SchoolReport() {
       {/* ── Classes Tab ── */}
       {tab === "classes" && (
         <div>
-          {loadingStudents ? <div style={{ textAlign: "center", padding: 60, color: "#3730a3" }}>در حال بارگذاری...</div>
-          : classData.length === 0 ? <div style={{ textAlign: "center", padding: 60, background: "rgba(255,255,255,0.80)", borderRadius: 16, color: "#4f46e5" }}>کلاسی یافت نشد</div>
+          {loadingStudents ? <div style={{ textAlign: "center", padding: 60, color: PD }}>در حال بارگذاری...</div>
+          : classData.length === 0 ? <div style={{ textAlign: "center", padding: 60, background: "rgba(255,255,255,0.90)", borderRadius: 16, color: PD }}>کلاسی یافت نشد</div>
           : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
               {classData.map((cls, idx) => {
-                const rankColor = idx === 0 ? "#f59e0b" : idx === 1 ? "#94a3b8" : idx === 2 ? "#d97706" : "#6366f1";
+                const rankColor = idx === 0 ? "#f59e0b" : idx === 1 ? "#94a3b8" : idx === 2 ? "#d97706" : P;
                 return (
-                  <div key={cls.name} style={{ background: "rgba(255,255,255,0.97)", borderRadius: 18, border: "1px solid rgba(139,92,246,0.20)", padding: 20, boxShadow: "0 4px 20px rgba(99,102,241,0.08)", transition: "transform 0.2s, box-shadow 0.2s" }}
-                    onMouseOver={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 28px rgba(99,102,241,0.15)"; }}
-                    onMouseOut={e => { (e.currentTarget as HTMLElement).style.transform = ""; (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 20px rgba(99,102,241,0.08)"; }}
+                  <div key={cls.name} style={{ background: "rgba(255,255,255,0.97)", borderRadius: 18, border: `1px solid ${P}22`, padding: 20, boxShadow: `0 4px 20px ${P}10`, transition: "transform 0.2s, box-shadow 0.2s" }}
+                    onMouseOver={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"; (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 28px ${P}20`; }}
+                    onMouseOut={e => { (e.currentTarget as HTMLElement).style.transform = ""; (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 20px ${P}10`; }}
                   >
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <div style={{ width: 38, height: 38, borderRadius: 12, background: `linear-gradient(135deg,${rankColor}33,${rankColor}18)`, border: `1.5px solid ${rankColor}44`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <div style={{ width: 38, height: 38, borderRadius: 12, background: `${rankColor}22`, border: `1.5px solid ${rankColor}44`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                           {idx < 3 ? <Trophy size={18} color={rankColor} /> : <BarChart2 size={18} color={rankColor} />}
                         </div>
                         <div>
-                          <div style={{ fontWeight: 800, fontSize: 15, color: "#1e1b4b" }}>{cls.name}</div>
-                          <div style={{ fontSize: 12, color: "#4f46e5" }}>{cls.count.toLocaleString("fa-IR")} دانش‌آموز</div>
+                          <div style={{ fontWeight: 800, fontSize: 15, color: "#134e4a" }}>{cls.name}</div>
+                          <div style={{ fontSize: 12, color: PD }}>{cls.count.toLocaleString("fa-IR")} دانش‌آموز</div>
                         </div>
                       </div>
                       <span style={{ fontSize: 12, fontWeight: 700, color: rankColor, background: `${rankColor}18`, border: `1px solid ${rankColor}33`, borderRadius: 8, padding: "3px 10px" }}>
@@ -308,8 +310,8 @@ export default function SchoolReport() {
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 14 }}>
                       {[
                         { label: "میانگین امتیاز", value: cls.avgScore.toLocaleString("fa-IR"), color: "#f59e0b" },
-                        { label: "تکمیل دروس", value: `${cls.avgCompletion}%`, color: "#10b981" },
-                        { label: "میانگین زمان", value: fmtDuration(cls.avgTime), color: "#3b82f6" },
+                        { label: "تکمیل دروس",     value: `${cls.avgCompletion}%`,               color: "#10b981" },
+                        { label: "میانگین زمان",    value: fmtDuration(cls.avgTime),              color: P },
                       ].map(s => (
                         <div key={s.label} style={{ background: `${s.color}0f`, borderRadius: 10, padding: "8px 10px", border: `1px solid ${s.color}22` }}>
                           <div style={{ fontWeight: 800, fontSize: 14, color: s.color }}>{s.value}</div>
@@ -317,14 +319,13 @@ export default function SchoolReport() {
                         </div>
                       ))}
                     </div>
-                    {/* Progress bar */}
                     <div>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
                         <span style={{ fontSize: 11, color: "#6b7280" }}>میانگین پیشرفت</span>
                         <span style={{ fontSize: 11, color: "#10b981", fontWeight: 700 }}>{cls.avgCompletion}%</span>
                       </div>
-                      <div style={{ height: 6, background: "rgba(99,102,241,0.10)", borderRadius: 999, overflow: "hidden" }}>
-                        <div style={{ height: "100%", width: `${cls.avgCompletion}%`, background: "linear-gradient(90deg,#7c3aed,#10b981)", borderRadius: 999, transition: "width 0.5s" }} />
+                      <div style={{ height: 6, background: `${P}14`, borderRadius: 999, overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: `${cls.avgCompletion}%`, background: `linear-gradient(90deg,${P},#10b981)`, borderRadius: 999, transition: "width 0.5s" }} />
                       </div>
                     </div>
                     {cls.topStudent && (
@@ -332,7 +333,7 @@ export default function SchoolReport() {
                         <Trophy size={13} color="#f59e0b" />
                         <div>
                           <div style={{ fontSize: 11, color: "#92400e", fontWeight: 700 }}>بهترین دانش‌آموز</div>
-                          <div style={{ fontSize: 12, color: "#1e1b4b", fontWeight: 600 }}>
+                          <div style={{ fontSize: 12, color: "#134e4a", fontWeight: 600 }}>
                             {cls.topStudent.name}
                             <span style={{ marginRight: 6, color: "#f59e0b", fontSize: 11 }}>⭐ {cls.topStudent.totalScore.toLocaleString("fa-IR")}</span>
                           </div>
@@ -347,20 +348,18 @@ export default function SchoolReport() {
         </div>
       )}
 
-      {/* ── Student Detail Panel (slide-in from left in RTL) ── */}
+      {/* ── Student Detail Panel ── */}
       {detailStudent && (
         <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", justifyContent: "flex-end" }} dir="rtl">
-          <div onClick={() => setDetailStudent(null)} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.40)", backdropFilter: "blur(3px)" }} />
-          <div style={{ position: "relative", zIndex: 1, width: 360, maxWidth: "92vw", background: "linear-gradient(160deg,#f5f3ff,#ede9fe)", overflowY: "auto", boxShadow: "-8px 0 40px rgba(99,102,241,0.22)", padding: "24px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
+          <div onClick={() => setDetailStudent(null)} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.35)", backdropFilter: "blur(3px)" }} />
+          <div style={{ position: "relative", zIndex: 1, width: 360, maxWidth: "92vw", background: "linear-gradient(160deg,#f0fdf9,#ccfbf1)", overflowY: "auto", boxShadow: `-8px 0 40px ${P}30`, padding: "24px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div style={{ fontWeight: 800, fontSize: 16, color: "#1e1b4b" }}>جزئیات عملکرد</div>
-              <button onClick={() => setDetailStudent(null)} style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(99,102,241,0.10)", border: "1px solid rgba(99,102,241,0.20)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-                <X size={16} color="#4f46e5" />
+              <div style={{ fontWeight: 800, fontSize: 16, color: "#134e4a" }}>جزئیات عملکرد</div>
+              <button onClick={() => setDetailStudent(null)} style={{ width: 32, height: 32, borderRadius: "50%", background: `${P}15`, border: `1px solid ${P}30`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                <X size={16} color={P} />
               </button>
             </div>
-
-            {/* Student profile */}
-            <div style={{ background: "linear-gradient(135deg,#7c3aed,#a855f7)", borderRadius: 16, padding: "16px 18px", color: "white" }}>
+            <div style={{ background: `linear-gradient(135deg,${P},${PD})`, borderRadius: 16, padding: "16px 18px", color: "white" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{ width: 44, height: 44, borderRadius: 14, background: "rgba(255,255,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <UserRound size={22} color="white" />
@@ -373,7 +372,7 @@ export default function SchoolReport() {
               <div style={{ display: "flex", gap: 16, marginTop: 14 }}>
                 {[
                   { label: "امتیاز", value: detailStudent.totalScore.toLocaleString("fa-IR"), color: "#fbbf24" },
-                  { label: "زمان", value: fmtDuration(detailStudent.totalMinutesInApp ?? 0), color: "#86efac" },
+                  { label: "زمان",   value: fmtDuration(detailStudent.totalMinutesInApp ?? 0), color: "#a7f3d0" },
                 ].map(s => (
                   <div key={s.label}>
                     <div style={{ fontSize: 16, fontWeight: 800, color: s.color }}>{s.value}</div>
@@ -382,11 +381,9 @@ export default function SchoolReport() {
                 ))}
               </div>
             </div>
-
-            {/* Score breakdown */}
             {breakdown && (breakdown.total ?? 0) > 0 && (
-              <div style={{ background: "rgba(255,255,255,0.90)", borderRadius: 14, padding: 16, border: "1px solid rgba(99,102,241,0.15)" }}>
-                <div style={{ fontWeight: 700, fontSize: 13, color: "#3730a3", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ background: "rgba(255,255,255,0.95)", borderRadius: 14, padding: 16, border: `1px solid ${P}20` }}>
+                <div style={{ fontWeight: 700, fontSize: 13, color: PD, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
                   <Star size={13} color="#f59e0b" /> تفکیک امتیاز
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -400,11 +397,11 @@ export default function SchoolReport() {
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                             <Icon size={12} color={m.color} />
-                            <span style={{ fontSize: 12, color: "#1e1b4b", fontWeight: 600 }}>{m.label}</span>
+                            <span style={{ fontSize: 12, color: "#134e4a", fontWeight: 600 }}>{m.label}</span>
                           </div>
                           <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                             <span style={{ fontSize: 12, color: m.color, fontWeight: 700 }}>{val.toLocaleString("fa-IR")}</span>
-                            <span style={{ fontSize: 10, color: "#6b7280", background: "#f3f4f6", borderRadius: 4, padding: "1px 5px" }}>{pct}%</span>
+                            <span style={{ fontSize: 10, color: "#6b7280", background: "#f0fdf9", borderRadius: 4, padding: "1px 5px" }}>{pct}%</span>
                           </div>
                         </div>
                         <div style={{ height: 5, background: `${m.color}18`, borderRadius: 999, overflow: "hidden" }}>
@@ -416,12 +413,10 @@ export default function SchoolReport() {
                 </div>
               </div>
             )}
-
-            {/* Book progress detail */}
             {detailStudent.bookProgress?.length > 0 && (
-              <div style={{ background: "rgba(255,255,255,0.90)", borderRadius: 14, padding: 16, border: "1px solid rgba(99,102,241,0.15)" }}>
-                <div style={{ fontWeight: 700, fontSize: 13, color: "#3730a3", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
-                  <BookOpen size={13} color="#6366f1" /> پیشرفت کتاب‌ها
+              <div style={{ background: "rgba(255,255,255,0.95)", borderRadius: 14, padding: 16, border: `1px solid ${P}20` }}>
+                <div style={{ fontWeight: 700, fontSize: 13, color: PD, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+                  <BookOpen size={13} color={P} /> پیشرفت کتاب‌ها
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {detailStudent.bookProgress.map((bp: any) => {
@@ -429,11 +424,11 @@ export default function SchoolReport() {
                     return (
                       <div key={bp.bookId}>
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                          <span style={{ fontSize: 12, color: "#1e1b4b", fontWeight: 600 }}>{bp.bookTitle}</span>
-                          <span style={{ fontSize: 12, color: "#4f46e5" }}>{bp.completedLessons}/{bp.lessonCount} — {pct}%</span>
+                          <span style={{ fontSize: 12, color: "#134e4a", fontWeight: 600 }}>{bp.bookTitle}</span>
+                          <span style={{ fontSize: 12, color: P }}>{bp.completedLessons}/{bp.lessonCount} — {pct}%</span>
                         </div>
-                        <div style={{ height: 6, background: "rgba(99,102,241,0.10)", borderRadius: 999, overflow: "hidden" }}>
-                          <div style={{ height: "100%", width: `${pct}%`, background: "linear-gradient(90deg,#7c3aed,#a855f7)", borderRadius: 999, transition: "width 0.5s" }} />
+                        <div style={{ height: 6, background: `${P}18`, borderRadius: 999, overflow: "hidden" }}>
+                          <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg,${P},#10b981)`, borderRadius: 999, transition: "width 0.5s" }} />
                         </div>
                       </div>
                     );
@@ -441,7 +436,6 @@ export default function SchoolReport() {
                 </div>
               </div>
             )}
-
             <div style={{ fontSize: 12, color: "#6b7280", textAlign: "center", paddingBottom: 8 }}>
               آخرین حضور: {fmtDate(detailStudent.lastPresenceAt)}
             </div>
