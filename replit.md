@@ -13,7 +13,7 @@ A multi-role Persian (RTL) educational platform for schools, teachers, parents, 
 - Required env: `DATABASE_URL` — Postgres connection string (auto-provisioned)
 - Required env: `SESSION_SECRET` — Express session secret (set as secret)
 
-## Demo Accounts (username: email or phone, password: national ID)
+## Demo Accounts (username: email or phone, password: admin123)
 
 | Email | Phone | National ID | Role | Description |
 |---|---|---|---|---|
