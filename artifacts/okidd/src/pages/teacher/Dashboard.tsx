@@ -7,8 +7,9 @@ import { useLocation } from "wouter";
 import {
   School, ChevronDown, ChevronLeft, Users, BookOpen, Lock, Unlock,
   BarChart2, Clock, Star, GraduationCap, TrendingUp, UserRound,
-  LogOut, Bell,
+  Bell,
 } from "lucide-react";
+import ProfilePanel from "../../components/ProfilePanel";
 
 const AMBER   = "#f59e0b";
 const AMBER_D = "#d97706";
@@ -54,7 +55,7 @@ function shine(): React.CSSProperties {
 }
 
 export default function TeacherDashboard() {
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const [, navigate] = useLocation();
   const [mounted, setMounted]             = useState(false);
   const [schoolsOpen, setSchoolsOpen]     = useState(false);
@@ -64,7 +65,6 @@ export default function TeacherDashboard() {
   const [progressClass, setProgressClass] = useState<any>(null);
   const [perfOpen, setPerfOpen]           = useState(false);
   const [perfClass, setPerfClass]         = useState<any>(null);
-  const [confirmLogout, setConfirmLogout] = useState(false);
 
   useEffect(() => { const t = setTimeout(() => setMounted(true), 80); return () => clearTimeout(t); }, []);
 
@@ -165,12 +165,7 @@ export default function TeacherDashboard() {
                 </span>
               )}
             </button>
-            <button
-              onClick={() => setConfirmLogout(true)}
-              style={{ width: 40, height: 40, borderRadius: "50%", background: `linear-gradient(135deg,${AMBER},${ORANGE})`, border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: `0 4px 16px ${AMBER}55` }}
-            >
-              <LogOut size={17} color="white" />
-            </button>
+            <ProfilePanel accent={AMBER} dark={AMBER_D} />
           </div>
         </div>
 
@@ -422,21 +417,6 @@ export default function TeacherDashboard() {
         </div>
       </div>
 
-      {/* Logout confirm */}
-      {confirmLogout && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}
-          onClick={() => setConfirmLogout(false)}>
-          <div style={{ background: "rgba(255,251,235,0.95)", backdropFilter: "blur(24px)", borderRadius: 24, padding: 28, maxWidth: 320, width: "90%", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", border: "1.5px solid rgba(245,158,11,0.3)" }}
-            onClick={e => e.stopPropagation()}>
-            <div style={{ fontWeight: 900, fontSize: 17, color: "#78350f", marginBottom: 8 }}>خروج از حساب</div>
-            <div style={{ fontSize: 13, color: "#92400e", marginBottom: 22 }}>آیا مطمئن هستید؟</div>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={logout} style={{ flex: 1, padding: "11px 0", background: "linear-gradient(135deg,#dc2626,#ef4444)", border: "none", borderRadius: 12, color: "white", fontFamily: "Vazirmatn", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>خروج</button>
-              <button onClick={() => setConfirmLogout(false)} style={{ flex: 1, padding: "11px 0", background: "rgba(245,158,11,0.14)", border: "1.5px solid rgba(245,158,11,0.35)", borderRadius: 12, color: "#92400e", fontFamily: "Vazirmatn", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>انصراف</button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <style>{`
         @keyframes dashUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }

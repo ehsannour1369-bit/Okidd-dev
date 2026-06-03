@@ -19,31 +19,19 @@ const CFG: Record<string, {
   school_manager: { accent: "#6366f1", dark: "#4f46e5", dashPath: "/school",     notifPath: "/school/notifications",    hasBell: true,  walletPath: "/school/wallet"  },
 };
 
-function WalletChip({ schoolId, walletPath, accent, dark }: { schoolId: number; walletPath: string; accent: string; dark: string }) {
-  const { data } = useQuery<{ balance: number }>({
-    queryKey: ["wallet-balance", schoolId],
-    queryFn: () => api.get(`/wallets/${schoolId}`),
-    enabled: !!schoolId,
-    staleTime: 30_000,
-  });
-
-  const balance = data?.balance ?? 0;
-
+function WalletChip({ walletPath, accent, dark }: { walletPath: string; accent: string; dark: string }) {
   return (
     <Link href={walletPath}>
       <button
         title="کیف پول"
         style={{
-          display: "flex", alignItems: "center", gap: 5,
-          padding: "7px 11px", borderRadius: 12,
-          background: `${accent}18`, border: `1.5px solid ${accent}50`,
-          cursor: "pointer", color: dark,
-          fontFamily: "Vazirmatn, sans-serif", fontSize: 12, fontWeight: 700,
-          whiteSpace: "nowrap",
+          width: 38, height: 38, borderRadius: 12,
+          background: `${accent}20`, border: `1.5px solid ${accent}55`,
+          cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+          color: dark,
         }}
       >
-        <Wallet size={14} />
-        {balance.toLocaleString("fa-IR")} ت
+        <Wallet size={17} />
       </button>
     </Link>
   );
@@ -126,9 +114,8 @@ export default function PageTopBar() {
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        {walletPath && effectiveSchoolId && (
+        {walletPath && (
           <WalletChip
-            schoolId={effectiveSchoolId}
             walletPath={walletPath}
             accent={accent}
             dark={dark}

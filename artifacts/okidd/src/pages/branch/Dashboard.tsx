@@ -2,9 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { Link } from "wouter";
-import { BookMarked, Users, GraduationCap, Bell, ClipboardList, GitBranch, MapPin, Building2, LayoutDashboard } from "lucide-react";
+import { BookMarked, Users, GraduationCap, Bell, ClipboardList, GitBranch, MapPin, Building2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import PageTopBar from "../../components/PageTopBar";
+import ProfilePanel from "../../components/ProfilePanel";
 import BookLicenseSummary from "../../components/BookLicenseSummary";
 
 interface BranchInfo { id: number; name: string; address?: string; schoolId: number; school?: { id: number; name: string }; }
@@ -99,16 +100,12 @@ export default function BranchDashboard() {
       <div style={{ position: "relative", zIndex: 1 }}>
         <PageTopBar />
         {/* Header */}
-        <div style={{ ...cardAnim(0), marginBottom: 22 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 50, height: 50, borderRadius: 16, background: `linear-gradient(135deg, ${P}, ${S})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 6px 20px ${P}77` }}>
-              <LayoutDashboard size={24} color="white" />
-            </div>
-            <div>
-              <h1 style={{ fontSize: 22, fontWeight: 900, color: "#134e4a", margin: 0 }}>داشبورد مدیر شعبه</h1>
-              <p style={{ color: "#0f766e", fontSize: 13, margin: 0 }}>مدیریت شعبه و کلاس‌های زیرمجموعه</p>
-            </div>
+        <div style={{ ...cardAnim(0), marginBottom: 22, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <h1 style={{ fontSize: 22, fontWeight: 900, color: "#134e4a", margin: 0 }}>داشبورد مدیر شعبه</h1>
+            <p style={{ color: "#0f766e", fontSize: 13, margin: 0 }}>مدیریت شعبه و کلاس‌های زیرمجموعه</p>
           </div>
+          <ProfilePanel accent={P} dark="#0f766e" />
         </div>
 
         {/* Branch info card — colored */}

@@ -4,9 +4,10 @@ import { useAuthStore } from "../../store/auth";
 import { Link } from "wouter";
 import {
   School, Users, GraduationCap, UserCheck, CreditCard, TrendingUp,
-  GitBranch, BookOpen, Package, FileText, BookMarked, BarChart2, ShieldCheck,
+  GitBranch, BookOpen, FileText, BookMarked, BarChart2, ShieldCheck,
 } from "lucide-react";
 import PageTopBar from "../../components/PageTopBar";
+import ProfilePanel from "../../components/ProfilePanel";
 import { useEffect, useState } from "react";
 import DashCarousel, { CarouselCard } from "../../components/DashCarousel";
 
@@ -66,14 +67,17 @@ export default function AdminDashboard() {
         <PageTopBar />
 
         {/* Integrated header */}
-        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28, ...anim(0) }}>
-          <div style={{ width: 52, height: 52, borderRadius: 17, background: "linear-gradient(135deg,#f59e0b,#ef4444)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 22px rgba(245,158,11,0.55)", flexShrink: 0 }}>
-            <TrendingUp size={24} color="white" />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28, ...anim(0) }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 52, height: 52, borderRadius: 17, background: "linear-gradient(135deg,#f59e0b,#ef4444)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 22px rgba(245,158,11,0.55)", flexShrink: 0 }}>
+              <TrendingUp size={24} color="white" />
+            </div>
+            <div>
+              <h1 style={{ fontSize: 20, fontWeight: 900, color: "#78350f", margin: 0 }}>داشبورد مدیر کل</h1>
+              <div style={{ fontSize: 13, color: "#92400e", marginTop: 2 }}>سلام، <strong>{user?.name}</strong></div>
+            </div>
           </div>
-          <div>
-            <h1 style={{ fontSize: 20, fontWeight: 900, color: "#78350f", margin: 0 }}>داشبورد مدیر کل</h1>
-            <div style={{ fontSize: 13, color: "#92400e", marginTop: 2 }}>سلام، <strong>{user?.name}</strong></div>
-          </div>
+          <ProfilePanel accent="#f59e0b" dark="#d97706" />
         </div>
 
         {/* Carousel */}

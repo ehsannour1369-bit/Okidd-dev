@@ -5,8 +5,9 @@ import { useNotificationReads } from "../../hooks/useNotificationReads";
 import ParentExamCalendar from "../../components/ParentExamCalendar";
 import {
   Bell, BookOpen, Clock, Star, Calendar,
-  Trophy, Heart, UserRound, Users, LogOut,
+  Trophy, Heart, UserRound, Users,
 } from "lucide-react";
+import ProfilePanel from "../../components/ProfilePanel";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 
@@ -57,11 +58,10 @@ const STAT_META = [
 ];
 
 export default function ParentDashboard() {
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const [, navigate]          = useLocation();
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
   const [mounted, setMounted]                 = useState(false);
-  const [confirmLogout, setConfirmLogout]     = useState(false);
 
   useEffect(() => { const t = setTimeout(() => setMounted(true), 80); return () => clearTimeout(t); }, []);
 
@@ -173,12 +173,7 @@ export default function ParentDashboard() {
                 </span>
               )}
             </button>
-            <button
-              onClick={() => setConfirmLogout(true)}
-              style={{ width: 40, height: 40, borderRadius: "50%", background: `linear-gradient(135deg,${accent},${accentDark})`, border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: `0 4px 16px ${accent}55`, transition: "background 0.4s" }}
-            >
-              <LogOut size={17} color="white" />
-            </button>
+            <ProfilePanel accent={accent} dark={accentDark} />
           </div>
         </div>
 
@@ -306,25 +301,6 @@ export default function ParentDashboard() {
         </div>
       </div>
 
-      {/* Logout confirm */}
-      {confirmLogout && (
-        <div
-          style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}
-          onClick={() => setConfirmLogout(false)}
-        >
-          <div
-            style={{ background: isGirl ? "rgba(253,242,248,0.96)" : "rgba(245,243,255,0.96)", backdropFilter: "blur(24px)", borderRadius: 24, padding: 28, maxWidth: 320, width: "90%", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", border: `1.5px solid ${accent}35` }}
-            onClick={e => e.stopPropagation()}
-          >
-            <div style={{ fontWeight: 900, fontSize: 17, color: TEXT, marginBottom: 8 }}>خروج از حساب</div>
-            <div style={{ fontSize: 13, color: TEXT2, marginBottom: 22 }}>آیا مطمئن هستید؟</div>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={logout} style={{ flex: 1, padding: "11px 0", background: "linear-gradient(135deg,#dc2626,#ef4444)", border: "none", borderRadius: 12, color: "white", fontFamily: "Vazirmatn", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>خروج</button>
-              <button onClick={() => setConfirmLogout(false)} style={{ flex: 1, padding: "11px 0", background: `${accent}18`, border: `1.5px solid ${accent}40`, borderRadius: 12, color: accentDark, fontFamily: "Vazirmatn", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>انصراف</button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <style>{`
         @keyframes dashUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
