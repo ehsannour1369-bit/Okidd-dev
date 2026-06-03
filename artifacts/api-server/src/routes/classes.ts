@@ -55,7 +55,7 @@ async function getUsedCount(schoolId: number, bookId: number): Promise<number> {
 }
 
 router.get("/classes", async (req, res) => {
-  const { gradeId, teacherId, studentId } = req.query as Record<string, string>;
+  const { gradeId, teacherId, studentId, schoolId, branchId } = req.query as Record<string, string>;
   let rows = await db.select().from(classesTable);
   if (gradeId) rows = rows.filter(c => c.gradeId === parseInt(gradeId));
 
@@ -69,6 +69,24 @@ router.get("/classes", async (req, res) => {
     const studentClasses = await db.select({ classId: classStudentsTable.classId }).from(classStudentsTable).where(eq(classStudentsTable.studentId, parseInt(studentId)));
     const ids = studentClasses.map(sc => sc.classId);
     rows = rows.filter(c => ids.includes(c.id));
+  }
+
+  if (schoolId || branchId) {
+    const sid = schoolId ? parseInt(schoolId) : null;
+    const bid = branchId ? parseInt(branchId) : null;
+    const branches = bid
+      ? [{ id: bid }]
+      : await db.select({ id: branchesTable.id }).from(branchesTable).where(eq(branchesTable.schoolId, sid!));
+    const branchIds = branches.map(b => b.id);
+    const gls = branchIds.length > 0
+      ? await db.select({ id: gradeLevelsTable.id }).from(gradeLevelsTable).where(inArray(gradeLevelsTable.branchId, branchIds))
+      : [];
+    const glIds = gls.map(g => g.id);
+    const grades = glIds.length > 0
+      ? await db.select({ id: gradesTable.id }).from(gradesTable).where(inArray(gradesTable.gradeLevelId, glIds))
+      : [];
+    const gradeIds = grades.map(g => g.id);
+    rows = gradeIds.length > 0 ? rows.filter(c => gradeIds.includes(c.gradeId)) : [];
   }
 
   const enriched = await Promise.all(rows.map(async cls => {

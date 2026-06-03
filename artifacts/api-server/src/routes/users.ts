@@ -73,6 +73,16 @@ router.patch("/users/:id/toggle-status", async (req, res) => {
   res.json(safeUser);
 });
 
+router.put("/users/:id/teacher-classes", async (req, res) => {
+  const teacherId = parseInt(req.params.id);
+  const { classIds } = req.body as { classIds: number[] };
+  await db.delete(classTeachersTable).where(eq(classTeachersTable.teacherId, teacherId));
+  if (Array.isArray(classIds) && classIds.length > 0) {
+    await db.insert(classTeachersTable).values(classIds.map(classId => ({ classId, teacherId })));
+  }
+  res.json({ ok: true });
+});
+
 // Enrolled books for a student
 router.get("/users/:id/enrolled-books", async (req, res) => {
   const studentId = parseInt(req.params.id);
