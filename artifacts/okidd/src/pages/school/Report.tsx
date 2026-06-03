@@ -143,8 +143,8 @@ export default function SchoolReport() {
           {loadingTeachers ? <div style={{ color: "#3730a3", textAlign: "center", padding: 40 }}>در حال بارگذاری...</div> : (
             <div style={{ background: "rgba(255,255,255,0.97)", borderRadius: 16, border: "1px solid rgba(139,92,246,0.2)", overflow: "hidden" }}>
               <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 640 }}>
-                  <thead><tr>{["معلم", "تلفن", "ایمیل", "کلاس‌ها", "آخرین ورود"].map(h => <th key={h} style={thStyle}>{h}</th>)}</tr></thead>
+                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 820 }}>
+                  <thead><tr>{["معلم", "کلاس‌ها", "دانش‌آموزان", "میانگین امتیاز", "پیشرفت درسی", "آخرین ورود"].map(h => <th key={h} style={thStyle}>{h}</th>)}</tr></thead>
                   <tbody>
                     {filteredTeachers.map((t: any) => (
                       <tr key={t.id} onMouseOver={e => (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.06)"} onMouseOut={e => (e.currentTarget as HTMLElement).style.background = ""}>
@@ -153,17 +153,40 @@ export default function SchoolReport() {
                             <div style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(135deg,#f59e0b,#fbbf24)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: "#1a1a2e", flexShrink: 0 }}>{t.name?.[0] ?? "م"}</div>
                             <div>
                               <div style={{ color: "#1e1b4b", fontWeight: 600, fontSize: 13 }}>{t.name}</div>
-                              <div style={{ color: "#4f46e5", fontSize: 11 }}>{t.status === "active" ? "فعال" : "غیرفعال"}</div>
+                              <div style={{ color: t.status === "active" ? "#16a34a" : "#9ca3af", fontSize: 11, display: "flex", alignItems: "center", gap: 3 }}>
+                                <span style={{ width: 6, height: 6, borderRadius: "50%", background: t.status === "active" ? "#22c55e" : "#9ca3af", display: "inline-block" }} />
+                                {t.status === "active" ? "فعال" : "غیرفعال"}
+                              </div>
                             </div>
                           </div>
                         </td>
-                        <td style={tdStyle}><span style={{ color: "#3730a3", fontSize: 13, direction: "ltr", display: "block" }}>{t.phone ?? "—"}</span></td>
-                        <td style={tdStyle}><span style={{ color: "#4f46e5", fontSize: 12, direction: "ltr", display: "block" }}>{t.email ?? "—"}</span></td>
                         <td style={tdStyle}>
                           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                             {t.classNames?.length > 0 ? t.classNames.map((cn: string, i: number) => (
                               <span key={i} style={{ padding: "2px 8px", borderRadius: 999, fontSize: 11, background: "rgba(99,102,241,0.15)", color: "#3730a3", border: "1px solid rgba(139,92,246,0.3)" }}>{cn}</span>
                             )) : <span style={{ color: "#6b7280", fontSize: 12 }}>—</span>}
+                          </div>
+                        </td>
+                        <td style={tdStyle}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                            <Users size={13} color="#6366f1" />
+                            <span style={{ color: "#1e1b4b", fontWeight: 700, fontSize: 14 }}>{(t.studentCount ?? 0).toLocaleString("fa-IR")}</span>
+                          </div>
+                        </td>
+                        <td style={tdStyle}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                            <Star size={13} color="#f59e0b" />
+                            <span style={{ color: "#d97706", fontWeight: 700, fontSize: 14 }}>{(t.avgScore ?? 0).toLocaleString("fa-IR")}</span>
+                          </div>
+                        </td>
+                        <td style={tdStyle}>
+                          <div>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                              <span style={{ fontSize: 12, color: "#4f46e5", fontWeight: 700 }}>{t.avgCompletion ?? 0}%</span>
+                            </div>
+                            <div style={{ height: 5, background: "rgba(99,102,241,0.12)", borderRadius: 999, overflow: "hidden", width: 80 }}>
+                              <div style={{ height: "100%", width: `${t.avgCompletion ?? 0}%`, background: "linear-gradient(90deg,#7c3aed,#10b981)", borderRadius: 999 }} />
+                            </div>
                           </div>
                         </td>
                         <td style={tdStyle}>

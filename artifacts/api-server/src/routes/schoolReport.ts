@@ -56,24 +56,86 @@ router.get("/school-report/teachers", async (req, res) => {
   const uniqueTeacherIds = [...new Set(teacherRows.map(r => r.teacherId))];
   if (!uniqueTeacherIds.length) { res.json([]); return; }
 
-  const teachers = await db.select().from(usersTable).where(inArray(usersTable.id, uniqueTeacherIds));
+  const [teachers, allClasses, studentRows, allBookIds] = await Promise.all([
+    db.select().from(usersTable).where(inArray(usersTable.id, uniqueTeacherIds)),
+    db.select({ id: classesTable.id, name: classesTable.name }).from(classesTable).where(inArray(classesTable.id, classIds)),
+    db.select({ studentId: classStudentsTable.studentId, classId: classStudentsTable.classId }).from(classStudentsTable).where(inArray(classStudentsTable.classId, classIds)),
+    db.select({ bookId: classBooksTable.bookId, classId: classBooksTable.classId }).from(classBooksTable).where(inArray(classBooksTable.classId, classIds)),
+  ]);
 
-  const classMap: Record<number, number[]> = {};
+  const teacherClassMap: Record<number, number[]> = {};
   for (const r of teacherRows) {
-    if (!classMap[r.teacherId]) classMap[r.teacherId] = [];
-    if (!classMap[r.teacherId].includes(r.classId)) classMap[r.teacherId].push(r.classId);
+    if (!teacherClassMap[r.teacherId]) teacherClassMap[r.teacherId] = [];
+    if (!teacherClassMap[r.teacherId].includes(r.classId)) teacherClassMap[r.teacherId].push(r.classId);
   }
 
-  const allClasses = await db.select({ id: classesTable.id, name: classesTable.name }).from(classesTable).where(inArray(classesTable.id, classIds));
   const classNameMap: Record<number, string> = {};
   for (const c of allClasses) classNameMap[c.id] = c.name;
 
-  const result = teachers.map(({ password: _pw, ...t }) => ({
-    ...t,
-    lastLoginAt: t.lastLoginAt ? new Date(t.lastLoginAt).toISOString() : null,
-    classIds: classMap[t.id] ?? [],
-    classNames: (classMap[t.id] ?? []).map(cid => classNameMap[cid]).filter(Boolean),
-  }));
+  // students per class
+  const classStudentMap: Record<number, number[]> = {};
+  for (const r of studentRows) {
+    if (!classStudentMap[r.classId]) classStudentMap[r.classId] = [];
+    classStudentMap[r.classId].push(r.studentId);
+  }
+
+  // books per class (for lesson counts)
+  const classBookMap: Record<number, number[]> = {};
+  for (const r of allBookIds) {
+    if (!classBookMap[r.classId]) classBookMap[r.classId] = [];
+    classBookMap[r.classId].push(r.bookId);
+  }
+
+  // fetch student performance if there are students
+  const allStudentIds = studentRows.map(r => r.studentId);
+  const uniqueStudentIds = [...new Set(allStudentIds)];
+
+  let progressRows: { studentId: number; bookId: number | null; score: number | null; completed: boolean | null }[] = [];
+  if (uniqueStudentIds.length > 0) {
+    progressRows = await db
+      .select({ studentId: studentProgressTable.studentId, bookId: studentProgressTable.bookId, score: studentProgressTable.score, completed: studentProgressTable.completed })
+      .from(studentProgressTable)
+      .where(inArray(studentProgressTable.studentId, uniqueStudentIds));
+  }
+
+  const uniqueBookIds = [...new Set(allBookIds.map(r => r.bookId))];
+  let bookLessonMap: Record<number, number> = {};
+  if (uniqueBookIds.length > 0) {
+    const books = await db.select({ id: booksTable.id, lessonCount: booksTable.lessonCount }).from(booksTable).where(inArray(booksTable.id, uniqueBookIds));
+    for (const b of books) bookLessonMap[b.id] = b.lessonCount ?? 0;
+  }
+
+  const result = teachers.map(({ password: _pw, ...t }) => {
+    const tClassIds = teacherClassMap[t.id] ?? [];
+    const tStudentIds = [...new Set(tClassIds.flatMap(cid => classStudentMap[cid] ?? []))];
+    const tBookIds = [...new Set(tClassIds.flatMap(cid => classBookMap[cid] ?? []))];
+
+    let totalScore = 0;
+    let totalCompleted = 0;
+    let totalLessons = 0;
+
+    for (const sid of tStudentIds) {
+      const sp = progressRows.filter(p => p.studentId === sid && p.bookId !== null && tBookIds.includes(p.bookId));
+      totalScore += sp.reduce((s, p) => s + (p.score ?? 0), 0);
+      totalCompleted += sp.filter(p => p.completed).length;
+    }
+    for (const bid of tBookIds) {
+      totalLessons += (bookLessonMap[bid] ?? 0) * tStudentIds.length;
+    }
+
+    const avgScore = tStudentIds.length > 0 ? Math.round(totalScore / tStudentIds.length) : 0;
+    const avgCompletion = totalLessons > 0 ? Math.round((totalCompleted / totalLessons) * 100) : 0;
+
+    return {
+      ...t,
+      lastLoginAt: t.lastLoginAt ? new Date(t.lastLoginAt).toISOString() : null,
+      classIds: tClassIds,
+      classNames: tClassIds.map(cid => classNameMap[cid]).filter(Boolean),
+      studentCount: tStudentIds.length,
+      avgScore,
+      avgCompletion,
+    };
+  });
 
   res.json(result);
 });
