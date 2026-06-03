@@ -10,6 +10,7 @@ export const booksTable = pgTable("books", {
   gradeLevel: text("grade_level"),
   academicStage: text("academic_stage"),
   isPreset: boolean("is_preset").notNull().default(false),
+  price: numeric("price", { precision: 12, scale: 0 }).notNull().default("0"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

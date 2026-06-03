@@ -38,9 +38,7 @@ export default function AdminDashboard() {
     { label: "کلاس‌ها",        path: "/admin/classes",      icon: BookMarked,    color: "#fbbf24", dark: "#f59e0b" },
     { label: "کاربران",        path: "/admin/users",        icon: Users,         color: "#fb923c", dark: "#f97316" },
     { label: "کتاب‌ها",        path: "/admin/books",        icon: BookOpen,      color: "#f87171", dark: "#ef4444" },
-    { label: "پکیج‌ها",        path: "/admin/packages",     icon: Package,       color: "#c084fc", dark: "#a855f7" },
-    { label: "تراکنش‌ها",      path: "/admin/transactions",          icon: CreditCard,    color: "#fcd34d", dark: "#fbbf24" },
-    { label: "مجوز کتاب",      path: "/admin/license-transactions",  icon: ShieldCheck,   color: "#a855f7", dark: "#7c3aed" },
+    { label: "سفارشات",        path: "/admin/orders",               icon: ShieldCheck,   color: "#a855f7", dark: "#7c3aed" },
     { label: "محتوا",          path: "/admin/content",               icon: FileText,      color: "#fb7185", dark: "#f43f5e" },
     { label: "مشاوره",         path: "/admin/consultants",           icon: BarChart2,     color: "#34d399", dark: "#10b981" },
   ];

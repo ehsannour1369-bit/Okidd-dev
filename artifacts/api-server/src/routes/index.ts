@@ -10,8 +10,8 @@ import gradesRouter from "./grades";
 import classesRouter from "./classes";
 import booksRouter from "./books";
 import lessonsRouter from "./lessons";
-import packagesRouter from "./packages";
-import transactionsRouter from "./transactions";
+import bookOrdersRouter from "./bookOrders";
+import walletRouter from "./wallet";
 import contentRouter from "./content";
 import dashboardRouter from "./dashboard";
 import notificationsRouter from "./notifications";
@@ -22,7 +22,6 @@ import consultantsRouter from "./consultants";
 import consultationsRouter from "./consultations";
 import gameScoresRouter from "./gameScores";
 import schoolReportRouter from "./schoolReport";
-import licenseTransactionsRouter from "./licenseTransactions";
 
 const router: IRouter = Router();
 
@@ -37,8 +36,8 @@ router.use(gradesRouter);
 router.use(classesRouter);
 router.use(booksRouter);
 router.use(lessonsRouter);
-router.use(packagesRouter);
-router.use(transactionsRouter);
+router.use(bookOrdersRouter);
+router.use(walletRouter);
 router.use(contentRouter);
 router.use(dashboardRouter);
 router.use(notificationsRouter);
@@ -49,6 +48,5 @@ router.use(consultantsRouter);
 router.use(consultationsRouter);
 router.use(gameScoresRouter);
 router.use(schoolReportRouter);
-router.use(licenseTransactionsRouter);
 
 export default router;

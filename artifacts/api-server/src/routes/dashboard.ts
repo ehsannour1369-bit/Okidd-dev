@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, usersTable, schoolsTable, transactionsTable, booksTable, branchesTable, classesTable, classStudentsTable, classTeachersTable, gradeLevelsTable, gradesTable } from "@workspace/db";
+import { db, usersTable, schoolsTable, booksTable, branchesTable, classesTable, classStudentsTable, classTeachersTable, gradeLevelsTable, gradesTable, bookOrdersTable } from "@workspace/db";
 import { eq, count, sum, inArray } from "drizzle-orm";
 
 const router = Router();
@@ -7,27 +7,18 @@ const router = Router();
 router.get("/dashboard/admin-stats", async (req, res) => {
   const allUsers = await db.select().from(usersTable);
   const allSchools = await db.select().from(schoolsTable);
-  const txRows = await db.select().from(transactionsTable);
+  const paidOrders = await db.select().from(bookOrdersTable);
 
   const totalSchools = allSchools.length;
   const activeSchools = allSchools.filter(s => s.status === "active").length;
   const totalTeachers = allUsers.filter(u => u.role === "teacher").length;
   const totalStudents = allUsers.filter(u => u.role === "student").length;
   const totalParents = allUsers.filter(u => u.role === "parent").length;
-  const totalRevenue = txRows.reduce((sum, t) => sum + parseFloat(String(t.amount)), 0);
+  const totalRevenue = paidOrders
+    .filter(o => o.status === "paid")
+    .reduce((s, o) => s + parseFloat(String(o.finalAmount)), 0);
 
-  const recentTransactions = txRows
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 5)
-    .map(t => ({
-      ...t,
-      amount: parseFloat(String(t.amount)),
-      discount: parseFloat(String(t.discount)),
-      balance: t.balance !== null ? parseFloat(String(t.balance)) : null,
-      paymentDate: t.paymentDate instanceof Date ? t.paymentDate.toISOString() : String(t.paymentDate),
-      schoolName: null,
-      packageName: null,
-    }));
+  const recentTransactions: unknown[] = [];
 
   res.json({ totalSchools, totalTeachers, totalStudents, totalParents, totalRevenue, activeSchools, recentTransactions });
 });

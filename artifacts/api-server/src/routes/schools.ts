@@ -3,9 +3,8 @@ import bcrypt from "bcryptjs";
 import {
   db, schoolsTable, branchesTable, classStudentsTable, classTeachersTable,
   gradesTable, gradeLevelsTable, classesTable, usersTable,
-  transactionsTable, packagesTable,
 } from "@workspace/db";
-import { eq, count, inArray, or, sum } from "drizzle-orm";
+import { eq, count, inArray, or } from "drizzle-orm";
 
 const router = Router();
 
@@ -34,14 +33,6 @@ async function getSchoolCounts(schoolId: number) {
   return { branchCount: branches.length, studentCount, teacherCount };
 }
 
-async function getSchoolTotalPackages(schoolId: number): Promise<number> {
-  const rows = await db
-    .select({ total: sum(packagesTable.studentCount) })
-    .from(transactionsTable)
-    .innerJoin(packagesTable, eq(transactionsTable.packageId, packagesTable.id))
-    .where(eq(transactionsTable.schoolId, schoolId));
-  return Number(rows[0]?.total ?? 0);
-}
 
 async function getBranchStudentCount(branchId: number): Promise<number> {
   const glRows = await db.select().from(gradeLevelsTable).where(eq(gradeLevelsTable.branchId, branchId));
@@ -75,7 +66,7 @@ router.get("/schools", async (req, res) => {
   const schools = await db.select().from(schoolsTable);
   const enriched = await Promise.all(schools.map(async s => {
     const counts = await getSchoolCounts(s.id);
-    const totalPackages = await getSchoolTotalPackages(s.id);
+    const totalPackages = 0;
     const branchDetails = await getSchoolBranchDetails(s.id);
     return { ...s, ...counts, totalPackages, branchDetails };
   }));
@@ -88,7 +79,7 @@ router.get("/schools/:id", async (req, res) => {
   const [school] = await db.select().from(schoolsTable).where(eq(schoolsTable.id, id));
   if (!school) { res.status(404).json({ error: "Not found" }); return; }
   const counts = await getSchoolCounts(id);
-  const totalPackages = await getSchoolTotalPackages(id);
+  const totalPackages = 0;
   const branchDetails = await getSchoolBranchDetails(id);
   let manager = null;
   if (school.managerUserId) {
@@ -147,7 +138,7 @@ router.post("/schools", async (req, res) => {
   }
 
   const counts = await getSchoolCounts(school.id);
-  const totalPackages = await getSchoolTotalPackages(school.id);
+  const totalPackages = 0;
   const branchDetails = await getSchoolBranchDetails(school.id);
   res.status(201).json({ ...school, ...counts, totalPackages, branchDetails });
 });
@@ -162,7 +153,7 @@ router.put("/schools/:id", async (req, res) => {
     .returning();
   if (!school) { res.status(404).json({ error: "Not found" }); return; }
   const counts = await getSchoolCounts(id);
-  const totalPackages = await getSchoolTotalPackages(id);
+  const totalPackages = 0;
   const branchDetails = await getSchoolBranchDetails(id);
   res.json({ ...school, ...counts, totalPackages, branchDetails });
 });
@@ -175,7 +166,7 @@ router.patch("/schools/:id/toggle-status", async (req, res) => {
   const newStatus = current.status === "active" ? "inactive" : "active";
   const [school] = await db.update(schoolsTable).set({ status: newStatus }).where(eq(schoolsTable.id, id)).returning();
   const counts = await getSchoolCounts(id);
-  const totalPackages = await getSchoolTotalPackages(id);
+  const totalPackages = 0;
   const branchDetails = await getSchoolBranchDetails(id);
   res.json({ ...school, ...counts, totalPackages, branchDetails });
 });
@@ -216,7 +207,7 @@ router.patch("/schools/:id/assign-manager", async (req, res) => {
   const [school] = await db.update(schoolsTable).set({ managerUserId: userId }).where(eq(schoolsTable.id, id)).returning();
   if (!school) { res.status(404).json({ error: "Not found" }); return; }
   const counts = await getSchoolCounts(id);
-  const totalPackages = await getSchoolTotalPackages(id);
+  const totalPackages = 0;
   const branchDetails = await getSchoolBranchDetails(id);
   res.json({ ...school, ...counts, totalPackages, branchDetails });
 });

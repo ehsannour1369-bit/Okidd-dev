@@ -8,7 +8,6 @@ export * from "./classes";
 export * from "./books";
 export * from "./lessons";
 export * from "./packages";
-export * from "./transactions";
 export * from "./content";
 export * from "./notifications";
 export * from "./examSchedule";

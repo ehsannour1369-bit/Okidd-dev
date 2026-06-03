@@ -10,15 +10,13 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminSchools from "./pages/admin/Schools";
 import AdminUsers from "./pages/admin/Users";
 import AdminBooks from "./pages/admin/Books";
-import AdminPackages from "./pages/admin/Packages";
-import AdminTransactions from "./pages/admin/Transactions";
+import AdminOrders from "./pages/admin/Orders";
 import AdminContent from "./pages/admin/Content";
 import AdminBranches from "./pages/admin/Branches";
 import AdminTeachers from "./pages/admin/Teachers";
 import AdminStudents from "./pages/admin/Students";
 import AdminClasses from "./pages/admin/Classes";
 import AdminConsultants from "./pages/admin/Consultants";
-import AdminLicenseTransactions from "./pages/admin/LicenseTransactions";
 
 import SchoolDashboard from "./pages/school/Dashboard";
 import SchoolBranches from "./pages/school/Branches";
@@ -30,12 +28,19 @@ import SchoolExams from "./pages/school/Exams";
 import SchoolReport from "./pages/school/Report";
 import SchoolProgressChart from "./pages/school/ProgressChart";
 
+import SchoolShop from "./pages/school/Shop";
+import SchoolOrders from "./pages/school/Orders";
+import SchoolWallet from "./pages/school/Wallet";
+
 import BranchDashboard from "./pages/branch/Dashboard";
 import BranchClasses from "./pages/branch/Classes";
 import BranchStudents from "./pages/school/Students";
 import BranchTeachers from "./pages/school/Teachers";
 import BranchNotifications from "./pages/branch/Notifications";
 import BranchExams from "./pages/school/Exams";
+import BranchShop from "./pages/branch/Shop";
+import BranchOrders from "./pages/branch/Orders";
+import BranchWallet from "./pages/branch/Wallet";
 
 import TeacherDashboard from "./pages/teacher/Dashboard";
 import TeacherMySchools from "./pages/teacher/MySchools";
@@ -108,15 +113,13 @@ function AppRouter() {
       <Route path="/admin/schools"><LayoutRoute component={AdminSchools} roles={["admin"]} /></Route>
       <Route path="/admin/users"><LayoutRoute component={AdminUsers} roles={["admin"]} /></Route>
       <Route path="/admin/books"><LayoutRoute component={AdminBooks} roles={["admin"]} /></Route>
-      <Route path="/admin/packages"><LayoutRoute component={AdminPackages} roles={["admin"]} /></Route>
-      <Route path="/admin/transactions"><LayoutRoute component={AdminTransactions} roles={["admin"]} /></Route>
+      <Route path="/admin/orders"><LayoutRoute component={AdminOrders} roles={["admin"]} /></Route>
       <Route path="/admin/content"><LayoutRoute component={AdminContent} roles={["admin"]} /></Route>
       <Route path="/admin/branches"><LayoutRoute component={AdminBranches} roles={["admin"]} /></Route>
       <Route path="/admin/teachers"><LayoutRoute component={AdminTeachers} roles={["admin"]} /></Route>
       <Route path="/admin/students"><LayoutRoute component={AdminStudents} roles={["admin"]} /></Route>
       <Route path="/admin/classes"><LayoutRoute component={AdminClasses} roles={["admin"]} /></Route>
       <Route path="/admin/consultants"><LayoutRoute component={AdminConsultants} roles={["admin"]} /></Route>
-      <Route path="/admin/license-transactions"><LayoutRoute component={AdminLicenseTransactions} roles={["admin"]} /></Route>
 
       {/* School Manager */}
       <Route path="/school"><LayoutRoute component={SchoolDashboard} roles={["school_manager"]} /></Route>
@@ -128,6 +131,9 @@ function AppRouter() {
       <Route path="/school/exams"><LayoutRoute component={SchoolExams} roles={["school_manager"]} /></Route>
       <Route path="/school/report"><LayoutRoute component={SchoolReport} roles={["school_manager"]} /></Route>
       <Route path="/school/progress"><LayoutRoute component={SchoolProgressChart} roles={["school_manager"]} /></Route>
+      <Route path="/school/shop"><LayoutRoute component={SchoolShop} roles={["school_manager"]} /></Route>
+      <Route path="/school/orders"><LayoutRoute component={SchoolOrders} roles={["school_manager"]} /></Route>
+      <Route path="/school/wallet"><LayoutRoute component={SchoolWallet} roles={["school_manager"]} /></Route>
 
       {/* Branch Manager */}
       <Route path="/branch"><LayoutRoute component={BranchDashboard} roles={["branch_manager"]} /></Route>
@@ -136,6 +142,9 @@ function AppRouter() {
       <Route path="/branch/teachers"><LayoutRoute component={BranchTeachers} roles={["branch_manager"]} /></Route>
       <Route path="/branch/notifications"><LayoutRoute component={BranchNotifications} roles={["branch_manager"]} /></Route>
       <Route path="/branch/exams"><LayoutRoute component={BranchExams} roles={["branch_manager"]} /></Route>
+      <Route path="/branch/shop"><LayoutRoute component={BranchShop} roles={["branch_manager"]} /></Route>
+      <Route path="/branch/orders"><LayoutRoute component={BranchOrders} roles={["branch_manager"]} /></Route>
+      <Route path="/branch/wallet"><LayoutRoute component={BranchWallet} roles={["branch_manager"]} /></Route>
 
       <Route path="/dev-auth" component={DevAuth} />
       {/* Teacher */}

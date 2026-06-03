@@ -5,7 +5,7 @@ import PageTopBar from "../../components/PageTopBar";
 import { showToast } from "../../lib/toast";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
-interface Book { id: number; title: string; lessonCount: number; monthlyFee: number; gradeLevel?: string; academicStage?: string; isPreset: boolean; }
+interface Book { id: number; title: string; lessonCount: number; monthlyFee: number; price: number; gradeLevel?: string; academicStage?: string; isPreset: boolean; }
 
 const inputStyle = { width: "100%", background: "rgba(255,252,235,0.90)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#78350f", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
 
@@ -45,7 +45,7 @@ export default function AdminBooks() {
   const qc = useQueryClient();
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Book | null>(null);
-  const [form, setForm] = useState({ title: "", lessonCount: 0, monthlyFee: 0, grade: "", academicStage: "", isPreset: false });
+  const [form, setForm] = useState({ title: "", lessonCount: 0, monthlyFee: 0, price: 0, grade: "", academicStage: "", isPreset: false });
 
   const { data: books = [] } = useQuery<Book[]>({ queryKey: ["books"], queryFn: () => api.get("/books") });
   const createMut = useMutation({ mutationFn: (d: any) => api.post("/books", d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["books"] }); setShowModal(false); showToast("کتاب با موفقیت ثبت شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا در ثبت کتاب", "error") });
@@ -56,11 +56,11 @@ export default function AdminBooks() {
     ? STAGE_GRADES[form.academicStage]
     : GRADES.map(g => g.value);
 
-  function openCreate() { setEditing(null); setForm({ title: "", lessonCount: 0, monthlyFee: 0, grade: "", academicStage: "", isPreset: false }); setShowModal(true); }
+  function openCreate() { setEditing(null); setForm({ title: "", lessonCount: 0, monthlyFee: 0, price: 0, grade: "", academicStage: "", isPreset: false }); setShowModal(true); }
   function openEdit(b: Book) {
     setEditing(b);
     const g = GRADES.find(x => x.label === b.gradeLevel)?.value ?? "";
-    setForm({ title: b.title, lessonCount: b.lessonCount, monthlyFee: b.monthlyFee, grade: g, academicStage: b.academicStage ?? "", isPreset: b.isPreset });
+    setForm({ title: b.title, lessonCount: b.lessonCount, monthlyFee: b.monthlyFee, price: b.price ?? 0, grade: g, academicStage: b.academicStage ?? "", isPreset: b.isPreset });
     setShowModal(true);
   }
   function handleSave() {
@@ -72,6 +72,7 @@ export default function AdminBooks() {
       title: form.title,
       lessonCount: form.lessonCount,
       monthlyFee: form.monthlyFee,
+      price: form.price,
       gradeLevel: gradeLabel(form.grade),
       academicStage: form.academicStage,
       isPreset: form.isPreset,
@@ -107,8 +108,8 @@ export default function AdminBooks() {
                 <div style={{ fontSize: 11, color: "#b45309" }}>درس</div>
               </div>
               <div style={{ background: "rgba(245,158,11,0.1)", borderRadius: 8, padding: "8px 12px", textAlign: "center" }}>
-                <div style={{ fontSize: 16, fontWeight: 700, color: "#fbbf24" }}>{Number(book.monthlyFee).toLocaleString("fa-IR")}</div>
-                <div style={{ fontSize: 11, color: "#b45309" }}>ت/ماه</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "#7c3aed" }}>{Number(book.price ?? 0).toLocaleString("fa-IR")}</div>
+                <div style={{ fontSize: 11, color: "#b45309" }}>قیمت (ت)</div>
               </div>
             </div>
             {(book.gradeLevel || book.academicStage) && (
@@ -147,6 +148,10 @@ export default function AdminBooks() {
           <div style={{ marginBottom: 14 }}>
             <label style={{ display: "block", color: "#92400e", fontSize: 13, marginBottom: 5 }}>تعداد درس</label>
             <input type="number" value={form.lessonCount} onChange={e => setForm({ ...form, lessonCount: parseInt(e.target.value) || 0 })} style={inputStyle} />
+          </div>
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ display: "block", color: "#92400e", fontSize: 13, marginBottom: 5 }}>قیمت فروش (تومان)</label>
+            <input type="number" value={form.price} onChange={e => setForm({ ...form, price: parseFloat(e.target.value) || 0 })} style={inputStyle} placeholder="مثلاً 150000" />
           </div>
           <div style={{ marginBottom: 14 }}>
             <label style={{ display: "block", color: "#92400e", fontSize: 13, marginBottom: 5 }}>شهریه ماهانه (تومان)</label>

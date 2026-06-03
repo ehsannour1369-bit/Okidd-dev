@@ -30,14 +30,14 @@ async function ensureLessons(bookId: number, lessonCount: number) {
 
 router.get("/books", async (req, res) => {
   const books = await db.select().from(booksTable);
-  res.json(books.map(b => ({ ...b, monthlyFee: parseFloat(String(b.monthlyFee)) })));
+  res.json(books.map(b => ({ ...b, monthlyFee: parseFloat(String(b.monthlyFee)), price: parseFloat(String(b.price ?? 0)) })));
 });
 
 router.post("/books", async (req, res) => {
   const [book] = await db.insert(booksTable).values(req.body).returning();
   const lessonCount = book.lessonCount ?? 0;
   if (lessonCount > 0) await ensureLessons(book.id, lessonCount);
-  res.status(201).json({ ...book, monthlyFee: parseFloat(String(book.monthlyFee)) });
+  res.status(201).json({ ...book, monthlyFee: parseFloat(String(book.monthlyFee)), price: parseFloat(String(book.price ?? 0)) });
 });
 
 router.post("/books/fix-lessons", async (_req, res) => {
@@ -65,7 +65,7 @@ router.get("/books/:id", async (req, res) => {
   const id = parseInt(req.params.id);
   const [book] = await db.select().from(booksTable).where(eq(booksTable.id, id));
   if (!book) { res.status(404).json({ error: "Not found" }); return; }
-  res.json({ ...book, monthlyFee: parseFloat(String(book.monthlyFee)) });
+  res.json({ ...book, monthlyFee: parseFloat(String(book.monthlyFee)), price: parseFloat(String(book.price ?? 0)) });
 });
 
 router.put("/books/:id", async (req, res) => {
@@ -74,7 +74,7 @@ router.put("/books/:id", async (req, res) => {
   if (!book) { res.status(404).json({ error: "Not found" }); return; }
   const lessonCount = req.body.lessonCount !== undefined ? req.body.lessonCount : book.lessonCount ?? 0;
   if (lessonCount > 0) await ensureLessons(book.id, lessonCount);
-  res.json({ ...book, monthlyFee: parseFloat(String(book.monthlyFee)) });
+  res.json({ ...book, monthlyFee: parseFloat(String(book.monthlyFee)), price: parseFloat(String(book.price ?? 0)) });
 });
 
 router.delete("/books/:id", async (req, res) => {

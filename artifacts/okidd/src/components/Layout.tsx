@@ -8,7 +8,7 @@ import {
   LayoutDashboard, School, Users, BookOpen, Package, CreditCard,
   Bell, FileText, LogOut, GraduationCap,
   BookMarked, Home, Star, ClipboardList, GitBranch, UserCheck,
-  Menu, X, BarChart2, ChevronRight, ShieldCheck,
+  Menu, X, BarChart2, ChevronRight, ShieldCheck, ShoppingCart, Wallet, Receipt,
 } from "lucide-react";
 import SidebarContext from "../contexts/SidebarContext";
 
@@ -30,9 +30,7 @@ const adminNav: NavItem[] = [
   { label: "کلاس‌ها", path: "/admin/classes", icon: BookMarked, color: "#f59e0b", bgGradient: "linear-gradient(135deg, #d97706, #f59e0b)" },
   { label: "کاربران", path: "/admin/users", icon: Users, color: "#fcd34d", bgGradient: "linear-gradient(135deg, #f59e0b, #fcd34d)" },
   { label: "کتاب‌ها", path: "/admin/books", icon: BookOpen, color: "#ef4444", bgGradient: "linear-gradient(135deg, #dc2626, #ef4444)" },
-  { label: "پکیج‌ها", path: "/admin/packages", icon: Package, color: "#f97316", bgGradient: "linear-gradient(135deg, #ea580c, #f97316)" },
-  { label: "تراکنش‌ها", path: "/admin/transactions", icon: CreditCard, color: "#fbbf24", bgGradient: "linear-gradient(135deg, #f59e0b, #fbbf24)" },
-  { label: "مجوز کتاب", path: "/admin/license-transactions", icon: ShieldCheck, color: "#a855f7", bgGradient: "linear-gradient(135deg, #7c3aed, #a855f7)" },
+  { label: "سفارشات", path: "/admin/orders", icon: ShieldCheck, color: "#a855f7", bgGradient: "linear-gradient(135deg, #7c3aed, #a855f7)" },
   { label: "محتوا", path: "/admin/content", icon: FileText, color: "#f87171", bgGradient: "linear-gradient(135deg, #ef4444, #f87171)" },
   { label: "مشاوره", path: "/admin/consultants", icon: UserCheck, color: "#fb923c", bgGradient: "linear-gradient(135deg, #f97316, #fb923c)" },
 ];
@@ -47,6 +45,9 @@ const schoolManagerNav: NavItem[] = [
   { label: "گزارش عملکرد", path: "/school/report", icon: BarChart2, color: "#818cf8", bgGradient: "linear-gradient(135deg, #6366f1, #818cf8)" },
   { label: "اعلان‌ها", path: "/school/notifications", icon: Bell, color: "#3b82f6", bgGradient: "linear-gradient(135deg, #2563eb, #3b82f6)" },
   { label: "برنامه امتحانات", path: "/school/exams", icon: ClipboardList, color: "#60a5fa", bgGradient: "linear-gradient(135deg, #3b82f6, #60a5fa)" },
+  { label: "فروشگاه کتاب", path: "/school/shop", icon: ShoppingCart, color: "#22d3ee", bgGradient: "linear-gradient(135deg, #06b6d4, #22d3ee)" },
+  { label: "سفارشات من", path: "/school/orders", icon: Receipt, color: "#818cf8", bgGradient: "linear-gradient(135deg, #6366f1, #818cf8)" },
+  { label: "کیف پول", path: "/school/wallet", icon: Wallet, color: "#34d399", bgGradient: "linear-gradient(135deg, #10b981, #34d399)" },
 ];
 
 const branchManagerNav: NavItem[] = [
@@ -56,6 +57,9 @@ const branchManagerNav: NavItem[] = [
   { label: "دانش‌آموزان", path: "/branch/students", icon: Users, color: "#34d399", bgGradient: "linear-gradient(135deg, #10b981, #34d399)" },
   { label: "اعلان‌ها", path: "/branch/notifications", icon: Bell, color: "#0d9488", bgGradient: "linear-gradient(135deg, #0f766e, #0d9488)" },
   { label: "برنامه امتحانات", path: "/branch/exams", icon: ClipboardList, color: "#10b981", bgGradient: "linear-gradient(135deg, #059669, #10b981)" },
+  { label: "فروشگاه کتاب", path: "/branch/shop", icon: ShoppingCart, color: "#22d3ee", bgGradient: "linear-gradient(135deg, #06b6d4, #22d3ee)" },
+  { label: "سفارشات من", path: "/branch/orders", icon: Receipt, color: "#2dd4bf", bgGradient: "linear-gradient(135deg, #0d9488, #2dd4bf)" },
+  { label: "کیف پول", path: "/branch/wallet", icon: Wallet, color: "#34d399", bgGradient: "linear-gradient(135deg, #10b981, #34d399)" },
 ];
 
 const teacherNav: NavItem[] = [
