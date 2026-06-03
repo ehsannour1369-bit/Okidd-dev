@@ -38,14 +38,14 @@ export default function SchoolShop() {
   const cartQty = cart.reduce((s, i) => s + i.quantity, 0);
 
   if (success && lastOrder) return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#f0fdf4,#dcfce7)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ background: "#fff", borderRadius: 20, padding: 40, textAlign: "center", maxWidth: 400, boxShadow: "0 8px 32px rgba(16,185,129,0.15)" }}>
-        <CheckCircle size={64} color="#10b981" style={{ marginBottom: 16 }} />
-        <h2 style={{ color: "#065f46", marginBottom: 8 }}>سفارش با موفقیت ثبت شد!</h2>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#f5f3ff,#ede9fe)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ background: "#fff", borderRadius: 20, padding: 40, textAlign: "center", maxWidth: 400, boxShadow: "0 8px 32px rgba(99,102,241,0.15)" }}>
+        <CheckCircle size={64} color="#6366f1" style={{ marginBottom: 16 }} />
+        <h2 style={{ color: "#3730a3", marginBottom: 8 }}>سفارش با موفقیت ثبت شد!</h2>
         <p style={{ color: "#64748b", marginBottom: 8 }}>شماره پیگیری: <b style={{ color: "#7c3aed" }}>{lastOrder.trackingNumber}</b></p>
         <p style={{ color: "#64748b", marginBottom: 24 }}>مبلغ: <b>{fmt(lastOrder.finalAmount)}</b></p>
         <button onClick={() => { setSuccess(false); setLastOrder(null); setCart([]); }}
-          style={{ background: "linear-gradient(135deg,#059669,#10b981)", color: "#fff", border: "none", borderRadius: 10, padding: "10px 24px", cursor: "pointer", fontFamily: "inherit", fontSize: 15, fontWeight: 600 }}>
+          style={{ background: "linear-gradient(135deg,#4f46e5,#6366f1)", color: "#fff", border: "none", borderRadius: 10, padding: "10px 24px", cursor: "pointer", fontFamily: "inherit", fontSize: 15, fontWeight: 600 }}>
           بازگشت به فروشگاه
         </button>
       </div>
@@ -53,23 +53,23 @@ export default function SchoolShop() {
   );
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#f0fdfe,#e0f9ff,#f0fdf4)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#f5f3ff,#ede9fe,#eef2ff)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
       <PageTopBar />
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "20px 16px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <BookOpen size={24} color="#06b6d4" />
-            <span style={{ fontSize: 20, fontWeight: 700, color: "#0e7490" }}>فروشگاه کتاب</span>
+            <BookOpen size={24} color="#6366f1" />
+            <span style={{ fontSize: 20, fontWeight: 700, color: "#4338ca" }}>فروشگاه کتاب</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             {wallet && (
-              <div style={{ background: "#ecfdf5", border: "1.5px solid #10b981", borderRadius: 10, padding: "6px 14px", fontSize: 13, color: "#065f46" }}>
+              <div style={{ background: "#ede9fe", border: "1.5px solid #6366f1", borderRadius: 10, padding: "6px 14px", fontSize: 13, color: "#3730a3" }}>
                 💰 کیف پول: <b>{fmt(Number(wallet.balance))}</b>
               </div>
             )}
             {cart.length > 0 && (
               <button onClick={() => setShowCheckout(true)}
-                style={{ display: "flex", alignItems: "center", gap: 8, background: "linear-gradient(135deg,#06b6d4,#22d3ee)", color: "#fff", border: "none", borderRadius: 10, padding: "8px 16px", cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>
+                style={{ display: "flex", alignItems: "center", gap: 8, background: "linear-gradient(135deg,#6366f1,#818cf8)", color: "#fff", border: "none", borderRadius: 10, padding: "8px 16px", cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>
                 <ShoppingCart size={16} />
                 سبد خرید ({cartQty})
                 <span style={{ background: "rgba(255,255,255,0.25)", borderRadius: 6, padding: "1px 7px", fontSize: 12 }}>{fmt(totalAmount)}</span>
@@ -82,12 +82,12 @@ export default function SchoolShop() {
           {books.map((book: Book) => {
             const inCart = cart.find(i => i.book.id === book.id);
             return (
-              <div key={book.id} style={{ background: "#fff", borderRadius: 16, border: "1.5px solid #cffafe", padding: 16, display: "flex", flexDirection: "column", gap: 10, boxShadow: "0 2px 8px rgba(6,182,212,0.06)" }}>
-                <div style={{ height: 100, background: "linear-gradient(135deg,#06b6d4,#22d3ee)", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div key={book.id} style={{ background: "#fff", borderRadius: 16, border: "1.5px solid #c7d2fe", padding: 16, display: "flex", flexDirection: "column", gap: 10, boxShadow: "0 2px 8px rgba(99,102,241,0.06)" }}>
+                <div style={{ height: 100, background: "linear-gradient(135deg,#6366f1,#818cf8)", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <BookOpen size={40} color="rgba(255,255,255,0.9)" />
                 </div>
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: "#0e7490", marginBottom: 4 }}>{book.title}</div>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: "#4338ca", marginBottom: 4 }}>{book.title}</div>
                   {book.gradeLevel && <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 2 }}>{book.gradeLevel}</div>}
                   <div style={{ fontSize: 11, color: "#94a3b8" }}>{book.lessonCount} درس</div>
                 </div>
@@ -95,14 +95,14 @@ export default function SchoolShop() {
                 <div style={{ marginTop: "auto" }}>
                   {!inCart ? (
                     <button onClick={() => addToCart(book)}
-                      style={{ width: "100%", background: "linear-gradient(135deg,#06b6d4,#22d3ee)", color: "#fff", border: "none", borderRadius: 10, padding: "8px 0", cursor: "pointer", fontFamily: "inherit", fontWeight: 600, fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                      style={{ width: "100%", background: "linear-gradient(135deg,#6366f1,#818cf8)", color: "#fff", border: "none", borderRadius: 10, padding: "8px 0", cursor: "pointer", fontFamily: "inherit", fontWeight: 600, fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
                       <Plus size={14} /> افزودن به سبد
                     </button>
                   ) : (
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#f0fdfe", border: "1.5px solid #06b6d4", borderRadius: 10, padding: "4px 8px" }}>
-                      <button onClick={() => updateQty(book.id, -1)} style={{ background: "none", border: "none", cursor: "pointer", color: "#06b6d4" }}><Minus size={16} /></button>
-                      <span style={{ fontWeight: 700, color: "#0e7490" }}>{inCart.quantity}</span>
-                      <button onClick={() => updateQty(book.id, 1)} style={{ background: "none", border: "none", cursor: "pointer", color: "#06b6d4" }}><Plus size={16} /></button>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#eef2ff", border: "1.5px solid #6366f1", borderRadius: 10, padding: "4px 8px" }}>
+                      <button onClick={() => updateQty(book.id, -1)} style={{ background: "none", border: "none", cursor: "pointer", color: "#6366f1" }}><Minus size={16} /></button>
+                      <span style={{ fontWeight: 700, color: "#4338ca" }}>{inCart.quantity}</span>
+                      <button onClick={() => updateQty(book.id, 1)} style={{ background: "none", border: "none", cursor: "pointer", color: "#6366f1" }}><Plus size={16} /></button>
                     </div>
                   )}
                 </div>
@@ -167,12 +167,12 @@ function CheckoutModal({ cart, schoolId, walletBalance, onClose, onSuccess }: {
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
       <div style={{ background: "#fff", borderRadius: 18, padding: 24, maxWidth: 500, width: "100%", maxHeight: "90vh", overflowY: "auto", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <h2 style={{ margin: 0, fontSize: 18, color: "#0e7490" }}>تکمیل سفارش</h2>
+          <h2 style={{ margin: 0, fontSize: 18, color: "#4338ca" }}>تکمیل سفارش</h2>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer" }}><X size={20} /></button>
         </div>
         {error && <div style={{ background: "#fef2f2", color: "#ef4444", padding: "8px 12px", borderRadius: 8, marginBottom: 12, fontSize: 13 }}>{error}</div>}
 
-        <div style={{ background: "#f0fdfe", borderRadius: 10, padding: 12, marginBottom: 16 }}>
+        <div style={{ background: "#eef2ff", borderRadius: 10, padding: 12, marginBottom: 16 }}>
           {cart.map(i => (
             <div key={i.book.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
               <span>{i.book.title} × {i.quantity}</span>
@@ -180,7 +180,7 @@ function CheckoutModal({ cart, schoolId, walletBalance, onClose, onSuccess }: {
             </div>
           ))}
           <div style={{ borderTop: "1px solid #cffafe", marginTop: 6, paddingTop: 6, display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: 14 }}>
-            <span style={{ color: "#0e7490" }}>جمع کل:</span>
+            <span style={{ color: "#4338ca" }}>جمع کل:</span>
             <span style={{ color: "#7c3aed" }}>{fmt(total)}</span>
           </div>
         </div>
@@ -189,12 +189,12 @@ function CheckoutModal({ cart, schoolId, walletBalance, onClose, onSuccess }: {
           <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13 }}>
             شماره پیگیری *
             <input value={tracking} onChange={e => setTracking(e.target.value)}
-              style={{ padding: "8px 10px", border: "1.5px solid #cffafe", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }} />
+              style={{ padding: "8px 10px", border: "1.5px solid #c7d2fe", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }} />
           </label>
           <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13 }}>
             روش پرداخت
             <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}
-              style={{ padding: "8px 10px", border: "1.5px solid #cffafe", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }}>
+              style={{ padding: "8px 10px", border: "1.5px solid #c7d2fe", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }}>
               <option value="bank">انتقال بانکی</option>
               <option value="wallet">کیف پول ({fmt(walletBalance)})</option>
               <option value="cash">نقدی</option>
@@ -211,13 +211,13 @@ function CheckoutModal({ cart, schoolId, walletBalance, onClose, onSuccess }: {
         <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, marginBottom: 16 }}>
           یادداشت
           <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
-            style={{ padding: "8px 10px", border: "1.5px solid #cffafe", borderRadius: 8, fontFamily: "inherit", fontSize: 13, resize: "vertical" }} />
+            style={{ padding: "8px 10px", border: "1.5px solid #c7d2fe", borderRadius: 8, fontFamily: "inherit", fontSize: 13, resize: "vertical" }} />
         </label>
 
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
           <button onClick={onClose} style={{ padding: "9px 20px", border: "1.5px solid #e2e8f0", borderRadius: 10, cursor: "pointer", fontFamily: "inherit", background: "#fff" }}>انصراف</button>
           <button onClick={submit} disabled={loading}
-            style={{ padding: "9px 20px", background: "linear-gradient(135deg,#06b6d4,#22d3ee)", color: "#fff", border: "none", borderRadius: 10, cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>
+            style={{ padding: "9px 20px", background: "linear-gradient(135deg,#6366f1,#818cf8)", color: "#fff", border: "none", borderRadius: 10, cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>
             {loading ? "در حال ثبت..." : "ثبت سفارش"}
           </button>
         </div>

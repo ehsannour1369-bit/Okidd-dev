@@ -13,8 +13,8 @@ interface LicTx {
 
 const IS: React.CSSProperties = {
   width: "100%", background: "rgba(255,252,235,0.95)",
-  border: "1px solid rgba(139,92,246,0.28)", borderRadius: 10,
-  color: "#3b0764", padding: "10px 12px", fontSize: 14,
+  border: "1px solid rgba(245,158,11,0.28)", borderRadius: 10,
+  color: "#451a03", padding: "10px 12px", fontSize: 14,
   fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl",
   boxSizing: "border-box",
 };
@@ -22,10 +22,10 @@ const IS: React.CSSProperties = {
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ background: "linear-gradient(160deg,#fdf4ff,#faf5ff)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 20, padding: 28, width: "90%", maxWidth: 540, maxHeight: "92vh", overflowY: "auto", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
+      <div style={{ background: "linear-gradient(160deg,#fffbeb,#fef9c3)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 20, padding: 28, width: "90%", maxWidth: 540, maxHeight: "92vh", overflowY: "auto", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
-          <h3 style={{ margin: 0, color: "#3b0764", fontSize: 17, fontWeight: 800 }}>{title}</h3>
-          <button onClick={onClose} style={{ background: "rgba(139,92,246,0.08)", border: "none", borderRadius: 8, width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#7c3aed" }}>
+          <h3 style={{ margin: 0, color: "#451a03", fontSize: 17, fontWeight: 800 }}>{title}</h3>
+          <button onClick={onClose} style={{ background: "rgba(245,158,11,0.08)", border: "none", borderRadius: 8, width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#d97706" }}>
             <X size={16} />
           </button>
         </div>
@@ -36,7 +36,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
 }
 
 function Label({ children }: { children: React.ReactNode }) {
-  return <div style={{ fontSize: 12, fontWeight: 700, color: "#6b21a8", marginBottom: 5 }}>{children}</div>;
+  return <div style={{ fontSize: 12, fontWeight: 700, color: "#92400e", marginBottom: 5 }}>{children}</div>;
 }
 
 export default function AdminLicenseTransactions() {
@@ -91,7 +91,7 @@ export default function AdminLicenseTransactions() {
   const totalQty = filtered.reduce((s, t) => s + t.quantity, 0);
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#fdf4ff 0%,#faf5ff 40%,#f5f3ff 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", position: "relative" }}>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#fffbeb 0%,#fef3c7 40%,#fff1f2 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", position: "relative" }}>
       <PageTopBar />
 
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "20px 16px" }}>
@@ -99,7 +99,7 @@ export default function AdminLicenseTransactions() {
         <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 20, flexWrap: "wrap" }}>
           <button
             onClick={() => { setShowForm(true); setFormError(null); }}
-            style={{ display: "flex", alignItems: "center", gap: 7, padding: "10px 18px", background: "linear-gradient(135deg,#7c3aed,#6d28d9)", border: "none", borderRadius: 12, color: "white", fontFamily: "Vazirmatn, sans-serif", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: "0 4px 14px rgba(124,58,237,0.35)" }}>
+            style={{ display: "flex", alignItems: "center", gap: 7, padding: "10px 18px", background: "linear-gradient(135deg,#d97706,#b45309)", border: "none", borderRadius: 12, color: "white", fontFamily: "Vazirmatn, sans-serif", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: "0 4px 14px rgba(245,158,11,0.35)" }}>
             <Plus size={15} /> ثبت تراکنش جدید
           </button>
           <select
@@ -112,7 +112,7 @@ export default function AdminLicenseTransactions() {
           </select>
           {filtered.length > 0 && (
             <div style={{ marginRight: "auto", display: "flex", gap: 10 }}>
-              <div style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 99, padding: "6px 14px", fontSize: 12, color: "#6d28d9", fontWeight: 700 }}>
+              <div style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: 99, padding: "6px 14px", fontSize: 12, color: "#b45309", fontWeight: 700 }}>
                 {filtered.length} تراکنش
               </div>
               <div style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 99, padding: "6px 14px", fontSize: 12, color: "#065f46", fontWeight: 700 }}>
@@ -123,39 +123,39 @@ export default function AdminLicenseTransactions() {
         </div>
 
         {/* Info box */}
-        <div style={{ background: "rgba(124,58,237,0.05)", border: "1px solid rgba(124,58,237,0.15)", borderRadius: 14, padding: "12px 16px", marginBottom: 20, display: "flex", gap: 10, alignItems: "flex-start" }}>
-          <ShieldCheck size={18} color="#7c3aed" style={{ flexShrink: 0, marginTop: 1 }} />
-          <p style={{ margin: 0, fontSize: 12, color: "#4c1d95", lineHeight: 1.7 }}>
+        <div style={{ background: "rgba(245,158,11,0.05)", border: "1px solid rgba(245,158,11,0.15)", borderRadius: 14, padding: "12px 16px", marginBottom: 20, display: "flex", gap: 10, alignItems: "flex-start" }}>
+          <ShieldCheck size={18} color="#d97706" style={{ flexShrink: 0, marginTop: 1 }} />
+          <p style={{ margin: 0, fontSize: 12, color: "#78350f", lineHeight: 1.7 }}>
             هر تراکنش نشان‌دهنده یک خرید واقعی مجوز کتاب است. تعداد مجوز قابل استفاده = مجموع تراکنش‌های ثبت‌شده. شماره پیگیری هر تراکنش باید <strong>یکتا</strong> باشد. بدون ثبت تراکنش، هیچ کتابی قابل اختصاص به دانش‌آموزان نیست.
           </p>
         </div>
 
         {/* Table */}
         {isLoading ? (
-          <div style={{ textAlign: "center", padding: 60, color: "#7c3aed" }}>در حال بارگذاری...</div>
+          <div style={{ textAlign: "center", padding: 60, color: "#d97706" }}>در حال بارگذاری...</div>
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "60px 20px", background: "rgba(255,255,255,0.6)", borderRadius: 18, border: "1px dashed rgba(139,92,246,0.3)" }}>
-            <ShieldCheck size={48} color="rgba(139,92,246,0.2)" style={{ marginBottom: 12 }} />
+          <div style={{ textAlign: "center", padding: "60px 20px", background: "rgba(255,255,255,0.6)", borderRadius: 18, border: "1px dashed rgba(245,158,11,0.3)" }}>
+            <ShieldCheck size={48} color="rgba(245,158,11,0.2)" style={{ marginBottom: 12 }} />
             <p style={{ color: "#9ca3af", margin: 0, fontSize: 14 }}>هنوز هیچ تراکنش مجوزی ثبت نشده</p>
-            <p style={{ color: "#c084fc", margin: "6px 0 0", fontSize: 12 }}>برای فعال‌سازی کتاب‌ها برای دانش‌آموزان، ابتدا تراکنش ثبت کنید</p>
+            <p style={{ color: "#fbbf24", margin: "6px 0 0", fontSize: 12 }}>برای فعال‌سازی کتاب‌ها برای دانش‌آموزان، ابتدا تراکنش ثبت کنید</p>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {filtered.map(tx => (
               <div key={tx.id} style={{
-                background: "rgba(255,255,255,0.88)", border: "1.5px solid rgba(139,92,246,0.12)",
+                background: "rgba(255,255,255,0.88)", border: "1.5px solid rgba(245,158,11,0.12)",
                 borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12,
-                boxShadow: "0 2px 8px rgba(124,58,237,0.06)",
+                boxShadow: "0 2px 8px rgba(245,158,11,0.06)",
               }}>
                 {/* Book icon */}
-                <div style={{ width: 42, height: 42, borderRadius: 12, background: "linear-gradient(135deg,#7c3aed,#6d28d9)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 12px rgba(124,58,237,0.3)" }}>
+                <div style={{ width: 42, height: 42, borderRadius: 12, background: "linear-gradient(135deg,#d97706,#b45309)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 12px rgba(245,158,11,0.3)" }}>
                   <BookOpen size={18} color="white" />
                 </div>
 
                 {/* Main info */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 5 }}>
-                    <span style={{ fontWeight: 800, fontSize: 14, color: "#1e1b4b" }}>{tx.bookTitle ?? `کتاب #${tx.bookId}`}</span>
+                    <span style={{ fontWeight: 800, fontSize: 14, color: "#78350f" }}>{tx.bookTitle ?? `کتاب #${tx.bookId}`}</span>
                     <span style={{ fontSize: 11, color: "#6b7280", background: "rgba(0,0,0,0.04)", borderRadius: 99, padding: "2px 8px" }}>
                       <School size={10} style={{ marginLeft: 3, verticalAlign: "middle" }} />{tx.schoolName ?? `مدرسه #${tx.schoolId}`}
                     </span>
@@ -164,7 +164,7 @@ export default function AdminLicenseTransactions() {
                     </span>
                   </div>
                   <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 11, color: "#7c3aed", display: "flex", alignItems: "center", gap: 4 }}>
+                    <span style={{ fontSize: 11, color: "#d97706", display: "flex", alignItems: "center", gap: 4 }}>
                       <Hash size={10} /> {tx.trackingNumber}
                     </span>
                     {tx.paymentDate && (
@@ -230,7 +230,7 @@ export default function AdminLicenseTransactions() {
                 <input
                   value={form.trackingNumber}
                   onChange={e => setForm(f => ({ ...f, trackingNumber: e.target.value }))}
-                  style={{ ...IS, borderColor: form.trackingNumber ? "rgba(124,58,237,0.5)" : "rgba(139,92,246,0.28)" }}
+                  style={{ ...IS, borderColor: form.trackingNumber ? "rgba(245,158,11,0.5)" : "rgba(245,158,11,0.28)" }}
                   placeholder="مثلاً: TRK-2024-001"
                 />
               </div>
@@ -287,7 +287,7 @@ export default function AdminLicenseTransactions() {
                   createMut.mutate(form);
                 }}
                 disabled={createMut.isPending}
-                style={{ flex: 1, padding: "12px 0", background: "linear-gradient(135deg,#7c3aed,#6d28d9)", border: "none", borderRadius: 12, color: "white", fontFamily: "Vazirmatn, sans-serif", fontWeight: 800, fontSize: 14, cursor: "pointer", opacity: createMut.isPending ? 0.7 : 1 }}>
+                style={{ flex: 1, padding: "12px 0", background: "linear-gradient(135deg,#d97706,#b45309)", border: "none", borderRadius: 12, color: "white", fontFamily: "Vazirmatn, sans-serif", fontWeight: 800, fontSize: 14, cursor: "pointer", opacity: createMut.isPending ? 0.7 : 1 }}>
                 {createMut.isPending ? "در حال ثبت..." : "ثبت تراکنش"}
               </button>
               <button
@@ -307,7 +307,7 @@ export default function AdminLicenseTransactions() {
             <div style={{ width: 56, height: 56, borderRadius: 16, background: "rgba(239,68,68,0.08)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", border: "1px solid rgba(239,68,68,0.2)" }}>
               <AlertTriangle size={24} color="#ef4444" />
             </div>
-            <p style={{ fontSize: 14, color: "#1e1b4b", marginBottom: 6, fontWeight: 700 }}>آیا مطمئن هستید؟</p>
+            <p style={{ fontSize: 14, color: "#78350f", marginBottom: 6, fontWeight: 700 }}>آیا مطمئن هستید؟</p>
             <p style={{ fontSize: 12, color: "#6b7280", margin: "0 0 6px" }}>
               حذف تراکنش «<strong>{confirmDelete.trackingNumber}</strong>»
             </p>

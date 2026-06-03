@@ -48,33 +48,33 @@ export default function AdminOrders() {
   });
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#fdf4ff 0%,#faf5ff 40%,#f5f3ff 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#fffbeb 0%,#fef3c7 40%,#fff1f2 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
       <PageTopBar />
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "20px 16px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 200 }}>
-            <ShoppingCart size={22} color="#a855f7" />
-            <span style={{ fontSize: 20, fontWeight: 700, color: "#1e1b4b" }}>مدیریت سفارشات</span>
+            <ShoppingCart size={22} color="#f59e0b" />
+            <span style={{ fontSize: 20, fontWeight: 700, color: "#78350f" }}>مدیریت سفارشات</span>
           </div>
           <button onClick={() => { setEditOrder(null); setShowForm(true); }}
-            style={{ display: "flex", alignItems: "center", gap: 6, background: "linear-gradient(135deg,#7c3aed,#a855f7)", color: "#fff", border: "none", borderRadius: 10, padding: "9px 18px", cursor: "pointer", fontFamily: "inherit", fontSize: 14, fontWeight: 600 }}>
+            style={{ display: "flex", alignItems: "center", gap: 6, background: "linear-gradient(135deg,#d97706,#f59e0b)", color: "#fff", border: "none", borderRadius: 10, padding: "9px 18px", cursor: "pointer", fontFamily: "inherit", fontSize: 14, fontWeight: 600 }}>
             <Plus size={16} /> ثبت سفارش جدید
           </button>
         </div>
 
         <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
           <div style={{ position: "relative", flex: 1, minWidth: 160 }}>
-            <Search size={14} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "#a855f7" }} />
+            <Search size={14} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "#f59e0b" }} />
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="جستجو شماره پیگیری / مدرسه"
-              style={{ width: "100%", padding: "8px 32px 8px 10px", border: "1.5px solid #e9d5ff", borderRadius: 8, fontFamily: "inherit", fontSize: 13, background: "#fff", boxSizing: "border-box" }} />
+              style={{ width: "100%", padding: "8px 32px 8px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13, background: "#fff", boxSizing: "border-box" }} />
           </div>
           <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
-            style={{ padding: "8px 12px", border: "1.5px solid #e9d5ff", borderRadius: 8, fontFamily: "inherit", fontSize: 13, background: "#fff" }}>
+            style={{ padding: "8px 12px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13, background: "#fff" }}>
             <option value="all">همه وضعیت‌ها</option>
             {Object.entries(STATUS_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
           <select value={filterSchool} onChange={e => setFilterSchool(e.target.value)}
-            style={{ padding: "8px 12px", border: "1.5px solid #e9d5ff", borderRadius: 8, fontFamily: "inherit", fontSize: 13, background: "#fff" }}>
+            style={{ padding: "8px 12px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13, background: "#fff" }}>
             <option value="all">همه مدارس</option>
             {schools.map((s: School) => <option key={s.id} value={String(s.id)}>{s.name}</option>)}
           </select>
@@ -83,21 +83,21 @@ export default function AdminOrders() {
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {filtered.length === 0 && <div style={{ textAlign: "center", padding: "40px 0", color: "#94a3b8" }}>سفارشی یافت نشد</div>}
           {filtered.map(order => (
-            <div key={order.id} style={{ background: "#fff", borderRadius: 14, border: "1.5px solid #ede9fe", overflow: "hidden", boxShadow: "0 2px 8px rgba(139,92,246,0.06)" }}>
+            <div key={order.id} style={{ background: "#fff", borderRadius: 14, border: "1.5px solid #fde68a", overflow: "hidden", boxShadow: "0 2px 8px rgba(245,158,11,0.06)" }}>
               <div style={{ padding: "14px 16px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                    <span style={{ fontWeight: 700, fontSize: 15, color: "#1e1b4b" }}>{schoolMap[order.schoolId] ?? `مدرسه ${order.schoolId}`}</span>
-                    <span style={{ fontSize: 12, color: "#7c3aed", background: "#f3e8ff", borderRadius: 6, padding: "2px 8px" }}>#{order.trackingNumber}</span>
+                    <span style={{ fontWeight: 700, fontSize: 15, color: "#78350f" }}>{schoolMap[order.schoolId] ?? `مدرسه ${order.schoolId}`}</span>
+                    <span style={{ fontSize: 12, color: "#d97706", background: "#fef3c7", borderRadius: 6, padding: "2px 8px" }}>#{order.trackingNumber}</span>
                     <span style={{ fontSize: 12, fontWeight: 600, color: STATUS_COLOR[order.status], background: STATUS_BG[order.status], borderRadius: 6, padding: "2px 8px", border: `1px solid ${STATUS_COLOR[order.status]}40` }}>
                       {STATUS_LABEL[order.status] ?? order.status}
                     </span>
                   </div>
                   <div style={{ marginTop: 4, display: "flex", gap: 12, fontSize: 13, color: "#64748b", flexWrap: "wrap" }}>
                     <span>{order.items.length} کتاب</span>
-                    <span>جمع کل: <b style={{ color: "#1e1b4b" }}>{fmt(order.totalAmount)}</b></span>
+                    <span>جمع کل: <b style={{ color: "#78350f" }}>{fmt(order.totalAmount)}</b></span>
                     {order.discount > 0 && <span>تخفیف {order.discount}%: <b style={{ color: "#ef4444" }}>-{fmt(order.discountAmount)}</b></span>}
-                    <span>قابل پرداخت: <b style={{ color: "#7c3aed" }}>{fmt(order.finalAmount)}</b></span>
+                    <span>قابل پرداخت: <b style={{ color: "#d97706" }}>{fmt(order.finalAmount)}</b></span>
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -114,7 +114,7 @@ export default function AdminOrders() {
                     </button>
                   )}
                   <button onClick={() => setExpanded(expanded === order.id ? null : order.id)}
-                    style={{ background: "#f5f3ff", border: "1.5px solid #ede9fe", borderRadius: 8, padding: "5px 10px", cursor: "pointer", color: "#7c3aed" }}>
+                    style={{ background: "#fffbeb", border: "1.5px solid #fde68a", borderRadius: 8, padding: "5px 10px", cursor: "pointer", color: "#d97706" }}>
                     {expanded === order.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </button>
                   <button onClick={() => { if (confirm("حذف شود؟")) deleteMut.mutate(order.id); }}
@@ -124,20 +124,20 @@ export default function AdminOrders() {
                 </div>
               </div>
               {expanded === order.id && (
-                <div style={{ borderTop: "1px solid #f3e8ff", background: "#faf5ff", padding: "12px 16px" }}>
+                <div style={{ borderTop: "1px solid #fef3c7", background: "#fef9c3", padding: "12px 16px" }}>
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     {order.items.map((item, i) => (
-                      <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", background: "#fff", borderRadius: 8, border: "1px solid #ede9fe", fontSize: 13 }}>
-                        <span style={{ color: "#1e1b4b", fontWeight: 600 }}>{item.bookTitle}</span>
+                      <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", background: "#fff", borderRadius: 8, border: "1px solid #fde68a", fontSize: 13 }}>
+                        <span style={{ color: "#78350f", fontWeight: 600 }}>{item.bookTitle}</span>
                         <div style={{ display: "flex", gap: 12, color: "#64748b" }}>
                           <span>تعداد: <b>{item.quantity}</b></span>
                           <span>قیمت واحد: <b>{fmt(item.unitPrice ?? 0)}</b></span>
-                          <span>جمع: <b style={{ color: "#7c3aed" }}>{fmt(item.subtotal ?? 0)}</b></span>
+                          <span>جمع: <b style={{ color: "#d97706" }}>{fmt(item.subtotal ?? 0)}</b></span>
                         </div>
                       </div>
                     ))}
                   </div>
-                  {order.notes && <div style={{ marginTop: 8, fontSize: 12, color: "#7c3aed", background: "#f3e8ff", padding: "6px 10px", borderRadius: 6 }}>یادداشت: {order.notes}</div>}
+                  {order.notes && <div style={{ marginTop: 8, fontSize: 12, color: "#d97706", background: "#fef3c7", padding: "6px 10px", borderRadius: 6 }}>یادداشت: {order.notes}</div>}
                   {order.paymentMethod && <div style={{ marginTop: 6, fontSize: 12, color: "#64748b" }}>روش پرداخت: {P_METHOD[order.paymentMethod] ?? order.paymentMethod}</div>}
                 </div>
               )}
@@ -204,7 +204,7 @@ function OrderForm({ books, schools, initial, onClose, onSaved }: {
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
       <div style={{ background: "#fff", borderRadius: 18, padding: 24, maxWidth: 600, width: "100%", maxHeight: "90vh", overflowY: "auto", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <h2 style={{ margin: 0, fontSize: 18, color: "#1e1b4b" }}>{initial ? "ویرایش سفارش" : "ثبت سفارش جدید"}</h2>
+          <h2 style={{ margin: 0, fontSize: 18, color: "#78350f" }}>{initial ? "ویرایش سفارش" : "ثبت سفارش جدید"}</h2>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#64748b" }}><X size={20} /></button>
         </div>
         {error && <div style={{ background: "#fef2f2", color: "#ef4444", padding: "8px 12px", borderRadius: 8, marginBottom: 12, fontSize: 13 }}>{error}</div>}
@@ -213,7 +213,7 @@ function OrderForm({ books, schools, initial, onClose, onSaved }: {
           <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "#374151" }}>
             مدرسه *
             <select value={schoolId} onChange={e => setSchoolId(e.target.value)}
-              style={{ padding: "8px 10px", border: "1.5px solid #e9d5ff", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }}>
+              style={{ padding: "8px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }}>
               <option value="">انتخاب کنید</option>
               {schools.map((s: School) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
@@ -221,17 +221,17 @@ function OrderForm({ books, schools, initial, onClose, onSaved }: {
           <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "#374151" }}>
             شماره پیگیری *
             <input value={tracking} onChange={e => setTracking(e.target.value)} placeholder="TRK-2024-001"
-              style={{ padding: "8px 10px", border: "1.5px solid #e9d5ff", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }} />
+              style={{ padding: "8px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }} />
           </label>
           <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "#374151" }}>
             تخفیف (%)
             <input type="number" min="0" max="100" value={discount} onChange={e => setDiscount(e.target.value)}
-              style={{ padding: "8px 10px", border: "1.5px solid #e9d5ff", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }} />
+              style={{ padding: "8px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }} />
           </label>
           <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "#374151" }}>
             روش پرداخت
             <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}
-              style={{ padding: "8px 10px", border: "1.5px solid #e9d5ff", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }}>
+              style={{ padding: "8px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }}>
               <option value="bank">انتقال بانکی</option>
               <option value="wallet">کیف پول</option>
               <option value="cash">نقدی</option>
@@ -244,7 +244,7 @@ function OrderForm({ books, schools, initial, onClose, onSaved }: {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
             <span style={{ fontSize: 14, fontWeight: 600, color: "#374151" }}>کتاب‌های سفارش</span>
             <button onClick={() => setItems([...items, { bookId: "", quantity: "1" }])}
-              style={{ display: "flex", alignItems: "center", gap: 4, background: "#f3e8ff", color: "#7c3aed", border: "none", borderRadius: 8, padding: "4px 10px", cursor: "pointer", fontSize: 12, fontFamily: "inherit" }}>
+              style={{ display: "flex", alignItems: "center", gap: 4, background: "#fef3c7", color: "#d97706", border: "none", borderRadius: 8, padding: "4px 10px", cursor: "pointer", fontSize: 12, fontFamily: "inherit" }}>
               <Plus size={12} /> افزودن کتاب
             </button>
           </div>
@@ -255,13 +255,13 @@ function OrderForm({ books, schools, initial, onClose, onSaved }: {
               return (
                 <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 80px 100px 28px", gap: 8, alignItems: "center" }}>
                   <select value={item.bookId} onChange={e => setItems(items.map((it, j) => j === i ? { ...it, bookId: e.target.value } : it))}
-                    style={{ padding: "7px 10px", border: "1.5px solid #e9d5ff", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }}>
+                    style={{ padding: "7px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }}>
                     <option value="">انتخاب کتاب</option>
                     {books.map(b => <option key={b.id} value={b.id}>{b.title} — {fmt(b.price)}</option>)}
                   </select>
                   <input type="number" min="1" value={item.quantity} onChange={e => setItems(items.map((it, j) => j === i ? { ...it, quantity: e.target.value } : it))}
-                    style={{ padding: "7px 10px", border: "1.5px solid #e9d5ff", borderRadius: 8, fontFamily: "inherit", fontSize: 13, textAlign: "center" }} />
-                  <div style={{ fontSize: 12, color: "#7c3aed", fontWeight: 600, textAlign: "center" }}>{sub > 0 ? fmt(sub) : "—"}</div>
+                    style={{ padding: "7px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13, textAlign: "center" }} />
+                  <div style={{ fontSize: 12, color: "#d97706", fontWeight: 600, textAlign: "center" }}>{sub > 0 ? fmt(sub) : "—"}</div>
                   <button onClick={() => setItems(items.filter((_, j) => j !== i))} style={{ background: "none", border: "none", cursor: "pointer", color: "#ef4444" }}><X size={16} /></button>
                 </div>
               );
@@ -269,7 +269,7 @@ function OrderForm({ books, schools, initial, onClose, onSaved }: {
           </div>
         </div>
 
-        <div style={{ background: "#faf5ff", borderRadius: 10, padding: "12px 16px", marginBottom: 16, fontSize: 14 }}>
+        <div style={{ background: "#fef9c3", borderRadius: 10, padding: "12px 16px", marginBottom: 16, fontSize: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
             <span style={{ color: "#64748b" }}>جمع کل:</span><span style={{ fontWeight: 600 }}>{fmt(total)}</span>
           </div>
@@ -278,22 +278,22 @@ function OrderForm({ books, schools, initial, onClose, onSaved }: {
               <span style={{ color: "#64748b" }}>تخفیف {discountNum}%:</span><span style={{ fontWeight: 600, color: "#ef4444" }}>-{fmt(discountAmt)}</span>
             </div>
           )}
-          <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #ede9fe", paddingTop: 8, marginTop: 4 }}>
-            <span style={{ color: "#7c3aed", fontWeight: 700 }}>قابل پرداخت:</span>
-            <span style={{ fontWeight: 700, color: "#7c3aed", fontSize: 16 }}>{fmt(final)}</span>
+          <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #fde68a", paddingTop: 8, marginTop: 4 }}>
+            <span style={{ color: "#d97706", fontWeight: 700 }}>قابل پرداخت:</span>
+            <span style={{ fontWeight: 700, color: "#d97706", fontSize: 16 }}>{fmt(final)}</span>
           </div>
         </div>
 
         <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "#374151", marginBottom: 16 }}>
           یادداشت
           <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
-            style={{ padding: "8px 10px", border: "1.5px solid #e9d5ff", borderRadius: 8, fontFamily: "inherit", fontSize: 13, resize: "vertical" }} />
+            style={{ padding: "8px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13, resize: "vertical" }} />
         </label>
 
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
           <button onClick={onClose} style={{ padding: "9px 20px", border: "1.5px solid #e2e8f0", borderRadius: 10, cursor: "pointer", fontFamily: "inherit", background: "#fff", color: "#64748b" }}>انصراف</button>
           <button onClick={submit} disabled={loading}
-            style={{ padding: "9px 20px", background: "linear-gradient(135deg,#7c3aed,#a855f7)", color: "#fff", border: "none", borderRadius: 10, cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>
+            style={{ padding: "9px 20px", background: "linear-gradient(135deg,#d97706,#f59e0b)", color: "#fff", border: "none", borderRadius: 10, cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>
             {loading ? "در حال ثبت..." : initial ? "ذخیره تغییرات" : "ثبت سفارش"}
           </button>
         </div>

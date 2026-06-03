@@ -24,10 +24,10 @@ export default function SchoolWallet() {
   const totalDebit = txs.filter(t => t.type === "debit").reduce((s, t) => s + Number(t.amount), 0);
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#f0fdf4,#dcfce7,#f5f3ff)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#f5f3ff,#ede9fe,#eef2ff)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
       <PageTopBar />
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "20px 16px" }}>
-        <div style={{ background: "linear-gradient(135deg,#059669,#10b981)", borderRadius: 20, padding: 28, marginBottom: 24, color: "#fff", textAlign: "center", boxShadow: "0 8px 32px rgba(16,185,129,0.25)" }}>
+        <div style={{ background: "linear-gradient(135deg,#4f46e5,#6366f1)", borderRadius: 20, padding: 28, marginBottom: 24, color: "#fff", textAlign: "center", boxShadow: "0 8px 32px rgba(99,102,241,0.25)" }}>
           <WalletIcon size={40} style={{ marginBottom: 10, opacity: 0.9 }} />
           <div style={{ fontSize: 14, opacity: 0.85, marginBottom: 6 }}>موجودی کیف پول</div>
           <div style={{ fontSize: 32, fontWeight: 800 }}>{isLoading ? "..." : fmt(Number(wallet?.balance ?? 0))}</div>
@@ -42,24 +42,24 @@ export default function SchoolWallet() {
           </div>
         </div>
 
-        <div style={{ background: "#fff", borderRadius: 14, border: "1.5px solid #bbf7d0", padding: 16, marginBottom: 20, fontSize: 13, color: "#065f46" }}>
+        <div style={{ background: "#fff", borderRadius: 14, border: "1.5px solid #c7d2fe", padding: 16, marginBottom: 20, fontSize: 13, color: "#3730a3" }}>
           <div style={{ fontWeight: 600, marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
-            <TrendingUp size={16} color="#10b981" /> چطور کیف پول شارژ کنم؟
+            <TrendingUp size={16} color="#6366f1" /> چطور کیف پول شارژ کنم؟
           </div>
           <div style={{ color: "#374151" }}>برای شارژ کیف پول با مدیریت سیستم تماس بگیرید. پس از تأیید پرداخت، موجودی شما به‌روز می‌شود.</div>
         </div>
 
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-            <TrendingUp size={18} color="#10b981" />
-            <span style={{ fontSize: 16, fontWeight: 700, color: "#065f46" }}>تاریخچه تراکنش‌ها</span>
+            <TrendingUp size={18} color="#6366f1" />
+            <span style={{ fontSize: 16, fontWeight: 700, color: "#3730a3" }}>تاریخچه تراکنش‌ها</span>
           </div>
           {txs.length === 0 && <div style={{ textAlign: "center", padding: "40px 0", color: "#94a3b8" }}>هنوز تراکنشی ثبت نشده</div>}
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {txs.map(tx => (
-              <div key={tx.id} style={{ background: "#fff", borderRadius: 12, border: `1.5px solid ${tx.type === "credit" ? "#bbf7d0" : "#fecaca"}`, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 38, height: 38, borderRadius: 10, background: tx.type === "credit" ? "#f0fdf4" : "#fef2f2", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  {tx.type === "credit" ? <ArrowDownCircle size={20} color="#10b981" /> : <ArrowUpCircle size={20} color="#ef4444" />}
+              <div key={tx.id} style={{ background: "#fff", borderRadius: 12, border: `1.5px solid ${tx.type === "credit" ? "#c7d2fe" : "#fecaca"}`, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 38, height: 38, borderRadius: 10, background: tx.type === "credit" ? "#f5f3ff" : "#fef2f2", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  {tx.type === "credit" ? <ArrowDownCircle size={20} color="#6366f1" /> : <ArrowUpCircle size={20} color="#ef4444" />}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b", marginBottom: 2 }}>{tx.description ?? (tx.type === "credit" ? "واریز" : "برداشت")}</div>

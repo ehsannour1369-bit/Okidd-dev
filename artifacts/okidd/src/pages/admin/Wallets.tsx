@@ -20,13 +20,13 @@ interface WalletData { id: number; balance: number; transactions: Tx[]; }
 
 const inp: React.CSSProperties = {
   background: "#fff",
-  border: "1.5px solid #e9d5ff",
+  border: "1.5px solid #fde68a",
   borderRadius: 8,
   padding: "8px 12px",
   fontSize: 13,
   fontFamily: "Vazirmatn, sans-serif",
   outline: "none",
-  color: "#1e1b4b",
+  color: "#78350f",
 };
 
 /* ─── Per-school expanded panel — own useQuery ─── */
@@ -61,15 +61,15 @@ function SchoolWalletPanel({ schoolId }: { schoolId: number }) {
   const txs = wallet?.transactions ?? [];
 
   return (
-    <div style={{ borderTop: "1px solid #f3e8ff", padding: "16px 16px 20px", background: "linear-gradient(180deg,#faf5ff,#fff)" }}>
+    <div style={{ borderTop: "1px solid #fef3c7", padding: "16px 16px 20px", background: "linear-gradient(180deg,#fef9c3,#fff)" }}>
 
       {/* Credit form */}
-      <div style={{ background: "#fff", border: "1.5px solid #ede9fe", borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
-        <div style={{ fontWeight: 700, fontSize: 14, color: "#3730a3", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
-          <Plus size={14} color="#7c3aed" /> شارژ کیف پول
+      <div style={{ background: "#fff", border: "1.5px solid #fde68a", borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+        <div style={{ fontWeight: 700, fontSize: 14, color: "#92400e", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+          <Plus size={14} color="#d97706" /> شارژ کیف پول
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 10, alignItems: "flex-end" }}>
-          <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12, color: "#4f46e5" }}>
+          <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12, color: "#b45309" }}>
             مبلغ (تومان) *
             <input
               type="number" min="1"
@@ -79,7 +79,7 @@ function SchoolWalletPanel({ schoolId }: { schoolId: number }) {
               style={{ ...inp, minWidth: 0 }}
             />
           </label>
-          <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12, color: "#4f46e5" }}>
+          <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12, color: "#b45309" }}>
             توضیحات
             <input
               value={form.desc}
@@ -91,7 +91,7 @@ function SchoolWalletPanel({ schoolId }: { schoolId: number }) {
           <button
             onClick={doCredit}
             disabled={creditMut.isPending}
-            style={{ background: "linear-gradient(135deg,#7c3aed,#a855f7)", color: "#fff", border: "none", borderRadius: 9, padding: "9px 16px", cursor: creditMut.isPending ? "not-allowed" : "pointer", fontFamily: "Vazirmatn", fontWeight: 600, fontSize: 13, display: "flex", alignItems: "center", gap: 5, whiteSpace: "nowrap", opacity: creditMut.isPending ? 0.7 : 1 }}
+            style={{ background: "linear-gradient(135deg,#d97706,#f59e0b)", color: "#fff", border: "none", borderRadius: 9, padding: "9px 16px", cursor: creditMut.isPending ? "not-allowed" : "pointer", fontFamily: "Vazirmatn", fontWeight: 600, fontSize: 13, display: "flex", alignItems: "center", gap: 5, whiteSpace: "nowrap", opacity: creditMut.isPending ? 0.7 : 1 }}
           >
             <Plus size={14} /> {creditMut.isPending ? "در حال شارژ..." : "شارژ"}
           </button>
@@ -117,10 +117,10 @@ function SchoolWalletPanel({ schoolId }: { schoolId: number }) {
       )}
 
       {/* Transaction history */}
-      <div style={{ fontWeight: 700, fontSize: 13, color: "#3730a3", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
-        <RefreshCw size={13} color="#a855f7" /> تاریخچه تراکنش‌ها
+      <div style={{ fontWeight: 700, fontSize: 13, color: "#92400e", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+        <RefreshCw size={13} color="#f59e0b" /> تاریخچه تراکنش‌ها
       </div>
-      {isLoading && <div style={{ color: "#a855f7", fontSize: 13, padding: "12px 0", textAlign: "center" }}>در حال بارگذاری...</div>}
+      {isLoading && <div style={{ color: "#f59e0b", fontSize: 13, padding: "12px 0", textAlign: "center" }}>در حال بارگذاری...</div>}
       {!isLoading && txs.length === 0 && (
         <div style={{ color: "#94a3b8", fontSize: 13, padding: "16px 0", textAlign: "center" }}>هنوز تراکنشی ثبت نشده</div>
       )}
@@ -174,20 +174,20 @@ export default function AdminWallets() {
   const totalBalance = summary.reduce((s, w) => s + w.balance, 0);
 
   return (
-    <div dir="rtl" style={{ minHeight: "100vh", background: "linear-gradient(160deg,#fdf4ff 0%,#faf5ff 40%,#f5f3ff 100%)", fontFamily: "Vazirmatn, sans-serif" }}>
+    <div dir="rtl" style={{ minHeight: "100vh", background: "linear-gradient(160deg,#fffbeb 0%,#fef3c7 40%,#fff1f2 100%)", fontFamily: "Vazirmatn, sans-serif" }}>
       <PageTopBar />
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "20px 16px 40px" }}>
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
-          <div style={{ width: 44, height: 44, borderRadius: 14, background: "linear-gradient(135deg,#7c3aed,#a855f7)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 18px rgba(124,58,237,0.35)", flexShrink: 0 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 14, background: "linear-gradient(135deg,#d97706,#f59e0b)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 18px rgba(245,158,11,0.35)", flexShrink: 0 }}>
             <WalletIcon size={22} color="white" />
           </div>
           <div style={{ flex: 1 }}>
-            <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#1e1b4b" }}>مدیریت کیف پول مدارس</h1>
-            <p style={{ margin: "2px 0 0", fontSize: 13, color: "#4f46e5" }}>شارژ کیف پول و مشاهده تاریخچه تراکنش‌ها</p>
+            <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#78350f" }}>مدیریت کیف پول مدارس</h1>
+            <p style={{ margin: "2px 0 0", fontSize: 13, color: "#b45309" }}>شارژ کیف پول و مشاهده تاریخچه تراکنش‌ها</p>
           </div>
-          <div style={{ background: "linear-gradient(135deg,#7c3aed,#a855f7)", borderRadius: 12, padding: "10px 20px", color: "white", textAlign: "center" }}>
+          <div style={{ background: "linear-gradient(135deg,#d97706,#f59e0b)", borderRadius: 12, padding: "10px 20px", color: "white", textAlign: "center" }}>
             <div style={{ fontSize: 11, opacity: 0.85 }}>مجموع موجودی‌ها</div>
             <div style={{ fontSize: 20, fontWeight: 800 }}>{fmt(totalBalance)}</div>
           </div>
@@ -204,25 +204,25 @@ export default function AdminWallets() {
             const balance  = balanceMap[school.id] ?? 0;
 
             return (
-              <div key={school.id} style={{ background: "#fff", borderRadius: 16, border: isExp ? "1.5px solid #a855f7" : "1.5px solid #ede9fe", overflow: "hidden", boxShadow: isExp ? "0 4px 24px rgba(139,92,246,0.15)" : "0 2px 8px rgba(139,92,246,0.05)", transition: "box-shadow 0.2s, border-color 0.2s" }}>
+              <div key={school.id} style={{ background: "#fff", borderRadius: 16, border: isExp ? "1.5px solid #f59e0b" : "1.5px solid #fde68a", overflow: "hidden", boxShadow: isExp ? "0 4px 24px rgba(245,158,11,0.15)" : "0 2px 8px rgba(245,158,11,0.05)", transition: "box-shadow 0.2s, border-color 0.2s" }}>
 
                 {/* Card header — click to expand */}
                 <div
                   onClick={() => setExpanded(isExp ? null : school.id)}
                   style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", cursor: "pointer", userSelect: "none" }}
                 >
-                  <div style={{ width: 38, height: 38, borderRadius: 12, background: "linear-gradient(135deg,rgba(124,58,237,0.15),rgba(168,85,247,0.1))", border: "1.5px solid rgba(139,92,246,0.22)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <Building2 size={18} color="#7c3aed" />
+                  <div style={{ width: 38, height: 38, borderRadius: 12, background: "linear-gradient(135deg,rgba(245,158,11,0.15),rgba(251,191,36,0.1))", border: "1.5px solid rgba(245,158,11,0.22)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <Building2 size={18} color="#d97706" />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: 14, color: "#1e1b4b" }}>{school.name}</div>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: "#78350f" }}>{school.name}</div>
                     <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 1 }}>شناسه: {school.id}</div>
                   </div>
                   <div style={{ padding: "6px 14px", background: balance > 0 ? "#f0fdf4" : "#f9fafb", border: `1px solid ${balance > 0 ? "#86efac" : "#e5e7eb"}`, borderRadius: 10, textAlign: "center", flexShrink: 0 }}>
                     <div style={{ fontSize: 15, fontWeight: 800, color: balance > 0 ? "#15803d" : "#9ca3af" }}>{fmt(balance)}</div>
                     <div style={{ fontSize: 10, color: "#9ca3af", marginTop: 1 }}>موجودی</div>
                   </div>
-                  <div style={{ color: "#a855f7", flexShrink: 0, marginRight: 2 }}>
+                  <div style={{ color: "#f59e0b", flexShrink: 0, marginRight: 2 }}>
                     {isExp ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                   </div>
                 </div>
