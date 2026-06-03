@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "../store/auth";
 import { api } from "../lib/api";
@@ -34,6 +34,11 @@ export default function ProfilePanel({ accent, dark }: ProfilePanelProps) {
   const [logoMsg, setLogoMsg]           = useState<string | null>(null);
   const avatarRef = useRef<HTMLInputElement>(null);
   const logoRef   = useRef<HTMLInputElement>(null);
+  const sheetRef  = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (open && sheetRef.current) sheetRef.current.scrollTop = 0;
+  }, [open]);
 
   const isSchoolMgr  = user?.role === "school_manager";
   const isBranchMgr  = user?.role === "branch_manager";
@@ -150,6 +155,7 @@ export default function ProfilePanel({ accent, dark }: ProfilePanelProps) {
 
           {/* bottom sheet */}
           <div
+            ref={sheetRef}
             onClick={e => e.stopPropagation()}
             style={{
               position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 901,
