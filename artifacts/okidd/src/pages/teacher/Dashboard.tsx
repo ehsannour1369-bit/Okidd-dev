@@ -238,8 +238,13 @@ export default function TeacherDashboard() {
                             <div key={school.id}>
                               <button onClick={() => setSelectedSchool(selectedSchool?.id === school.id ? null : school)}
                                 style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 16px", background: selectedSchool?.id === school.id ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.10)", border: `1px solid ${selectedSchool?.id === school.id ? "rgba(255,255,255,0.50)" : "rgba(255,255,255,0.22)"}`, borderRadius: 12, cursor: "pointer", color: "white", fontFamily: "Vazirmatn", fontWeight: 600, fontSize: 14 }}>
-                                <span><School size={14} style={{ display: "inline", verticalAlign: "middle", marginLeft: 6, color: "rgba(255,255,255,0.8)" }} />{school.name}</span>
-                                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.65)" }}>{school.classes?.length ?? 0} کلاس</span>
+                                <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                  {school.logoUrl
+                                    ? <img src={school.logoUrl} alt="" style={{ width: 26, height: 26, borderRadius: 7, objectFit: "contain", background: "rgba(255,255,255,0.22)", border: "1px solid rgba(255,255,255,0.3)", flexShrink: 0 }} />
+                                    : <School size={18} color="rgba(255,255,255,0.75)" style={{ flexShrink: 0 }} />}
+                                  {school.name}
+                                </span>
+                                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", flexShrink: 0 }}>{school.classes?.length ?? 0} کلاس</span>
                               </button>
                               {selectedSchool?.id === school.id && (
                                 <div style={{ marginTop: 7, paddingRight: 14 }}>

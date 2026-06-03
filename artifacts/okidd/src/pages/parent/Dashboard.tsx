@@ -83,6 +83,13 @@ export default function ParentDashboard() {
     queryFn:  () => api.get(`/rankings?classId=${childSummary?.classes?.[0]?.id}`),
     enabled:  !!childSummary?.classes?.[0]?.id,
   });
+  const { data: childSchoolInfo } = useQuery<any>({
+    queryKey: ["school-info", currentChild?.schoolId],
+    queryFn:  () => api.get(`/schools/${currentChild?.schoolId}`),
+    enabled:  !!currentChild?.schoolId,
+    staleTime: 60_000,
+  });
+
   const { data: notifications = [] } = useQuery<any[]>({
     queryKey: ["notifications", "parent", user?.schoolId],
     queryFn:  () => api.get(`/notifications?schoolId=${user?.schoolId}`),
@@ -230,7 +237,18 @@ export default function ParentDashboard() {
           {/* Child stats */}
           {currentChild && childSummary && (
             <>
-              <div style={{ fontSize: 14, fontWeight: 800, color: TEXT, marginBottom: 10, ...cardAnim(3), display: "flex", alignItems: "center", gap: 6 }}>
+              {/* School logo banner for selected child */}
+              {childSchoolInfo?.logoUrl && (
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, padding: "10px 14px", background: "rgba(255,255,255,0.62)", border: "1.5px solid rgba(200,190,255,0.28)", borderRadius: 16, backdropFilter: "blur(12px)", ...cardAnim(3) }}>
+                  <img src={childSchoolInfo.logoUrl} alt="لوگوی مدرسه" style={{ width: 44, height: 44, borderRadius: 12, objectFit: "contain", background: "white", border: "1px solid rgba(0,0,0,0.06)", flexShrink: 0 }} />
+                  <div>
+                    <div style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600 }}>مدرسه</div>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: "#1e1b4b" }}>{childSchoolInfo.name}</div>
+                  </div>
+                </div>
+              )}
+
+              <div style={{ fontSize: 14, fontWeight: 800, color: TEXT, marginBottom: 10, ...cardAnim(4), display: "flex", alignItems: "center", gap: 6 }}>
                 <UserRound size={15} style={{ color: accent }} /> گزارش عملکرد {currentChild.name}
               </div>
 
