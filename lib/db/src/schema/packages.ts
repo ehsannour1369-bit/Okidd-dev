@@ -16,6 +16,7 @@ export const packageBooksTable = pgTable("package_books", {
   id: serial("id").primaryKey(),
   packageId: integer("package_id").notNull(),
   bookId: integer("book_id").notNull(),
+  quantity: integer("quantity").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

@@ -1,8 +1,55 @@
 import { Router } from "express";
-import { db, classesTable, classStudentsTable, classTeachersTable, classBooksTable, usersTable, booksTable, gradesTable, gradeLevelsTable, branchesTable, schoolsTable, presenceLogTable, studentProgressTable } from "@workspace/db";
+import { db, classesTable, classStudentsTable, classTeachersTable, classBooksTable, usersTable, booksTable, gradesTable, gradeLevelsTable, branchesTable, schoolsTable, presenceLogTable, studentProgressTable, packagesTable, packageBooksTable } from "@workspace/db";
 import { eq, inArray, count, and } from "drizzle-orm";
 
 const router = Router();
+
+/* ─── License helpers ─────────────────────────────────────────────────── */
+
+/** Resolve schoolId for a classId (class → grade → gradeLevel → branch → school) */
+async function getSchoolIdForClass(classId: number): Promise<number | null> {
+  const [cls] = await db.select().from(classesTable).where(eq(classesTable.id, classId));
+  if (!cls?.gradeId) return null;
+  const [grade] = await db.select().from(gradesTable).where(eq(gradesTable.id, cls.gradeId));
+  if (!grade?.gradeLevelId) return null;
+  const [gl] = await db.select().from(gradeLevelsTable).where(eq(gradeLevelsTable.id, grade.gradeLevelId));
+  if (!gl?.branchId) return null;
+  const [branch] = await db.select().from(branchesTable).where(eq(branchesTable.id, gl.branchId));
+  return branch?.schoolId ?? null;
+}
+
+/** Count purchased licenses for a book in a school */
+async function getPurchasedCount(schoolId: number, bookId: number): Promise<number> {
+  const pkgs = await db.select({ id: packagesTable.id }).from(packagesTable).where(eq(packagesTable.schoolId, schoolId));
+  if (pkgs.length === 0) return 0;
+  const pkgIds = pkgs.map(p => p.id);
+  const pbRows = await db.select().from(packageBooksTable)
+    .where(and(inArray(packageBooksTable.packageId, pkgIds), eq(packageBooksTable.bookId, bookId)));
+  return pbRows.reduce((s, r) => s + r.quantity, 0);
+}
+
+/** Count currently used licenses for a book in a school (distinct students in classes with this book) */
+async function getUsedCount(schoolId: number, bookId: number): Promise<number> {
+  const branches = await db.select({ id: branchesTable.id }).from(branchesTable).where(eq(branchesTable.schoolId, schoolId));
+  if (branches.length === 0) return 0;
+  const branchIds = branches.map(b => b.id);
+  const gls = await db.select({ id: gradeLevelsTable.id }).from(gradeLevelsTable).where(inArray(gradeLevelsTable.branchId, branchIds));
+  if (gls.length === 0) return 0;
+  const glIds = gls.map(g => g.id);
+  const grades = await db.select({ id: gradesTable.id }).from(gradesTable).where(inArray(gradesTable.gradeLevelId, glIds));
+  if (grades.length === 0) return 0;
+  const gradeIds = grades.map(g => g.id);
+  const classes = await db.select({ id: classesTable.id }).from(classesTable).where(inArray(classesTable.gradeId, gradeIds));
+  if (classes.length === 0) return 0;
+  const classIds = classes.map(c => c.id);
+  const cbRows = await db.select({ classId: classBooksTable.classId }).from(classBooksTable)
+    .where(and(inArray(classBooksTable.classId, classIds), eq(classBooksTable.bookId, bookId)));
+  const bookClassIds = cbRows.map(r => r.classId);
+  if (bookClassIds.length === 0) return 0;
+  const studs = await db.select({ studentId: classStudentsTable.studentId }).from(classStudentsTable)
+    .where(inArray(classStudentsTable.classId, bookClassIds));
+  return new Set(studs.map(s => s.studentId)).size;
+}
 
 router.get("/classes", async (req, res) => {
   const { gradeId, teacherId, studentId } = req.query as Record<string, string>;
@@ -73,6 +120,25 @@ router.get("/classes/:id/students", async (req, res) => {
 router.post("/classes/:id/students", async (req, res) => {
   const classId = parseInt(req.params.id);
   const { studentId } = req.body;
+
+  // License check: adding a student "uses" one license for each book in this class
+  const schoolId = await getSchoolIdForClass(classId);
+  if (schoolId) {
+    const bookRows = await db.select({ bookId: classBooksTable.bookId }).from(classBooksTable).where(eq(classBooksTable.classId, classId));
+    const violations: string[] = [];
+    for (const { bookId } of bookRows) {
+      const [purchased, used] = await Promise.all([getPurchasedCount(schoolId, bookId), getUsedCount(schoolId, bookId)]);
+      if (purchased > 0 && used >= purchased) {
+        const [book] = await db.select({ title: booksTable.title }).from(booksTable).where(eq(booksTable.id, bookId));
+        violations.push(book?.title ?? `کتاب #${bookId}`);
+      }
+    }
+    if (violations.length > 0) {
+      res.status(400).json({ error: `مجوز کتاب‌های زیر تکمیل شده است: ${violations.join("، ")}. برای افزودن دانش‌آموز ابتدا مجوز بیشتری خریداری کنید.` });
+      return;
+    }
+  }
+
   await db.insert(classStudentsTable).values({ classId, studentId }).onConflictDoNothing();
   res.status(201).json({ ok: true });
 });
@@ -142,6 +208,27 @@ router.get("/classes/:id/books", async (req, res) => {
 router.post("/classes/:id/books", async (req, res) => {
   const classId = parseInt(req.params.id);
   const { bookId } = req.body;
+
+  // License check: adding a book to a class "uses" N licenses (N = students currently in class)
+  const schoolId = await getSchoolIdForClass(classId);
+  if (schoolId) {
+    const [purchased, used, studs] = await Promise.all([
+      getPurchasedCount(schoolId, bookId),
+      getUsedCount(schoolId, bookId),
+      db.select({ count: count() }).from(classStudentsTable).where(eq(classStudentsTable.classId, classId)),
+    ]);
+    const classStudentCount = Number(studs[0]?.count ?? 0);
+    if (purchased > 0 && used + classStudentCount > purchased) {
+      const remaining = Math.max(0, purchased - used);
+      const [book] = await db.select({ title: booksTable.title }).from(booksTable).where(eq(booksTable.id, bookId));
+      res.status(400).json({
+        error: `مجوز کافی برای کتاب «${book?.title ?? bookId}» وجود ندارد. خریداری‌شده: ${purchased}، در حال استفاده: ${used}، باقی‌مانده: ${remaining}، نیاز دارد: ${classStudentCount}`,
+        purchased, used, remaining, required: classStudentCount,
+      });
+      return;
+    }
+  }
+
   await db.insert(classBooksTable).values({ classId, bookId }).onConflictDoNothing();
   res.status(201).json({ ok: true });
 });

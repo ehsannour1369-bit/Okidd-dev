@@ -5,6 +5,7 @@ import { Link } from "wouter";
 import { BookMarked, Users, GraduationCap, Bell, ClipboardList, GitBranch, MapPin, Building2, LayoutDashboard } from "lucide-react";
 import { useEffect, useState } from "react";
 import PageTopBar from "../../components/PageTopBar";
+import BookLicenseSummary from "../../components/BookLicenseSummary";
 
 interface BranchInfo { id: number; name: string; address?: string; schoolId: number; school?: { id: number; name: string }; }
 interface BranchAssignment { id: number; branchId: number; academicYear: string; isActive: boolean; branch: BranchInfo | null; school: { id: number; name: string } | null; }
@@ -152,8 +153,21 @@ export default function BranchDashboard() {
           })}
         </div>
 
+        {/* Book License Summary */}
+        {schoolId && (
+          <div style={{ background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)", borderRadius: 20, padding: "18px 20px", border: "1px solid rgba(13,148,136,0.18)", boxShadow: "0 4px 20px rgba(13,148,136,0.10)", marginBottom: 24, ...cardAnim(8) }}>
+            <BookLicenseSummary
+              schoolId={schoolId}
+              branchId={assignment?.branch?.id ?? user?.branchId ?? undefined}
+              accentColor={P}
+              accentDark="#0f766e"
+              title="وضعیت مجوزهای کتاب این شعبه"
+            />
+          </div>
+        )}
+
         {/* Quick links */}
-        <div style={cardAnim(8)}>
+        <div style={cardAnim(9)}>
           <h2 style={{ fontSize: 15, fontWeight: 800, color: "#134e4a", marginBottom: 12 }}>دسترسی سریع</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>
             {QUICK_LINKS.map((item, idx) => {

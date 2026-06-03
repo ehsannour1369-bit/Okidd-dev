@@ -8,6 +8,7 @@ import {
 import PageTopBar from "../../components/PageTopBar";
 import { useRef, useState, useEffect } from "react";
 import DashCarousel, { CarouselCard } from "../../components/DashCarousel";
+import BookLicenseSummary from "../../components/BookLicenseSummary";
 
 interface SchoolStats {
   totalBranches: number; totalClasses: number;
@@ -151,6 +152,18 @@ export default function SchoolDashboard() {
         ) : (
           <div style={anim(2)}>
             <DashCarousel cards={cards} accentColor={P} accentDark={PD} />
+          </div>
+        )}
+
+        {/* Book License Summary */}
+        {user?.schoolId && (
+          <div style={{ background: "rgba(255,255,255,0.65)", backdropFilter: "blur(12px)", borderRadius: 20, padding: "18px 20px", border: `1px solid ${P}22`, boxShadow: `0 4px 20px ${P}14`, marginTop: 20, ...anim(3) }}>
+            <BookLicenseSummary
+              schoolId={user.schoolId}
+              accentColor={P}
+              accentDark={PD}
+              title="وضعیت مجوزهای کتاب مدرسه"
+            />
           </div>
         )}
       </div>
