@@ -6,7 +6,7 @@ import { useState } from "react";
 import {
   Clock, Star, GraduationCap, Users, BookOpen, UserRound,
   BarChart2, X, Trophy, Brain, Gamepad2, Film, Dumbbell, Zap,
-  type LucideIcon,
+  CheckCircle2, type LucideIcon,
 } from "lucide-react";
 
 type ReportTab = "teachers" | "students" | "classes";
@@ -45,12 +45,26 @@ const tdStyle: React.CSSProperties = {
   verticalAlign: "middle",
 };
 
+const AC = "#7c3aed";
+const AL = "#a855f7";
+
+function ProgressBar({ pct, color = AC }: { pct: number; color?: string }) {
+  return (
+    <div style={{ height: 5, background: "rgba(99,102,241,0.12)", borderRadius: 999, overflow: "hidden", width: 80 }}>
+      <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg,${color},#10b981)`, borderRadius: 999 }} />
+    </div>
+  );
+}
+
 export default function SchoolReport() {
   const { user } = useAuthStore();
   const [tab, setTab]             = useState<ReportTab>("teachers");
   const [studentSearch, setStudentSearch] = useState("");
   const [teacherSearch, setTeacherSearch] = useState("");
   const [detailStudent, setDetailStudent] = useState<any>(null);
+  const [detailTeacher, setDetailTeacher] = useState<any>(null);
+  const [detailClassId, setDetailClassId] = useState<number | null>(null);
+  const [detailClassMeta, setDetailClassMeta] = useState<{ name: string; count: number } | null>(null);
   const [sortBy, setSortBy]       = useState<"score" | "time" | "lessons">("score");
 
   const { data: teachers = [], isLoading: loadingTeachers } = useQuery<any[]>({
@@ -68,6 +82,11 @@ export default function SchoolReport() {
     queryFn:  () => api.get(`/student-scores-breakdown?studentId=${detailStudent?.id}`),
     enabled:  !!detailStudent?.id,
   });
+  const { data: classDetail = [], isLoading: loadingClassDetail } = useQuery<any[]>({
+    queryKey: ["class-detail", detailClassId],
+    queryFn:  () => api.get(`/school-report/class-detail?classId=${detailClassId}`),
+    enabled:  !!detailClassId,
+  });
 
   const filteredTeachers = teachers.filter(t =>
     !teacherSearch || t.name?.includes(teacherSearch) || t.email?.includes(teacherSearch) || t.phone?.includes(teacherSearch)
@@ -82,7 +101,6 @@ export default function SchoolReport() {
       return donB - donA;
     });
 
-  /* ── Class aggregation ── */
   const classMap: Record<string, any[]> = {};
   for (const s of students) {
     const key = s.className ?? "بدون کلاس";
@@ -98,7 +116,7 @@ export default function SchoolReport() {
       return s + (total > 0 ? (completed / total) * 100 : 0);
     }, 0) / sts.length) : 0;
     const top = [...sts].sort((a, b) => b.totalScore - a.totalScore)[0];
-    return { name, count: sts.length, avgScore, avgTime, avgCompletion, topStudent: top };
+    return { name, classId: (sts[0]?.classId ?? null) as number | null, count: sts.length, avgScore, avgTime, avgCompletion, topStudent: top };
   }).sort((a, b) => b.avgScore - a.avgScore);
 
   const tabBtn = (label: string, value: ReportTab, Icon: LucideIcon) => (
@@ -123,7 +141,6 @@ export default function SchoolReport() {
         <p style={{ color: "#4f46e5", fontSize: 14, marginTop: 4 }}>گزارش کامل عملکرد معلمان، دانش‌آموزان و کلاس‌ها</p>
       </div>
 
-      {/* Tabs */}
       <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap" }}>
         {tabBtn("گزارش معلمان", "teachers", GraduationCap)}
         {tabBtn("گزارش دانش‌آموزان", "students", Users)}
@@ -136,6 +153,7 @@ export default function SchoolReport() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 12, flexWrap: "wrap" }}>
             <span style={{ color: "#3730a3", fontSize: 14, display: "flex", alignItems: "center", gap: 6 }}>
               <GraduationCap size={15} color="#f59e0b" /> {filteredTeachers.length} معلم
+              <span style={{ color: "#9ca3af", fontSize: 12, fontWeight: 400 }}>— برای جزئیات کلیک کنید</span>
             </span>
             <input value={teacherSearch} onChange={e => setTeacherSearch(e.target.value)} placeholder="جستجوی معلم..."
               style={{ background: "rgba(255,255,255,0.80)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, padding: "8px 14px", color: "#1e1b4b", fontFamily: "Vazirmatn, sans-serif", fontSize: 13, outline: "none", width: 220 }} />
@@ -147,7 +165,11 @@ export default function SchoolReport() {
                   <thead><tr>{["معلم", "کلاس‌ها", "دانش‌آموزان", "میانگین امتیاز", "پیشرفت درسی", "آخرین ورود"].map(h => <th key={h} style={thStyle}>{h}</th>)}</tr></thead>
                   <tbody>
                     {filteredTeachers.map((t: any) => (
-                      <tr key={t.id} onMouseOver={e => (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.06)"} onMouseOut={e => (e.currentTarget as HTMLElement).style.background = ""}>
+                      <tr key={t.id}
+                        onClick={() => { setDetailTeacher(detailTeacher?.id === t.id ? null : t); setDetailClassId(null); setDetailStudent(null); }}
+                        style={{ cursor: "pointer", background: detailTeacher?.id === t.id ? "rgba(124,58,237,0.07)" : "" }}
+                        onMouseOver={e => { if (detailTeacher?.id !== t.id) (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.04)"; }}
+                        onMouseOut={e => { if (detailTeacher?.id !== t.id) (e.currentTarget as HTMLElement).style.background = ""; }}>
                         <td style={tdStyle}>
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                             <div style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(135deg,#f59e0b,#fbbf24)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: "#1a1a2e", flexShrink: 0 }}>{t.name?.[0] ?? "م"}</div>
@@ -181,12 +203,8 @@ export default function SchoolReport() {
                         </td>
                         <td style={tdStyle}>
                           <div>
-                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                              <span style={{ fontSize: 12, color: "#4f46e5", fontWeight: 700 }}>{t.avgCompletion ?? 0}%</span>
-                            </div>
-                            <div style={{ height: 5, background: "rgba(99,102,241,0.12)", borderRadius: 999, overflow: "hidden", width: 80 }}>
-                              <div style={{ height: "100%", width: `${t.avgCompletion ?? 0}%`, background: "linear-gradient(90deg,#7c3aed,#10b981)", borderRadius: 999 }} />
-                            </div>
+                            <div style={{ fontSize: 12, color: "#4f46e5", fontWeight: 700, marginBottom: 3 }}>{t.avgCompletion ?? 0}%</div>
+                            <ProgressBar pct={t.avgCompletion ?? 0} />
                           </div>
                         </td>
                         <td style={tdStyle}>
@@ -241,7 +259,7 @@ export default function SchoolReport() {
                       const overallPct   = totalLessons > 0 ? Math.round((doneLessons / totalLessons) * 100) : 0;
                       return (
                         <tr key={s.id}
-                          onClick={() => setDetailStudent(detailStudent?.id === s.id ? null : s)}
+                          onClick={() => { setDetailStudent(detailStudent?.id === s.id ? null : s); setDetailTeacher(null); setDetailClassId(null); }}
                           style={{ cursor: "pointer" }}
                           onMouseOver={e => (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.06)"}
                           onMouseOut={e => (e.currentTarget as HTMLElement).style.background = detailStudent?.id === s.id ? "rgba(124,58,237,0.10)" : ""}
@@ -309,14 +327,17 @@ export default function SchoolReport() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
               {classData.map((cls, idx) => {
                 const rankColor = idx === 0 ? "#f59e0b" : idx === 1 ? "#94a3b8" : idx === 2 ? "#d97706" : "#6366f1";
+                const isSelected = detailClassId === cls.classId;
                 return (
-                  <div key={cls.name} style={{ background: "rgba(255,255,255,0.97)", borderRadius: 18, border: "1px solid rgba(139,92,246,0.20)", padding: 20, boxShadow: "0 4px 20px rgba(99,102,241,0.08)", transition: "transform 0.2s, box-shadow 0.2s" }}
-                    onMouseOver={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 28px rgba(99,102,241,0.15)"; }}
-                    onMouseOut={e => { (e.currentTarget as HTMLElement).style.transform = ""; (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 20px rgba(99,102,241,0.08)"; }}
+                  <div key={cls.name}
+                    onClick={() => { if (cls.classId) { setDetailClassId(isSelected ? null : cls.classId); setDetailClassMeta({ name: cls.name, count: cls.count }); setDetailTeacher(null); setDetailStudent(null); } }}
+                    style={{ background: "rgba(255,255,255,0.97)", borderRadius: 18, border: `1.5px solid ${isSelected ? AC : "rgba(139,92,246,0.20)"}`, padding: 20, boxShadow: isSelected ? `0 8px 28px ${AC}22` : "0 4px 20px rgba(99,102,241,0.08)", transition: "transform 0.2s, box-shadow 0.2s", cursor: cls.classId ? "pointer" : "default" }}
+                    onMouseOver={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"; }}
+                    onMouseOut={e => { (e.currentTarget as HTMLElement).style.transform = ""; }}
                   >
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <div style={{ width: 38, height: 38, borderRadius: 12, background: `linear-gradient(135deg,${rankColor}33,${rankColor}18)`, border: `1.5px solid ${rankColor}44`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <div style={{ width: 38, height: 38, borderRadius: 12, background: `${rankColor}22`, border: `1.5px solid ${rankColor}44`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                           {idx < 3 ? <Trophy size={18} color={rankColor} /> : <BarChart2 size={18} color={rankColor} />}
                         </div>
                         <div>
@@ -340,7 +361,6 @@ export default function SchoolReport() {
                         </div>
                       ))}
                     </div>
-                    {/* Progress bar */}
                     <div>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
                         <span style={{ fontSize: 11, color: "#6b7280" }}>میانگین پیشرفت</span>
@@ -362,6 +382,11 @@ export default function SchoolReport() {
                         </div>
                       </div>
                     )}
+                    {cls.classId && (
+                      <div style={{ marginTop: 10, fontSize: 11, color: isSelected ? AC : "#9ca3af", textAlign: "center" }}>
+                        {isSelected ? "← برای بستن کلیک کنید" : "کلیک برای جزئیات درس‌ها ←"}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -370,7 +395,7 @@ export default function SchoolReport() {
         </div>
       )}
 
-      {/* ── Student Detail Panel (slide-in from left in RTL) ── */}
+      {/* ── Student Detail Panel ── */}
       {detailStudent && (
         <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", justifyContent: "flex-end" }} dir="rtl">
           <div onClick={() => setDetailStudent(null)} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.40)", backdropFilter: "blur(3px)" }} />
@@ -381,8 +406,6 @@ export default function SchoolReport() {
                 <X size={16} color="#4f46e5" />
               </button>
             </div>
-
-            {/* Student profile */}
             <div style={{ background: "linear-gradient(135deg,#7c3aed,#a855f7)", borderRadius: 16, padding: "16px 18px", color: "white" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{ width: 44, height: 44, borderRadius: 14, background: "rgba(255,255,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -405,8 +428,6 @@ export default function SchoolReport() {
                 ))}
               </div>
             </div>
-
-            {/* Score breakdown */}
             {breakdown && (breakdown.total ?? 0) > 0 && (
               <div style={{ background: "rgba(255,255,255,0.90)", borderRadius: 14, padding: 16, border: "1px solid rgba(99,102,241,0.15)" }}>
                 <div style={{ fontWeight: 700, fontSize: 13, color: "#3730a3", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
@@ -439,8 +460,6 @@ export default function SchoolReport() {
                 </div>
               </div>
             )}
-
-            {/* Book progress detail */}
             {detailStudent.bookProgress?.length > 0 && (
               <div style={{ background: "rgba(255,255,255,0.90)", borderRadius: 14, padding: 16, border: "1px solid rgba(99,102,241,0.15)" }}>
                 <div style={{ fontWeight: 700, fontSize: 13, color: "#3730a3", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
@@ -464,10 +483,165 @@ export default function SchoolReport() {
                 </div>
               </div>
             )}
-
             <div style={{ fontSize: 12, color: "#6b7280", textAlign: "center", paddingBottom: 8 }}>
               آخرین حضور: {fmtDate(detailStudent.lastPresenceAt)}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Teacher Detail Panel ── */}
+      {detailTeacher && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", justifyContent: "flex-end" }} dir="rtl">
+          <div onClick={() => setDetailTeacher(null)} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.40)", backdropFilter: "blur(3px)" }} />
+          <div style={{ position: "relative", zIndex: 1, width: 400, maxWidth: "95vw", background: "linear-gradient(160deg,#fffbeb,#fef3c7,#fff1f2)", overflowY: "auto", boxShadow: "-8px 0 40px rgba(245,158,11,0.22)", padding: "24px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ fontWeight: 800, fontSize: 16, color: "#1e1b4b" }}>گزارش معلم — کلاس به کلاس</div>
+              <button onClick={() => setDetailTeacher(null)} style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.30)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                <X size={16} color="#d97706" />
+              </button>
+            </div>
+            {/* Teacher profile */}
+            <div style={{ background: "linear-gradient(135deg,#f59e0b,#d97706)", borderRadius: 16, padding: "16px 18px", color: "white" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 46, height: 46, borderRadius: 14, background: "rgba(255,255,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 800 }}>{detailTeacher.name?.[0]}</div>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: 16 }}>{detailTeacher.name}</div>
+                  <div style={{ fontSize: 12, opacity: 0.85, direction: "ltr" }}>{detailTeacher.email}</div>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 16, marginTop: 14 }}>
+                {[
+                  { label: "کلاس‌ها", value: (detailTeacher.classIds?.length ?? 0).toLocaleString("fa-IR") },
+                  { label: "دانش‌آموزان", value: (detailTeacher.studentCount ?? 0).toLocaleString("fa-IR") },
+                  { label: "میانگین امتیاز", value: (detailTeacher.avgScore ?? 0).toLocaleString("fa-IR") },
+                  { label: "پیشرفت کلی", value: `${detailTeacher.avgCompletion ?? 0}%` },
+                ].map(s => (
+                  <div key={s.label}>
+                    <div style={{ fontSize: 15, fontWeight: 800, color: "#fef9c3" }}>{s.value}</div>
+                    <div style={{ fontSize: 10, opacity: 0.80 }}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Class breakdown */}
+            {(detailTeacher.classBreakdown ?? []).length === 0 ? (
+              <div style={{ textAlign: "center", color: "#9ca3af", padding: 24, fontSize: 13 }}>این معلم به کلاسی اختصاص داده نشده</div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {(detailTeacher.classBreakdown ?? []).map((cls: any) => (
+                  <div key={cls.classId} style={{ background: "rgba(255,255,255,0.90)", borderRadius: 14, padding: 16, border: "1px solid rgba(245,158,11,0.25)" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: "#1e1b4b", display: "flex", alignItems: "center", gap: 6 }}>
+                        <span style={{ width: 8, height: 8, borderRadius: "50%", background: AC, display: "inline-block" }} />
+                        {cls.className}
+                      </div>
+                      <span style={{ fontSize: 12, color: "#6b7280", display: "flex", alignItems: "center", gap: 4 }}>
+                        <Users size={12} /> {cls.studentCount} نفر
+                      </span>
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
+                      <div style={{ background: "rgba(245,158,11,0.08)", borderRadius: 10, padding: "8px 10px" }}>
+                        <div style={{ fontWeight: 800, fontSize: 16, color: "#d97706", display: "flex", alignItems: "center", gap: 4 }}>
+                          <Star size={13} /> {(cls.avgScore ?? 0).toLocaleString("fa-IR")}
+                        </div>
+                        <div style={{ fontSize: 10, color: "#92400e" }}>میانگین امتیاز</div>
+                      </div>
+                      <div style={{ background: "rgba(16,185,129,0.08)", borderRadius: 10, padding: "8px 10px" }}>
+                        <div style={{ fontWeight: 800, fontSize: 16, color: "#059669" }}>{cls.avgCompletion ?? 0}%</div>
+                        <div style={{ fontSize: 10, color: "#065f46" }}>پیشرفت درسی</div>
+                      </div>
+                    </div>
+                    <div style={{ height: 5, background: "rgba(245,158,11,0.15)", borderRadius: 999, overflow: "hidden", marginBottom: 10 }}>
+                      <div style={{ height: "100%", width: `${cls.avgCompletion ?? 0}%`, background: "linear-gradient(90deg,#f59e0b,#10b981)", borderRadius: 999 }} />
+                    </div>
+                    {(cls.books ?? []).length > 0 && (
+                      <div>
+                        <div style={{ fontSize: 11, color: "#78350f", fontWeight: 700, marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}>
+                          <BookOpen size={11} /> کتاب‌های این کلاس:
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                          {cls.books.map((bk: any) => (
+                            <div key={bk.bookId} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "5px 10px", background: "rgba(99,102,241,0.07)", borderRadius: 8 }}>
+                              <span style={{ fontSize: 12, color: "#1e1b4b", fontWeight: 600 }}>{bk.bookTitle}</span>
+                              <span style={{ fontSize: 11, color: "#6366f1" }}>{bk.lessonCount} درس</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Class Detail Panel ── */}
+      {detailClassId && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", justifyContent: "flex-end" }} dir="rtl">
+          <div onClick={() => setDetailClassId(null)} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.40)", backdropFilter: "blur(3px)" }} />
+          <div style={{ position: "relative", zIndex: 1, width: 440, maxWidth: "95vw", background: "linear-gradient(160deg,#f5f3ff,#ede9fe)", overflowY: "auto", boxShadow: "-8px 0 40px rgba(99,102,241,0.22)", padding: "24px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: 16, color: "#1e1b4b" }}>جزئیات کلاس — درس به درس</div>
+                {detailClassMeta && <div style={{ fontSize: 12, color: "#4f46e5", marginTop: 2 }}>{detailClassMeta.name} — {detailClassMeta.count} دانش‌آموز</div>}
+              </div>
+              <button onClick={() => setDetailClassId(null)} style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(99,102,241,0.10)", border: "1px solid rgba(99,102,241,0.20)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                <X size={16} color={AC} />
+              </button>
+            </div>
+            {loadingClassDetail ? (
+              <div style={{ textAlign: "center", color: "#4f46e5", padding: 40 }}>در حال بارگذاری...</div>
+            ) : classDetail.length === 0 ? (
+              <div style={{ textAlign: "center", color: "#9ca3af", padding: 32, fontSize: 13 }}>درسی برای این کلاس ثبت نشده</div>
+            ) : classDetail.map((book: any) => (
+              <div key={book.bookId} style={{ background: "rgba(255,255,255,0.90)", borderRadius: 14, padding: 16, border: "1px solid rgba(99,102,241,0.15)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                  <div style={{ width: 34, height: 34, borderRadius: 10, background: "linear-gradient(135deg,#7c3aed,#a855f7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <BookOpen size={16} color="white" />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: "#1e1b4b" }}>{book.bookTitle}</div>
+                    <div style={{ fontSize: 11, color: "#4f46e5" }}>{book.lessons?.length ?? 0} درس — {book.totalStudents} دانش‌آموز</div>
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {(book.lessons ?? []).map((lesson: any, li: number) => {
+                    const pct = lesson.completionPct ?? 0;
+                    const barColor = pct >= 75 ? "#10b981" : pct >= 40 ? "#f59e0b" : "#ef4444";
+                    return (
+                      <div key={lesson.lessonId} style={{ padding: "8px 10px", background: "rgba(245,243,255,0.70)", borderRadius: 10, border: "1px solid rgba(139,92,246,0.12)" }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <span style={{ width: 20, height: 20, borderRadius: 6, background: `${barColor}18`, border: `1px solid ${barColor}44`, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 800, color: barColor, flexShrink: 0 }}>
+                              {(li + 1).toLocaleString("fa-IR")}
+                            </span>
+                            <span style={{ fontSize: 12, color: "#1e1b4b", fontWeight: 600 }}>{lesson.lessonTitle}</span>
+                          </div>
+                          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                            {lesson.avgScore > 0 && (
+                              <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 2 }}>
+                                <Star size={10} />{lesson.avgScore.toLocaleString("fa-IR")}
+                              </span>
+                            )}
+                            <div style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 11 }}>
+                              <CheckCircle2 size={12} color={barColor} />
+                              <span style={{ color: barColor, fontWeight: 700 }}>{lesson.completedCount}/{book.totalStudents}</span>
+                              <span style={{ color: "#6b7280" }}>({pct}%)</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{ height: 4, background: `${barColor}18`, borderRadius: 999, overflow: "hidden" }}>
+                          <div style={{ height: "100%", width: `${pct}%`, background: barColor, borderRadius: 999, transition: "width 0.5s" }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
