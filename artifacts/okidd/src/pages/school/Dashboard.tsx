@@ -6,7 +6,6 @@ import {
   GitBranch, Bell, ClipboardList, BarChart2,
 } from "lucide-react";
 import PageTopBar from "../../components/PageTopBar";
-import ProfilePanel from "../../components/ProfilePanel";
 import { useState, useEffect } from "react";
 import DashCarousel, { CarouselCard } from "../../components/DashCarousel";
 import BookLicenseSummary from "../../components/BookLicenseSummary";
@@ -68,7 +67,6 @@ export default function SchoolDashboard() {
             <h1 style={{ fontSize: 20, fontWeight: 900, color: "#1e1b4b", margin: 0 }}>داشبورد مدرسه</h1>
             <div style={{ fontSize: 13, color: "#3730a3", marginTop: 2 }}>سلام، <strong>{user?.name}</strong></div>
           </div>
-          <ProfilePanel accent={P} dark={PD} />
         </div>
 
         {/* Carousel */}

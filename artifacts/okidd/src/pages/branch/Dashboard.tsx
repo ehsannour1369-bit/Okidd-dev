@@ -5,7 +5,6 @@ import { Link } from "wouter";
 import { BookMarked, Users, GraduationCap, Bell, ClipboardList, GitBranch, MapPin, Building2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import PageTopBar from "../../components/PageTopBar";
-import ProfilePanel from "../../components/ProfilePanel";
 import BookLicenseSummary from "../../components/BookLicenseSummary";
 
 interface BranchInfo { id: number; name: string; address?: string; schoolId: number; school?: { id: number; name: string }; }
@@ -105,7 +104,6 @@ export default function BranchDashboard() {
             <h1 style={{ fontSize: 22, fontWeight: 900, color: "#134e4a", margin: 0 }}>داشبورد مدیر شعبه</h1>
             <p style={{ color: "#0f766e", fontSize: 13, margin: 0 }}>مدیریت شعبه و کلاس‌های زیرمجموعه</p>
           </div>
-          <ProfilePanel accent={P} dark="#0f766e" />
         </div>
 
         {/* Branch info card — colored */}

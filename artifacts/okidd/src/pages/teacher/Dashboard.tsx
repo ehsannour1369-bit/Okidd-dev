@@ -9,7 +9,6 @@ import {
   BarChart2, Clock, Star, GraduationCap, TrendingUp, UserRound,
   Bell,
 } from "lucide-react";
-import ProfilePanel from "../../components/ProfilePanel";
 
 const AMBER   = "#f59e0b";
 const AMBER_D = "#d97706";
@@ -165,7 +164,6 @@ export default function TeacherDashboard() {
                 </span>
               )}
             </button>
-            <ProfilePanel accent={AMBER} dark={AMBER_D} />
           </div>
         </div>
 

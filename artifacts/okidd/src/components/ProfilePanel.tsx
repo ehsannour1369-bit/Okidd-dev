@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "../store/auth";
 import { api } from "../lib/api";
@@ -36,7 +36,7 @@ export default function ProfilePanel({ accent, dark }: ProfilePanelProps) {
   const logoRef   = useRef<HTMLInputElement>(null);
   const sheetRef  = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (open && sheetRef.current) sheetRef.current.scrollTop = 0;
   }, [open]);
 

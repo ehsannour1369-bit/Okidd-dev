@@ -4,7 +4,8 @@ import { useSidebar } from "../contexts/SidebarContext";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { useNotificationReads } from "../hooks/useNotificationReads";
-import { Menu, ChevronRight, Bell, LogOut, Wallet } from "lucide-react";
+import { Menu, ChevronRight, Bell, Wallet } from "lucide-react";
+import ProfilePanel from "./ProfilePanel";
 
 const CFG: Record<string, {
   accent: string; dark: string;
@@ -147,19 +148,7 @@ export default function PageTopBar() {
             </button>
           </Link>
         )}
-        <button
-          onClick={logout}
-          title="خروج"
-          style={{
-            display: "flex", alignItems: "center", gap: 5,
-            padding: "8px 12px", borderRadius: 11,
-            background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.30)",
-            color: "#dc2626", cursor: "pointer", fontSize: 13,
-            fontFamily: "Vazirmatn, sans-serif", fontWeight: 600,
-          }}
-        >
-          <LogOut size={15} />
-        </button>
+        <ProfilePanel accent={accent} dark={dark} />
       </div>
     </div>
   );

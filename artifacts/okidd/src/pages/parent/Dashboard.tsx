@@ -7,7 +7,6 @@ import {
   Bell, BookOpen, Clock, Star, Calendar,
   Trophy, Heart, UserRound, Users,
 } from "lucide-react";
-import ProfilePanel from "../../components/ProfilePanel";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 
@@ -180,7 +179,6 @@ export default function ParentDashboard() {
                 </span>
               )}
             </button>
-            <ProfilePanel accent={accent} dark={accentDark} />
           </div>
         </div>
 
