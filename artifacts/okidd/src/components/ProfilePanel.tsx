@@ -1,4 +1,5 @@
 import { useState, useRef, useLayoutEffect } from "react";
+import { createPortal } from "react-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "../store/auth";
 import { api } from "../lib/api";
@@ -141,7 +142,7 @@ export default function ProfilePanel({ accent, dark }: ProfilePanelProps) {
       </button>
 
       {/* ── Backdrop + Sheet ── */}
-      {open && (
+      {open && createPortal(
         <>
           {/* backdrop */}
           <div
@@ -409,7 +410,8 @@ export default function ProfilePanel({ accent, dark }: ProfilePanelProps) {
           </div>
 
           <style>{`@keyframes ppSpin{to{transform:rotate(360deg)}}`}</style>
-        </>
+        </>,
+        document.body
       )}
     </>
   );
