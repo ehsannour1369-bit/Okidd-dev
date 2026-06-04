@@ -28,9 +28,13 @@ html {
 
 body {
   background: var(--purple-darkest);
-  color: var(--text-primary);
+  color: #1e1b4b;
   min-height: 100vh;
   margin: 0;
+}
+
+input, select, textarea, button {
+  color: inherit;
 }
 
 body::before {
