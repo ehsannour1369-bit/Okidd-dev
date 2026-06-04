@@ -17,3 +17,4 @@ export * from "./consultants";
 export * from "./consultations";
 export * from "./gameScores";
 export * from "./notificationReplies";
+export * from "./studentEnrollments";

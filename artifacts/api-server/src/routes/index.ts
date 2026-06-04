@@ -23,6 +23,7 @@ import consultationsRouter from "./consultations";
 import gameScoresRouter from "./gameScores";
 import schoolReportRouter from "./schoolReport";
 import schoolTeachersRouter from "./schoolTeachers";
+import studentEnrollmentsRouter from "./studentEnrollments";
 
 const router: IRouter = Router();
 
@@ -50,5 +51,6 @@ router.use(consultationsRouter);
 router.use(gameScoresRouter);
 router.use(schoolReportRouter);
 router.use(schoolTeachersRouter);
+router.use(studentEnrollmentsRouter);
 
 export default router;

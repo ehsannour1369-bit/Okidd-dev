@@ -1,3 +1,4 @@
 - [game_scores DB mismatch](game-scores-schema.md) — DB column was `game_name` (text), schema expects `game_type` (varchar 50); fixed via ALTER TABLE RENAME.
 - [studentProgress duplicate records](student-progress-dedup.md) — studentProgress table can have duplicate rows per (studentId, lessonId); always deduplicate before counting completions or completionPct will exceed 100%.
 - [shop-wallet system complete](shop-wallet-complete.md) — book_orders, book_order_items, wallets, wallet_transactions tables + all routes + all school/branch/admin pages fully built.
+- [student-enrollments system](student-enrollments.md) — year-based student-school membership via student_enrollments table; mirrors branch_managers pattern; users.schoolId kept in sync as active-school cache.
