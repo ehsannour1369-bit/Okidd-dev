@@ -33,6 +33,13 @@ export const classBooksTable = pgTable("class_books", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const schoolTeachersTable = pgTable("school_teachers", {
+  id: serial("id").primaryKey(),
+  schoolId: integer("school_id").notNull(),
+  teacherId: integer("teacher_id").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const insertClassSchema = createInsertSchema(classesTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertClass = z.infer<typeof insertClassSchema>;
 export type Class = typeof classesTable.$inferSelect;

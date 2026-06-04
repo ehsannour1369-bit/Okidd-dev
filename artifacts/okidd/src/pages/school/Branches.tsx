@@ -52,7 +52,7 @@ export default function SchoolBranches() {
   const [classManage, setClassManage] = useState<any>(null);
   const [classTab, setClassTab] = useState<Tab>("books");
 
-  const [bForm, setBForm] = useState({ name: "", address: "" });
+  const [bForm, setBForm] = useState({ name: "", address: "", managerName: "", managerPhone: "", managerNationalId: "" });
   const [glForm, setGLForm] = useState({ name: "" });
   const [grForm, setGrForm] = useState({ name: "" });
   const [clForm, setClForm] = useState({ name: "", capacity: "30" });
@@ -66,14 +66,14 @@ export default function SchoolBranches() {
   const { data: classes = [] } = useQuery<any[]>({ queryKey: ["classes"], queryFn: () => api.get("/classes") });
   const { data: allBooks = [] } = useQuery<any[]>({ queryKey: ["books"], queryFn: () => api.get("/books") });
   const { data: schoolStudents = [] } = useQuery<any[]>({ queryKey: ["users", "student", schoolId], queryFn: () => api.get(`/users?role=student&schoolId=${schoolId}`), enabled: !!schoolId });
-  const { data: schoolTeachers = [] } = useQuery<any[]>({ queryKey: ["users", "teacher", schoolId], queryFn: () => api.get(`/users?role=teacher&schoolId=${schoolId}`), enabled: !!schoolId });
+  const { data: schoolTeachers = [] } = useQuery<any[]>({ queryKey: ["school-teachers", schoolId], queryFn: () => api.get(`/school-teachers?schoolId=${schoolId}`), enabled: !!schoolId });
   const { data: classBooks = [] } = useQuery<any[]>({ queryKey: ["class-books", classManage?.id], queryFn: () => api.get(`/classes/${classManage?.id}/books`), enabled: !!classManage?.id });
   const { data: classStudents = [] } = useQuery<any[]>({ queryKey: ["class-students", classManage?.id], queryFn: () => api.get(`/classes/${classManage?.id}/students`), enabled: !!classManage?.id });
   const { data: classTeachers = [] } = useQuery<any[]>({ queryKey: ["class-teachers", classManage?.id], queryFn: () => api.get(`/classes/${classManage?.id}/teachers`), enabled: !!classManage?.id });
 
   const inv = (keys: string[][]) => keys.forEach(k => qc.invalidateQueries({ queryKey: k }));
 
-  const addBranchMut = useMutation({ mutationFn: (d: any) => api.post("/branches", { ...d, schoolId }), onSuccess: () => { inv([["branches", String(schoolId)]]); setAddBranchOpen(false); setBForm({ name: "", address: "" }); showToast("شعبه با موفقیت ایجاد شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا در ایجاد شعبه", "error") });
+  const addBranchMut = useMutation({ mutationFn: (d: any) => api.post("/branches", { ...d, schoolId }), onSuccess: () => { inv([["branches", String(schoolId)]]); setAddBranchOpen(false); setBForm({ name: "", address: "", managerName: "", managerPhone: "", managerNationalId: "" }); showToast("شعبه با موفقیت ایجاد شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا در ایجاد شعبه", "error") });
   const delBranchMut = useMutation({ mutationFn: (id: number) => api.delete(`/branches/${id}`), onSuccess: () => { inv([["branches", String(schoolId)]]); showToast("شعبه حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
   const addGLMut = useMutation({ mutationFn: (d: any) => api.post("/grade-levels", d), onSuccess: () => { inv([["grade-levels"]]); setAddGLFor(null); setGLForm({ name: "" }); showToast("مقطع تحصیلی اضافه شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا", "error") });
   const delGLMut = useMutation({ mutationFn: (id: number) => api.delete(`/grade-levels/${id}`), onSuccess: () => { inv([["grade-levels"]]); showToast("مقطع حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
@@ -116,7 +116,7 @@ export default function SchoolBranches() {
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1e1b4b", margin: 0 }}>مدیریت شعبه‌ها</h1>
           <p style={{ color: "#4f46e5", fontSize: 14, marginTop: 4 }}>{branches.length} شعبه</p>
         </div>
-        <button onClick={() => { setBForm({ name: "", address: "" }); setAddBranchOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", background: "linear-gradient(135deg, #7c3aed, #a855f7)", border: "none", borderRadius: 10, color: "white", fontSize: 14, fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>
+        <button onClick={() => { setBForm({ name: "", address: "", managerName: "", managerPhone: "", managerNationalId: "" }); setAddBranchOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", background: "linear-gradient(135deg, #7c3aed, #a855f7)", border: "none", borderRadius: 10, color: "white", fontSize: 14, fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>
           <Plus size={16} /> افزودن شعبه
         </button>
       </div>
@@ -133,6 +133,16 @@ export default function SchoolBranches() {
                 <div>
                   <div style={{ fontWeight: 700, color: "#1e1b4b", fontSize: 15 }}>📍 {branch.name}</div>
                   {branch.address && <div style={{ color: "#4f46e5", fontSize: 12, marginTop: 2 }}>{branch.address}</div>}
+                  {branch.manager
+                    ? <div style={{ color: "#059669", fontSize: 12, marginTop: 3, display: "flex", alignItems: "center", gap: 5 }}>
+                        <span>👤</span>
+                        <span>{branch.manager.name}</span>
+                        {branch.manager.phone && <span style={{ color: "#9ca3af" }}>· {branch.manager.phone}</span>}
+                      </div>
+                    : branch.managerName
+                      ? <div style={{ color: "#d97706", fontSize: 12, marginTop: 3 }}>👤 {branch.managerName} {branch.managerPhone && `· ${branch.managerPhone}`}</div>
+                      : <div style={{ color: "#9ca3af", fontSize: 12, marginTop: 3 }}>مدیر تعریف نشده</div>
+                  }
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ background: "rgba(59,130,246,0.15)", border: "1px solid rgba(59,130,246,0.3)", borderRadius: 999, padding: "2px 10px", fontSize: 12, color: "#60a5fa" }}>{bGLs.length} مقطع</span>
@@ -324,9 +334,18 @@ export default function SchoolBranches() {
       {/* Add Branch Modal */}
       {addBranchOpen && (
         <Modal title="افزودن شعبه" onClose={() => setAddBranchOpen(false)}>
-          <Lbl label="نام شعبه"><input value={bForm.name} onChange={e => setBForm({ ...bForm, name: e.target.value })} style={IS} placeholder="مثال: شعبه مرکزی" /></Lbl>
+          <Lbl label="نام شعبه *"><input value={bForm.name} onChange={e => setBForm({ ...bForm, name: e.target.value })} style={IS} placeholder="مثال: شعبه مرکزی" /></Lbl>
           <Lbl label="آدرس"><input value={bForm.address} onChange={e => setBForm({ ...bForm, address: e.target.value })} style={IS} /></Lbl>
-          <SaveBtn onClick={() => addBranchMut.mutate(bForm)} disabled={!bForm.name} />
+          <div style={{ margin: "16px 0 10px", padding: "12px 14px", background: "rgba(99,102,241,0.07)", borderRadius: 10, border: "1px solid rgba(99,102,241,0.15)" }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#4f46e5", marginBottom: 10 }}>👤 مشخصات مدیر شعبه (اختیاری)</div>
+            <Lbl label="نام مدیر"><input value={bForm.managerName} onChange={e => setBForm({ ...bForm, managerName: e.target.value })} style={IS} placeholder="نام و نام‌خانوادگی" /></Lbl>
+            <Lbl label="شماره تلفن"><input value={bForm.managerPhone} onChange={e => setBForm({ ...bForm, managerPhone: e.target.value })} style={IS} placeholder="09..." /></Lbl>
+            <Lbl label="کد ملی">
+              <input value={bForm.managerNationalId} onChange={e => setBForm({ ...bForm, managerNationalId: e.target.value })} style={IS} placeholder="کد ملی (رمز اولیه)" />
+              <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 4 }}>رمز ورود اولیه = کد ملی · ورود با تلفن یا ایمیل</div>
+            </Lbl>
+          </div>
+          <SaveBtn onClick={() => addBranchMut.mutate(bForm)} disabled={!bForm.name || addBranchMut.isPending} label={addBranchMut.isPending ? "در حال ایجاد..." : "ایجاد شعبه"} />
         </Modal>
       )}
 

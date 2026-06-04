@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { showToast } from "../../lib/toast";
-import { GraduationCap, Mail, Phone, Plus, X, BookOpen, Users, Star, ChevronDown, ChevronUp, Edit2, UserX, UserCheck, CheckSquare, Square } from "lucide-react";
+import { GraduationCap, Mail, Phone, Plus, X, BookOpen, Users, Star, ChevronDown, ChevronUp, Edit2, UserX, UserCheck, CheckSquare, Square, Search, UserPlus } from "lucide-react";
 import PageTopBar from "../../components/PageTopBar";
 
 const IS = { width: "100%", background: "rgba(245,243,255,0.90)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#1e1b4b", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
@@ -17,17 +17,22 @@ export default function SchoolTeachers() {
   const qc = useQueryClient();
 
   const [showModal, setShowModal] = useState(false);
+  const [modalTab, setModalTab] = useState<"search" | "create">("search");
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [form, setForm] = useState({ name: "", email: "", password: "", gender: "male", phone: "" });
+  const [searchQ, setSearchQ] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [confirmTeacher, setConfirmTeacher] = useState<any | null>(null);
-
+  const [confirmRemove, setConfirmRemove] = useState<any | null>(null);
   const [editClassesTeacher, setEditClassesTeacher] = useState<any | null>(null);
   const [selectedClassIds, setSelectedClassIds] = useState<number[]>([]);
 
   const { data: teachers = [] } = useQuery<any[]>({
-    queryKey: ["users", "teacher", user?.schoolId],
-    queryFn: () => api.get(`/users?role=teacher&schoolId=${user?.schoolId}`),
+    queryKey: ["school-teachers", user?.schoolId],
+    queryFn: () => api.get(`/school-teachers?schoolId=${user?.schoolId}`),
     enabled: !!user?.schoolId,
   });
 
@@ -53,11 +58,15 @@ export default function SchoolTeachers() {
   const reportMap: Record<number, any> = {};
   for (const t of reportTeachers) reportMap[t.id] = t;
 
+  function invalidateTeachers() {
+    qc.invalidateQueries({ queryKey: ["school-teachers", user?.schoolId] });
+    qc.invalidateQueries({ queryKey: ["school-report-teachers", user?.schoolId] });
+  }
+
   const createMut = useMutation({
-    mutationFn: (d: any) => api.post("/users", { ...d, role: "teacher", schoolId: user?.schoolId, status: "active" }),
+    mutationFn: (d: any) => api.post("/school-teachers", { ...d, schoolId: user?.schoolId }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["users", "teacher", user?.schoolId] });
-      qc.invalidateQueries({ queryKey: ["school-report-teachers", user?.schoolId] });
+      invalidateTeachers();
       setShowModal(false);
       setForm({ name: "", email: "", password: "", gender: "male", phone: "" });
       showToast("معلم با موفقیت ایجاد شد ✓");
@@ -65,12 +74,34 @@ export default function SchoolTeachers() {
     onError: (e: any) => showToast(e?.message ?? "خطا در ایجاد معلم", "error"),
   });
 
+  const addExistingMut = useMutation({
+    mutationFn: (teacherId: number) => api.post("/school-teachers", { schoolId: user?.schoolId, teacherId }),
+    onSuccess: () => {
+      invalidateTeachers();
+      setShowModal(false);
+      setSearchQ("");
+      setSearchResults([]);
+      showToast("معلم به مدرسه اضافه شد ✓");
+    },
+    onError: (e: any) => showToast(e?.message ?? "خطا", "error"),
+  });
+
+  const removeMut = useMutation({
+    mutationFn: (teacherId: number) => api.delete(`/school-teachers?schoolId=${user?.schoolId}&teacherId=${teacherId}`),
+    onSuccess: () => {
+      invalidateTeachers();
+      setConfirmRemove(null);
+      showToast("معلم از مدرسه حذف شد");
+    },
+    onError: () => showToast("خطا در حذف معلم", "error"),
+  });
+
   const toggleStatusMut = useMutation({
     mutationFn: (id: number) => api.patch(`/users/${id}/toggle-status`, {}),
     onSuccess: (data: any) => {
-      qc.invalidateQueries({ queryKey: ["users", "teacher", user?.schoolId] });
+      invalidateTeachers();
       setConfirmTeacher(null);
-      showToast(data.status === "inactive" ? "همکاری با معلم قطع شد" : "حساب معلم فعال شد");
+      showToast(data.status === "inactive" ? "حساب معلم غیرفعال شد" : "حساب معلم فعال شد");
     },
     onError: () => showToast("خطا در تغییر وضعیت", "error"),
   });
@@ -96,9 +127,29 @@ export default function SchoolTeachers() {
   }
 
   function toggleClass(classId: number) {
-    setSelectedClassIds(prev =>
-      prev.includes(classId) ? prev.filter(id => id !== classId) : [...prev, classId]
-    );
+    setSelectedClassIds(prev => prev.includes(classId) ? prev.filter(id => id !== classId) : [...prev, classId]);
+  }
+
+  function openModal() {
+    setModalTab("search");
+    setSearchQ("");
+    setSearchResults([]);
+    setForm({ name: "", email: "", password: "", gender: "male", phone: "" });
+    setShowModal(true);
+  }
+
+  function onSearchChange(q: string) {
+    setSearchQ(q);
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    if (q.length < 2) { setSearchResults([]); return; }
+    setIsSearching(true);
+    searchTimer.current = setTimeout(async () => {
+      try {
+        const res = await api.get(`/school-teachers/search?q=${encodeURIComponent(q)}&schoolId=${user?.schoolId}`);
+        setSearchResults(res as any[]);
+      } catch { setSearchResults([]); }
+      setIsSearching(false);
+    }, 400);
   }
 
   return (
@@ -109,8 +160,8 @@ export default function SchoolTeachers() {
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1e1b4b", margin: 0 }}>معلمان</h1>
           <p style={{ color: "#4f46e5", fontSize: 14, marginTop: 4 }}>{teachers.length} معلم</p>
         </div>
-        <button onClick={() => { setForm({ name: "", email: "", password: "", gender: "male", phone: "" }); setShowModal(true); }} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", background: "linear-gradient(135deg, #7c3aed, #a855f7)", border: "none", borderRadius: 10, color: "white", fontSize: 14, fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>
-          <Plus size={16} /> ایجاد حساب کاربری
+        <button onClick={openModal} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", background: "linear-gradient(135deg, #7c3aed, #a855f7)", border: "none", borderRadius: 10, color: "white", fontSize: 14, fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>
+          <Plus size={16} /> افزودن معلم
         </button>
       </div>
 
@@ -165,7 +216,6 @@ export default function SchoolTeachers() {
                   </div>
                 )}
 
-                {/* Action buttons */}
                 <div style={{ display: "flex", gap: 6, marginBottom: rpt && (rpt.classBreakdown ?? []).length > 0 && !isInactive ? 8 : 0 }}>
                   <button
                     onClick={() => openEditClasses(t)}
@@ -174,8 +224,13 @@ export default function SchoolTeachers() {
                   </button>
                   <button
                     onClick={() => setConfirmTeacher(t)}
-                    style={{ flex: 1, padding: "7px 0", background: isInactive ? "rgba(34,197,94,0.08)" : "rgba(239,68,68,0.08)", border: `1px solid ${isInactive ? "rgba(34,197,94,0.25)" : "rgba(239,68,68,0.25)"}`, borderRadius: 8, color: isInactive ? "#15803d" : "#ef4444", fontSize: 11, fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-                    {isInactive ? <><UserCheck size={12} /> فعال‌سازی</> : <><UserX size={12} /> قطع همکاری</>}
+                    style={{ flex: 1, padding: "7px 0", background: isInactive ? "rgba(34,197,94,0.08)" : "rgba(245,158,11,0.08)", border: `1px solid ${isInactive ? "rgba(34,197,94,0.25)" : "rgba(245,158,11,0.25)"}`, borderRadius: 8, color: isInactive ? "#15803d" : "#d97706", fontSize: 11, fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                    {isInactive ? <><UserCheck size={12} /> فعال‌سازی</> : <><UserX size={12} /> غیرفعال</>}
+                  </button>
+                  <button
+                    onClick={() => setConfirmRemove(t)}
+                    style={{ padding: "7px 10px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 8, color: "#ef4444", fontSize: 11, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <X size={13} />
                   </button>
                 </div>
 
@@ -230,58 +285,155 @@ export default function SchoolTeachers() {
         {teachers.length === 0 && <p style={{ color: "#4f46e5" }}>هیچ معلمی یافت نشد</p>}
       </div>
 
-      {/* Create teacher modal */}
+      {/* Add Teacher Modal */}
       {showModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ background: "#f5f3ff", border: "1px solid rgba(124,58,237,0.5)", borderRadius: 20, padding: 28, width: "90%", maxWidth: 480, maxHeight: "90vh", overflowY: "auto" }}>
+          <div style={{ background: "#f5f3ff", border: "1px solid rgba(124,58,237,0.5)", borderRadius: 20, padding: 28, width: "90%", maxWidth: 500, maxHeight: "90vh", overflowY: "auto" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-              <h3 style={{ margin: 0, color: "#1e1b4b", fontSize: 17, fontWeight: 700 }}>ایجاد حساب معلم</h3>
+              <h3 style={{ margin: 0, color: "#1e1b4b", fontSize: 17, fontWeight: 700 }}>افزودن معلم</h3>
               <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", color: "#4f46e5", cursor: "pointer" }}><X size={20} /></button>
             </div>
-            <Lbl label="نام کامل"><input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={IS} /></Lbl>
-            <Lbl label="ایمیل"><input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} type="email" style={{ ...IS, direction: "ltr", textAlign: "left" }} /></Lbl>
-            <Lbl label="رمز عبور"><input value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} type="password" style={IS} /></Lbl>
-            <Lbl label="تلفن"><input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} style={IS} /></Lbl>
-            <Lbl label="جنسیت">
-              <select value={form.gender} onChange={e => setForm({ ...form, gender: e.target.value })} style={{ ...IS, appearance: "none" }}>
-                <option value="male">مرد</option>
-                <option value="female">زن</option>
-              </select>
-            </Lbl>
-            <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
-              <button onClick={() => createMut.mutate(form)} disabled={!form.name || !form.email || !form.password || createMut.isPending} style={{ flex: 1, padding: "11px 0", background: "linear-gradient(135deg, #7c3aed, #a855f7)", border: "none", borderRadius: 10, color: "white", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14, opacity: (!form.name || !form.email || !form.password) ? 0.5 : 1 }}>
-                {createMut.isPending ? "در حال ایجاد..." : "ایجاد حساب"}
+
+            {/* Tabs */}
+            <div style={{ display: "flex", gap: 8, marginBottom: 20, background: "rgba(255,255,255,0.6)", borderRadius: 12, padding: 4 }}>
+              <button
+                onClick={() => setModalTab("search")}
+                style={{ flex: 1, padding: "9px 0", background: modalTab === "search" ? "white" : "transparent", border: modalTab === "search" ? "1px solid rgba(124,58,237,0.3)" : "1px solid transparent", borderRadius: 9, color: modalTab === "search" ? "#4f46e5" : "#6b7280", fontSize: 13, fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, transition: "all 0.15s" }}>
+                <Search size={14} /> جستجوی معلم موجود
               </button>
-              <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: "11px 0", background: "transparent", border: "1px solid rgba(124,58,237,0.5)", borderRadius: 10, color: "#a855f7", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14 }}>انصراف</button>
+              <button
+                onClick={() => setModalTab("create")}
+                style={{ flex: 1, padding: "9px 0", background: modalTab === "create" ? "white" : "transparent", border: modalTab === "create" ? "1px solid rgba(124,58,237,0.3)" : "1px solid transparent", borderRadius: 9, color: modalTab === "create" ? "#4f46e5" : "#6b7280", fontSize: 13, fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, transition: "all 0.15s" }}>
+                <UserPlus size={14} /> ایجاد حساب جدید
+              </button>
             </div>
+
+            {/* Tab: Search existing */}
+            {modalTab === "search" && (
+              <div>
+                <Lbl label="جستجو با نام، تلفن، ایمیل یا کد ملی">
+                  <div style={{ position: "relative" }}>
+                    <input
+                      value={searchQ}
+                      onChange={e => onSearchChange(e.target.value)}
+                      style={{ ...IS, paddingRight: 38 }}
+                      placeholder="مثال: 0912... یا نام معلم"
+                      autoFocus
+                    />
+                    <Search size={16} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: "#9ca3af", pointerEvents: "none" }} />
+                  </div>
+                </Lbl>
+
+                {isSearching && <div style={{ textAlign: "center", color: "#9ca3af", fontSize: 13, padding: "12px 0" }}>در حال جستجو...</div>}
+
+                {!isSearching && searchQ.length >= 2 && searchResults.length === 0 && (
+                  <div style={{ textAlign: "center", color: "#9ca3af", fontSize: 13, padding: "16px 0" }}>
+                    کاربری یافت نشد
+                    <div style={{ marginTop: 8, fontSize: 12 }}>از تب «ایجاد حساب جدید» معلم جدید بسازید</div>
+                  </div>
+                )}
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {searchResults.map((u: any) => (
+                    <div key={u.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: "rgba(255,255,255,0.85)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 12 }}>
+                      <div style={{ width: 40, height: 40, borderRadius: 10, background: "linear-gradient(135deg, #7c3aed, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 16, fontWeight: 700, flexShrink: 0 }}>{u.name[0]}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, color: "#1e1b4b", fontSize: 14 }}>{u.name}</div>
+                        <div style={{ fontSize: 12, color: "#6b7280", display: "flex", gap: 8, flexWrap: "wrap" }}>
+                          {u.phone && <span>{u.phone}</span>}
+                          <span style={{ direction: "ltr" }}>{u.email}</span>
+                        </div>
+                        <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 2 }}>نقش فعلی: {u.role}</div>
+                      </div>
+                      <button
+                        onClick={() => addExistingMut.mutate(u.id)}
+                        disabled={addExistingMut.isPending}
+                        style={{ padding: "7px 14px", background: "linear-gradient(135deg, #7c3aed, #a855f7)", border: "none", borderRadius: 8, color: "white", fontSize: 12, fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", whiteSpace: "nowrap" }}>
+                        افزودن
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Tab: Create new */}
+            {modalTab === "create" && (
+              <div>
+                <Lbl label="نام کامل"><input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={IS} /></Lbl>
+                <Lbl label="ایمیل"><input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} type="email" style={{ ...IS, direction: "ltr", textAlign: "left" }} /></Lbl>
+                <Lbl label="رمز عبور"><input value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} type="password" style={IS} /></Lbl>
+                <Lbl label="تلفن"><input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} style={IS} /></Lbl>
+                <Lbl label="جنسیت">
+                  <select value={form.gender} onChange={e => setForm({ ...form, gender: e.target.value })} style={{ ...IS, appearance: "none" as const }}>
+                    <option value="male">مرد</option>
+                    <option value="female">زن</option>
+                  </select>
+                </Lbl>
+                <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+                  <button
+                    onClick={() => createMut.mutate(form)}
+                    disabled={!form.name || !form.email || !form.password || createMut.isPending}
+                    style={{ flex: 1, padding: "11px 0", background: "linear-gradient(135deg, #7c3aed, #a855f7)", border: "none", borderRadius: 10, color: "white", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14, opacity: (!form.name || !form.email || !form.password) ? 0.5 : 1 }}>
+                    {createMut.isPending ? "در حال ایجاد..." : "ایجاد حساب"}
+                  </button>
+                  <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: "11px 0", background: "transparent", border: "1px solid rgba(124,58,237,0.5)", borderRadius: 10, color: "#a855f7", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14 }}>انصراف</button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* Deactivate / Reactivate confirmation modal */}
+      {/* Deactivate / Reactivate confirmation */}
       {confirmTeacher && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ background: "#fff5f5", border: "1px solid rgba(239,68,68,0.4)", borderRadius: 20, padding: 32, width: "90%", maxWidth: 420, textAlign: "center" }}>
-            <div style={{ width: 60, height: 60, borderRadius: "50%", background: confirmTeacher.status === "inactive" ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.12)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-              {confirmTeacher.status === "inactive" ? <UserCheck size={28} color="#15803d" /> : <UserX size={28} color="#ef4444" />}
+          <div style={{ background: "#fffbeb", border: "1px solid rgba(245,158,11,0.4)", borderRadius: 20, padding: 32, width: "90%", maxWidth: 420, textAlign: "center" }}>
+            <div style={{ width: 60, height: 60, borderRadius: "50%", background: confirmTeacher.status === "inactive" ? "rgba(34,197,94,0.12)" : "rgba(245,158,11,0.12)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+              {confirmTeacher.status === "inactive" ? <UserCheck size={28} color="#15803d" /> : <UserX size={28} color="#d97706" />}
             </div>
             <h3 style={{ margin: "0 0 10px", color: "#1e1b4b", fontSize: 17, fontWeight: 700 }}>
-              {confirmTeacher.status === "inactive" ? "فعال‌سازی مجدد" : "قطع همکاری"}
+              {confirmTeacher.status === "inactive" ? "فعال‌سازی مجدد" : "غیرفعال‌سازی"}
             </h3>
             <p style={{ color: "#4b5563", fontSize: 14, margin: "0 0 24px", lineHeight: 1.7 }}>
               {confirmTeacher.status === "inactive"
                 ? <>آیا می‌خواهید حساب معلم <strong>{confirmTeacher.name}</strong> را دوباره فعال کنید؟</>
-                : <>آیا از قطع همکاری با معلم <strong>{confirmTeacher.name}</strong> مطمئن هستید؟ دسترسی ایشان به سیستم غیرفعال می‌شود و حساب کاربری حذف نمی‌شود.</>
+                : <>آیا از غیرفعال‌کردن حساب معلم <strong>{confirmTeacher.name}</strong> مطمئن هستید؟ دسترسی ایشان به سیستم قطع می‌شود.</>
               }
             </p>
             <div style={{ display: "flex", gap: 10 }}>
               <button
                 onClick={() => toggleStatusMut.mutate(confirmTeacher.id)}
                 disabled={toggleStatusMut.isPending}
-                style={{ flex: 1, padding: "11px 0", background: confirmTeacher.status === "inactive" ? "linear-gradient(135deg,#15803d,#22c55e)" : "linear-gradient(135deg,#dc2626,#ef4444)", border: "none", borderRadius: 10, color: "white", fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14 }}>
-                {toggleStatusMut.isPending ? "..." : confirmTeacher.status === "inactive" ? "فعال‌سازی" : "قطع همکاری"}
+                style={{ flex: 1, padding: "11px 0", background: confirmTeacher.status === "inactive" ? "linear-gradient(135deg,#15803d,#22c55e)" : "linear-gradient(135deg,#d97706,#f59e0b)", border: "none", borderRadius: 10, color: "white", fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14 }}>
+                {toggleStatusMut.isPending ? "..." : confirmTeacher.status === "inactive" ? "فعال‌سازی" : "غیرفعال"}
               </button>
               <button onClick={() => setConfirmTeacher(null)} style={{ flex: 1, padding: "11px 0", background: "transparent", border: "1px solid #d1d5db", borderRadius: 10, color: "#6b7280", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14 }}>انصراف</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Remove from school confirmation */}
+      {confirmRemove && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ background: "#fff5f5", border: "1px solid rgba(239,68,68,0.4)", borderRadius: 20, padding: 32, width: "90%", maxWidth: 420, textAlign: "center" }}>
+            <div style={{ width: 60, height: 60, borderRadius: "50%", background: "rgba(239,68,68,0.12)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+              <X size={28} color="#ef4444" />
+            </div>
+            <h3 style={{ margin: "0 0 10px", color: "#1e1b4b", fontSize: 17, fontWeight: 700 }}>حذف از مدرسه</h3>
+            <p style={{ color: "#4b5563", fontSize: 14, margin: "0 0 24px", lineHeight: 1.7 }}>
+              آیا از حذف معلم <strong>{confirmRemove.name}</strong> از این مدرسه مطمئن هستید؟<br />
+              <span style={{ fontSize: 12, color: "#9ca3af" }}>حساب کاربری ایشان حذف نمی‌شود.</span>
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={() => removeMut.mutate(confirmRemove.id)}
+                disabled={removeMut.isPending}
+                style={{ flex: 1, padding: "11px 0", background: "linear-gradient(135deg,#dc2626,#ef4444)", border: "none", borderRadius: 10, color: "white", fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14 }}>
+                {removeMut.isPending ? "..." : "حذف از مدرسه"}
+              </button>
+              <button onClick={() => setConfirmRemove(null)} style={{ flex: 1, padding: "11px 0", background: "transparent", border: "1px solid #d1d5db", borderRadius: 10, color: "#6b7280", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14 }}>انصراف</button>
             </div>
           </div>
         </div>

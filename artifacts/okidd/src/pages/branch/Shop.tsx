@@ -54,7 +54,7 @@ export default function BranchShop() {
   );
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#f0fdfe,#e0f9ff,#f0fdfa)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#f0fdfa,#ccfbf1,#ecfdf5)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
       <PageTopBar />
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "20px 16px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
