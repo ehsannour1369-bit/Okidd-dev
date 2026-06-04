@@ -3,8 +3,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { showToast } from "../../lib/toast";
-import { Plus, X, UserRound, History, ArrowRightLeft, ChevronDown, ChevronUp, Calendar, Users, Search, Trash2, Link } from "lucide-react";
+import { Plus, X, UserRound, History, ArrowRightLeft, ChevronDown, ChevronUp, Calendar, Users, Search, Trash2, Link, BookOpen } from "lucide-react";
 import PageTopBar from "../../components/PageTopBar";
+import StudentBooksModal from "../../components/StudentBooksModal";
 
 const IS: React.CSSProperties = { width: "100%", background: "rgba(245,243,255,0.90)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#1e1b4b", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl", boxSizing: "border-box" };
 function Lbl({ label, children }: any) {
@@ -24,6 +25,7 @@ export default function SchoolStudents() {
   const [showCreate, setShowCreate] = useState(false);
   const [transferStudent, setTransferStudent] = useState<any>(null);
   const [parentsStudent, setParentsStudent] = useState<any>(null);
+  const [booksStudent, setBooksStudent] = useState<any>(null);
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
   const [expandedType, setExpandedType] = useState<"history" | "parents" | null>(null);
 
@@ -139,6 +141,10 @@ export default function SchoolStudents() {
                           style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.25)", borderRadius: 7, padding: "4px 8px", cursor: "pointer", color: "#059669", display: "flex", alignItems: "center" }}>
                           <Users size={13} />
                         </button>
+                        <button onClick={() => setBooksStudent(s)} title="کتاب‌های دانش‌آموز"
+                          style={{ background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 7, padding: "4px 8px", cursor: "pointer", color: "#7c3aed", display: "flex", alignItems: "center" }}>
+                          <BookOpen size={13} />
+                        </button>
                         <button onClick={() => toggleRow(s.id, "history")} title="تاریخچه ثبت‌نام"
                           style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.25)", borderRadius: 7, padding: "4px 8px", cursor: "pointer", color: "#6366f1", display: "flex", alignItems: "center", gap: 2 }}>
                           <History size={13} />
@@ -206,6 +212,15 @@ export default function SchoolStudents() {
         <ParentsModal student={parentsStudent}
           onClose={() => setParentsStudent(null)}
           onChanged={() => { qc.invalidateQueries({ queryKey: ["parent-students"] }); }}
+        />
+      )}
+
+      {/* Student Books Modal */}
+      {booksStudent && schoolId && (
+        <StudentBooksModal
+          student={booksStudent}
+          schoolId={schoolId}
+          onClose={() => setBooksStudent(null)}
         />
       )}
     </div>
