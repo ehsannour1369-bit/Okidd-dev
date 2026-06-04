@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import PageTopBar from "../../components/PageTopBar";
 import { showToast } from "../../lib/toast";
-import { Plus, ChevronDown, ChevronUp, Trash2, BookOpen, Users, GraduationCap, X, UserRound } from "lucide-react";
+import { Plus, ChevronDown, ChevronUp, Trash2, BookOpen, Users, GraduationCap, X, UserRound, UserCog, Search, UserPlus } from "lucide-react";
 
 const IS = { width: "100%", background: "rgba(245,243,255,0.90)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#1e1b4b", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
 
@@ -52,6 +52,14 @@ export default function SchoolBranches() {
   const [classManage, setClassManage] = useState<any>(null);
   const [classTab, setClassTab] = useState<Tab>("books");
 
+  const [editManagerBranch, setEditManagerBranch] = useState<any | null>(null);
+  const [managerTab, setManagerTab] = useState<"search" | "create">("search");
+  const [managerSearchQ, setManagerSearchQ] = useState("");
+  const [managerSearchResults, setManagerSearchResults] = useState<any[]>([]);
+  const [managerIsSearching, setManagerIsSearching] = useState(false);
+  const [managerForm, setManagerForm] = useState({ managerName: "", managerPhone: "", managerNationalId: "" });
+  const managerSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [bForm, setBForm] = useState({ name: "", address: "", managerName: "", managerPhone: "", managerNationalId: "" });
   const [glForm, setGLForm] = useState({ name: "" });
   const [grForm, setGrForm] = useState({ name: "" });
@@ -88,6 +96,41 @@ export default function SchoolBranches() {
   const delStudMut = useMutation({ mutationFn: ({ cid, sid }: any) => api.delete(`/classes/${cid}/students/${sid}`), onSuccess: () => { inv([["class-students", String(classManage?.id)]]); showToast("دانش‌آموز حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
   const addTeachMut = useMutation({ mutationFn: ({ cid, tid }: any) => api.post(`/classes/${cid}/teachers`, { teacherId: parseInt(tid) }), onSuccess: () => { inv([["class-teachers", String(classManage?.id)]]); setAddTeacherId(""); showToast("معلم اضافه شد ✓"); }, onError: (e: any) => showToast(e?.message ?? "خطا", "error") });
   const delTeachMut = useMutation({ mutationFn: ({ cid, tid }: any) => api.delete(`/classes/${cid}/teachers/${tid}`), onSuccess: () => { inv([["class-teachers", String(classManage?.id)]]); showToast("معلم حذف شد"); }, onError: (e: any) => showToast(e?.message ?? "خطا در حذف", "error") });
+
+  const assignManagerMut = useMutation({
+    mutationFn: (body: any) => api.patch(`/branches/${editManagerBranch?.id}/manager`, body),
+    onSuccess: () => {
+      inv([["branches", String(schoolId)]]);
+      setEditManagerBranch(null);
+      setManagerSearchQ("");
+      setManagerSearchResults([]);
+      setManagerForm({ managerName: "", managerPhone: "", managerNationalId: "" });
+      showToast("مدیر شعبه تنظیم شد ✓");
+    },
+    onError: (e: any) => showToast(e?.message ?? "خطا در تنظیم مدیر", "error"),
+  });
+
+  function openManagerModal(branch: any) {
+    setEditManagerBranch(branch);
+    setManagerTab("search");
+    setManagerSearchQ("");
+    setManagerSearchResults([]);
+    setManagerForm({ managerName: "", managerPhone: "", managerNationalId: "" });
+  }
+
+  function onManagerSearchChange(q: string) {
+    setManagerSearchQ(q);
+    if (managerSearchTimer.current) clearTimeout(managerSearchTimer.current);
+    if (q.length < 2) { setManagerSearchResults([]); return; }
+    setManagerIsSearching(true);
+    managerSearchTimer.current = setTimeout(async () => {
+      try {
+        const res = await api.get(`/school-teachers/search?q=${encodeURIComponent(q)}&schoolId=${schoolId}`);
+        setManagerSearchResults(res as any[]);
+      } catch { setManagerSearchResults([]); }
+      setManagerIsSearching(false);
+    }, 400);
+  }
 
   function toggle<T>(set: Set<T>, item: T) {
     const next = new Set(set);
@@ -144,8 +187,9 @@ export default function SchoolBranches() {
                       : <div style={{ color: "#9ca3af", fontSize: 12, marginTop: 3 }}>مدیر تعریف نشده</div>
                   }
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ background: "rgba(59,130,246,0.15)", border: "1px solid rgba(59,130,246,0.3)", borderRadius: 999, padding: "2px 10px", fontSize: 12, color: "#60a5fa" }}>{bGLs.length} مقطع</span>
+                  <button onClick={e => { e.stopPropagation(); openManagerModal(branch); }} title="تخصیص مدیر شعبه" style={{ background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.3)", borderRadius: 8, color: "#6366f1", padding: "5px 8px", cursor: "pointer", display: "flex", alignItems: "center" }}><UserCog size={14} /></button>
                   <button onClick={e => { e.stopPropagation(); if (window.confirm("حذف شود؟")) delBranchMut.mutate(branch.id); }} style={{ background: "rgba(248,113,113,0.15)", border: "1px solid rgba(248,113,113,0.3)", borderRadius: 8, color: "#f87171", padding: "5px 8px", cursor: "pointer" }}><Trash2 size={14} /></button>
                   {isExp ? <ChevronUp size={18} style={{ color: "#4f46e5" }} /> : <ChevronDown size={18} style={{ color: "#4f46e5" }} />}
                 </div>
@@ -388,6 +432,80 @@ export default function SchoolBranches() {
             </select>
           </Lbl>
           <SaveBtn onClick={() => addGradeMut.mutate({ gradeLevelId: addGradeFor, name: grForm.name })} disabled={!grForm.name} />
+        </Modal>
+      )}
+
+      {/* Assign Branch Manager Modal */}
+      {editManagerBranch && (
+        <Modal title={`تخصیص مدیر — ${editManagerBranch.name}`} onClose={() => setEditManagerBranch(null)}>
+          {/* Current manager info */}
+          {(editManagerBranch.manager || editManagerBranch.managerName) && (
+            <div style={{ background: "rgba(5,150,105,0.08)", border: "1px solid rgba(5,150,105,0.25)", borderRadius: 10, padding: "10px 14px", marginBottom: 16, fontSize: 13, color: "#065f46", display: "flex", alignItems: "center", gap: 8 }}>
+              <span>👤 مدیر فعلی:</span>
+              <strong>{editManagerBranch.manager?.name ?? editManagerBranch.managerName}</strong>
+              {(editManagerBranch.manager?.phone ?? editManagerBranch.managerPhone) && (
+                <span style={{ color: "#6b7280" }}>· {editManagerBranch.manager?.phone ?? editManagerBranch.managerPhone}</span>
+              )}
+            </div>
+          )}
+
+          {/* Tabs */}
+          <div style={{ display: "flex", gap: 6, marginBottom: 18, background: "rgba(255,255,255,0.6)", borderRadius: 12, padding: 4 }}>
+            <button onClick={() => setManagerTab("search")} style={{ flex: 1, padding: "9px 0", background: managerTab === "search" ? "white" : "transparent", border: managerTab === "search" ? "1px solid rgba(124,58,237,0.3)" : "1px solid transparent", borderRadius: 9, color: managerTab === "search" ? "#4f46e5" : "#6b7280", fontSize: 13, fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <Search size={13} /> جستجوی کاربر موجود
+            </button>
+            <button onClick={() => setManagerTab("create")} style={{ flex: 1, padding: "9px 0", background: managerTab === "create" ? "white" : "transparent", border: managerTab === "create" ? "1px solid rgba(124,58,237,0.3)" : "1px solid transparent", borderRadius: 9, color: managerTab === "create" ? "#4f46e5" : "#6b7280", fontSize: 13, fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <UserPlus size={13} /> مدیر جدید
+            </button>
+          </div>
+
+          {/* Search tab */}
+          {managerTab === "search" && (
+            <div>
+              <Lbl label="جستجو با نام، تلفن، ایمیل یا کد ملی">
+                <div style={{ position: "relative" }}>
+                  <input value={managerSearchQ} onChange={e => onManagerSearchChange(e.target.value)} style={{ ...IS, paddingRight: 38 }} placeholder="مثال: 0912... یا نام مدیر" autoFocus />
+                  <Search size={16} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: "#9ca3af", pointerEvents: "none" }} />
+                </div>
+              </Lbl>
+              {managerIsSearching && <div style={{ textAlign: "center", color: "#9ca3af", fontSize: 13, padding: "10px 0" }}>در حال جستجو...</div>}
+              {!managerIsSearching && managerSearchQ.length >= 2 && managerSearchResults.length === 0 && (
+                <div style={{ textAlign: "center", color: "#9ca3af", fontSize: 13, padding: "12px 0" }}>کاربری یافت نشد — از تب «مدیر جدید» استفاده کنید</div>
+              )}
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {managerSearchResults.map((u: any) => (
+                  <div key={u.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: "rgba(255,255,255,0.9)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 12 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 10, background: "linear-gradient(135deg,#7c3aed,#a855f7)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 16, fontWeight: 700, flexShrink: 0 }}>{u.name[0]}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, color: "#1e1b4b", fontSize: 14 }}>{u.name}</div>
+                      <div style={{ fontSize: 12, color: "#6b7280" }}>{u.phone && <span>{u.phone} · </span>}{u.email}</div>
+                      <div style={{ fontSize: 11, color: "#9ca3af" }}>{u.role}</div>
+                    </div>
+                    <button onClick={() => assignManagerMut.mutate({ selectedManagerUserId: u.id })} disabled={assignManagerMut.isPending} style={{ padding: "7px 14px", background: "linear-gradient(135deg,#7c3aed,#a855f7)", border: "none", borderRadius: 8, color: "white", fontSize: 12, fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>
+                      انتخاب
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Create new manager tab */}
+          {managerTab === "create" && (
+            <div>
+              <Lbl label="نام مدیر *"><input value={managerForm.managerName} onChange={e => setManagerForm({ ...managerForm, managerName: e.target.value })} style={IS} placeholder="نام و نام‌خانوادگی" /></Lbl>
+              <Lbl label="شماره تلفن *"><input value={managerForm.managerPhone} onChange={e => setManagerForm({ ...managerForm, managerPhone: e.target.value })} style={IS} placeholder="09..." /></Lbl>
+              <Lbl label="کد ملی">
+                <input value={managerForm.managerNationalId} onChange={e => setManagerForm({ ...managerForm, managerNationalId: e.target.value })} style={IS} placeholder="کد ملی (رمز ورود اولیه)" />
+                <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 4 }}>رمز ورود اولیه = کد ملی (یا تلفن در صورت نبود کد ملی)</div>
+              </Lbl>
+              <SaveBtn
+                onClick={() => assignManagerMut.mutate(managerForm)}
+                disabled={!managerForm.managerName || !managerForm.managerPhone || assignManagerMut.isPending}
+                label={assignManagerMut.isPending ? "در حال ذخیره..." : "ثبت مدیر جدید"}
+              />
+            </div>
+          )}
         </Modal>
       )}
 

@@ -162,6 +162,75 @@ router.put("/branches/:id", async (req, res) => {
   res.json({ ...branch, studentCount });
 });
 
+// ─── Assign / replace branch manager ──────────────────────────────────────────
+router.patch("/branches/:id/manager", async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { selectedManagerUserId, managerName, managerPhone, managerNationalId, academicYear = "1403-1404" } = req.body;
+
+  const [branch] = await db.select().from(branchesTable).where(eq(branchesTable.id, id));
+  if (!branch) { res.status(404).json({ error: "Not found" }); return; }
+
+  // Deactivate current active manager record for this branch
+  await db.update(branchManagersTable).set({ isActive: false })
+    .where(and(eq(branchManagersTable.branchId, id), eq(branchManagersTable.isActive, true)));
+
+  let managerId: number | null = null;
+  let managerUser: any = null;
+
+  if (selectedManagerUserId) {
+    managerId = Number(selectedManagerUserId);
+    await db.update(usersTable)
+      .set({ role: "branch_manager", schoolId: branch.schoolId } as any)
+      .where(eq(usersTable.id, managerId));
+    const [u] = await db.select().from(usersTable).where(eq(usersTable.id, managerId));
+    managerUser = u;
+  } else if (managerName || managerPhone) {
+    // Duplicate check
+    if (managerPhone || managerNationalId) {
+      const conditions: ReturnType<typeof eq>[] = [];
+      if (managerPhone) conditions.push(eq(usersTable.phone, managerPhone));
+      if (managerNationalId) conditions.push(eq(usersTable.nationalId, managerNationalId));
+      const dups = await db.select().from(usersTable).where(or(...conditions));
+      if (dups.length > 0) {
+        const candidates = dups.map(({ password: _pw, ...safe }) => safe);
+        res.json({ status: "duplicate_found", candidates });
+        return;
+      }
+    }
+    const email = managerPhone ? `${managerPhone}@okidd.com` : `bm.${id}.${Date.now()}@okidd.com`;
+    const rawPw = managerNationalId ?? managerPhone ?? "okidd1234";
+    const hashed = await bcrypt.hash(rawPw, 10);
+    const [newUser] = await db.insert(usersTable).values({
+      name: managerName ?? `مدیر شعبه ${branch.name}`,
+      email,
+      password: hashed,
+      phone: managerPhone ?? null,
+      nationalId: managerNationalId ?? null,
+      role: "branch_manager",
+      schoolId: branch.schoolId,
+      status: "active",
+    } as any).returning();
+    managerId = newUser.id;
+    managerUser = newUser;
+  }
+
+  if (managerId) {
+    await db.insert(branchManagersTable).values({ userId: managerId, branchId: id, academicYear, isActive: true });
+  }
+
+  const [updated] = await db.update(branchesTable).set({
+    managerUserId: managerId ?? null,
+    managerName: managerUser?.name ?? managerName ?? null,
+    managerPhone: managerUser?.phone ?? managerPhone ?? null,
+    managerNationalId: managerNationalId ?? null,
+  } as any).where(eq(branchesTable.id, id)).returning();
+
+  const studentCount = await getBranchStudentCount(id);
+  let safeManager = null;
+  if (managerUser) { const { password: _pw, ...safe } = managerUser; safeManager = safe; }
+  res.json({ ...updated, studentCount, manager: safeManager });
+});
+
 // ─── Delete ───────────────────────────────────────────────────────────────────
 router.delete("/branches/:id", async (req, res) => {
   const id = parseInt(req.params.id);
