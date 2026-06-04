@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { showToast } from "../../lib/toast";
-import { GraduationCap, Mail, Phone, Plus, X, BookOpen, Users, Star, ChevronDown, ChevronUp, Edit2, UserX, UserCheck, CheckSquare, Square, Search, UserPlus } from "lucide-react";
+import { GraduationCap, Mail, Phone, Plus, X, BookOpen, Users, Star, ChevronDown, ChevronUp, Edit2, UserX, UserCheck, CheckSquare, Square, Search, UserPlus, Pencil } from "lucide-react";
 import PageTopBar from "../../components/PageTopBar";
 
 const IS = { width: "100%", background: "rgba(245,243,255,0.90)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#1e1b4b", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl" as const };
@@ -28,6 +28,8 @@ export default function SchoolTeachers() {
   const [confirmTeacher, setConfirmTeacher] = useState<any | null>(null);
   const [confirmRemove, setConfirmRemove] = useState<any | null>(null);
   const [editClassesTeacher, setEditClassesTeacher] = useState<any | null>(null);
+  const [editTeacher, setEditTeacher] = useState<any | null>(null);
+  const [editForm, setEditForm] = useState({ name: "", email: "", phone: "", gender: "male" });
   const [selectedClassIds, setSelectedClassIds] = useState<number[]>([]);
 
   const { data: teachers = [] } = useQuery<any[]>({
@@ -104,6 +106,17 @@ export default function SchoolTeachers() {
       showToast(data.status === "inactive" ? "حساب معلم غیرفعال شد" : "حساب معلم فعال شد");
     },
     onError: () => showToast("خطا در تغییر وضعیت", "error"),
+  });
+
+  const editMut = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: typeof editForm }) =>
+      api.put<any>(`/users/${id}`, data),
+    onSuccess: () => {
+      invalidateTeachers();
+      setEditTeacher(null);
+      showToast("اطلاعات معلم بروزرسانی شد ✓");
+    },
+    onError: (e: any) => showToast(e?.message ?? "خطا در ویرایش", "error"),
   });
 
   const editClassesMut = useMutation({
@@ -217,6 +230,11 @@ export default function SchoolTeachers() {
                 )}
 
                 <div style={{ display: "flex", gap: 6, marginBottom: rpt && (rpt.classBreakdown ?? []).length > 0 && !isInactive ? 8 : 0 }}>
+                  <button
+                    onClick={() => { setEditTeacher(t); setEditForm({ name: t.name, email: t.email ?? "", phone: t.phone ?? "", gender: t.gender ?? "male" }); }}
+                    style={{ flex: 1, padding: "7px 0", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.28)", borderRadius: 8, color: "#d97706", fontSize: 11, fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                    <Pencil size={12} /> ویرایش اطلاعات
+                  </button>
                   <button
                     onClick={() => openEditClasses(t)}
                     style={{ flex: 1, padding: "7px 0", background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.25)", borderRadius: 8, color: "#4f46e5", fontSize: 11, fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
@@ -434,6 +452,38 @@ export default function SchoolTeachers() {
                 {removeMut.isPending ? "..." : "حذف از مدرسه"}
               </button>
               <button onClick={() => setConfirmRemove(null)} style={{ flex: 1, padding: "11px 0", background: "transparent", border: "1px solid #d1d5db", borderRadius: 10, color: "#6b7280", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14 }}>انصراف</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Teacher Info Modal */}
+      {editTeacher && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+          <div style={{ background: "#fffbeb", border: "1px solid rgba(245,158,11,0.45)", borderRadius: 20, padding: 28, width: "90%", maxWidth: 460, maxHeight: "90vh", overflowY: "auto" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <h3 style={{ margin: 0, color: "#1e1b4b", fontSize: 17, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
+                <Pencil size={17} color="#d97706" /> ویرایش: {editTeacher.name}
+              </h3>
+              <button onClick={() => setEditTeacher(null)} style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer" }}><X size={20} /></button>
+            </div>
+            <Lbl label="نام کامل *"><input value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} style={IS} /></Lbl>
+            <Lbl label="ایمیل *"><input value={editForm.email} onChange={e => setEditForm({ ...editForm, email: e.target.value })} type="email" style={{ ...IS, direction: "ltr", textAlign: "left" }} /></Lbl>
+            <Lbl label="شماره تلفن"><input value={editForm.phone} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} style={IS} placeholder="09..." /></Lbl>
+            <Lbl label="جنسیت">
+              <select value={editForm.gender} onChange={e => setEditForm({ ...editForm, gender: e.target.value })} style={{ ...IS, appearance: "none" as any }}>
+                <option value="male">مرد</option>
+                <option value="female">زن</option>
+              </select>
+            </Lbl>
+            <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+              <button
+                onClick={() => editMut.mutate({ id: editTeacher.id, data: editForm })}
+                disabled={!editForm.name || !editForm.email || editMut.isPending}
+                style={{ flex: 1, padding: "11px 0", background: "linear-gradient(135deg,#d97706,#f59e0b)", border: "none", borderRadius: 10, color: "white", fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14, opacity: (!editForm.name || !editForm.email) ? 0.5 : 1 }}>
+                {editMut.isPending ? "در حال ذخیره..." : "ذخیره تغییرات"}
+              </button>
+              <button onClick={() => setEditTeacher(null)} style={{ flex: 1, padding: "11px 0", background: "transparent", border: "1px solid rgba(245,158,11,0.4)", borderRadius: 10, color: "#d97706", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14 }}>انصراف</button>
             </div>
           </div>
         </div>

@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { showToast } from "../../lib/toast";
-import { Plus, X, UserRound, History, ArrowRightLeft, ChevronDown, ChevronUp, Calendar, Users, Search, Trash2, Link } from "lucide-react";
+import { Plus, X, UserRound, History, ArrowRightLeft, ChevronDown, ChevronUp, Calendar, Users, Search, Trash2, Link, Pencil } from "lucide-react";
 import PageTopBar from "../../components/PageTopBar";
 
 const IS: React.CSSProperties = { width: "100%", background: "rgba(245,243,255,0.90)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#1e1b4b", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl", boxSizing: "border-box" };
@@ -24,6 +24,8 @@ export default function SchoolStudents() {
   const [showCreate, setShowCreate] = useState(false);
   const [transferStudent, setTransferStudent] = useState<any>(null);
   const [parentsStudent, setParentsStudent] = useState<any>(null);
+  const [editStudent, setEditStudent] = useState<any>(null);
+  const [editForm, setEditForm] = useState({ name: "", email: "", phone: "", nationalId: "", gender: "male" });
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
   const [expandedType, setExpandedType] = useState<"history" | "parents" | null>(null);
 
@@ -38,6 +40,18 @@ export default function SchoolStudents() {
     queryKey: ["users", "student", schoolId],
     queryFn: () => api.get(`/users?role=student&schoolId=${schoolId}`),
     enabled: !!schoolId,
+  });
+
+  const editMut = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: typeof editForm }) =>
+      api.put<any>(`/users/${id}`, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["students-by-year"] });
+      qc.invalidateQueries({ queryKey: ["users", "student", schoolId] });
+      setEditStudent(null);
+      showToast("اطلاعات دانش‌آموز بروزرسانی شد ✓");
+    },
+    onError: (e: any) => showToast(e?.message ?? "خطا در ویرایش", "error"),
   });
 
   const createMut = useMutation({
@@ -131,6 +145,10 @@ export default function SchoolStudents() {
                     </td>
                     <td style={{ padding: "11px 14px", borderBottom: expandedRow === s.id ? "none" : "1px solid rgba(139,92,246,0.08)" }}>
                       <div style={{ display: "flex", gap: 5 }}>
+                        <button onClick={() => { setEditStudent(s); setEditForm({ name: s.name, email: s.email ?? "", phone: s.phone ?? "", nationalId: s.nationalId ?? "", gender: s.gender ?? "male" }); }} title="ویرایش اطلاعات"
+                          style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 7, padding: "4px 8px", cursor: "pointer", color: "#d97706", display: "flex", alignItems: "center" }}>
+                          <Pencil size={13} />
+                        </button>
                         <button onClick={() => setTransferStudent(s)} title="انتقال/ثبت‌نام"
                           style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.25)", borderRadius: 7, padding: "4px 8px", cursor: "pointer", color: "#6366f1", display: "flex", alignItems: "center" }}>
                           <ArrowRightLeft size={13} />
@@ -207,6 +225,39 @@ export default function SchoolStudents() {
           onClose={() => setParentsStudent(null)}
           onChanged={() => { qc.invalidateQueries({ queryKey: ["parent-students"] }); }}
         />
+      )}
+
+      {/* Edit Student Modal */}
+      {editStudent && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+          <div style={{ background: "#fffbeb", border: "1px solid rgba(245,158,11,0.45)", borderRadius: 20, padding: 28, width: "90%", maxWidth: 460, maxHeight: "90vh", overflowY: "auto" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <h3 style={{ margin: 0, color: "#1e1b4b", fontSize: 17, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
+                <Pencil size={17} color="#d97706" /> ویرایش: {editStudent.name}
+              </h3>
+              <button onClick={() => setEditStudent(null)} style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer" }}><X size={20} /></button>
+            </div>
+            <Lbl label="نام کامل *"><input value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} style={IS} /></Lbl>
+            <Lbl label="ایمیل *"><input value={editForm.email} onChange={e => setEditForm({ ...editForm, email: e.target.value })} type="email" style={{ ...IS, direction: "ltr", textAlign: "left" }} /></Lbl>
+            <Lbl label="شماره تلفن"><input value={editForm.phone} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} style={IS} placeholder="09..." /></Lbl>
+            <Lbl label="کد ملی"><input value={editForm.nationalId} onChange={e => setEditForm({ ...editForm, nationalId: e.target.value })} style={IS} maxLength={10} /></Lbl>
+            <Lbl label="جنسیت">
+              <select value={editForm.gender} onChange={e => setEditForm({ ...editForm, gender: e.target.value })} style={{ ...IS, appearance: "none" as any }}>
+                <option value="male">پسر</option>
+                <option value="female">دختر</option>
+              </select>
+            </Lbl>
+            <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+              <button
+                onClick={() => editMut.mutate({ id: editStudent.id, data: editForm })}
+                disabled={!editForm.name || !editForm.email || editMut.isPending}
+                style={{ flex: 1, padding: "11px 0", background: "linear-gradient(135deg,#d97706,#f59e0b)", border: "none", borderRadius: 10, color: "white", fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14, opacity: (!editForm.name || !editForm.email) ? 0.5 : 1 }}>
+                {editMut.isPending ? "در حال ذخیره..." : "ذخیره تغییرات"}
+              </button>
+              <button onClick={() => setEditStudent(null)} style={{ flex: 1, padding: "11px 0", background: "transparent", border: "1px solid rgba(245,158,11,0.4)", borderRadius: 10, color: "#d97706", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14 }}>انصراف</button>
+            </div>
+          </div>
+        </div>
       )}
 
     </div>
