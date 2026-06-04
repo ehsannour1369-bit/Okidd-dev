@@ -7,7 +7,7 @@ import { useLocation } from "wouter";
 import {
   School, ChevronDown, ChevronLeft, Users, BookOpen, Lock, Unlock,
   BarChart2, Clock, Star, GraduationCap, TrendingUp, UserRound,
-  Bell, User, LogOut, Eye, EyeOff, Camera,
+  Bell, User, LogOut, Eye, EyeOff, Camera, Pencil, Check, X, KeyRound,
 } from "lucide-react";
 
 const AMBER   = "#f59e0b";
@@ -63,6 +63,52 @@ export default function TeacherDashboard() {
   const [showPassword, setShowPassword]   = useState(false);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const avatarRef = useRef<HTMLInputElement>(null);
+  const [editMode, setEditMode]       = useState(false);
+  const [editName, setEditName]       = useState("");
+  const [editEmail, setEditEmail]     = useState("");
+  const [editPhone, setEditPhone]     = useState("");
+  const [editSaving, setEditSaving]   = useState(false);
+  const [editError, setEditError]     = useState("");
+  const [pwMode, setPwMode]           = useState(false);
+  const [pwCurrent, setPwCurrent]     = useState("");
+  const [pwNew, setPwNew]             = useState("");
+  const [pwSaving, setPwSaving]       = useState(false);
+  const [pwError, setPwError]         = useState("");
+  const [pwSuccess, setPwSuccess]     = useState(false);
+
+  function openEdit() {
+    setEditName(user?.name ?? "");
+    setEditEmail(user?.email ?? "");
+    setEditPhone(user?.phone ?? "");
+    setEditError("");
+    setEditMode(true);
+  }
+
+  async function saveProfile() {
+    if (!user?.id) return;
+    setEditSaving(true); setEditError("");
+    try {
+      const updated = await api.patch<any>(`/users/${user.id}/profile`, {
+        name: editName, email: editEmail, phone: editPhone,
+      });
+      useAuthStore.getState().setAuth({ ...user, ...updated }, useAuthStore.getState().token!);
+      setEditMode(false);
+    } catch (e: any) {
+      setEditError(e?.message ?? "خطا در ذخیره");
+    } finally { setEditSaving(false); }
+  }
+
+  async function savePassword() {
+    if (!user?.id) return;
+    setPwSaving(true); setPwError(""); setPwSuccess(false);
+    try {
+      await api.patch(`/users/${user.id}/password`, { currentPassword: pwCurrent, newPassword: pwNew });
+      setPwSuccess(true); setPwCurrent(""); setPwNew("");
+      setTimeout(() => { setPwMode(false); setPwSuccess(false); }, 1500);
+    } catch (e: any) {
+      setPwError(e?.message ?? "خطا در تغییر رمز");
+    } finally { setPwSaving(false); }
+  }
 
   async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -482,47 +528,97 @@ export default function TeacherDashboard() {
               <div style={{ fontSize: 12, color: AMBER_D, marginTop: 3, fontWeight: 600 }}>معلم</div>
             </div>
 
-            {/* Info rows */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
-              <div style={{ background: "rgba(248,247,255,0.9)", border: "1.5px solid rgba(200,190,255,0.25)", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: `${AMBER}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <User size={16} color={AMBER_D} />
+            {/* ── View / Edit mode ── */}
+            {!editMode && !pwMode ? (
+              <>
+                {/* Info rows — view */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
+                  {[
+                    { label: "نام", value: user?.name },
+                    { label: "ایمیل", value: user?.email },
+                    { label: "شماره موبایل", value: user?.phone },
+                  ].map(row => (
+                    <div key={row.label} style={{ background: "rgba(248,247,255,0.9)", border: "1.5px solid rgba(200,190,255,0.25)", borderRadius: 12, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ fontSize: 11, color: "#9ca3af", width: 90, flexShrink: 0 }}>{row.label}</div>
+                      <div style={{ flex: 1, fontSize: 14, fontWeight: 700, color: "#1e1b4b" }}>{row.value || "—"}</div>
+                    </div>
+                  ))}
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 10, color: "#9ca3af", marginBottom: 2 }}>نام کاربری</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#1e1b4b", direction: "ltr", textAlign: "right" }}>{user?.email || user?.phone || "—"}</div>
-                </div>
-              </div>
-              <div style={{ background: "rgba(248,247,255,0.9)", border: "1.5px solid rgba(200,190,255,0.25)", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: `${AMBER}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Lock size={16} color={AMBER_D} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 10, color: "#9ca3af", marginBottom: 2 }}>رمز عبور (کد ملی)</div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#1e1b4b", letterSpacing: showPassword ? 0 : 3, direction: "ltr", textAlign: "right" }}>
-                    {showPassword ? (user?.nationalId ?? "—") : "••••••••••"}
-                  </div>
-                </div>
-                <button onClick={() => setShowPassword(v => !v)} style={{ background: "none", border: "none", cursor: "pointer", color: AMBER_D, padding: 4, flexShrink: 0 }}>
-                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
-                </button>
-              </div>
-            </div>
 
-            {/* Logout */}
-            {!confirmLogout ? (
-              <button onClick={() => setConfirmLogout(true)} style={{ width: "100%", padding: "13px 0", background: "rgba(239,68,68,0.08)", border: "1.5px solid rgba(239,68,68,0.3)", borderRadius: 16, color: "#ef4444", fontFamily: "Vazirmatn", fontSize: 15, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                <LogOut size={17} /> خروج از حساب
-              </button>
-            ) : (
-              <div style={{ background: "rgba(254,226,226,0.6)", border: "1.5px solid rgba(239,68,68,0.3)", borderRadius: 16, padding: "14px 16px" }}>
-                <div style={{ fontSize: 13, color: "#b91c1c", fontWeight: 700, textAlign: "center", marginBottom: 12 }}>مطمئنی می‌خوای خارج بشی؟</div>
-                <div style={{ display: "flex", gap: 10 }}>
-                  <button onClick={() => setConfirmLogout(false)} style={{ flex: 1, padding: "10px 0", background: "rgba(255,255,255,0.8)", border: "1.5px solid rgba(200,200,220,0.5)", borderRadius: 12, color: "#374151", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
-                    نه، بمان
+                {/* Action buttons */}
+                <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                  <button onClick={openEdit} style={{ flex: 1, padding: "11px 0", background: `linear-gradient(135deg,${AMBER}22,${ORANGE}14)`, border: `1.5px solid ${AMBER}55`, borderRadius: 14, color: AMBER_D, fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                    <Pencil size={15} /> ویرایش اطلاعات
                   </button>
-                  <button onClick={() => { setProfileOpen(false); setConfirmLogout(false); logout(); }} style={{ flex: 1, padding: "10px 0", background: "linear-gradient(135deg,#ef4444,#dc2626)", border: "none", borderRadius: 12, color: "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 800, cursor: "pointer", boxShadow: "0 4px 14px rgba(239,68,68,0.4)" }}>
-                    بله، خروج
+                  <button onClick={() => { setPwMode(true); setPwError(""); setPwCurrent(""); setPwNew(""); setPwSuccess(false); }} style={{ flex: 1, padding: "11px 0", background: "rgba(99,102,241,0.08)", border: "1.5px solid rgba(99,102,241,0.3)", borderRadius: 14, color: "#4f46e5", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                    <KeyRound size={15} /> تغییر رمز
+                  </button>
+                </div>
+
+                {/* Logout */}
+                {!confirmLogout ? (
+                  <button onClick={() => setConfirmLogout(true)} style={{ width: "100%", padding: "12px 0", background: "rgba(239,68,68,0.08)", border: "1.5px solid rgba(239,68,68,0.3)", borderRadius: 14, color: "#ef4444", fontFamily: "Vazirmatn", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                    <LogOut size={16} /> خروج از حساب
+                  </button>
+                ) : (
+                  <div style={{ background: "rgba(254,226,226,0.6)", border: "1.5px solid rgba(239,68,68,0.3)", borderRadius: 14, padding: "14px 16px" }}>
+                    <div style={{ fontSize: 13, color: "#b91c1c", fontWeight: 700, textAlign: "center", marginBottom: 12 }}>مطمئنی می‌خوای خارج بشی؟</div>
+                    <div style={{ display: "flex", gap: 10 }}>
+                      <button onClick={() => setConfirmLogout(false)} style={{ flex: 1, padding: "10px 0", background: "rgba(255,255,255,0.8)", border: "1.5px solid rgba(200,200,220,0.5)", borderRadius: 12, color: "#374151", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>نه، بمان</button>
+                      <button onClick={() => { setProfileOpen(false); setConfirmLogout(false); logout(); }} style={{ flex: 1, padding: "10px 0", background: "linear-gradient(135deg,#ef4444,#dc2626)", border: "none", borderRadius: 12, color: "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 800, cursor: "pointer", boxShadow: "0 4px 14px rgba(239,68,68,0.4)" }}>بله، خروج</button>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : editMode ? (
+              /* ── Edit profile form ── */
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {[
+                  { label: "نام", value: editName, set: setEditName, type: "text" },
+                  { label: "ایمیل", value: editEmail, set: setEditEmail, type: "email" },
+                  { label: "شماره موبایل", value: editPhone, set: setEditPhone, type: "tel" },
+                ].map(f => (
+                  <div key={f.label}>
+                    <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 5, fontWeight: 600 }}>{f.label}</div>
+                    <input
+                      type={f.type} value={f.value} onChange={e => f.set(e.target.value)}
+                      style={{ width: "100%", padding: "10px 14px", borderRadius: 12, border: `1.5px solid ${AMBER}55`, background: "rgba(255,251,235,0.9)", fontFamily: "Vazirmatn", fontSize: 14, color: "#1e1b4b", outline: "none", boxSizing: "border-box" }}
+                    />
+                  </div>
+                ))}
+                {editError && <div style={{ color: "#ef4444", fontSize: 12, textAlign: "center" }}>{editError}</div>}
+                <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                  <button onClick={() => setEditMode(false)} style={{ flex: 1, padding: "11px 0", background: "rgba(255,255,255,0.8)", border: "1.5px solid rgba(200,200,220,0.5)", borderRadius: 12, color: "#374151", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
+                    <X size={15} /> انصراف
+                  </button>
+                  <button onClick={saveProfile} disabled={editSaving} style={{ flex: 1, padding: "11px 0", background: `linear-gradient(135deg,${AMBER},${ORANGE})`, border: "none", borderRadius: 12, color: "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 5, opacity: editSaving ? 0.7 : 1 }}>
+                    {editSaving ? <div style={{ width: 14, height: 14, border: "2px solid white", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} /> : <><Check size={15} /> ذخیره</>}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* ── Change password form ── */
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {[
+                  { label: "رمز فعلی", value: pwCurrent, set: setPwCurrent },
+                  { label: "رمز جدید", value: pwNew, set: setPwNew },
+                ].map(f => (
+                  <div key={f.label}>
+                    <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 5, fontWeight: 600 }}>{f.label}</div>
+                    <input
+                      type="password" value={f.value} onChange={e => f.set(e.target.value)}
+                      style={{ width: "100%", padding: "10px 14px", borderRadius: 12, border: "1.5px solid rgba(99,102,241,0.35)", background: "rgba(238,242,255,0.9)", fontFamily: "Vazirmatn", fontSize: 14, color: "#1e1b4b", outline: "none", boxSizing: "border-box", direction: "ltr" }}
+                    />
+                  </div>
+                ))}
+                {pwError && <div style={{ color: "#ef4444", fontSize: 12, textAlign: "center" }}>{pwError}</div>}
+                {pwSuccess && <div style={{ color: "#16a34a", fontSize: 13, fontWeight: 700, textAlign: "center" }}>✓ رمز با موفقیت تغییر کرد</div>}
+                <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                  <button onClick={() => setPwMode(false)} style={{ flex: 1, padding: "11px 0", background: "rgba(255,255,255,0.8)", border: "1.5px solid rgba(200,200,220,0.5)", borderRadius: 12, color: "#374151", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
+                    <X size={15} /> انصراف
+                  </button>
+                  <button onClick={savePassword} disabled={pwSaving || !pwCurrent || !pwNew} style={{ flex: 1, padding: "11px 0", background: "linear-gradient(135deg,#6366f1,#4f46e5)", border: "none", borderRadius: 12, color: "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 5, opacity: (pwSaving || !pwCurrent || !pwNew) ? 0.6 : 1 }}>
+                    {pwSaving ? <div style={{ width: 14, height: 14, border: "2px solid white", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} /> : <><Check size={15} /> تغییر رمز</>}
                   </button>
                 </div>
               </div>
