@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
@@ -54,7 +54,7 @@ export default function SchoolExams() {
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
-    lessonName: "", examDate: "", examTime: "", examType: "", examMode: "", examPages: "", description: "",
+    lessonName: "", examDate: "", examTime: "", examType: "", examMode: "", examPages: "", description: "", _customLesson: "",
   });
 
   const { data: exams = [] } = useQuery<ExamEntry[]>({
@@ -62,12 +62,24 @@ export default function SchoolExams() {
     queryFn:  () => api.get(`/exam-schedule?schoolId=${user?.schoolId}`),
   });
 
+  const { data: allBooks = [] } = useQuery<{ id: number; title: string; gradeLevel?: string | null }[]>({
+    queryKey: ["books"],
+    queryFn:  () => api.get("/books"),
+  });
+
+  const bookOptions = useMemo(() =>
+    [...allBooks].sort((a, b) => a.title.localeCompare(b.title, "fa")),
+    [allBooks]
+  );
+
+  const effectiveLessonName = form.lessonName === "__custom__" ? form._customLesson : form.lessonName;
+
   const createMut = useMutation({
     mutationFn: (d: any) => api.post("/exam-schedule", { ...d, schoolId: user?.schoolId }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["exam-schedule"] });
       setShowForm(false);
-      setForm({ lessonName: "", examDate: "", examTime: "", examType: "", examMode: "", examPages: "", description: "" });
+      setForm({ lessonName: "", examDate: "", examTime: "", examType: "", examMode: "", examPages: "", description: "", _customLesson: "" });
       showToast("امتحان با موفقیت ثبت شد ✓");
     },
     onError: (e: any) => showToast(e?.message ?? "خطا در ثبت امتحان", "error"),
@@ -101,7 +113,24 @@ export default function SchoolExams() {
 
             <div style={{ gridColumn: "1/-1" }}>
               <label style={{ display: "block", color: "#3730a3", fontSize: 12, fontWeight: 700, marginBottom: 5 }}>نام درس *</label>
-              <input value={form.lessonName} onChange={f("lessonName")} style={inputStyle} placeholder="مثال: ریاضی فصل اول" />
+              <select value={form.lessonName} onChange={f("lessonName")} style={{ ...inputStyle, cursor: "pointer" }}>
+                <option value="">انتخاب درس...</option>
+                {bookOptions.map(b => (
+                  <option key={b.id} value={b.title}>
+                    {b.title}{b.gradeLevel ? ` — ${b.gradeLevel}` : ""}
+                  </option>
+                ))}
+                <option value="__custom__">سایر (وارد کردن دستی)</option>
+              </select>
+              {form.lessonName === "__custom__" && (
+                <input
+                  value={form._customLesson ?? ""}
+                  onChange={e => setForm(p => ({ ...p, _customLesson: e.target.value }))}
+                  style={{ ...inputStyle, marginTop: 8 }}
+                  placeholder="نام درس را وارد کنید..."
+                  autoFocus
+                />
+              )}
             </div>
 
             <div>
@@ -144,7 +173,7 @@ export default function SchoolExams() {
           </div>
 
           <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
-            <button onClick={() => createMut.mutate(form)} disabled={!form.lessonName || !form.examDate || createMut.isPending}
+            <button onClick={() => createMut.mutate({ ...form, lessonName: effectiveLessonName })} disabled={!effectiveLessonName || !form.examDate || createMut.isPending}
               style={{ flex: 1, padding: "12px 0", background: "linear-gradient(135deg,#7c3aed,#a855f7)", border: "none", borderRadius: 12, color: "white", fontWeight: 700, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontSize: 14 }}>
               {createMut.isPending ? "در حال ذخیره..." : "ذخیره امتحان"}
             </button>
