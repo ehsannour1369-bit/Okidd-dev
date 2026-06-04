@@ -45,6 +45,36 @@ router.put("/users/:id", async (req, res) => {
   res.json(safeUser);
 });
 
+// Safe self-edit: only name, phone, nationalId, email
+router.patch("/users/:id/profile", async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { name, phone, nationalId, email } = req.body as Record<string, string>;
+  const updates: Record<string, unknown> = {};
+  if (name !== undefined) updates.name = name;
+  if (phone !== undefined) updates.phone = phone;
+  if (nationalId !== undefined) updates.nationalId = nationalId;
+  if (email !== undefined) updates.email = email;
+  const [user] = await db.update(usersTable).set(updates).where(eq(usersTable.id, id)).returning();
+  if (!user) { res.status(404).json({ error: "Not found" }); return; }
+  const { password: _pw, ...safeUser } = user;
+  res.json(safeUser);
+});
+
+// Change own password — requires current password verification
+router.patch("/users/:id/password", async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { currentPassword, newPassword } = req.body as { currentPassword: string; newPassword: string };
+  if (!currentPassword || !newPassword) { res.status(400).json({ error: "رمز عبور فعلی و جدید الزامی است" }); return; }
+  if (newPassword.length < 6) { res.status(400).json({ error: "رمز عبور جدید باید حداقل ۶ کاراکتر باشد" }); return; }
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, id));
+  if (!user) { res.status(404).json({ error: "Not found" }); return; }
+  const valid = await bcrypt.compare(currentPassword, user.password);
+  if (!valid) { res.status(400).json({ error: "رمز عبور فعلی اشتباه است" }); return; }
+  const hashed = await bcrypt.hash(newPassword, 10);
+  await db.update(usersTable).set({ password: hashed }).where(eq(usersTable.id, id));
+  res.json({ success: true });
+});
+
 router.patch("/users/:id/avatar", async (req, res) => {
   const id = parseInt(req.params.id);
   const { avatarUrl } = req.body;
