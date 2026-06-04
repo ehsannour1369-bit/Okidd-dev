@@ -208,7 +208,6 @@ router.get("/book-license-summary", async (req, res) => {
   }
 
   const used: Record<number, number> = {};
-  const bookStudents: Record<number, Set<number>> = {};
   if (classIds.length > 0) {
     const cbRows = await db.select().from(classBooksTable).where(inArray(classBooksTable.classId, classIds));
     const csRows = await db.select().from(classStudentsTable).where(inArray(classStudentsTable.classId, classIds));
@@ -217,23 +216,13 @@ router.get("/book-license-summary", async (req, res) => {
       if (!classStudentsMap[cs.classId]) classStudentsMap[cs.classId] = new Set();
       classStudentsMap[cs.classId].add(cs.studentId);
     }
+    const bookStudents: Record<number, Set<number>> = {};
     for (const cb of cbRows) {
       if (!bookStudents[cb.bookId]) bookStudents[cb.bookId] = new Set();
       for (const s of (classStudentsMap[cb.classId] ?? new Set())) bookStudents[cb.bookId].add(s);
     }
+    for (const [bid, studs] of Object.entries(bookStudents)) used[Number(bid)] = studs.size;
   }
-
-  // Also merge direct student_book assignments (deduped with class-based)
-  const { studentBooksTable } = await import("@workspace/db");
-  const directAssignments = await db.select({ bookId: studentBooksTable.bookId, studentId: studentBooksTable.studentId })
-    .from(studentBooksTable)
-    .where(and(eq(studentBooksTable.schoolId, sid), eq(studentBooksTable.isActive, true)));
-  for (const da of directAssignments) {
-    if (!bookStudents[da.bookId]) bookStudents[da.bookId] = new Set();
-    bookStudents[da.bookId].add(da.studentId);
-  }
-
-  for (const [bid, studs] of Object.entries(bookStudents)) used[Number(bid)] = studs.size;
 
   const allBookIds = [...new Set([...Object.keys(purchased), ...Object.keys(used)].map(Number))];
   if (allBookIds.length === 0) { res.json([]); return; }

@@ -25,7 +25,6 @@ import schoolReportRouter from "./schoolReport";
 import schoolTeachersRouter from "./schoolTeachers";
 import studentEnrollmentsRouter from "./studentEnrollments";
 import parentStudentsRouter from "./parentStudents";
-import studentBooksRouter from "./studentBooks";
 
 const router: IRouter = Router();
 
@@ -55,6 +54,5 @@ router.use(schoolReportRouter);
 router.use(schoolTeachersRouter);
 router.use(studentEnrollmentsRouter);
 router.use(parentStudentsRouter);
-router.use(studentBooksRouter);
 
 export default router;

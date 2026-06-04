@@ -19,4 +19,3 @@ export * from "./gameScores";
 export * from "./notificationReplies";
 export * from "./studentEnrollments";
 export * from "./parentStudents";
-export * from "./studentBooks";
