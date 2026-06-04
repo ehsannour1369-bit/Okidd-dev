@@ -1,45 +1,29 @@
 import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
+import { showToast } from "../../lib/toast";
 import {
   BookOpen, Star, UserRound, Clock, Calendar,
   ChevronDown, ChevronUp, Trophy, GraduationCap,
-  Gamepad2, Brain, Film, Dumbbell, Zap,
+  Gamepad2, Brain, Film, Dumbbell, Zap, Plus, X, Search, Link,
 } from "lucide-react";
 import PageTopBar from "../../components/PageTopBar";
 
 function glassCard(color: string, dark: string, extra?: React.CSSProperties): React.CSSProperties {
   return {
     background: `linear-gradient(145deg, ${color}68, ${dark}42)`,
-    backdropFilter: "blur(22px)",
-    WebkitBackdropFilter: "blur(22px)",
-    border: `1.5px solid ${color}88`,
-    borderRadius: 22,
-    position: "relative",
-    overflow: "hidden",
+    backdropFilter: "blur(22px)", WebkitBackdropFilter: "blur(22px)",
+    border: `1.5px solid ${color}88`, borderRadius: 22, position: "relative", overflow: "hidden",
     boxShadow: `0 6px 28px ${color}44, inset 0 1px 0 rgba(255,255,255,0.32)`,
-    transition: "transform 0.26s cubic-bezier(.34,1.56,.64,1), box-shadow 0.26s ease",
-    ...extra,
+    transition: "transform 0.26s cubic-bezier(.34,1.56,.64,1), box-shadow 0.26s ease", ...extra,
   };
 }
 function glassIcon(color: string, size = 46): React.CSSProperties {
-  return {
-    width: size, height: size, borderRadius: 14,
-    background: "rgba(255,255,255,0.35)",
-    backdropFilter: "blur(12px)",
-    border: "1.5px solid rgba(255,255,255,0.60)",
-    boxShadow: `0 2px 10px ${color}22`,
-    display: "flex", alignItems: "center", justifyContent: "center",
-    flexShrink: 0,
-  };
+  return { width: size, height: size, borderRadius: 14, background: "rgba(255,255,255,0.35)", backdropFilter: "blur(12px)", border: "1.5px solid rgba(255,255,255,0.60)", boxShadow: `0 2px 10px ${color}22`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 };
 }
 function shine(): React.CSSProperties {
-  return {
-    position: "absolute", top: 0, left: 0, right: 0, height: "45%",
-    background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%)",
-    borderRadius: "22px 22px 0 0", pointerEvents: "none",
-  };
+  return { position: "absolute", top: 0, left: 0, right: 0, height: "45%", background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" };
 }
 
 const STAT_META = [
@@ -50,58 +34,60 @@ const STAT_META = [
   { label: "رتبه کلاس",      key: "rank",      icon: Trophy,        color: "#8b5cf6", dark: "#7c3aed" },
   { label: "دروس تکمیل‌شده", key: "lessons",   icon: GraduationCap, color: "#10b981", dark: "#059669" },
 ];
-
 const BREAKDOWN_META = [
-  { key: "lesson",    label: "دروس",      color: "#6366f1", icon: BookOpen },
-  { key: "game",      label: "بازی",      color: "#f59e0b", icon: Gamepad2 },
-  { key: "quiz",      label: "کوییز",     color: "#ec4899", icon: Brain },
-  { key: "exercise",  label: "تمرین",     color: "#10b981", icon: Dumbbell },
-  { key: "animation", label: "انیمیشن",   color: "#3b82f6", icon: Film },
-  { key: "balloon",   label: "بالون",     color: "#f97316", icon: Zap },
-  { key: "video",     label: "ویدیو",     color: "#a855f7", icon: Film },
+  { key: "lesson", label: "دروس", color: "#6366f1", icon: BookOpen },
+  { key: "game", label: "بازی", color: "#f59e0b", icon: Gamepad2 },
+  { key: "quiz", label: "کوییز", color: "#ec4899", icon: Brain },
+  { key: "exercise", label: "تمرین", color: "#10b981", icon: Dumbbell },
+  { key: "animation", label: "انیمیشن", color: "#3b82f6", icon: Film },
+  { key: "balloon", label: "بالون", color: "#f97316", icon: Zap },
+  { key: "video", label: "ویدیو", color: "#a855f7", icon: Film },
 ];
+
+const RELATION_LABELS: Record<string, string> = { father: "پدر", mother: "مادر", guardian: "سرپرست" };
 
 export default function ParentChildren() {
   const { user } = useAuthStore();
-  const [selected, setSelected]         = useState<any>(null);
+  const qc = useQueryClient();
+  const [selected, setSelected] = useState<any>(null);
   const [expandedBook, setExpandedBook] = useState<number | null>(null);
-  const [mounted, setMounted]           = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [showConnect, setShowConnect] = useState(false);
 
   useEffect(() => { const t = setTimeout(() => setMounted(true), 80); return () => clearTimeout(t); }, []);
 
-  const { data: allUsers = [] } = useQuery<any[]>({
-    queryKey: ["users"],
-    queryFn: () => api.get("/users"),
+  // Get linked children via parent_students
+  const { data: links = [], isLoading: linksLoading } = useQuery<any[]>({
+    queryKey: ["parent-students", user?.id],
+    queryFn: () => api.get(`/parent-students?parentId=${user?.id}`),
+    enabled: !!user?.id,
   });
-  const children = allUsers.filter((u: any) => u.role === "student" && u.schoolId === user?.schoolId);
+
+  const children = links.map((l: any) => ({ ...l.student, relationType: l.relationType, linkId: l.id }));
   const currentChild = selected ?? children[0];
 
   const { data: summary } = useQuery<any>({
     queryKey: ["student-summary", currentChild?.id],
-    queryFn:  () => api.get(`/users/${currentChild?.id}/student-summary`),
-    enabled:  !!currentChild?.id,
+    queryFn: () => api.get(`/users/${currentChild?.id}/student-summary`),
+    enabled: !!currentChild?.id,
   });
-
   const { data: rankings = [] } = useQuery<any[]>({
     queryKey: ["rankings", summary?.classes?.[0]?.id],
-    queryFn:  () => api.get(`/rankings?classId=${summary?.classes?.[0]?.id}`),
-    enabled:  !!summary?.classes?.[0]?.id,
+    queryFn: () => api.get(`/rankings?classId=${summary?.classes?.[0]?.id}`),
+    enabled: !!summary?.classes?.[0]?.id,
   });
-
   const { data: breakdown } = useQuery<any>({
     queryKey: ["student-scores-breakdown", currentChild?.id],
-    queryFn:  () => api.get(`/student-scores-breakdown?studentId=${currentChild?.id}`),
-    enabled:  !!currentChild?.id,
+    queryFn: () => api.get(`/student-scores-breakdown?studentId=${currentChild?.id}`),
+    enabled: !!currentChild?.id,
   });
 
   const isGirl     = currentChild?.gender === "female";
   const accent     = isGirl ? "#e879f9" : "#818cf8";
   const accentDark = isGirl ? "#c026d3" : "#4f46e5";
-  const bgGrad     = isGirl
-    ? "linear-gradient(160deg,#fdf2f8 0%,#fce7f3 40%,#fff1f2 100%)"
-    : "linear-gradient(160deg,#f5f3ff 0%,#ede9fe 40%,#eef2ff 100%)";
-  const TEXT  = isGirl ? "#4a044e" : "#1e1b4b";
-  const TEXT2 = isGirl ? "#86198f" : "#3730a3";
+  const bgGrad     = isGirl ? "linear-gradient(160deg,#fdf2f8 0%,#fce7f3 40%,#fff1f2 100%)" : "linear-gradient(160deg,#f5f3ff 0%,#ede9fe 40%,#eef2ff 100%)";
+  const TEXT       = isGirl ? "#4a044e" : "#1e1b4b";
+  const TEXT2      = isGirl ? "#86198f" : "#3730a3";
 
   function cardAnim(idx: number): React.CSSProperties {
     if (!mounted) return { opacity: 0, transform: "translateY(22px)" };
@@ -109,8 +95,7 @@ export default function ParentChildren() {
   }
   function fmtDateTime(d: string | null) {
     if (!d) return "—";
-    return new Date(d).toLocaleDateString("fa-IR") + " " +
-      new Date(d).toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" });
+    return new Date(d).toLocaleDateString("fa-IR") + " " + new Date(d).toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" });
   }
   function fmtDuration(mins: number) {
     if (!mins) return "۰ دقیقه";
@@ -127,9 +112,7 @@ export default function ParentChildren() {
     rank:      myRank ? `${myRank.rank.toLocaleString("fa-IR")} از ${rankings.length.toLocaleString("fa-IR")}` : "—",
     lessons:   ((summary?.books ?? []) as any[]).reduce((s, b) => s + (b.completedLessons ?? 0), 0).toLocaleString("fa-IR"),
   };
-
   const bdTotal = breakdown?.total ?? 0;
-  const bdMeta = BREAKDOWN_META.filter(m => (breakdown?.[m.key] ?? 0) > 0);
 
   return (
     <div dir="rtl" style={{ fontFamily: "Vazirmatn, sans-serif", margin: "-12px", background: bgGrad, minHeight: "100vh", transition: "background 0.4s" }}>
@@ -140,36 +123,52 @@ export default function ParentChildren() {
 
       <div style={{ position: "relative", zIndex: 1, padding: "20px 16px 40px" }}>
         <PageTopBar />
-        <div style={{ fontWeight: 800, fontSize: 18, color: TEXT, marginBottom: 16, ...cardAnim(0), display: "flex", alignItems: "center", gap: 8 }}>
-          <UserRound size={18} style={{ color: accent }} /> مدیریت فرزندان
+
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, ...cardAnim(0) }}>
+          <div style={{ fontWeight: 800, fontSize: 18, color: TEXT, display: "flex", alignItems: "center", gap: 8 }}>
+            <UserRound size={18} style={{ color: accent }} /> مدیریت فرزندان
+            {children.length > 0 && <span style={{ background: `${accent}33`, color: accentDark, borderRadius: 999, padding: "1px 10px", fontSize: 13 }}>{children.length}</span>}
+          </div>
+          <button onClick={() => setShowConnect(true)}
+            style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", background: `linear-gradient(135deg,${accent},${accentDark})`, border: "none", borderRadius: 12, color: "white", fontSize: 13, fontWeight: 700, fontFamily: "Vazirmatn", cursor: "pointer", boxShadow: `0 4px 14px ${accent}55` }}>
+            <Plus size={14} /> افزودن فرزند
+          </button>
         </div>
 
-        {/* Child selector */}
+        {/* Child selector tabs */}
         {children.length > 1 && (
           <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap", ...cardAnim(1) }}>
             {children.map((child: any) => {
               const isActive = currentChild?.id === child.id;
-              const cc  = child.gender === "female" ? "#e879f9" : "#818cf8";
+              const cc = child.gender === "female" ? "#e879f9" : "#818cf8";
               const ccd = child.gender === "female" ? "#c026d3" : "#4f46e5";
               return (
                 <button key={child.id} onClick={() => { setSelected(child); setExpandedBook(null); }}
                   style={{ display: "flex", alignItems: "center", gap: 7, padding: "9px 16px", borderRadius: 14, cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: isActive ? 700 : 500, background: isActive ? `linear-gradient(135deg,${cc}bb,${ccd}99)` : `${cc}18`, border: `2px solid ${isActive ? cc + "dd" : cc + "44"}`, color: isActive ? "white" : ccd, backdropFilter: "blur(12px)", transform: isActive ? "scale(1.04)" : "scale(1)", boxShadow: isActive ? `0 6px 20px ${cc}44` : "none", transition: "all 0.25s" }}>
                   <UserRound size={13} /> {child.name}
-                  <span style={{ fontSize: 10, opacity: 0.8 }}>{child.gender === "female" ? "دختر" : "پسر"}</span>
+                  <span style={{ fontSize: 10, opacity: 0.8 }}>{RELATION_LABELS[child.relationType] ?? child.relationType}</span>
                 </button>
               );
             })}
           </div>
         )}
 
-        {children.length === 0 && (
+        {/* Empty state */}
+        {!linksLoading && children.length === 0 && (
           <div style={{ ...glassCard(accent, accentDark, { padding: 40, textAlign: "center" }), ...cardAnim(2) }}>
             <div style={shine()} />
-            <div style={{ ...glassIcon(accent, 56), margin: "0 auto 12px" }}><UserRound size={26} color="white" /></div>
-            <div style={{ color: "rgba(255,255,255,0.88)", fontWeight: 600, fontSize: 15 }}>هیچ فرزندی ثبت نشده است</div>
+            <div style={{ ...glassIcon(accent, 56), margin: "0 auto 16px" }}><UserRound size={26} color="white" /></div>
+            <div style={{ color: "rgba(255,255,255,0.88)", fontWeight: 700, fontSize: 15, marginBottom: 8 }}>هنوز فرزندی اضافه نشده</div>
+            <div style={{ color: "rgba(255,255,255,0.65)", fontSize: 13, marginBottom: 20 }}>با کد ملی فرزندتان حساب کاربری او را پیدا و اتصال برقرار کنید</div>
+            <button onClick={() => setShowConnect(true)}
+              style={{ padding: "10px 24px", background: "rgba(255,255,255,0.25)", border: "1.5px solid rgba(255,255,255,0.55)", borderRadius: 12, color: "white", fontWeight: 700, fontFamily: "Vazirmatn", cursor: "pointer", fontSize: 14 }}>
+              <Plus size={14} style={{ display: "inline", marginLeft: 6 }} /> افزودن فرزند
+            </button>
           </div>
         )}
 
+        {/* Child detail */}
         {currentChild && (
           <>
             {/* Profile card */}
@@ -179,11 +178,17 @@ export default function ParentChildren() {
                 <div style={{ width: 52, height: 52, borderRadius: 16, background: "rgba(255,255,255,0.30)", border: "1.5px solid rgba(255,255,255,0.60)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <UserRound size={26} color="white" />
                 </div>
-                <div>
+                <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 800, fontSize: 17, color: "white", textShadow: "0 1px 6px rgba(0,0,0,0.15)" }}>{currentChild.name}</div>
                   <div style={{ fontSize: 12, color: "rgba(255,255,255,0.78)", marginTop: 2 }}>{currentChild.email}</div>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.65)", marginTop: 3, display: "flex", gap: 8 }}>
+                    <span style={{ background: "rgba(255,255,255,0.18)", borderRadius: 6, padding: "1px 8px" }}>
+                      {RELATION_LABELS[currentChild.relationType] ?? currentChild.relationType}
+                    </span>
+                    {currentChild.nationalId && <span style={{ background: "rgba(255,255,255,0.18)", borderRadius: 6, padding: "1px 8px" }}>کد ملی: {currentChild.nationalId}</span>}
+                  </div>
                   {summary?.classes?.length > 0 && (
-                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.68)", marginTop: 3, display: "flex", gap: 5, flexWrap: "wrap" }}>
+                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.68)", marginTop: 4, display: "flex", gap: 5, flexWrap: "wrap" }}>
                       {summary.classes.map((c: any) => (
                         <span key={c.id} style={{ background: "rgba(255,255,255,0.18)", borderRadius: 6, padding: "1px 7px" }}>
                           <BookOpen size={9} style={{ display: "inline", marginLeft: 3 }} />{c.name}
@@ -195,7 +200,7 @@ export default function ParentChildren() {
               </div>
             </div>
 
-            {/* Stats grid */}
+            {/* Stats */}
             {summary && (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 9, marginBottom: 12 }}>
                 {STAT_META.map((sm, idx) => {
@@ -204,9 +209,7 @@ export default function ParentChildren() {
                     <div key={sm.key} style={{ ...glassCard(sm.color, sm.dark, { padding: "13px 11px" }), ...cardAnim(idx + 3) }}>
                       <div style={shine()} />
                       <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 6, position: "relative", zIndex: 1 }}>
-                        <div style={{ width: 26, height: 26, borderRadius: 8, background: "rgba(255,255,255,0.22)", border: "1.5px solid rgba(255,255,255,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <Icon size={12} color="white" />
-                        </div>
+                        <div style={{ width: 26, height: 26, borderRadius: 8, background: "rgba(255,255,255,0.22)", border: "1.5px solid rgba(255,255,255,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon size={12} color="white" /></div>
                         <span style={{ color: "rgba(255,255,255,0.82)", fontSize: 10, fontWeight: 700, lineHeight: 1.2 }}>{sm.label}</span>
                       </div>
                       <div style={{ color: "white", fontWeight: 800, fontSize: 12, position: "relative", zIndex: 1, textShadow: "0 1px 5px rgba(0,0,0,0.18)", wordBreak: "break-word" }}>{statValues[sm.key]}</div>
@@ -216,16 +219,14 @@ export default function ParentChildren() {
               </div>
             )}
 
-            {/* ── Score Breakdown ── */}
+            {/* Score breakdown */}
             {breakdown && bdTotal > 0 && (
               <div style={{ ...glassCard(accent, accentDark, { padding: "16px 18px", marginBottom: 14 }), ...cardAnim(10) }}>
                 <div style={shine()} />
                 <div style={{ position: "relative", zIndex: 1 }}>
                   <div style={{ fontWeight: 800, fontSize: 14, color: "white", marginBottom: 12, display: "flex", alignItems: "center", gap: 7 }}>
                     <Star size={14} color="rgba(255,255,255,0.9)" /> تفکیک امتیاز
-                    <span style={{ background: "rgba(255,255,255,0.22)", borderRadius: 8, padding: "2px 10px", fontSize: 13, fontWeight: 800 }}>
-                      {bdTotal.toLocaleString("fa-IR")} ستاره
-                    </span>
+                    <span style={{ background: "rgba(255,255,255,0.22)", borderRadius: 8, padding: "2px 10px", fontSize: 13, fontWeight: 800 }}>{bdTotal.toLocaleString("fa-IR")} ستاره</span>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {BREAKDOWN_META.map(m => {
@@ -237,9 +238,7 @@ export default function ParentChildren() {
                         <div key={m.key}>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                              <div style={{ width: 20, height: 20, borderRadius: 6, background: "rgba(255,255,255,0.22)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                <Icon size={11} color="white" />
-                              </div>
+                              <div style={{ width: 20, height: 20, borderRadius: 6, background: "rgba(255,255,255,0.22)", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon size={11} color="white" /></div>
                               <span style={{ fontSize: 12, color: "rgba(255,255,255,0.88)", fontWeight: 600 }}>{m.label}</span>
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -275,11 +274,7 @@ export default function ParentChildren() {
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                               <span style={{ fontWeight: 700, color: "white", fontSize: 13 }}>{book.title}</span>
-                              {book.totalScore > 0 && (
-                                <span style={{ background: "rgba(255,255,255,0.22)", color: "white", borderRadius: 6, padding: "1px 7px", fontSize: 11, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 3 }}>
-                                  <Star size={9} /> {book.totalScore.toLocaleString("fa-IR")}
-                                </span>
-                              )}
+                              {book.totalScore > 0 && <span style={{ background: "rgba(255,255,255,0.22)", color: "white", borderRadius: 6, padding: "1px 7px", fontSize: 11, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 3 }}><Star size={9} /> {book.totalScore.toLocaleString("fa-IR")}</span>}
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                               <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>{book.completedLessons}/{book.lessonCount}</span>
@@ -296,18 +291,10 @@ export default function ParentChildren() {
                             <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)", marginBottom: 8, paddingTop: 10, fontWeight: 600 }}>جزئیات دروس</div>
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: 6 }}>
                               {book.lessons.map((lesson: any) => (
-                                <div key={lesson.lessonId}
-                                  style={{ background: lesson.completed ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.08)", border: `1px solid ${lesson.completed ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.18)"}`, borderRadius: 8, padding: "7px 10px" }}>
-                                  <div style={{ fontSize: 11, color: "white", fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                    {lesson.lessonTitle ?? `درس ${lesson.lessonIndex}`}
-                                  </div>
+                                <div key={lesson.lessonId} style={{ background: lesson.completed ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.08)", border: `1px solid ${lesson.completed ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.18)"}`, borderRadius: 8, padding: "7px 10px" }}>
+                                  <div style={{ fontSize: 11, color: "white", fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{lesson.lessonTitle ?? `درس ${lesson.lessonIndex}`}</div>
                                   <div style={{ fontSize: 10, color: "rgba(255,255,255,0.70)", marginTop: 3, display: "flex", alignItems: "center", gap: 3 }}>
-                                    {lesson.completed ? (
-                                      <>
-                                        <Star size={9} color="#fbbf24" />
-                                        <span style={{ color: "#fbbf24" }}>{lesson.score > 0 ? lesson.score.toLocaleString("fa-IR") : "تکمیل"}</span>
-                                      </>
-                                    ) : "ناتمام"}
+                                    {lesson.completed ? (<><Star size={9} color="#fbbf24" /><span style={{ color: "#fbbf24" }}>{lesson.score > 0 ? lesson.score.toLocaleString("fa-IR") : "تکمیل"}</span></>) : "ناتمام"}
                                   </div>
                                 </div>
                               ))}
@@ -321,16 +308,130 @@ export default function ParentChildren() {
               </div>
             )}
 
-            {!summary && (
-              <div style={{ textAlign: "center", padding: 40, color: TEXT2, fontSize: 14 }}>در حال بارگذاری...</div>
-            )}
+            {!summary && <div style={{ textAlign: "center", padding: 40, color: TEXT2, fontSize: 14 }}>در حال بارگذاری...</div>}
           </>
         )}
       </div>
 
-      <style>{`
-        @keyframes childUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
-      `}</style>
+      {/* Connect Child Modal */}
+      {showConnect && (
+        <ConnectChildModal
+          parentId={user!.id}
+          existingStudentIds={children.map((c: any) => c.id)}
+          onClose={() => setShowConnect(false)}
+          onConnected={() => {
+            qc.invalidateQueries({ queryKey: ["parent-students", user?.id] });
+            setShowConnect(false);
+            showToast("فرزند با موفقیت اضافه شد ✓");
+          }}
+        />
+      )}
+
+      <style>{`@keyframes childUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }`}</style>
+    </div>
+  );
+}
+
+const IS: React.CSSProperties = { width: "100%", background: "rgba(245,243,255,0.9)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#1e1b4b", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl", boxSizing: "border-box" };
+
+function ConnectChildModal({ parentId, existingStudentIds, onClose, onConnected }: {
+  parentId: number; existingStudentIds: number[];
+  onClose: () => void; onConnected: () => void;
+}) {
+  const [nationalId, setNationalId] = useState("");
+  const [relationType, setRelationType] = useState("father");
+  const [found, setFound] = useState<any>(null);
+  const [searching, setSearching] = useState(false);
+  const [searchErr, setSearchErr] = useState("");
+  const [linking, setLinking] = useState(false);
+  const [linkErr, setLinkErr] = useState("");
+
+  async function search() {
+    if (nationalId.length < 5) { setSearchErr("کد ملی باید حداقل ۵ رقم باشد"); return; }
+    setSearching(true); setSearchErr(""); setFound(null);
+    try {
+      const results: any[] = await api.get(`/students/search-by-national-id?nationalId=${nationalId}`);
+      if (results.length === 0) { setSearchErr("دانش‌آموزی با این کد ملی یافت نشد. لطفاً از مدیر مدرسه بخواهید حساب کاربری فرزندتان را بسازد."); }
+      else if (existingStudentIds.includes(results[0].id)) { setSearchErr("این فرزند قبلاً اضافه شده است."); }
+      else { setFound(results[0]); }
+    } catch { setSearchErr("خطا در جستجو"); }
+    setSearching(false);
+  }
+
+  async function link() {
+    if (!found) return;
+    setLinking(true); setLinkErr("");
+    try {
+      await api.post("/parent-students", { parentId, studentId: found.id, relationType });
+      onConnected();
+    } catch (e: any) {
+      setLinkErr(e?.message ?? "خطا در اتصال");
+      setLinking(false);
+    }
+  }
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(5px)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div style={{ background: "#f5f3ff", border: "1px solid rgba(124,58,237,0.5)", borderRadius: 20, padding: 28, width: "90%", maxWidth: 460 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <h3 style={{ margin: 0, color: "#1e1b4b", fontSize: 17, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}><Link size={16} color="#7c3aed" /> افزودن فرزند</h3>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "#4f46e5", cursor: "pointer" }}><X size={20} /></button>
+        </div>
+
+        <div style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 10, padding: "10px 14px", marginBottom: 18, fontSize: 13, color: "#4f46e5", lineHeight: 1.7 }}>
+          کد ملی فرزندتان را وارد کنید. اگر حساب کاربری دارد، به شما متصل می‌شود.
+        </div>
+
+        {/* Search */}
+        <div style={{ marginBottom: 14 }}>
+          <label style={{ display: "block", color: "#3730a3", fontSize: 13, marginBottom: 6, fontWeight: 600 }}>کد ملی فرزند *</label>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input value={nationalId} onChange={e => { setNationalId(e.target.value); setFound(null); setSearchErr(""); }}
+              onKeyDown={e => e.key === "Enter" && search()}
+              style={{ ...IS, flex: 1 }} placeholder="مثال: ۱۲۳۴۵۶۷۸۹۰" maxLength={10} />
+            <button onClick={search} disabled={searching || nationalId.length < 5}
+              style={{ padding: "10px 16px", background: "linear-gradient(135deg,#7c3aed,#a855f7)", border: "none", borderRadius: 10, color: "white", cursor: "pointer", fontFamily: "Vazirmatn", fontWeight: 600, fontSize: 13, display: "flex", alignItems: "center", gap: 5, opacity: nationalId.length < 5 ? 0.5 : 1 }}>
+              <Search size={14} /> {searching ? "..." : "جستجو"}
+            </button>
+          </div>
+          {searchErr && <div style={{ color: "#ef4444", fontSize: 12, marginTop: 6 }}>{searchErr}</div>}
+        </div>
+
+        {/* Result */}
+        {found && (
+          <div style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 12, padding: "12px 16px", marginBottom: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+              <div style={{ width: 38, height: 38, borderRadius: 10, background: found.gender === "female" ? "rgba(236,72,153,0.15)" : "rgba(99,102,241,0.13)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <UserRound size={18} color={found.gender === "female" ? "#ec4899" : "#6366f1"} />
+              </div>
+              <div>
+                <div style={{ fontWeight: 700, color: "#065f46", fontSize: 14 }}>{found.name}</div>
+                <div style={{ fontSize: 12, color: "#047857" }}>{found.email}</div>
+              </div>
+              <span style={{ marginRight: "auto", fontSize: 11, background: "rgba(16,185,129,0.15)", color: "#065f46", borderRadius: 999, padding: "2px 10px", fontWeight: 600 }}>✓ یافت شد</span>
+            </div>
+
+            <div>
+              <label style={{ display: "block", color: "#3730a3", fontSize: 13, marginBottom: 5, fontWeight: 600 }}>نسبت *</label>
+              <select value={relationType} onChange={e => setRelationType(e.target.value)} style={{ ...IS, appearance: "none" }}>
+                <option value="father">پدر</option>
+                <option value="mother">مادر</option>
+                <option value="guardian">سرپرست</option>
+              </select>
+            </div>
+          </div>
+        )}
+
+        {linkErr && <div style={{ background: "#fef2f2", color: "#ef4444", padding: "8px 12px", borderRadius: 8, marginBottom: 12, fontSize: 13 }}>{linkErr}</div>}
+
+        <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+          <button onClick={link} disabled={!found || linking}
+            style={{ flex: 1, padding: "11px 0", background: found ? "linear-gradient(135deg,#7c3aed,#a855f7)" : "#e2e8f0", border: "none", borderRadius: 10, color: found ? "white" : "#94a3b8", fontWeight: 700, fontFamily: "Vazirmatn", cursor: found ? "pointer" : "default", fontSize: 14 }}>
+            {linking ? "در حال اتصال..." : "اتصال فرزند"}
+          </button>
+          <button onClick={onClose} style={{ flex: 1, padding: "11px 0", background: "transparent", border: "1px solid rgba(124,58,237,0.4)", borderRadius: 10, color: "#7c3aed", fontWeight: 600, fontFamily: "Vazirmatn", cursor: "pointer", fontSize: 14 }}>انصراف</button>
+        </div>
+      </div>
     </div>
   );
 }
