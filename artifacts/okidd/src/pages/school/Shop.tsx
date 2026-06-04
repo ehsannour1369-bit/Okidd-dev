@@ -194,10 +194,10 @@ function CheckoutModal({ cart, schoolId, walletBalance, onClose, onSuccess }: {
           <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13 }}>
             روش پرداخت
             <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}
-              style={{ padding: "8px 10px", border: "1.5px solid #c7d2fe", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }}>
-              <option value="bank">انتقال بانکی</option>
-              <option value="wallet">کیف پول ({fmt(walletBalance)})</option>
-              <option value="cash">نقدی</option>
+              style={{ padding: "8px 10px", border: "1.5px solid #c7d2fe", borderRadius: 8, fontFamily: "inherit", fontSize: 13, background: "#fff", color: "#1e1b4b" }}>
+              <option value="bank" style={{ background: "#fff", color: "#1e1b4b" }}>انتقال بانکی</option>
+              <option value="wallet" style={{ background: "#fff", color: "#1e1b4b" }}>کیف پول ({fmt(walletBalance)})</option>
+              <option value="cash" style={{ background: "#fff", color: "#1e1b4b" }}>نقدی</option>
             </select>
           </label>
         </div>

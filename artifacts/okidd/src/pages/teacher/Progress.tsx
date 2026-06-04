@@ -107,8 +107,8 @@ export default function TeacherProgress() {
 
   const inputStyle: React.CSSProperties = {
     width: "100%",
-    background: "rgba(13,10,26,0.55)",
-    border: "1px solid rgba(245,158,11,0.30)",
+    background: "#1e1233",
+    border: "1px solid rgba(245,158,11,0.40)",
     borderRadius: 10,
     color: "#fde68a",
     padding: "10px 14px",
@@ -117,6 +117,7 @@ export default function TeacherProgress() {
     outline: "none",
     appearance: "none" as any,
   };
+  const optStyle: React.CSSProperties = { background: "#1e1233", color: "#fde68a" };
 
   return (
     <div dir="rtl" style={{ fontFamily: "Vazirmatn, sans-serif", minHeight: "100vh" }}>
@@ -142,16 +143,16 @@ export default function TeacherProgress() {
               <div style={{ flex: 1, minWidth: 200 }}>
                 <label style={{ display: "block", color: "#fbbf24", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>کلاس</label>
                 <select value={selClass?.id ?? ""} onChange={e => { setSelClass(classes.find(c => c.id === parseInt(e.target.value)) ?? null); setSelBook(null); }} style={inputStyle}>
-                  <option value="">انتخاب کنید</option>
-                  {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  <option value="" style={optStyle}>انتخاب کنید</option>
+                  {classes.map(c => <option key={c.id} value={c.id} style={optStyle}>{c.name}</option>)}
                 </select>
               </div>
               {selClass && (
                 <div style={{ flex: 1, minWidth: 200 }}>
                   <label style={{ display: "block", color: "#fbbf24", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>کتاب</label>
                   <select value={selBook?.id ?? ""} onChange={e => setSelBook(classBooks.find(b => b.id === parseInt(e.target.value)) ?? null)} style={inputStyle}>
-                    <option value="">انتخاب کنید</option>
-                    {classBooks.map(b => <option key={b.id} value={b.id}>{b.title}</option>)}
+                    <option value="" style={optStyle}>انتخاب کنید</option>
+                    {classBooks.map(b => <option key={b.id} value={b.id} style={optStyle}>{b.title}</option>)}
                   </select>
                 </div>
               )}
@@ -199,8 +200,8 @@ export default function TeacherProgress() {
             <div style={{ marginBottom: 20 }}>
               <label style={{ display: "block", color: "#fbbf24", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>انتخاب کلاس</label>
               <select value={perfSelClass?.id ?? ""} onChange={e => { setPerfSelClass(classes.find(c => c.id === parseInt(e.target.value)) ?? null); setExpanded(null); }} style={{ ...inputStyle, maxWidth: 320 }}>
-                <option value="">انتخاب کنید</option>
-                {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                <option value="" style={optStyle}>انتخاب کنید</option>
+                {classes.map(c => <option key={c.id} value={c.id} style={optStyle}>{c.name}</option>)}
               </select>
             </div>
 
