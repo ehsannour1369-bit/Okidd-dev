@@ -2,12 +2,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { useNotificationReads } from "../../hooks/useNotificationReads";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import {
   School, ChevronDown, ChevronLeft, Users, BookOpen, Lock, Unlock,
   BarChart2, Clock, Star, GraduationCap, TrendingUp, UserRound,
-  Bell, User, LogOut, Eye, EyeOff,
+  Bell, User, LogOut, Eye, EyeOff, Camera,
 } from "lucide-react";
 
 const AMBER   = "#f59e0b";
@@ -61,6 +61,24 @@ export default function TeacherDashboard() {
   const [profileOpen, setProfileOpen]     = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
   const [showPassword, setShowPassword]   = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const avatarRef = useRef<HTMLInputElement>(null);
+
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !user?.id) return;
+    setAvatarUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const { url } = await api.upload<{ url: string }>("/content/upload", form);
+      const updated = await api.patch<any>(`/users/${user.id}/avatar`, { avatarUrl: url });
+      useAuthStore.getState().setAuth({ ...user, avatarUrl: updated.avatarUrl }, useAuthStore.getState().token!);
+    } catch { /* silent */ } finally {
+      setAvatarUploading(false);
+      if (avatarRef.current) avatarRef.current.value = "";
+    }
+  }
   const [selectedSchool, setSelectedSchool] = useState<any>(null);
   const [selectedClass, setSelectedClass]   = useState<any>(null);
   const [progressOpen, setProgressOpen]   = useState(false);
@@ -447,11 +465,19 @@ export default function TeacherDashboard() {
 
             {/* Avatar */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 28 }}>
-              <div style={{ width: 80, height: 80, borderRadius: "50%", background: `linear-gradient(135deg,${AMBER},${ORANGE})`, border: `3px solid ${AMBER}`, boxShadow: `0 6px 24px ${AMBER}60`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12, overflow: "hidden" }}>
-                {user?.avatarUrl
-                  ? <img src={user.avatarUrl} alt="پروفایل" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  : <User size={34} color="white" />}
+              <div style={{ position: "relative", width: 84, height: 84, marginBottom: 12 }}>
+                <div style={{ width: 84, height: 84, borderRadius: "50%", background: `linear-gradient(135deg,${AMBER},${ORANGE})`, border: `3px solid ${AMBER}`, boxShadow: `0 6px 24px ${AMBER}60`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                  {user?.avatarUrl
+                    ? <img src={user.avatarUrl} alt="پروفایل" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    : <User size={34} color="white" />}
+                </div>
+                <button onClick={() => avatarRef.current?.click()} disabled={avatarUploading} style={{ position: "absolute", bottom: 0, left: 0, width: 28, height: 28, borderRadius: "50%", background: `linear-gradient(135deg,${AMBER},${ORANGE})`, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+                  {avatarUploading
+                    ? <div style={{ width: 10, height: 10, border: "2px solid white", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} />
+                    : <Camera size={13} color="white" />}
+                </button>
               </div>
+              <input ref={avatarRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleAvatarUpload} />
               <div style={{ fontWeight: 800, fontSize: 18, color: "#1e1b4b" }}>{user?.name}</div>
               <div style={{ fontSize: 12, color: AMBER_D, marginTop: 3, fontWeight: 600 }}>معلم</div>
             </div>
