@@ -20,14 +20,14 @@ const PINK_D  = "#db2777";
 
 function glassCard(color: string, extra?: React.CSSProperties): React.CSSProperties {
   return {
-    background: `linear-gradient(145deg, ${color}68, ${color}42)`,
+    background: `linear-gradient(145deg, ${color}cc, ${color}aa)`,
     backdropFilter: "blur(22px)",
     WebkitBackdropFilter: "blur(22px)",
-    border: `1.5px solid ${color}88`,
+    border: `1.5px solid ${color}cc`,
     borderRadius: 22,
     position: "relative",
     overflow: "hidden",
-    boxShadow: `0 6px 28px ${color}44, inset 0 1px 0 rgba(255,255,255,0.32)`,
+    boxShadow: `0 6px 28px ${color}66, inset 0 1px 0 rgba(255,255,255,0.32)`,
     transition: "transform 0.26s cubic-bezier(.34,1.56,.64,1), box-shadow 0.26s ease",
     ...extra,
   };
@@ -221,8 +221,8 @@ export default function TeacherDashboard() {
               {/* Expanded body */}
               {ac.open && (
                 <div style={{
-                  background: `linear-gradient(145deg, ${ac.color}25, ${ac.dark}16)`,
-                  backdropFilter: "blur(22px)", border: `1.5px solid ${ac.color}50`,
+                  background: `linear-gradient(145deg, ${ac.color}bb, ${ac.dark}99)`,
+                  backdropFilter: "blur(22px)", border: `1.5px solid ${ac.color}cc`,
                   borderTop: "none", borderRadius: "0 0 22px 22px", padding: 18,
                 }}>
 
