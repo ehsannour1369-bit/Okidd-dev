@@ -512,7 +512,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         marginRight: showDesktopSidebar ? 240 : 0,
         flex: 1, minHeight: "100vh",
         width: showDesktopSidebar ? "calc(100% - 240px)" : "100%",
-        maxWidth: "100%", overflow: "hidden",
+        maxWidth: "100%", overflowX: "hidden",
         background: isStudent
           ? (isGirl
             ? "linear-gradient(135deg, #4facfe 0%, #c084fc 38%, #f472b6 72%, #fb7185 100%)"
