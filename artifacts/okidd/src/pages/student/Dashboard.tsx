@@ -359,21 +359,7 @@ export default function StudentDashboard() {
                 <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${GREEN}70, ${GREEN}20)`, borderRadius: "0 0 24px 24px" }} />
               </div>
 
-              {/* ⑥ کلاس آنلاین — full width */}
-              <div style={{ gridColumn: "span 2", ...glassCard(accent, { padding: "14px 18px", display: "flex", alignItems: "center", gap: 14, background: `linear-gradient(145deg, ${accent}70, ${accentDark}45)`, border: `1.5px solid ${accent}90` }), ...cardAnim('up', 0.38) }}
-                onClick={() => navigate("/student/online-class")}
-                onMouseEnter={e => hoverIn(e.currentTarget, accent)}
-                onMouseLeave={e => hoverOut(e.currentTarget, accent)}>
-                <div style={{ ...glassIconStyle(accent, 48) }}>
-                  <Video size={24} color={accent} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 800, fontSize: 16, color: "#1e1b4b" }}>کلاس آنلاین</div>
-                  <div style={{ fontSize: 12, color: "#4b5563", marginTop: 3 }}>برنامه هفتگی و ورود به جلسه</div>
-                </div>
-                <ChevronRight size={20} color={accent} />
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${accent}70, ${accent}20)`, borderRadius: "0 0 24px 24px" }} />
-              </div>
+              {/* ⑥ کلاس آنلاین — hidden until enabled */}
 
               {/* ⑦ اعلانات — Purple, full width */}
               <div style={{ gridColumn: "span 2", ...glassCard(PURPLE, { padding: "12px 18px", display: "flex", alignItems: "center", gap: 14 }), ...cardAnim('up', 0.52) }}
