@@ -8,6 +8,7 @@ import {
   ChevronDown, ChevronUp, Trophy, GraduationCap,
   Gamepad2, Brain, Film, Dumbbell, Zap, Plus, X, Search, Link,
 } from "lucide-react";
+import { LessonStarRow, scoreToStars } from "../../components/LessonStarPanel";
 import PageTopBar from "../../components/PageTopBar";
 
 function glassCard(color: string, dark: string, extra?: React.CSSProperties): React.CSSProperties {
@@ -288,15 +289,18 @@ export default function ParentChildren() {
                         </div>
                         {isExpanded && book.lessons && (
                           <div style={{ padding: "0 16px 14px", borderTop: "1px solid rgba(255,255,255,0.18)", position: "relative", zIndex: 1 }}>
-                            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)", marginBottom: 8, paddingTop: 10, fontWeight: 600 }}>جزئیات دروس</div>
-                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: 6 }}>
+                            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)", marginBottom: 8, paddingTop: 10, fontWeight: 600, display: "flex", alignItems: "center", gap: 5 }}>
+                              <Star size={11} color="#fbbf24" fill="#fbbf24" /> عملکرد درس به درس
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                               {book.lessons.map((lesson: any) => (
-                                <div key={lesson.lessonId} style={{ background: lesson.completed ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.08)", border: `1px solid ${lesson.completed ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.18)"}`, borderRadius: 8, padding: "7px 10px" }}>
-                                  <div style={{ fontSize: 11, color: "white", fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{lesson.lessonTitle ?? `درس ${lesson.lessonIndex}`}</div>
-                                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.70)", marginTop: 3, display: "flex", alignItems: "center", gap: 3 }}>
-                                    {lesson.completed ? (<><Star size={9} color="#fbbf24" /><span style={{ color: "#fbbf24" }}>{lesson.score > 0 ? lesson.score.toLocaleString("fa-IR") : "تکمیل"}</span></>) : "ناتمام"}
-                                  </div>
-                                </div>
+                                <LessonStarRow key={lesson.lessonId} lesson={{
+                                  lessonId: lesson.lessonId,
+                                  lessonTitle: lesson.lessonTitle ?? `درس ${lesson.lessonIndex}`,
+                                  lessonIndex: lesson.lessonIndex,
+                                  score: lesson.score ?? 0,
+                                  completed: lesson.completed ?? false,
+                                }} />
                               ))}
                             </div>
                           </div>

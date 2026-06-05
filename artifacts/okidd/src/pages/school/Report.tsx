@@ -8,6 +8,7 @@ import {
   BarChart2, X, Trophy, Brain, Gamepad2, Film, Dumbbell, Zap,
   CheckCircle2, type LucideIcon,
 } from "lucide-react";
+import { LessonStarFetcher } from "../../components/LessonStarPanel";
 
 type ReportTab = "teachers" | "students" | "classes";
 
@@ -465,7 +466,7 @@ export default function SchoolReport() {
                 <div style={{ fontWeight: 700, fontSize: 13, color: "#3730a3", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
                   <BookOpen size={13} color="#6366f1" /> پیشرفت کتاب‌ها
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                   {detailStudent.bookProgress.map((bp: any) => {
                     const pct = bp.lessonCount > 0 ? Math.round((bp.completedLessons / bp.lessonCount) * 100) : 0;
                     return (
@@ -474,9 +475,10 @@ export default function SchoolReport() {
                           <span style={{ fontSize: 12, color: "#1e1b4b", fontWeight: 600 }}>{bp.bookTitle}</span>
                           <span style={{ fontSize: 12, color: "#4f46e5" }}>{bp.completedLessons}/{bp.lessonCount} — {pct}%</span>
                         </div>
-                        <div style={{ height: 6, background: "rgba(99,102,241,0.10)", borderRadius: 999, overflow: "hidden" }}>
+                        <div style={{ height: 6, background: "rgba(99,102,241,0.10)", borderRadius: 999, overflow: "hidden", marginBottom: 8 }}>
                           <div style={{ height: "100%", width: `${pct}%`, background: "linear-gradient(90deg,#7c3aed,#a855f7)", borderRadius: 999, transition: "width 0.5s" }} />
                         </div>
+                        <LessonStarFetcher studentId={detailStudent.id} bookId={bp.bookId} bookTitle={bp.bookTitle} accentColor="#4f46e5" />
                       </div>
                     );
                   })}

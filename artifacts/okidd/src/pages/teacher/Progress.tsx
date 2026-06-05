@@ -4,6 +4,7 @@ import { useAuthStore } from "../../store/auth";
 import { useState } from "react";
 import { showToast } from "../../lib/toast";
 import { Lock, Unlock, BarChart2, Star, Clock, CheckCircle, UserRound, ChevronDown, ChevronUp, Trophy, BookOpen } from "lucide-react";
+import { LessonStarFetcher } from "../../components/LessonStarPanel";
 import PageTopBar from "../../components/PageTopBar";
 
 const AMBER   = "#f59e0b";
@@ -295,7 +296,7 @@ export default function TeacherProgress() {
                             <div style={{ fontSize: 12, color: "#d97706", fontWeight: 700, marginBottom: 10, paddingTop: 10, display: "flex", alignItems: "center", gap: 5 }}>
                               <BookOpen size={13} /> پیشرفت کتاب‌ها
                             </div>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                               {st.bookProgress.map((bp: any) => {
                                 const pct = bp.lessonCount > 0 ? Math.round((bp.completedLessons / bp.lessonCount) * 100) : 0;
                                 return (
@@ -304,9 +305,10 @@ export default function TeacherProgress() {
                                       <span style={{ fontSize: 12, color: "#92400e", fontWeight: 600 }}>{bp.bookTitle}</span>
                                       <span style={{ fontSize: 12, color: "#d97706" }}>{bp.completedLessons}/{bp.lessonCount} درس — {pct}%</span>
                                     </div>
-                                    <div style={{ height: 6, background: "rgba(245,158,11,0.15)", borderRadius: 999, overflow: "hidden" }}>
+                                    <div style={{ height: 6, background: "rgba(245,158,11,0.15)", borderRadius: 999, overflow: "hidden", marginBottom: 8 }}>
                                       <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg,${GREEN},${GREEN_D})`, borderRadius: 999, transition: "width 0.5s" }} />
                                     </div>
+                                    <LessonStarFetcher studentId={st.id} bookId={bp.bookId} bookTitle={bp.bookTitle} accentColor={AMBER_D} />
                                   </div>
                                 );
                               })}
