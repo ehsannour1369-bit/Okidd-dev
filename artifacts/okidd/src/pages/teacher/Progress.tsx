@@ -107,24 +107,24 @@ export default function TeacherProgress() {
 
   const inputStyle: React.CSSProperties = {
     width: "100%",
-    background: "#1e1233",
-    border: "1px solid rgba(245,158,11,0.40)",
+    background: "rgba(255,255,255,0.80)",
+    border: "1px solid rgba(245,158,11,0.45)",
     borderRadius: 10,
-    color: "#fde68a",
+    color: "#78350f",
     padding: "10px 14px",
     fontSize: 14,
     fontFamily: "Vazirmatn, sans-serif",
     outline: "none",
     appearance: "none" as any,
   };
-  const optStyle: React.CSSProperties = { background: "#1e1233", color: "#fde68a" };
+  const optStyle: React.CSSProperties = { background: "#fef3c7", color: "#78350f" };
 
   return (
     <div dir="rtl" style={{ fontFamily: "Vazirmatn, sans-serif", minHeight: "100vh" }}>
       <PageTopBar />
 
       <div style={{ padding: "4px 0 24px" }}>
-        <h1 style={{ fontSize: 20, fontWeight: 800, color: "#fde68a", marginBottom: 16 }}>مدیریت کلاس و عملکرد</h1>
+        <h1 style={{ fontSize: 20, fontWeight: 800, color: "#92400e", marginBottom: 16 }}>مدیریت کلاس و عملکرد</h1>
 
         {/* Tabs */}
         <div style={{ display: "flex", gap: 10, marginBottom: 22 }}>
@@ -141,7 +141,7 @@ export default function TeacherProgress() {
           <div>
             <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
               <div style={{ flex: 1, minWidth: 200 }}>
-                <label style={{ display: "block", color: "#fbbf24", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>کلاس</label>
+                <label style={{ display: "block", color: "#92400e", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>کلاس</label>
                 <select value={selClass?.id ?? ""} onChange={e => { setSelClass(classes.find(c => c.id === parseInt(e.target.value)) ?? null); setSelBook(null); }} style={inputStyle}>
                   <option value="" style={optStyle}>انتخاب کنید</option>
                   {classes.map(c => <option key={c.id} value={c.id} style={optStyle}>{c.name}</option>)}
@@ -149,7 +149,7 @@ export default function TeacherProgress() {
               </div>
               {selClass && (
                 <div style={{ flex: 1, minWidth: 200 }}>
-                  <label style={{ display: "block", color: "#fbbf24", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>کتاب</label>
+                  <label style={{ display: "block", color: "#92400e", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>کتاب</label>
                   <select value={selBook?.id ?? ""} onChange={e => setSelBook(classBooks.find(b => b.id === parseInt(e.target.value)) ?? null)} style={inputStyle}>
                     <option value="" style={optStyle}>انتخاب کنید</option>
                     {classBooks.map(b => <option key={b.id} value={b.id} style={optStyle}>{b.title}</option>)}
@@ -160,7 +160,7 @@ export default function TeacherProgress() {
 
             {selClass && selBook && (
               <div style={{ ...glass(AMBER, { padding: 20 }) }}>
-                <h3 style={{ color: "#fde68a", fontWeight: 700, margin: "0 0 16px", fontSize: 15 }}>
+                <h3 style={{ color: "#92400e", fontWeight: 700, margin: "0 0 16px", fontSize: 15 }}>
                   درس‌های {selBook.title} — {selClass.name}
                 </h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -168,13 +168,13 @@ export default function TeacherProgress() {
                     const unlocked = unlockedIds.has(lesson.id);
                     const ue = unlocks.find((u: any) => u.lessonId === lesson.id);
                     return (
-                      <div key={lesson.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: unlocked ? "rgba(34,197,94,0.10)" : "rgba(13,10,26,0.40)", border: `1px solid ${unlocked ? "rgba(34,197,94,0.25)" : "rgba(245,158,11,0.15)"}`, borderRadius: 10 }}>
+                      <div key={lesson.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: unlocked ? "rgba(34,197,94,0.10)" : "rgba(255,255,255,0.60)", border: `1px solid ${unlocked ? "rgba(34,197,94,0.30)" : "rgba(245,158,11,0.30)"}`, borderRadius: 10 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                           <div style={{ width: 32, height: 32, borderRadius: 8, background: unlocked ? "rgba(34,197,94,0.22)" : "rgba(245,158,11,0.18)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                             {unlocked ? <Unlock size={15} style={{ color: "#4ade80" }} /> : <Lock size={15} style={{ color: AMBER }} />}
                           </div>
                           <div>
-                            <div style={{ fontWeight: 600, color: "#fde68a", fontSize: 13 }}>درس {i + 1}: {lesson.title}</div>
+                            <div style={{ fontWeight: 600, color: "#78350f", fontSize: 13 }}>درس {i + 1}: {lesson.title}</div>
                             {unlocked && ue?.createdAt && <div style={{ fontSize: 11, color: "#4ade80", marginTop: 2 }}>باز شده: {new Date(ue.createdAt).toLocaleDateString("fa-IR")}</div>}
                           </div>
                         </div>
@@ -198,7 +198,7 @@ export default function TeacherProgress() {
         {tab === "performance" && (
           <div>
             <div style={{ marginBottom: 20 }}>
-              <label style={{ display: "block", color: "#fbbf24", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>انتخاب کلاس</label>
+              <label style={{ display: "block", color: "#92400e", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>انتخاب کلاس</label>
               <select value={perfSelClass?.id ?? ""} onChange={e => { setPerfSelClass(classes.find(c => c.id === parseInt(e.target.value)) ?? null); setExpanded(null); }} style={{ ...inputStyle, maxWidth: 320 }}>
                 <option value="" style={optStyle}>انتخاب کنید</option>
                 {classes.map(c => <option key={c.id} value={c.id} style={optStyle}>{c.name}</option>)}
@@ -244,7 +244,7 @@ export default function TeacherProgress() {
                     const isGirl = st.gender === "female";
                     const rankColor = st.rank === 1 ? "#f59e0b" : st.rank === 2 ? "#94a3b8" : st.rank === 3 ? "#d97706" : "#6b7280";
                     return (
-                      <div key={st.id} style={{ background: isExp ? "rgba(245,158,11,0.08)" : "rgba(13,10,26,0.45)", border: `1.5px solid ${isExp ? AMBER + "55" : "rgba(245,158,11,0.15)"}`, borderRadius: 14, overflow: "hidden", transition: "all 0.2s" }}>
+                      <div key={st.id} style={{ background: isExp ? "rgba(245,158,11,0.10)" : "rgba(255,255,255,0.60)", border: `1.5px solid ${isExp ? AMBER + "55" : "rgba(245,158,11,0.30)"}`, borderRadius: 14, overflow: "hidden", transition: "all 0.2s" }}>
                         <div
                           onClick={() => setExpanded(isExp ? null : st.id)}
                           style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", cursor: "pointer" }}
@@ -259,7 +259,7 @@ export default function TeacherProgress() {
                           </div>
                           {/* Name */}
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontWeight: 700, color: "#fde68a", fontSize: 13, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{st.name}</div>
+                            <div style={{ fontWeight: 700, color: "#78350f", fontSize: 13, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{st.name}</div>
                             <div style={{ fontSize: 11, color: "#92400e", marginTop: 1 }}>{fmtDate(st.lastPresenceAt)}</div>
                           </div>
                           {/* Stats */}
@@ -301,7 +301,7 @@ export default function TeacherProgress() {
                                 return (
                                   <div key={bp.bookId}>
                                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                                      <span style={{ fontSize: 12, color: "#fbbf24", fontWeight: 600 }}>{bp.bookTitle}</span>
+                                      <span style={{ fontSize: 12, color: "#92400e", fontWeight: 600 }}>{bp.bookTitle}</span>
                                       <span style={{ fontSize: 12, color: "#d97706" }}>{bp.completedLessons}/{bp.lessonCount} درس — {pct}%</span>
                                     </div>
                                     <div style={{ height: 6, background: "rgba(245,158,11,0.15)", borderRadius: 999, overflow: "hidden" }}>

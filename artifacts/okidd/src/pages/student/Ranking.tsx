@@ -119,10 +119,10 @@ export default function StudentRanking() {
   return (
     <div style={{ padding: "24px 20px 40px", minHeight: "100vh", fontFamily: "Vazirmatn, sans-serif", direction: "rtl" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-        <button onClick={() => navigate("/student")} style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.22)", border: "1.5px solid rgba(255,255,255,0.4)", borderRadius: 12, padding: "8px 14px", color: "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 600, cursor: "pointer", backdropFilter: "blur(8px)" }}>
+        <button onClick={() => navigate("/student")} style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.60)", border: `1.5px solid ${accentDark}40`, borderRadius: 12, padding: "8px 14px", color: accentDark, fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 600, cursor: "pointer", backdropFilter: "blur(8px)" }}>
           <ChevronRight size={16} /> برگشت
         </button>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "white", margin: 0, textShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1e1b4b", margin: 0 }}>
           <Trophy size={20} style={{ display:"inline", verticalAlign:"middle", marginLeft:6 }} /> رتبه‌بندی
         </h1>
       </div>
@@ -269,7 +269,7 @@ export default function StudentRanking() {
           { key: "book", label: "درس خاص", icon: <BookOpen size={13} /> },
         ] as const).map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
-            style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 5, padding: "10px 4px", borderRadius: 12, border: `1.5px solid ${tab === t.key ? accentDark : "rgba(255,255,255,0.5)"}`, background: tab === t.key ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.22)", color: tab === t.key ? accentDark : "rgba(255,255,255,0.85)", fontFamily: "Vazirmatn", fontSize: 12, fontWeight: tab === t.key ? 700 : 500, cursor: "pointer", backdropFilter: "blur(8px)" }}>
+            style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 5, padding: "10px 4px", borderRadius: 12, border: `1.5px solid ${tab === t.key ? accentDark : "rgba(99,102,241,0.30)"}`, background: tab === t.key ? `${accentDark}18` : "rgba(255,255,255,0.55)", color: tab === t.key ? accentDark : "#4b5563", fontFamily: "Vazirmatn", fontSize: 12, fontWeight: tab === t.key ? 700 : 500, cursor: "pointer", backdropFilter: "blur(8px)" }}>
             {t.icon} {t.label}
           </button>
         ))}
@@ -307,7 +307,7 @@ export default function StudentRanking() {
 
       {/* Rankings list */}
       {rankingsQuery.isLoading ? (
-        <div style={{ textAlign: "center", padding: 32, color: "white", fontSize: 14 }}>در حال بارگذاری...</div>
+        <div style={{ textAlign: "center", padding: 32, color: "#5b21b6", fontSize: 14 }}>در حال بارگذاری...</div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {rankings.map((entry, i) => {
@@ -325,7 +325,7 @@ export default function StudentRanking() {
                   {i < 3 ? (
                     <span style={{ fontSize: 24 }}>{medals[i]}</span>
                   ) : (
-                    <span style={{ fontSize: 13, fontWeight: 800, color: isMe ? accentDark : "rgba(255,255,255,0.8)" }}>#{entry.rank}</span>
+                    <span style={{ fontSize: 13, fontWeight: 800, color: isMe ? accentDark : "#6b7280" }}>#{entry.rank}</span>
                   )}
                 </div>
                 <div style={{ flex: 1 }}>

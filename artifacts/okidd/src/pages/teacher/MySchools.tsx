@@ -41,35 +41,35 @@ export default function TeacherMySchools() {
     <div>
       <PageTopBar />
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f8f5ff", margin: 0 }}>مدارس من</h1>
-        <p style={{ color: "#8b5cf6", fontSize: 14, marginTop: 4 }}>مدارسی که در آن‌ها تدریس می‌کنید</p>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#78350f", margin: 0 }}>مدارس من</h1>
+        <p style={{ color: "#b45309", fontSize: 14, marginTop: 4 }}>مدارسی که در آن‌ها تدریس می‌کنید</p>
       </div>
       {schoolMap.size === 0 ? (
-        <div style={{ background: "rgba(30,18,60,0.85)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, padding: 40, textAlign: "center" }}>
-          <School size={48} style={{ color: "#8b5cf6", marginBottom: 12 }} />
-          <p style={{ color: "#8b5cf6" }}>هنوز در هیچ مدرسه‌ای تدریس نمی‌کنید</p>
+        <div style={{ background: "rgba(255,255,255,0.72)", border: "1px solid rgba(245,158,11,0.30)", borderRadius: 16, padding: 40, textAlign: "center", backdropFilter: "blur(12px)" }}>
+          <School size={48} style={{ color: "#d97706", marginBottom: 12 }} />
+          <p style={{ color: "#92400e" }}>هنوز در هیچ مدرسه‌ای تدریس نمی‌کنید</p>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {Array.from(schoolMap.values()).map(({ school, classes: sClasses }) => (
-            <div key={school.id} style={{ background: "rgba(30,18,60,0.85)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, padding: 22 }}>
+            <div key={school.id} style={{ background: "rgba(255,255,255,0.72)", border: "1px solid rgba(245,158,11,0.30)", borderRadius: 16, padding: 22, backdropFilter: "blur(12px)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
-                <div style={{ width: 48, height: 48, borderRadius: 14, background: "linear-gradient(135deg, #7c3aed, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: "linear-gradient(135deg, #f59e0b, #d97706)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <School size={24} color="white" />
                 </div>
                 <div>
-                  <div style={{ fontWeight: 700, color: "#f8f5ff", fontSize: 17 }}>{school.name}</div>
-                  <div style={{ color: "#8b5cf6", fontSize: 13 }}>{sClasses.length} کلاس</div>
+                  <div style={{ fontWeight: 700, color: "#78350f", fontSize: 17 }}>{school.name}</div>
+                  <div style={{ color: "#b45309", fontSize: 13 }}>{sClasses.length} کلاس</div>
                 </div>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10 }}>
                 {sClasses.map((cls: any) => (
-                  <div key={cls.id} style={{ background: "rgba(13,10,26,0.5)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 10, padding: 14, transition: "all 0.2s ease" }}
-                    onMouseOver={e => { (e.currentTarget as HTMLElement).style.borderColor = "#7c3aed"; (e.currentTarget as HTMLElement).style.boxShadow = "0 0 12px rgba(124,58,237,0.2)"; }}
-                    onMouseOut={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(139,92,246,0.2)"; (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
+                  <div key={cls.id} style={{ background: "rgba(255,255,255,0.60)", border: "1px solid rgba(245,158,11,0.30)", borderRadius: 10, padding: 14, transition: "all 0.2s ease" }}
+                    onMouseOver={e => { (e.currentTarget as HTMLElement).style.borderColor = "#f59e0b"; (e.currentTarget as HTMLElement).style.boxShadow = "0 0 12px rgba(245,158,11,0.25)"; }}
+                    onMouseOut={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(245,158,11,0.30)"; (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
                   >
-                    <div style={{ fontWeight: 600, color: "#f8f5ff", marginBottom: 6 }}>{cls.name}</div>
-                    <div style={{ fontSize: 12, color: "#60a5fa" }}><Users size={11} style={{ display: "inline", verticalAlign: "middle", marginLeft: 3 }} />{cls.studentCount} دانش‌آموز</div>
+                    <div style={{ fontWeight: 600, color: "#78350f", marginBottom: 6 }}>{cls.name}</div>
+                    <div style={{ fontSize: 12, color: "#b45309" }}><Users size={11} style={{ display: "inline", verticalAlign: "middle", marginLeft: 3 }} />{cls.studentCount} دانش‌آموز</div>
                   </div>
                 ))}
               </div>
