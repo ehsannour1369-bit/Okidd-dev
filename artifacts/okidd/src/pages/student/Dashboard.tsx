@@ -391,7 +391,7 @@ export default function StudentDashboard() {
 
         {/* ══════════ SCHOOL INFO ══════════ */}
         {screen === "school" && (
-          <div style={{ padding: "24px 16px" }}>
+          <div style={{ flex: 1, overflowY: "auto", minHeight: 0, padding: "24px 16px" }}>
             <div style={{ background: "rgba(255,255,255,0.82)", backdropFilter: "blur(22px)", borderRadius: 28, padding: 24, maxWidth: 480, margin: "0 auto", border: "1.5px solid rgba(255,255,255,0.92)", boxShadow: "0 10px 40px rgba(0,0,0,0.09)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 22 }}>
                 <button onClick={() => setScreen("home")} style={{ background: "rgba(255,255,255,0.7)", border: "1.5px solid rgba(200,200,230,0.5)", borderRadius: "50%", width: 36, height: 36, color: "#1e1b4b", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -467,7 +467,7 @@ export default function StudentDashboard() {
 
         {/* ══════════ BOOKS (inline — when no book enrolled on Play click) ══════════ */}
         {screen === "books" && (
-          <div style={{ padding: "24px 16px" }}>
+          <div style={{ flex: 1, overflowY: "auto", minHeight: 0, padding: "24px 16px" }}>
             <div style={{ background: "rgba(255,255,255,0.78)", backdropFilter: "blur(20px)", borderRadius: 24, padding: 28, maxWidth: 480, margin: "0 auto", border: "1.5px solid rgba(255,255,255,0.9)", boxShadow: "0 8px 32px rgba(0,0,0,0.08)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
                 <button onClick={() => setScreen("home")} style={{ background: "rgba(255,255,255,0.7)", border: "1.5px solid rgba(200,200,230,0.5)", borderRadius: "50%", width: 36, height: 36, color: "#1e1b4b", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
