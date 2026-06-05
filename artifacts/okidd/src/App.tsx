@@ -28,6 +28,7 @@ import SchoolNotifications from "./pages/school/Notifications";
 import SchoolExams from "./pages/school/Exams";
 import SchoolReport from "./pages/school/Report";
 import SchoolProgressChart from "./pages/school/ProgressChart";
+import SchoolOnlineClass from "./pages/school/OnlineClass";
 
 import SchoolShop from "./pages/school/Shop";
 import SchoolOrders from "./pages/school/Orders";
@@ -43,24 +44,28 @@ import BranchShop from "./pages/branch/Shop";
 import BranchOrders from "./pages/branch/Orders";
 import BranchWallet from "./pages/branch/Wallet";
 import BranchReport from "./pages/branch/Report";
+import BranchOnlineClass from "./pages/branch/OnlineClass";
 
 import TeacherDashboard from "./pages/teacher/Dashboard";
 import TeacherMySchools from "./pages/teacher/MySchools";
 import TeacherClasses from "./pages/teacher/Classes";
 import TeacherProgress from "./pages/teacher/Progress";
 import TeacherNotifications from "./pages/teacher/Notifications";
+import TeacherOnlineClass from "./pages/teacher/OnlineClass";
 import DevAuth from "./pages/DevAuth";
 
 import ParentDashboard from "./pages/parent/Dashboard";
 import ParentChildren from "./pages/parent/Children";
 import ParentConsultations from "./pages/parent/Consultations";
 import ParentNotifications from "./pages/parent/Notifications";
+import ParentOnlineClass from "./pages/parent/OnlineClass";
 
 import ConsultantDashboard from "./pages/consultant/Dashboard";
 import ConsultantSchedule from "./pages/consultant/Schedule";
 
 import StudentDashboard from "./pages/student/Dashboard";
 import StudentBooks from "./pages/student/Books";
+import StudentOnlineClass from "./pages/student/OnlineClass";
 import StudentRanking from "./pages/student/Ranking";
 import StudentGame from "./pages/student/Game";
 import GamePlayer from "./pages/student/GamePlayer";
@@ -134,6 +139,7 @@ function AppRouter() {
       <Route path="/school/exams"><LayoutRoute component={SchoolExams} roles={["school_manager"]} /></Route>
       <Route path="/school/report"><LayoutRoute component={SchoolReport} roles={["school_manager"]} /></Route>
       <Route path="/school/progress"><LayoutRoute component={SchoolProgressChart} roles={["school_manager"]} /></Route>
+      <Route path="/school/online-class"><LayoutRoute component={SchoolOnlineClass} roles={["school_manager"]} /></Route>
       <Route path="/school/shop"><LayoutRoute component={SchoolShop} roles={["school_manager"]} /></Route>
       <Route path="/school/orders"><LayoutRoute component={SchoolOrders} roles={["school_manager"]} /></Route>
       <Route path="/school/wallet"><LayoutRoute component={SchoolWallet} roles={["school_manager"]} /></Route>
@@ -146,6 +152,7 @@ function AppRouter() {
       <Route path="/branch/notifications"><LayoutRoute component={BranchNotifications} roles={["branch_manager"]} /></Route>
       <Route path="/branch/exams"><LayoutRoute component={BranchExams} roles={["branch_manager"]} /></Route>
       <Route path="/branch/report"><LayoutRoute component={BranchReport} roles={["branch_manager"]} /></Route>
+      <Route path="/branch/online-class"><LayoutRoute component={BranchOnlineClass} roles={["branch_manager"]} /></Route>
       <Route path="/branch/shop"><LayoutRoute component={BranchShop} roles={["branch_manager"]} /></Route>
       <Route path="/branch/orders"><LayoutRoute component={BranchOrders} roles={["branch_manager"]} /></Route>
       <Route path="/branch/wallet"><LayoutRoute component={BranchWallet} roles={["branch_manager"]} /></Route>
@@ -155,12 +162,14 @@ function AppRouter() {
       <Route path="/teacher"><LayoutRoute component={TeacherDashboard} roles={["teacher"]} /></Route>
       <Route path="/teacher/schools"><LayoutRoute component={TeacherMySchools} roles={["teacher"]} /></Route>
       <Route path="/teacher/classes"><LayoutRoute component={TeacherClasses} roles={["teacher"]} /></Route>
+      <Route path="/teacher/online-class"><LayoutRoute component={TeacherOnlineClass} roles={["teacher"]} /></Route>
       <Route path="/teacher/progress"><LayoutRoute component={TeacherProgress} roles={["teacher"]} /></Route>
       <Route path="/teacher/notifications"><LayoutRoute component={TeacherNotifications} roles={["teacher"]} /></Route>
 
       {/* Parent */}
       <Route path="/parent"><LayoutRoute component={ParentDashboard} roles={["parent"]} /></Route>
       <Route path="/parent/children"><LayoutRoute component={ParentChildren} roles={["parent"]} /></Route>
+      <Route path="/parent/online-class"><LayoutRoute component={ParentOnlineClass} roles={["parent"]} /></Route>
       <Route path="/parent/consultations"><LayoutRoute component={ParentConsultations} roles={["parent"]} /></Route>
       <Route path="/parent/notifications"><LayoutRoute component={ParentNotifications} roles={["parent"]} /></Route>
 
@@ -171,6 +180,7 @@ function AppRouter() {
       {/* Student */}
       <Route path="/student"><LayoutRoute component={StudentDashboard} roles={["student"]} /></Route>
       <Route path="/student/books"><LayoutRoute component={StudentBooks} roles={["student"]} /></Route>
+      <Route path="/student/online-class"><LayoutRoute component={StudentOnlineClass} roles={["student"]} /></Route>
       <Route path="/student/ranking"><LayoutRoute component={StudentRanking} roles={["student"]} /></Route>
       <Route path="/student/game"><LayoutRoute component={StudentGame} roles={["student"]} /></Route>
       <Route path="/student/game-player"><AuthGuard allowedRoles={["student"]}><GamePlayer /></AuthGuard></Route>

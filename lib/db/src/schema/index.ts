@@ -19,3 +19,5 @@ export * from "./gameScores";
 export * from "./notificationReplies";
 export * from "./studentEnrollments";
 export * from "./parentStudents";
+export * from "./classSchedules";
+export * from "./classSessions";

@@ -8,7 +8,7 @@ import {
   LayoutDashboard, School, Users, BookOpen, Package, CreditCard,
   Bell, FileText, LogOut, GraduationCap,
   BookMarked, Home, Star, ClipboardList, GitBranch, UserCheck,
-  Menu, X, BarChart2, ChevronRight, ShieldCheck, ShoppingCart, Wallet, Receipt,
+  Menu, X, BarChart2, ChevronRight, ShieldCheck, ShoppingCart, Wallet, Receipt, Video,
 } from "lucide-react";
 import SidebarContext from "../contexts/SidebarContext";
 
@@ -46,6 +46,7 @@ const schoolManagerNav: NavItem[] = [
   { label: "گزارش عملکرد", path: "/school/report", icon: BarChart2, color: "#818cf8", bgGradient: "linear-gradient(135deg, #6366f1, #818cf8)" },
   { label: "اعلان‌ها", path: "/school/notifications", icon: Bell, color: "#3b82f6", bgGradient: "linear-gradient(135deg, #2563eb, #3b82f6)" },
   { label: "برنامه امتحانات", path: "/school/exams", icon: ClipboardList, color: "#60a5fa", bgGradient: "linear-gradient(135deg, #3b82f6, #60a5fa)" },
+  { label: "کلاس آنلاین", path: "/school/online-class", icon: Video, color: "#4f46e5", bgGradient: "linear-gradient(135deg, #4338ca, #4f46e5)" },
   { label: "فروشگاه کتاب", path: "/school/shop", icon: ShoppingCart, color: "#22d3ee", bgGradient: "linear-gradient(135deg, #06b6d4, #22d3ee)" },
   { label: "سفارشات من", path: "/school/orders", icon: Receipt, color: "#818cf8", bgGradient: "linear-gradient(135deg, #6366f1, #818cf8)" },
   { label: "کیف پول", path: "/school/wallet", icon: Wallet, color: "#34d399", bgGradient: "linear-gradient(135deg, #10b981, #34d399)" },
@@ -59,6 +60,7 @@ const branchManagerNav: NavItem[] = [
   { label: "گزارش عملکرد", path: "/branch/report", icon: BarChart2, color: "#0d9488", bgGradient: "linear-gradient(135deg, #0f766e, #0d9488)" },
   { label: "اعلان‌ها", path: "/branch/notifications", icon: Bell, color: "#0d9488", bgGradient: "linear-gradient(135deg, #0f766e, #0d9488)" },
   { label: "برنامه امتحانات", path: "/branch/exams", icon: ClipboardList, color: "#10b981", bgGradient: "linear-gradient(135deg, #059669, #10b981)" },
+  { label: "کلاس آنلاین", path: "/branch/online-class", icon: Video, color: "#0d9488", bgGradient: "linear-gradient(135deg, #0f766e, #0d9488)" },
   { label: "فروشگاه کتاب", path: "/branch/shop", icon: ShoppingCart, color: "#22d3ee", bgGradient: "linear-gradient(135deg, #06b6d4, #22d3ee)" },
   { label: "سفارشات من", path: "/branch/orders", icon: Receipt, color: "#2dd4bf", bgGradient: "linear-gradient(135deg, #0d9488, #2dd4bf)" },
   { label: "کیف پول", path: "/branch/wallet", icon: Wallet, color: "#34d399", bgGradient: "linear-gradient(135deg, #10b981, #34d399)" },
@@ -66,6 +68,7 @@ const branchManagerNav: NavItem[] = [
 
 const teacherNav: NavItem[] = [
   { label: "داشبورد", path: "/teacher", icon: LayoutDashboard, color: "#f59e0b", bgGradient: "linear-gradient(135deg, #d97706, #f59e0b)" },
+  { label: "کلاس آنلاین", path: "/teacher/online-class", icon: Video, color: "#d97706", bgGradient: "linear-gradient(135deg, #b45309, #d97706)" },
   { label: "عملکرد کلاس", path: "/teacher/progress", icon: BarChart2, color: "#f97316", bgGradient: "linear-gradient(135deg, #ea580c, #f97316)" },
   { label: "اعلان‌ها", path: "/teacher/notifications", icon: Bell, color: "#fbbf24", bgGradient: "linear-gradient(135deg, #f59e0b, #fbbf24)" },
 ];
@@ -73,6 +76,7 @@ const teacherNav: NavItem[] = [
 const parentNav: NavItem[] = [
   { label: "داشبورد", path: "/parent", icon: LayoutDashboard, color: "#f43f5e", bgGradient: "linear-gradient(135deg, #e11d48, #f43f5e)" },
   { label: "فرزندانم", path: "/parent/children", icon: Users, color: "#ec4899", bgGradient: "linear-gradient(135deg, #db2777, #ec4899)" },
+  { label: "کلاس آنلاین", path: "/parent/online-class", icon: Video, color: "#e11d48", bgGradient: "linear-gradient(135deg, #be123c, #e11d48)" },
   { label: "مشاوره", path: "/parent/consultations", icon: BookOpen, color: "#fb7185", bgGradient: "linear-gradient(135deg, #f43f5e, #fb7185)" },
   { label: "اعلان‌ها", path: "/parent/notifications", icon: Bell, color: "#f43f5e", bgGradient: "linear-gradient(135deg, #e11d48, #f43f5e)" },
 ];
@@ -80,6 +84,7 @@ const parentNav: NavItem[] = [
 const studentNav: NavItem[] = [
   { label: "داشبورد", path: "/student", icon: Home, color: "#8b5cf6", bgGradient: "linear-gradient(135deg, #7c3aed, #a855f7)" },
   { label: "کتاب‌هایم", path: "/student/books", icon: BookOpen, color: "#3b82f6", bgGradient: "linear-gradient(135deg, #2563eb, #3b82f6)" },
+  { label: "کلاس آنلاین", path: "/student/online-class", icon: Video, color: "#7c3aed", bgGradient: "linear-gradient(135deg, #6d28d9, #7c3aed)" },
   { label: "رتبه‌بندی", path: "/student/ranking", icon: Star, color: "#f59e0b", bgGradient: "linear-gradient(135deg, #d97706, #f59e0b)" },
   { label: "بازی", path: "/student/game", icon: Package, color: "#ec4899", bgGradient: "linear-gradient(135deg, #db2777, #ec4899)" },
 ];
