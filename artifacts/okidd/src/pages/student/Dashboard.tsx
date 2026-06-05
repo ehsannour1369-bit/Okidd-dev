@@ -269,8 +269,8 @@ export default function StudentDashboard() {
 
         {/* ══════════ HOME ══════════ */}
         {screen === "home" && (
-          <div style={{ flex: 1, padding: "10px 20px 30px", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gridTemplateRows: "1.8fr 1fr 1fr 1fr", gap: 10, flex: 1, maxWidth: 560, margin: "0 auto", width: "100%" }}>
+          <div style={{ flex: 1, padding: "10px 20px 30px", overflowY: "auto", display: "flex", flexDirection: "column", minHeight: 0 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gridTemplateRows: "repeat(4, minmax(90px, 1fr))", gap: 10, flex: 1, maxWidth: 560, margin: "0 auto", width: "100%", minHeight: 460 }}>
 
               {/* ① PLAY — full width */}
               <div
