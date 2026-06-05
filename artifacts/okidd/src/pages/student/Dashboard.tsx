@@ -82,6 +82,11 @@ export default function StudentDashboard() {
   const [profileOpen, setProfileOpen]     = useState(false);
   const [showPassword, setShowPassword]   = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
+  const [profileEditMode, setProfileEditMode] = useState(false);
+  const [editName, setEditName]           = useState("");
+  const [editCurPw, setEditCurPw]         = useState("");
+  const [editNewPw, setEditNewPw]         = useState("");
+  const [profileSaveErr, setProfileSaveErr] = useState("");
   const [introPhase, setIntroPhase] = useState<'splash' | 'animate' | 'done'>('splash');
   const [avatarUploading, setAvatarUploading] = useState(false);
   const avatarRef = useRef<HTMLInputElement>(null);
@@ -132,6 +137,40 @@ export default function StudentDashboard() {
     mutationFn: (data: any) => api.post("/student-progress", data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["student-progress", user?.id] }),
   });
+
+  const updateProfileMut = useMutation({
+    mutationFn: ({ name }: { name: string }) =>
+      api.patch(`/users/${user?.id}/profile`, { name }),
+    onSuccess: (updated: any) => {
+      const { token } = useAuthStore.getState();
+      useAuthStore.getState().setAuth({ ...user!, name: updated.name }, token!);
+      qc.invalidateQueries({ queryKey: ["me"] });
+    },
+  });
+
+  const changePasswordMut = useMutation({
+    mutationFn: ({ currentPassword, newPassword }: { currentPassword: string; newPassword: string }) =>
+      api.patch(`/users/${user?.id}/password`, { currentPassword, newPassword }),
+  });
+
+  async function handleProfileSave() {
+    setProfileSaveErr("");
+    try {
+      if (editName.trim() && editName.trim() !== user?.name) {
+        await updateProfileMut.mutateAsync({ name: editName.trim() });
+      }
+      if (editNewPw) {
+        if (!editCurPw) { setProfileSaveErr("رمز عبور فعلی را وارد کنید"); return; }
+        if (editNewPw.length < 6) { setProfileSaveErr("رمز جدید حداقل ۶ کاراکتر باشد"); return; }
+        await changePasswordMut.mutateAsync({ currentPassword: editCurPw, newPassword: editNewPw });
+      }
+      setProfileEditMode(false);
+      setEditCurPw("");
+      setEditNewPw("");
+    } catch (e: any) {
+      setProfileSaveErr(e?.message ?? "خطا در ذخیره");
+    }
+  }
 
   function toggleNotifExpand(id: number) {
     setExpandedNotifIds(prev => {
@@ -653,14 +692,13 @@ export default function StudentDashboard() {
             <div style={{ width: 40, height: 4, background: "rgba(0,0,0,0.15)", borderRadius: 99, margin: "0 auto 24px" }} />
 
             {/* Avatar */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 28 }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 24 }}>
               <div style={{ position: "relative", width: 96, height: 96, marginBottom: 12 }}>
                 <div style={{ width: 96, height: 96, borderRadius: "50%", overflow: "hidden", background: `linear-gradient(135deg,${accent},${accentDark})`, border: `3px solid ${accent}`, boxShadow: `0 6px 24px ${accent}60`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   {user?.avatarUrl
                     ? <img src={user.avatarUrl} alt="پروفایل" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     : <User size={40} color="white" />}
                 </div>
-                {/* Camera button overlay */}
                 <button onClick={() => avatarRef.current?.click()} disabled={avatarUploading} style={{ position: "absolute", bottom: 0, left: 0, width: 30, height: 30, borderRadius: "50%", background: `linear-gradient(135deg,${accent},${accentDark})`, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
                   {avatarUploading ? <div style={{ width: 10, height: 10, border: "2px solid white", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} /> : <Camera size={14} color="white" />}
                 </button>
@@ -670,34 +708,73 @@ export default function StudentDashboard() {
               <div style={{ fontSize: 12, color: accent, marginTop: 3, fontWeight: 600 }}>دانش‌آموز</div>
             </div>
 
-            {/* Info rows */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
-              {/* Username */}
-              <div style={{ background: "rgba(248,247,255,0.9)", border: "1.5px solid rgba(200,190,255,0.35)", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: `${accent}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <User size={16} color={accentDark} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 10, color: "#9ca3af", marginBottom: 2 }}>نام کاربری</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#1e1b4b", direction: "ltr", textAlign: "right" }}>{user?.email}</div>
-                </div>
-              </div>
-              {/* Password */}
-              <div style={{ background: "rgba(248,247,255,0.9)", border: "1.5px solid rgba(200,190,255,0.35)", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: `${accent}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Lock size={16} color={accentDark} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 10, color: "#9ca3af", marginBottom: 2 }}>رمز عبور</div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#1e1b4b", letterSpacing: showPassword ? 0 : 3, direction: "ltr", textAlign: "right" }}>
-                    {showPassword ? (user?.nationalId ?? "—") : "••••••••••"}
+            {/* Edit toggle */}
+            {!profileEditMode ? (
+              <>
+                {/* Info rows — read-only */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
+                  <div style={{ background: "rgba(248,247,255,0.9)", border: "1.5px solid rgba(200,190,255,0.35)", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: `${accent}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <User size={16} color={accentDark} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 10, color: "#9ca3af", marginBottom: 2 }}>نام کاربری</div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: "#1e1b4b", direction: "ltr", textAlign: "right" }}>{user?.email}</div>
+                    </div>
+                  </div>
+                  <div style={{ background: "rgba(248,247,255,0.9)", border: "1.5px solid rgba(200,190,255,0.35)", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: `${accent}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Lock size={16} color={accentDark} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 10, color: "#9ca3af", marginBottom: 2 }}>رمز عبور</div>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: "#1e1b4b", letterSpacing: showPassword ? 0 : 3, direction: "ltr", textAlign: "right" }}>
+                        {showPassword ? (user?.nationalId ?? "—") : "••••••••••"}
+                      </div>
+                    </div>
+                    <button onClick={() => setShowPassword(v => !v)} style={{ background: "none", border: "none", cursor: "pointer", color: accentDark, padding: 4 }}>
+                      {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                    </button>
                   </div>
                 </div>
-                <button onClick={() => setShowPassword(v => !v)} style={{ background: "none", border: "none", cursor: "pointer", color: accentDark, padding: 4 }}>
-                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                <button onClick={() => { setEditName(user?.name ?? ""); setProfileSaveErr(""); setProfileEditMode(true); }}
+                  style={{ width: "100%", padding: "11px 0", background: `${accentDark}12`, border: `1.5px solid ${accentDark}30`, borderRadius: 14, color: accentDark, fontFamily: "Vazirmatn", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 12 }}>
+                  ✏️ ویرایش پروفایل
                 </button>
+              </>
+            ) : (
+              /* Edit form */
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
+                {/* Name */}
+                <div>
+                  <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 5, fontWeight: 600 }}>نام و نام خانوادگی</div>
+                  <input value={editName} onChange={e => setEditName(e.target.value)}
+                    style={{ width: "100%", padding: "11px 14px", borderRadius: 12, border: `1.5px solid ${accentDark}40`, fontFamily: "Vazirmatn", fontSize: 14, color: "#1e1b4b", background: "rgba(248,247,255,0.9)", boxSizing: "border-box", outline: "none" }} />
+                </div>
+                {/* Divider */}
+                <div style={{ borderTop: "1px dashed rgba(200,190,255,0.5)", margin: "4px 0" }} />
+                <div style={{ fontSize: 11, color: "#6b7280", fontWeight: 600 }}>تغییر رمز عبور (اختیاری)</div>
+                {/* Current password */}
+                <input value={editCurPw} onChange={e => setEditCurPw(e.target.value)} type="password" placeholder="رمز عبور فعلی"
+                  style={{ width: "100%", padding: "11px 14px", borderRadius: 12, border: `1.5px solid rgba(200,190,255,0.4)`, fontFamily: "Vazirmatn", fontSize: 13, color: "#1e1b4b", background: "rgba(248,247,255,0.9)", boxSizing: "border-box", outline: "none" }} />
+                {/* New password */}
+                <input value={editNewPw} onChange={e => setEditNewPw(e.target.value)} type="password" placeholder="رمز عبور جدید (حداقل ۶ کاراکتر)"
+                  style={{ width: "100%", padding: "11px 14px", borderRadius: 12, border: `1.5px solid rgba(200,190,255,0.4)`, fontFamily: "Vazirmatn", fontSize: 13, color: "#1e1b4b", background: "rgba(248,247,255,0.9)", boxSizing: "border-box", outline: "none" }} />
+                {/* Error */}
+                {profileSaveErr && <div style={{ fontSize: 12, color: "#ef4444", textAlign: "center", fontWeight: 600 }}>{profileSaveErr}</div>}
+                {/* Save / Cancel */}
+                <div style={{ display: "flex", gap: 10 }}>
+                  <button onClick={() => { setProfileEditMode(false); setEditCurPw(""); setEditNewPw(""); setProfileSaveErr(""); }}
+                    style={{ flex: 1, padding: "11px 0", background: "rgba(255,255,255,0.8)", border: "1.5px solid rgba(200,200,220,0.5)", borderRadius: 12, color: "#374151", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                    انصراف
+                  </button>
+                  <button onClick={handleProfileSave} disabled={updateProfileMut.isPending || changePasswordMut.isPending}
+                    style={{ flex: 1, padding: "11px 0", background: `linear-gradient(135deg,${accent},${accentDark})`, border: "none", borderRadius: 12, color: "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 800, cursor: "pointer", opacity: (updateProfileMut.isPending || changePasswordMut.isPending) ? 0.6 : 1, boxShadow: `0 4px 14px ${accent}45` }}>
+                    {(updateProfileMut.isPending || changePasswordMut.isPending) ? "در حال ذخیره..." : "ذخیره"}
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Logout button — two-step confirmation */}
             {!confirmLogout ? (
