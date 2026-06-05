@@ -185,7 +185,7 @@ function CheckoutModal({ cart, schoolId, walletBalance, onClose, onSuccess }: {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12, marginBottom: 16 }}>
           <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13 }}>
             شماره پیگیری *
             <input value={tracking} onChange={e => setTracking(e.target.value)}

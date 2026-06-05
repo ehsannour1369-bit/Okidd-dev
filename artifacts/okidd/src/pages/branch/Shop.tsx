@@ -153,7 +153,7 @@ function BranchCheckout({ cart, schoolId, walletBalance, onClose, onSuccess }: {
           {cart.map(i => <div key={i.book.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}><span>{i.book.title} ×{i.quantity}</span><span style={{ color: "#7c3aed", fontWeight: 600 }}>{fmt(i.book.price * i.quantity)}</span></div>)}
           <div style={{ borderTop: "1px solid #ccfbf1", marginTop: 6, paddingTop: 6, display: "flex", justifyContent: "space-between", fontWeight: 700 }}><span>جمع:</span><span style={{ color: "#0d9488" }}>{fmt(total)}</span></div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10, marginBottom: 12 }}>
           <label style={{ display: "flex", flexDirection: "column", gap: 3, fontSize: 13 }}>شماره پیگیری
             <input value={tracking} onChange={e => setTracking(e.target.value)} style={{ padding: "7px 8px", border: "1.5px solid #ccfbf1", borderRadius: 7, fontFamily: "inherit", fontSize: 12 }} />
           </label>
