@@ -7,7 +7,7 @@ import { useLocation } from "wouter";
 import {
   Lock, CheckCircle, ChevronRight, ChevronDown, ChevronUp,
   Bell, MessageCircle,
-  BookOpen, GraduationCap, Trophy, Play,
+  BookOpen, GraduationCap, Trophy, Play, Video,
   Building2, MapPin, Phone, Users, X, LogOut,
   Camera, Eye, EyeOff, User, Sparkles,
 } from "lucide-react";
@@ -280,7 +280,7 @@ export default function StudentDashboard() {
         {/* ══════════ HOME ══════════ */}
         {screen === "home" && (
           <div style={{ flex: 1, padding: "10px 20px 30px", overflowY: "auto", display: "flex", flexDirection: "column", minHeight: 0 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gridTemplateRows: "repeat(4, minmax(90px, 1fr))", gap: 10, flex: 1, maxWidth: 560, margin: "0 auto", width: "100%", minHeight: 460 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gridTemplateRows: "repeat(5, minmax(90px, 1fr))", gap: 10, flex: 1, maxWidth: 560, margin: "0 auto", width: "100%", minHeight: 560 }}>
 
               {/* ① PLAY — full width */}
               <div
@@ -359,8 +359,24 @@ export default function StudentDashboard() {
                 <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${GREEN}70, ${GREEN}20)`, borderRadius: "0 0 24px 24px" }} />
               </div>
 
-              {/* ⑥ اعلانات — Purple, full width */}
-              <div style={{ gridColumn: "span 2", ...glassCard(PURPLE, { padding: "12px 18px", display: "flex", alignItems: "center", gap: 14 }), ...cardAnim('up', 0.45) }}
+              {/* ⑥ کلاس آنلاین — full width */}
+              <div style={{ gridColumn: "span 2", ...glassCard("#7c3aed", { padding: "14px 18px", display: "flex", alignItems: "center", gap: 14, background: "linear-gradient(145deg, #7c3aed70, #6d28d945)", border: "1.5px solid #7c3aed90" }), ...cardAnim('up', 0.38) }}
+                onClick={() => navigate("/student/online-class")}
+                onMouseEnter={e => hoverIn(e.currentTarget, "#7c3aed")}
+                onMouseLeave={e => hoverOut(e.currentTarget, "#7c3aed")}>
+                <div style={{ ...glassIconStyle("#7c3aed", 48) }}>
+                  <Video size={24} color="#7c3aed" />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 800, fontSize: 16, color: "#1e1b4b" }}>کلاس آنلاین</div>
+                  <div style={{ fontSize: 12, color: "#4b5563", marginTop: 3 }}>برنامه هفتگی و ورود به جلسه</div>
+                </div>
+                <ChevronRight size={20} color="#7c3aed" />
+                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg, #7c3aed70, #7c3aed20)", borderRadius: "0 0 24px 24px" }} />
+              </div>
+
+              {/* ⑦ اعلانات — Purple, full width */}
+              <div style={{ gridColumn: "span 2", ...glassCard(PURPLE, { padding: "12px 18px", display: "flex", alignItems: "center", gap: 14 }), ...cardAnim('up', 0.52) }}
                 onClick={() => setNotifOpen(true)}
                 onMouseEnter={e => hoverIn(e.currentTarget, PURPLE)}
                 onMouseLeave={e => hoverOut(e.currentTarget, PURPLE)}>

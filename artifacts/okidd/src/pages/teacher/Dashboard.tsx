@@ -5,8 +5,8 @@ import { useNotificationReads } from "../../hooks/useNotificationReads";
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import {
-  School, ChevronDown, ChevronLeft, Users, BookOpen, Lock, Unlock,
-  BarChart2, Clock, Star, GraduationCap, TrendingUp, UserRound,
+  School, ChevronDown, ChevronLeft, ChevronRight, Users, BookOpen, Lock, Unlock,
+  BarChart2, Clock, Star, GraduationCap, TrendingUp, UserRound, Video,
   Bell, User, LogOut, Eye, EyeOff, Camera, Pencil, Check, X, KeyRound,
 } from "lucide-react";
 
@@ -263,6 +263,36 @@ export default function TeacherDashboard() {
 
         {/* ── Scrollable cards ── */}
         <div style={{ flex: 1, overflowY: "auto", padding: "14px 20px 36px" }}>
+
+          {/* کلاس آنلاین — direct nav card */}
+          <div style={{ marginBottom: 12, ...cardAnim(2) }}>
+            <div
+              onClick={() => navigate("/teacher/online-class")}
+              style={{
+                ...glassCard("#7c3aed", {
+                  padding: "18px 20px", display: "flex", alignItems: "center", gap: 14,
+                  cursor: "pointer", borderRadius: 22,
+                  background: "linear-gradient(145deg,#7c3aedcc,#6d28d9aa)",
+                  border: "1.5px solid #7c3aedcc",
+                  boxShadow: "0 6px 28px #7c3aed66, inset 0 1px 0 rgba(255,255,255,0.32)",
+                }),
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ""; }}
+            >
+              <div style={shine()} />
+              <div style={{ ...glassIcon(AMBER, 46) }}>
+                <Video size={22} color="white" />
+              </div>
+              <div style={{ flex: 1, position: "relative", zIndex: 1 }}>
+                <div style={{ fontWeight: 800, fontSize: 15, color: "white", marginBottom: 2, textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>کلاس آنلاین</div>
+                <div style={{ color: "rgba(255,255,255,0.78)", fontSize: 12, fontWeight: 500 }}>شروع جلسه و مدیریت برنامه هفتگی</div>
+              </div>
+              <div style={{ width: 30, height: 30, borderRadius: 9, background: "rgba(255,255,255,0.20)", border: "1px solid rgba(255,255,255,0.40)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+                <ChevronRight size={16} color="rgba(255,255,255,0.8)" />
+              </div>
+            </div>
+          </div>
 
           {CARDS.map((ac, idx) => (
             <div key={ac.id} style={{ marginBottom: 12, ...cardAnim(idx + 2) }}>
