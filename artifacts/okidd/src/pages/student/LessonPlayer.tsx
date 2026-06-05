@@ -49,6 +49,8 @@ export default function LessonPlayer() {
   const [savedScore, setSavedScore]             = useState(false);
   const [contentCompleted, setContentCompleted] = useState(false);
   const [muted, setMuted]                       = useState(false);
+  const [sessionScore, setSessionScore]         = useState(0);
+  const progressSaved                           = useRef(false);
   const iframeRef          = useRef<HTMLIFrameElement>(null);
   const videoRef           = useRef<HTMLVideoElement>(null);
   /* زمان شروع نمایش محتوای جاری — برای جلوگیری از سیگنال‌های زودهنگام بازی هنگام load */
@@ -58,12 +60,30 @@ export default function LessonPlayer() {
 
   useEffect(() => {
     if (!bookId) return;
-    api.get(`/lessons?bookId=${bookId}`).then((data: any) => {
-      setLessons(data as any[]);
-      const startIdx = startLessonId ? (data as any[]).findIndex((l: any) => l.id === startLessonId) : 0;
-      setCurrentLessonIndex(startIdx >= 0 ? startIdx : 0);
-    }).catch(() => setError("خطا در بارگذاری درس‌ها"));
-  }, [bookId, startLessonId]);
+    const run = async () => {
+      try {
+        const lessonsData: any[] = await api.get(`/lessons?bookId=${bookId}`);
+        setLessons(lessonsData);
+        if (startLessonId) {
+          const idx = lessonsData.findIndex((l: any) => l.id === startLessonId);
+          setCurrentLessonIndex(idx >= 0 ? idx : 0);
+        } else if (!freeMode && user?.id) {
+          /* پیدا کردن اولین درس تکمیل‌نشده برای این کتاب */
+          const progressData: any[] = await api.get(`/student-progress?studentId=${user.id}`);
+          const completedIds = new Set(
+            progressData.filter((p: any) => p.completed && p.bookId === bookId).map((p: any) => p.lessonId)
+          );
+          const firstIncomplete = lessonsData.findIndex((l: any) => !completedIds.has(l.id));
+          setCurrentLessonIndex(firstIncomplete >= 0 ? firstIncomplete : lessonsData.length - 1);
+        } else {
+          setCurrentLessonIndex(0);
+        }
+      } catch {
+        setError("خطا در بارگذاری درس‌ها");
+      }
+    };
+    run();
+  }, [bookId, startLessonId, freeMode, user?.id]);
 
   const currentLesson = lessons[currentLessonIndex] ?? null;
 
@@ -74,6 +94,8 @@ export default function LessonPlayer() {
     setFinished(false);
     setSavedScore(false);
     setContentCompleted(false);
+    setSessionScore(0);
+    progressSaved.current = false;
     api.get(`/content?lessonId=${currentLesson.id}`).then((data: any) => {
       const items  = (data ?? []) as any[];
       const sorted = [...items].sort((a: any, b: any) => {
@@ -121,7 +143,7 @@ export default function LessonPlayer() {
         const gameType = currentContent?.type ?? "game";
         if (user?.id && !freeMode) {
           api.post("/game-scores", { studentId: user.id, gameType, score, lessonId: currentLesson?.id ?? null })
-            .then(() => { setSavedScore(true); setContentCompleted(true); }).catch(() => {});
+            .then(() => { setSavedScore(true); setContentCompleted(true); setSessionScore(s => s + score); }).catch(() => {});
         } else {
           /* حالت آزاد: score ثبت نمی‌شود ولی UI کامل می‌شود */
           setSavedScore(true);
@@ -133,6 +155,7 @@ export default function LessonPlayer() {
         const type = currentContent?.type;
         if (!freeMode && user?.id && (type === "quiz" || type === "exercise")) {
           api.post("/game-scores", { studentId: user.id, gameType: type, score: 5, lessonId: currentLesson?.id ?? null }).catch(() => {});
+          setSessionScore(s => s + 5);
         }
       }
     };
@@ -186,11 +209,19 @@ export default function LessonPlayer() {
     if (currentLessonIndex > 0) setCurrentLessonIndex(i => i - 1);
   }
 
+  /* ── Auto-save progress when lesson finishes (bonus +10) ── */
+  useEffect(() => {
+    if (!finished || freeMode || !user?.id || !currentLesson?.id || progressSaved.current) return;
+    progressSaved.current = true;
+    const totalScore = sessionScore + 10;
+    api.post("/student-progress", {
+      studentId: user.id, lessonId: currentLesson.id, bookId,
+      completed: true, score: totalScore,
+    }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finished]);
+
   function completeAndNext() {
-    /* در حالت مرور آزاد امتیاز ثبت نمی‌شود */
-    if (!freeMode && user?.id && currentLesson?.id) {
-      api.post("/student-progress", { studentId: user.id, lessonId: currentLesson.id, bookId, completed: true, score: 10 }).catch(() => {});
-    }
     goToNextLesson();
   }
 
@@ -309,31 +340,55 @@ export default function LessonPlayer() {
   );
 
   /* ── Finished ── */
-  if (finished) return (
-    <div style={{ ...pageWrap }}>
-      <Header />
-      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 20px" }}>
-        <div style={{ ...GLASS, borderRadius: 28, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 18, padding: "48px 56px", textAlign: "center", maxWidth: 460 }}>
-          <div style={{ width: 90, height: 90, borderRadius: "50%", background: `linear-gradient(135deg,${accent},${accentLight})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 8px 28px ${accentBorder}` }}><Trophy size={42} color="white" /></div>
-          <h2 style={{ color: "#1e1b4b", fontWeight: 800, fontSize: 24, margin: 0 }}>آفرین! درس تکمیل شد</h2>
-          <p style={{ color: "#6b7280", fontSize: 14, margin: 0 }}>شما {content.length} محتوا را در این درس مشاهده کردید</p>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(251,191,36,0.12)", border: "1.5px solid rgba(251,191,36,0.3)", borderRadius: 12, padding: "10px 22px", color: "#d97706", fontSize: 15, fontWeight: 700 }}>
-            <Trophy size={16} /> +۱۰ امتیاز
-          </div>
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
-            {!isLastLesson && (
-              <button onClick={completeAndNext} style={{ padding: "13px 32px", background: `linear-gradient(135deg,${accent},${accentLight})`, border: "none", borderRadius: 16, color: "white", fontFamily: "Vazirmatn", fontSize: 15, fontWeight: 800, cursor: "pointer", boxShadow: `0 6px 20px ${accentBorder}` }}>
-                درس بعدی ←
+  if (finished) {
+    const totalEarned = sessionScore + 10;
+    return (
+      <div style={{ ...pageWrap }}>
+        <Header />
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 20px" }}>
+          <div style={{ ...GLASS, borderRadius: 28, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 18, padding: "48px 56px", textAlign: "center", maxWidth: 460 }}>
+            <div style={{ width: 90, height: 90, borderRadius: "50%", background: `linear-gradient(135deg,${accent},${accentLight})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 8px 28px ${accentBorder}` }}>
+              <Trophy size={42} color="white" />
+            </div>
+            <h2 style={{ color: "#1e1b4b", fontWeight: 800, fontSize: 24, margin: 0 }}>آفرین! درس تکمیل شد</h2>
+            <p style={{ color: "#6b7280", fontSize: 14, margin: 0 }}>
+              درس «{currentLesson?.title}» با موفقیت به پایان رسید
+            </p>
+            {/* Total score badge */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, background: "rgba(251,191,36,0.12)", border: "1.5px solid rgba(251,191,36,0.3)", borderRadius: 16, padding: "14px 32px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#d97706", fontSize: 22, fontWeight: 900 }}>
+                <Trophy size={20} color="#d97706" />
+                +{freeMode ? "—" : totalEarned.toLocaleString("fa-IR")} امتیاز
+              </div>
+              {!freeMode && sessionScore > 0 && (
+                <div style={{ fontSize: 11, color: "#92400e", opacity: 0.75 }}>
+                  {sessionScore.toLocaleString("fa-IR")} فعالیت + ۱۰ تکمیل درس
+                </div>
+              )}
+            </div>
+            {/* Next/Done buttons */}
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+              {!freeMode && isLastLesson ? (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 24px", background: "rgba(34,197,94,0.10)", border: "1.5px solid rgba(34,197,94,0.35)", borderRadius: 14, color: "#15803d", fontSize: 14, fontWeight: 700 }}>
+                    🎉 درس جدیدی وجود ندارد
+                  </div>
+                  <div style={{ fontSize: 12, color: "#6b7280" }}>همه درس‌های این کتاب را تکمیل کردید!</div>
+                </div>
+              ) : !isLastLesson ? (
+                <button onClick={completeAndNext} style={{ padding: "13px 32px", background: `linear-gradient(135deg,${accent},${accentLight})`, border: "none", borderRadius: 16, color: "white", fontFamily: "Vazirmatn", fontSize: 15, fontWeight: 800, cursor: "pointer", boxShadow: `0 6px 20px ${accentBorder}` }}>
+                  درس بعدی ←
+                </button>
+              ) : null}
+              <button onClick={() => navigate("/student")} style={{ padding: "13px 32px", background: accentBg, border: `1.5px solid ${accentBorder}`, borderRadius: 16, color: accent, fontFamily: "Vazirmatn", fontSize: 15, fontWeight: 600, cursor: "pointer" }}>
+                صفحه اصلی
               </button>
-            )}
-            <button onClick={() => navigate("/student")} style={{ padding: "13px 32px", background: accentBg, border: `1.5px solid ${accentBorder}`, borderRadius: 16, color: accent, fontFamily: "Vazirmatn", fontSize: 15, fontWeight: 600, cursor: "pointer" }}>
-              صفحه اصلی
-            </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   /* ── Main player ── */
   const Icon = TYPE_ICONS[currentContent.type] ?? FileText;
@@ -412,6 +467,7 @@ export default function LessonPlayer() {
                       /* ذخیره امتیاز ۵ برای تماشای انیمیشن/ویدیو تا آخر */
                       if (!freeMode && user?.id && currentContent?.type) {
                         api.post("/game-scores", { studentId: user.id, gameType: currentContent.type, score: 5, lessonId: currentLesson?.id ?? null }).catch(() => {});
+                        setSessionScore(s => s + 5);
                       }
                     }}
                     onTimeUpdate={e => {
@@ -489,11 +545,13 @@ export default function LessonPlayer() {
 
         {/* دکمه‌های کنترل */}
         <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-          {/* تکرار — همیشه فعال */}
-          <button onClick={replayContent}
-            style={{ width: 40, height: 40, borderRadius: 11, background: accentBg, border: `1.5px solid ${accentBorder}`, color: accent, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <RotateCcw size={16} />
-          </button>
+          {/* تکرار — در حالت قفل برای بازی بعد از ثبت امتیاز مخفی می‌شود */}
+          {(freeMode || !isGame || !savedScore) && (
+            <button onClick={replayContent}
+              style={{ width: 40, height: 40, borderRadius: 11, background: accentBg, border: `1.5px solid ${accentBorder}`, color: accent, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <RotateCcw size={16} />
+            </button>
+          )}
 
           {/* در حالت قفل: دکمه «بعدی» فقط برای آخرین محتوا یا وقتی کامل شده نمایش می‌یابد */}
           {freeMode ? (
