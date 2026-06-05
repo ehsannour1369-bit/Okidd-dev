@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import {
   Lock, CheckCircle, ChevronRight, ChevronDown, ChevronUp,
-  Bell, Plus, Send as SendIcon, MessageCircle,
+  Bell, MessageCircle,
   BookOpen, GraduationCap, Trophy, Play,
   Building2, MapPin, Phone, Users, X, LogOut,
   Camera, Eye, EyeOff, User, Sparkles,
@@ -14,7 +14,6 @@ import {
 import NotificationThread from "../../components/NotificationThread";
 
 type Screen = "home" | "books" | "lesson" | "school";
-type NotifTab = "received" | "sent";
 
 const BLUE   = "#3b82f6";
 const ORANGE = "#f97316";
@@ -74,9 +73,6 @@ export default function StudentDashboard() {
   const [notifOpen, setNotifOpen]         = useState(false);
   const [selectedBook, setSelectedBook]   = useState<any>(null);
   const [currentLesson, setCurrentLesson] = useState(1);
-  const [notifTab, setNotifTab]           = useState<NotifTab>("received");
-  const [showNotifForm, setShowNotifForm] = useState(false);
-  const [notifForm, setNotifForm]         = useState({ title: "", body: "", targetRole: "teacher" });
   const [expandedNotifIds, setExpandedNotifIds] = useState<Set<number>>(new Set());
 
   /* Book picker sheet */
@@ -119,11 +115,6 @@ export default function StudentDashboard() {
   });
   const { countUnread } = useNotificationReads(user?.id);
   const unreadNotifCount = countUnread(receivedNotifs);
-  const { data: sentNotifs = [] } = useQuery<any[]>({
-    queryKey: ["notifications", "student-sent", user?.id],
-    queryFn: () => api.get(`/notifications?fromUserId=${user?.id}`),
-    enabled: !!user?.id,
-  });
   const { data: scoreBreakdown } = useQuery<Record<string, number>>({
     queryKey: ["score-breakdown-home", user?.id],
     queryFn: () => api.get(`/student-scores-breakdown?studentId=${user?.id}`),
@@ -141,26 +132,6 @@ export default function StudentDashboard() {
     mutationFn: (data: any) => api.post("/student-progress", data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["student-progress", user?.id] }),
   });
-  const createNotifMut = useMutation({
-    mutationFn: (d: any) => api.post("/notifications", d),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["notifications"] });
-      setShowNotifForm(false);
-      setNotifForm({ title: "", body: "", targetRole: "teacher" });
-    },
-  });
-
-  function handleNotifSend() {
-    if (!notifForm.title.trim() || !notifForm.body.trim()) return;
-    createNotifMut.mutate({
-      title: notifForm.title.trim(), body: notifForm.body.trim(),
-      targetRole: notifForm.targetRole, schoolId: user?.schoolId,
-      fromUserId: user?.id, fromRole: "student", fromName: user?.name ?? "دانش‌آموز",
-      recipientStudentIds: null, recipientTeacherIds: null,
-      recipientClassIds: null, recipientBranchIds: null,
-      recipientGrades: null, recipientGradeLevels: null,
-    });
-  }
 
   function toggleNotifExpand(id: number) {
     setExpandedNotifIds(prev => {
@@ -571,39 +542,8 @@ export default function StudentDashboard() {
               <Bell size={17} color={accentDark} /> اعلانات
             </div>
           </div>
-          <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
-            {(["received", "sent"] as const).map(t => (
-              <button key={t} onClick={() => setNotifTab(t)} style={{ flex: 1, padding: "7px 0", borderRadius: 10, border: `1.5px solid ${notifTab === t ? accentDark : "rgba(200,200,230,0.5)"}`, background: notifTab === t ? `${accentDark}14` : "rgba(255,255,255,0.55)", color: notifTab === t ? accentDark : "#5b21b6", fontSize: 11, fontFamily: "Vazirmatn", cursor: "pointer", fontWeight: notifTab === t ? 700 : 400 }}>
-                {t === "received" ? `دریافتی${unreadNotifCount > 0 ? ` (${unreadNotifCount.toLocaleString("fa-IR")})` : ""}` : `ارسالی${sentNotifs.length > 0 ? ` (${sentNotifs.length})` : ""}`}
-              </button>
-            ))}
-          </div>
-          <button onClick={() => setShowNotifForm(v => !v)} style={{ width: "100%", marginBottom: 10, padding: "9px 0", background: `linear-gradient(135deg, ${accent}, ${accentDark})`, border: "none", borderRadius: 10, color: "white", fontFamily: "Vazirmatn", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, boxShadow: `0 4px 15px ${accent}45` }}>
-            <Plus size={13} /> پیام جدید
-          </button>
-          {showNotifForm && (
-            <div style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(12px)", border: "1.5px solid rgba(200,200,240,0.5)", borderRadius: 14, padding: 12, marginBottom: 12 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "#1e1b4b" }}>ارسال پیام</div>
-                <button onClick={() => setShowNotifForm(false)} style={{ background: "none", border: "none", color: accentDark, cursor: "pointer" }}><X size={14} /></button>
-              </div>
-              <div style={{ display: "grid", gap: 8 }}>
-                <select value={notifForm.targetRole} onChange={e => setNotifForm({ ...notifForm, targetRole: e.target.value })} style={drawerInput}>
-                  <option value="teacher">معلم</option>
-                  <option value="school_manager">مدیر مدرسه</option>
-                </select>
-                <input value={notifForm.title} onChange={e => setNotifForm({ ...notifForm, title: e.target.value })} placeholder="موضوع..." style={drawerInput} />
-                <textarea value={notifForm.body} onChange={e => setNotifForm({ ...notifForm, body: e.target.value })} rows={3} placeholder="متن پیام..." style={{ ...drawerInput, resize: "vertical" }} />
-                <button onClick={handleNotifSend} disabled={!notifForm.title.trim() || !notifForm.body.trim() || createNotifMut.isPending}
-                  style={{ width: "100%", padding: "9px 0", background: `linear-gradient(135deg, ${accent}, ${accentDark})`, border: "none", borderRadius: 9, color: "white", fontFamily: "Vazirmatn", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, opacity: (!notifForm.title.trim() || !notifForm.body.trim()) ? 0.5 : 1 }}>
-                  <SendIcon size={12} /> {createNotifMut.isPending ? "در حال ارسال..." : "ارسال"}
-                </button>
-              </div>
-            </div>
-          )}
-          {(notifTab === "received" ? receivedNotifs : sentNotifs).map((n: any) => {
+          {receivedNotifs.map((n: any) => {
             const isExpanded = expandedNotifIds.has(n.id);
-            const isSent = notifTab === "sent";
             return (
               <div key={n.id} style={{ background: "rgba(255,255,255,0.65)", border: "1.5px solid rgba(200,200,240,0.4)", borderRadius: 12, marginBottom: 8, overflow: "hidden" }}>
                 <div style={{ padding: "10px 12px" }}>
@@ -611,11 +551,6 @@ export default function StudentDashboard() {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 700, color: "#1e1b4b", fontSize: 12, marginBottom: 3 }}>{n.title}</div>
                       <div style={{ fontSize: 11, color: "#5b21b6", lineHeight: 1.5 }}>{n.body}</div>
-                      {isSent && n.targetRole && (
-                        <span style={{ display: "inline-block", marginTop: 4, background: `${accentDark}14`, border: `1px solid ${accentDark}28`, borderRadius: 999, padding: "1px 7px", fontSize: 10, color: accentDark }}>
-                          به: {n.targetRole === "school_manager" ? "مدیر" : "معلم"}
-                        </span>
-                      )}
                       {n.createdAt && <div style={{ fontSize: 10, color: "#7c3aed", marginTop: 3 }}>{new Date(n.createdAt).toLocaleDateString("fa-IR")}</div>}
                     </div>
                     <button onClick={() => toggleNotifExpand(n.id)} style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 3, padding: "4px 7px", background: isExpanded ? `${accentDark}14` : "rgba(255,255,255,0.75)", border: `1px solid ${isExpanded ? accentDark : "rgba(200,200,230,0.5)"}`, borderRadius: 8, color: accentDark, cursor: "pointer", fontSize: 10, fontFamily: "Vazirmatn" }}>
@@ -632,10 +567,10 @@ export default function StudentDashboard() {
               </div>
             );
           })}
-          {(notifTab === "received" ? receivedNotifs : sentNotifs).length === 0 && (
+          {receivedNotifs.length === 0 && (
             <div style={{ textAlign: "center", padding: "24px 0", color: "#5b21b6", fontSize: 12 }}>
               <Bell size={28} style={{ opacity: 0.3, display: "block", margin: "0 auto 8px" }} />
-              {notifTab === "received" ? "اعلانی وجود ندارد" : "پیامی ارسال نکرده‌اید"}
+              اعلانی وجود ندارد
             </div>
           )}
         </div>
