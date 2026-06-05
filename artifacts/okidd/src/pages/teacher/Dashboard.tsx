@@ -269,12 +269,12 @@ export default function TeacherDashboard() {
             <div
               onClick={() => navigate("/teacher/online-class")}
               style={{
-                ...glassCard("#7c3aed", {
+                ...glassCard(AMBER, {
                   padding: "18px 20px", display: "flex", alignItems: "center", gap: 14,
                   cursor: "pointer", borderRadius: 22,
-                  background: "linear-gradient(145deg,#7c3aedcc,#6d28d9aa)",
-                  border: "1.5px solid #7c3aedcc",
-                  boxShadow: "0 6px 28px #7c3aed66, inset 0 1px 0 rgba(255,255,255,0.32)",
+                  background: `linear-gradient(145deg,${AMBER}cc,${AMBER_D}aa)`,
+                  border: `1.5px solid ${AMBER}cc`,
+                  boxShadow: `0 6px 28px ${AMBER}66, inset 0 1px 0 rgba(255,255,255,0.32)`,
                 }),
               }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; }}

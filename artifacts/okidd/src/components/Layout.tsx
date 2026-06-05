@@ -522,9 +522,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           ? (isGirl
             ? "linear-gradient(135deg, #4facfe 0%, #c084fc 38%, #f472b6 72%, #fb7185 100%)"
             : "linear-gradient(135deg, #4facfe 0%, #818cf8 42%, #a78bfa 72%, #c084fc 100%)")
-          : (user.role === "admin" || user.role === "school_manager" || user.role === "branch_manager")
-            ? theme.dashBg
-            : undefined,
+          : theme.dashBg,
       }}>
 
 
