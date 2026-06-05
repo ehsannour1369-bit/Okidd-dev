@@ -79,6 +79,9 @@ export default function StudentDashboard() {
   const [notifForm, setNotifForm]         = useState({ title: "", body: "", targetRole: "teacher" });
   const [expandedNotifIds, setExpandedNotifIds] = useState<Set<number>>(new Set());
 
+  /* Book picker sheet */
+  const [bookPickerOpen, setBookPickerOpen] = useState(false);
+
   /* Profile panel */
   const [profileOpen, setProfileOpen]     = useState(false);
   const [showPassword, setShowPassword]   = useState(false);
@@ -272,7 +275,11 @@ export default function StudentDashboard() {
               {/* ① PLAY — full width */}
               <div
                 style={{ gridColumn: "span 2", ...glassCard(accent, { padding: "14px 18px", display: "flex", alignItems: "center", gap: 14, background: `linear-gradient(145deg, ${accent}38, ${accentDark}20)`, border: `1.5px solid ${accent}60` }), ...cardAnim('up', 0) }}
-                onClick={() => enrolledBooks.length > 0 ? navigate(`/student/lesson-player?bookId=${enrolledBooks[0].id}&lessonId=0`) : setScreen("books")}
+                onClick={() => {
+                  if (enrolledBooks.length === 0) { setScreen("books"); return; }
+                  if (enrolledBooks.length === 1) { navigate(`/student/lesson-player?bookId=${enrolledBooks[0].id}&lessonId=0`); return; }
+                  setBookPickerOpen(true);
+                }}
                 onMouseEnter={e => hoverIn(e.currentTarget, accent)}
                 onMouseLeave={e => hoverOut(e.currentTarget, accent)}
               >
@@ -634,6 +641,73 @@ export default function StudentDashboard() {
         </div>
       </div>
       {notifOpen && <div onClick={() => setNotifOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 499 }} />}
+
+      {/* ══════════ BOOK PICKER SHEET ══════════ */}
+      {bookPickerOpen && (
+        <>
+          <div onClick={() => setBookPickerOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 800, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(5px)" }} />
+          <div onClick={e => e.stopPropagation()} style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 801, background: "rgba(255,255,255,0.96)", backdropFilter: "blur(28px)", borderRadius: "28px 28px 0 0", padding: "24px 20px 44px", boxShadow: "0 -10px 50px rgba(99,102,241,0.18)", direction: "rtl", fontFamily: "Vazirmatn", maxHeight: "70vh", overflowY: "auto" }}>
+            {/* Handle bar */}
+            <div style={{ width: 40, height: 4, background: "rgba(0,0,0,0.15)", borderRadius: 99, margin: "0 auto 20px" }} />
+
+            {/* Title */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 12, background: `linear-gradient(135deg,${accent},${accentDark})`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Play size={18} color="white" fill="white" />
+              </div>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: 16, color: "#1e1b4b" }}>کدوم کتاب رو شروع کنی؟</div>
+                <div style={{ fontSize: 12, color: "#6d6d8a", marginTop: 2 }}>یک کتاب از لیست زیر انتخاب کن</div>
+              </div>
+            </div>
+
+            {/* Book list */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {enrolledBooks.map((book: any, idx: number) => {
+                const bookColors = ["#818cf8","#3b82f6","#ec4899","#f97316","#22c55e","#8b5cf6"];
+                const bc = bookColors[idx % bookColors.length];
+                const completedForBook = progress.filter((p: any) => p.completed && p.bookId === book.id).length;
+                const total = book.lessonCount ?? 0;
+                const pct = total > 0 ? Math.round((completedForBook / total) * 100) : 0;
+                return (
+                  <button
+                    key={book.id}
+                    onClick={() => { setBookPickerOpen(false); navigate(`/student/lesson-player?bookId=${book.id}&lessonId=0`); }}
+                    style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: `linear-gradient(145deg,${bc}18,${bc}08)`, border: `1.5px solid ${bc}35`, borderRadius: 18, cursor: "pointer", fontFamily: "Vazirmatn", textAlign: "right", transition: "all 0.18s" }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "scale(1.02)"; (e.currentTarget as HTMLElement).style.boxShadow = `0 6px 20px ${bc}30`; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ""; (e.currentTarget as HTMLElement).style.boxShadow = ""; }}
+                  >
+                    <div style={{ width: 48, height: 48, borderRadius: 14, background: `linear-gradient(135deg,${bc},${bc}aa)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: `0 4px 14px ${bc}40` }}>
+                      <BookOpen size={22} color="white" />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 800, fontSize: 14, color: "#1e1b4b", marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{book.title}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <div style={{ flex: 1, height: 5, background: "rgba(0,0,0,0.08)", borderRadius: 99, overflow: "hidden" }}>
+                          <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg,${bc},${bc}bb)`, borderRadius: 99, transition: "width 0.5s ease" }} />
+                        </div>
+                        <span style={{ fontSize: 11, color: bc, fontWeight: 700, whiteSpace: "nowrap" }}>{pct}%</span>
+                      </div>
+                      <div style={{ fontSize: 11, color: "#6d6d8a", marginTop: 3 }}>{completedForBook} از {total} درس تکمیل شده</div>
+                    </div>
+                    <div style={{ width: 32, height: 32, borderRadius: 10, background: `${bc}18`, border: `1px solid ${bc}35`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <Play size={14} color={bc} fill={bc} />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Cancel button */}
+            <button
+              onClick={() => setBookPickerOpen(false)}
+              style={{ width: "100%", marginTop: 16, padding: "12px 0", background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 14, fontFamily: "Vazirmatn", fontWeight: 700, fontSize: 14, color: "#6d6d8a", cursor: "pointer" }}
+            >
+              انصراف
+            </button>
+          </div>
+        </>
+      )}
 
       {/* ══════════ PROFILE PANEL ══════════ */}
       {profileOpen && (
