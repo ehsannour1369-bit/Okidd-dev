@@ -224,53 +224,70 @@ export default function StudentDashboard() {
     : {};
 
   /* ─────────────────────────────────── RENDER ─────────────────────────────────── */
-  return (
-    <div style={{ height: "100dvh", background: "linear-gradient(160deg,#e8eeff 0%,#f0eaff 40%,#eafaf3 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", position: "relative", overflow: "hidden" }}>
 
-      {/* Animated background blobs with glow */}
+  /* Kid-friendly card helper */
+  function kidCard(bg: string, extra?: React.CSSProperties): React.CSSProperties {
+    return {
+      background: bg,
+      borderRadius: 28,
+      cursor: "pointer",
+      transition: "transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.22s ease",
+      position: "relative",
+      overflow: "hidden",
+      ...extra,
+    };
+  }
+
+  return (
+    <div style={{ height: "100dvh", background: isGirl ? "linear-gradient(160deg,#fce4f6 0%,#f3e8ff 45%,#fef3fb 100%)" : "linear-gradient(160deg,#e0f0ff 0%,#ede8ff 45%,#eafff3 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", position: "relative", overflow: "hidden" }}>
+
+      {/* Animated background blobs */}
       <div className="blob b1" />
       <div className="blob b2" />
       <div className="blob b3" />
       <div className="blob b4" />
       <div className="blob b5" />
-      {/* Glow rings */}
-      <div className="glow-ring gr1" />
-      <div className="glow-ring gr2" />
-      {/* Stars */}
-      {[...Array(22)].map((_, i) => <div key={i} className={`star s${(i % 5) + 1}`} style={{ top: `${Math.floor((i * 37 + 11) % 95)}%`, left: `${Math.floor((i * 53 + 7) % 95)}%`, animationDelay: `${(i * 0.41).toFixed(2)}s` }} />)}
-      {/* Shooting stars */}
-      <div className="shoot sh1" />
-      <div className="shoot sh2" />
-      <div className="shoot sh3" />
+
+      {/* Floating bubbles */}
+      {[...Array(14)].map((_, i) => (
+        <div key={`bubble-${i}`} className={`kid-bubble kb${(i % 6) + 1}`} style={{
+          top: `${(i * 43 + 17) % 90}%`,
+          left: `${(i * 67 + 9) % 90}%`,
+          animationDelay: `${(i * 0.7).toFixed(1)}s`,
+        }} />
+      ))}
+
+      {/* Floating stars */}
+      {[...Array(18)].map((_, i) => <div key={`star-${i}`} className={`star s${(i % 5) + 1}`} style={{ top: `${Math.floor((i * 37 + 11) % 95)}%`, left: `${Math.floor((i * 53 + 7) % 95)}%`, animationDelay: `${(i * 0.41).toFixed(2)}s` }} />)}
 
       <div style={{ position: "relative", zIndex: 1, height: "100%", display: "flex", flexDirection: "column" }}>
 
         {/* ── Logo banner ── */}
         {schoolInfo?.logoUrl && (
-          <div style={{ display: "flex", justifyContent: "center", paddingTop: 18, paddingBottom: 2 }}>
-            <div style={{ ...headerAnim, width: 82, height: 82, borderRadius: 22, background: "rgba(255,255,255,0.82)", backdropFilter: "blur(16px)", border: "1.5px solid rgba(255,255,255,0.9)", boxShadow: "0 6px 28px rgba(0,0,0,0.09)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ display: "flex", justifyContent: "center", paddingTop: 14, paddingBottom: 0 }}>
+            <div style={{ ...headerAnim, width: 72, height: 72, borderRadius: 20, background: "rgba(255,255,255,0.88)", backdropFilter: "blur(16px)", border: "2px solid rgba(255,255,255,0.95)", boxShadow: "0 6px 28px rgba(0,0,0,0.09)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <img src={schoolInfo.logoUrl} alt="لوگو" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
             </div>
           </div>
         )}
 
         {/* ── Top bar: score + greeting + profile ── */}
-        <div style={{ ...headerAnim, display: "flex", justifyContent: "space-between", alignItems: "center", padding: schoolInfo?.logoUrl ? "10px 18px 0" : "18px 18px 0", direction: "ltr" }}>
-          {/* Score */}
-          <div style={{ display: "flex", alignItems: "center", gap: 7, background: "rgba(255,255,255,0.72)", backdropFilter: "blur(14px)", border: `1.5px solid ${accent}45`, borderRadius: 999, padding: "8px 16px", boxShadow: `0 4px 20px ${accent}22, inset 0 0 0 1px rgba(255,255,255,0.85)` }}>
-            <span className="score-sparkle-icon" style={{ color: accent, display: "flex", filter: `drop-shadow(0 0 5px ${accent}99)` }}>
-              <Sparkles size={18} strokeWidth={2.5} />
-            </span>
-            <span style={{ color: accentDark, fontWeight: 900, fontSize: 15, letterSpacing: "0.02em" }}>{displayScore.toLocaleString("fa-IR")}</span>
+        <div style={{ ...headerAnim, display: "flex", justifyContent: "space-between", alignItems: "center", padding: schoolInfo?.logoUrl ? "8px 16px 0" : "16px 16px 0", direction: "ltr", gap: 8 }}>
+          {/* Score pill — star badge */}
+          <div style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.88)", backdropFilter: "blur(14px)", border: `2px solid ${accent}55`, borderRadius: 999, padding: "6px 14px 6px 10px", boxShadow: `0 3px 16px ${accent}30`, flexShrink: 0 }}>
+            <span className="score-sparkle-icon" style={{ fontSize: 20, lineHeight: 1 }}>⭐</span>
+            <span style={{ color: accentDark, fontWeight: 900, fontSize: 16 }}>{displayScore.toLocaleString("fa-IR")}</span>
           </div>
           {/* Greeting */}
-          <div className="glow-greeting" style={{ fontWeight: 800, fontSize: 15, textAlign: "center", lineHeight: 1.5, flex: 1, padding: "0 8px" }}>
-            <span>{user?.name?.split(" ")[0]} عزیزم به مدرسه </span>
-            <span className="glow-school">{schoolInfo?.name ?? "..."}</span>
+          <div className="glow-greeting" style={{ fontWeight: 900, fontSize: 14, textAlign: "center", lineHeight: 1.5, flex: 1, padding: "0 4px" }}>
+            <span>سلام </span>
+            <span style={{ color: accentDark }}>{user?.name?.split(" ")[0]}</span>
+            <span> 👋 به </span>
+            <span className="glow-school">{schoolInfo?.name ?? "مدرسه"}</span>
             <span> خوش آمدی</span>
           </div>
           {/* Profile button */}
-          <button onClick={() => setProfileOpen(true)} style={{ width: 44, height: 44, borderRadius: "50%", background: user?.avatarUrl ? "transparent" : `linear-gradient(135deg,${accent},${accentDark})`, backdropFilter: "blur(14px)", border: `2px solid ${accent}`, boxShadow: `0 4px 16px ${accent}50`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0, overflow: "hidden", flexShrink: 0 }}>
+          <button onClick={() => setProfileOpen(true)} style={{ width: 46, height: 46, borderRadius: "50%", background: user?.avatarUrl ? "transparent" : `linear-gradient(135deg,${accent},${accentDark})`, border: `3px solid ${accent}`, boxShadow: `0 4px 16px ${accent}50`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0, overflow: "hidden", flexShrink: 0 }}>
             {user?.avatarUrl
               ? <img src={user.avatarUrl} alt="پروفایل" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               : <User size={20} color="white" />}
@@ -279,110 +296,98 @@ export default function StudentDashboard() {
 
         {/* ══════════ HOME ══════════ */}
         {screen === "home" && (
-          <div style={{ flex: 1, padding: "10px 20px 30px", overflowY: "auto", display: "flex", flexDirection: "column", minHeight: 0 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gridTemplateRows: "repeat(5, minmax(90px, 1fr))", gap: 10, flex: 1, maxWidth: 560, margin: "0 auto", width: "100%", minHeight: 560 }}>
+          <div style={{ flex: 1, padding: "10px 16px 24px", overflowY: "auto", display: "flex", flexDirection: "column", minHeight: 0 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 11, maxWidth: 520, margin: "0 auto", width: "100%" }}>
 
-              {/* ① PLAY — full width */}
+              {/* ① BIG PLAY BUTTON */}
               <div
-                style={{ gridColumn: "span 2", ...glassCard(accent, { padding: "14px 18px", display: "flex", alignItems: "center", gap: 14, background: `linear-gradient(145deg, ${accent}38, ${accentDark}20)`, border: `1.5px solid ${accent}60` }), ...cardAnim('up', 0) }}
+                className="play-btn-kid"
+                style={{ ...cardAnim('up', 0), ...kidCard(
+                  isGirl
+                    ? "linear-gradient(135deg,#f472b6,#e879f9,#c026d3)"
+                    : "linear-gradient(135deg,#818cf8,#6366f1,#4f46e5)",
+                  { padding: "0", height: 120, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: isGirl ? "0 10px 40px #e879f955, 0 0 0 6px #f472b618" : "0 10px 40px #6366f155, 0 0 0 6px #818cf818" }
+                )}}
                 onClick={() => {
                   if (enrolledBooks.length === 0) { setScreen("books"); return; }
                   if (enrolledBooks.length === 1) { navigate(`/student/lesson-player?bookId=${enrolledBooks[0].id}&lessonId=0`); return; }
                   setBookPickerOpen(true);
                 }}
-                onMouseEnter={e => hoverIn(e.currentTarget, accent)}
-                onMouseLeave={e => hoverOut(e.currentTarget, accent)}
               >
-                <div style={{ ...glassIconStyle(accent, 58) }}>
-                  <Play size={27} color={accentDark} fill={accentDark} />
-                </div>
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: 19, color: "#1e1b4b", lineHeight: 1.2 }}>شروع یادگیری!</div>
-                  <div style={{ fontSize: 12, color: accentDark, marginTop: 4 }}>
-                    {enrolledBooks.length > 0 ? `${enrolledBooks.length} کتاب در دسترس` : "کتابی ثبت نشده"}
+                {/* Shine sweep */}
+                <div style={{ position: "absolute", top: 0, left: "-60%", width: "40%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent)", transform: "skewX(-18deg)", pointerEvents: "none", animation: "shine-sweep 2.8s ease-in-out infinite" }} />
+                <div style={{ display: "flex", alignItems: "center", gap: 18, zIndex: 1, padding: "0 28px" }}>
+                  <div className="rocket-bounce" style={{ fontSize: 52, lineHeight: 1, filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.20))" }}>
+                    {isGirl ? "🦄" : "🚀"}
+                  </div>
+                  <div style={{ color: "white" }}>
+                    <div style={{ fontWeight: 900, fontSize: 24, textShadow: "0 2px 8px rgba(0,0,0,0.18)", letterSpacing: "0.01em" }}>شروع یادگیری!</div>
+                    <div style={{ fontSize: 13, opacity: 0.88, marginTop: 4, fontWeight: 700 }}>
+                      {enrolledBooks.length > 0
+                        ? `${enrolledBooks.length.toLocaleString("fa-IR")} کتاب در دسترس 📖`
+                        : "بزن بریم یاد بگیریم ✨"}
+                    </div>
                   </div>
                 </div>
-                <div style={{ position: "absolute", top: 0, right: 0, width: "40%", height: "100%", background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.12))", pointerEvents: "none" }} />
               </div>
 
-              {/* ② کتاب‌هایم — Blue  (RTL: right col) */}
-              <div style={{ ...glassCard(BLUE, { padding: "14px 12px" }), ...cardAnim('right', 0.15) }}
-                onClick={() => navigate("/student/books")}
-                onMouseEnter={e => hoverIn(e.currentTarget, BLUE)}
-                onMouseLeave={e => hoverOut(e.currentTarget, BLUE)}>
-                <div style={{ ...glassIconStyle(BLUE, 44), marginBottom: 8 }}>
-                  <BookOpen size={21} color={BLUE} />
+              {/* ② 2×2 grid */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 11 }}>
+
+                {/* کتاب‌هایم */}
+                <div className="kid-card-hover" style={{ ...kidCard("linear-gradient(145deg,#bfdbfe,#93c5fd)", { padding: "20px 14px 16px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", boxShadow: "0 6px 24px #3b82f635, 0 0 0 3px #bfdbfe80" }), ...cardAnim('right', 0.15) }}
+                  onClick={() => navigate("/student/books")}>
+                  <div style={{ fontSize: 40, marginBottom: 8, filter: "drop-shadow(0 3px 6px rgba(0,0,0,0.12))", animation: "float-gentle 3s ease-in-out infinite" }}>📚</div>
+                  <div style={{ fontWeight: 900, fontSize: 15, color: "#1e3a8a" }}>کتاب‌هایم</div>
+                  <div style={{ fontSize: 12, color: "#1d4ed8", marginTop: 4, fontWeight: 700 }}>
+                    {enrolledBooks.length.toLocaleString("fa-IR")} کتاب
+                  </div>
                 </div>
-                <div style={{ fontWeight: 700, fontSize: 14, color: "#1e1b4b" }}>کتاب‌هایم</div>
-                <div style={{ fontSize: 11, color: "#4b5563", marginTop: 3 }}>{enrolledBooks.length} کتاب</div>
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${BLUE}70, ${BLUE}20)`, borderRadius: "0 0 24px 24px" }} />
+
+                {/* معلم من */}
+                <div className="kid-card-hover" style={{ ...kidCard("linear-gradient(145deg,#fbcfe8,#f9a8d4)", { padding: "20px 14px 16px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", boxShadow: "0 6px 24px #ec489935, 0 0 0 3px #fbcfe880" }), ...cardAnim('left', 0.15) }}
+                  onClick={() => navigate("/student/teacher")}>
+                  <div style={{ fontSize: 40, marginBottom: 8, filter: "drop-shadow(0 3px 6px rgba(0,0,0,0.12))", animation: "float-gentle 3.4s ease-in-out infinite 0.5s" }}>👩‍🏫</div>
+                  <div style={{ fontWeight: 900, fontSize: 15, color: "#831843" }}>معلم من</div>
+                  <div style={{ fontSize: 12, color: "#be185d", marginTop: 4, fontWeight: 700 }}>کلاس من</div>
+                </div>
+
+                {/* مدرسه من */}
+                <div className="kid-card-hover" style={{ ...kidCard("linear-gradient(145deg,#fed7aa,#fdba74)", { padding: "20px 14px 16px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", boxShadow: "0 6px 24px #f9731635, 0 0 0 3px #fed7aa80" }), ...cardAnim('right', 0.28) }}
+                  onClick={() => setScreen("school")}>
+                  <div style={{ fontSize: 40, marginBottom: 8, filter: "drop-shadow(0 3px 6px rgba(0,0,0,0.12))", animation: "float-gentle 3.8s ease-in-out infinite 0.2s" }}>🏫</div>
+                  <div style={{ fontWeight: 900, fontSize: 15, color: "#7c2d12" }}>مدرسه من</div>
+                  <div style={{ fontSize: 11, color: "#c2410c", marginTop: 4, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
+                    {schoolInfo?.name ?? "—"}
+                  </div>
+                </div>
+
+                {/* رتبه‌ام */}
+                <div className="kid-card-hover" style={{ ...kidCard("linear-gradient(145deg,#bbf7d0,#86efac)", { padding: "20px 14px 16px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", boxShadow: "0 6px 24px #22c55e35, 0 0 0 3px #bbf7d080" }), ...cardAnim('left', 0.28) }}
+                  onClick={() => navigate("/student/ranking")}>
+                  <div style={{ fontSize: 40, marginBottom: 8, filter: "drop-shadow(0 3px 6px rgba(0,0,0,0.12))", animation: "float-gentle 2.9s ease-in-out infinite 0.8s" }}>🏆</div>
+                  <div style={{ fontWeight: 900, fontSize: 15, color: "#14532d" }}>رتبه‌ام</div>
+                  <div style={{ fontSize: 12, color: "#15803d", marginTop: 4, fontWeight: 700 }}>
+                    {displayScore.toLocaleString("fa-IR")} ⭐
+                  </div>
+                </div>
               </div>
 
-              {/* ③ معلم من — Pink  (RTL: left col) */}
-              <div style={{ ...glassCard(PINK, { padding: "14px 12px" }), ...cardAnim('left', 0.15) }}
-                onClick={() => navigate("/student/teacher")}
-                onMouseEnter={e => hoverIn(e.currentTarget, PINK)}
-                onMouseLeave={e => hoverOut(e.currentTarget, PINK)}>
-                <div style={{ ...glassIconStyle(PINK, 44), marginBottom: 8 }}>
-                  <GraduationCap size={21} color={PINK} />
-                </div>
-                <div style={{ fontWeight: 700, fontSize: 14, color: "#1e1b4b" }}>معلم من</div>
-                <div style={{ fontSize: 11, color: "#4b5563", marginTop: 3 }}>مشاهده کلاس</div>
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${PINK}70, ${PINK}20)`, borderRadius: "0 0 24px 24px" }} />
-              </div>
-
-              {/* ④ مدرسه من — Orange  (RTL: right col, row 2) */}
-              <div style={{ ...glassCard(ORANGE, { padding: "14px 12px" }), ...cardAnim('right', 0.3) }}
-                onClick={() => setScreen("school")}
-                onMouseEnter={e => hoverIn(e.currentTarget, ORANGE)}
-                onMouseLeave={e => hoverOut(e.currentTarget, ORANGE)}>
-                <div style={{ ...glassIconStyle(ORANGE, 44), marginBottom: 8 }}>
-                  <Building2 size={21} color={ORANGE} />
-                </div>
-                <div style={{ fontWeight: 700, fontSize: 14, color: "#1e1b4b" }}>مدرسه من</div>
-                <div style={{ fontSize: 11, color: "#4b5563", marginTop: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {schoolInfo?.name ?? "—"}
-                </div>
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${ORANGE}70, ${ORANGE}20)`, borderRadius: "0 0 24px 24px" }} />
-              </div>
-
-              {/* ⑤ رتبه‌ام — Green  (RTL: left col, row 2) */}
-              <div style={{ ...glassCard(GREEN, { padding: "14px 12px" }), ...cardAnim('left', 0.3) }}
-                onClick={() => navigate("/student/ranking")}
-                onMouseEnter={e => hoverIn(e.currentTarget, GREEN)}
-                onMouseLeave={e => hoverOut(e.currentTarget, GREEN)}>
-                <div style={{ ...glassIconStyle(GREEN, 44), marginBottom: 8 }}>
-                  <Trophy size={21} color={GREEN} />
-                </div>
-                <div style={{ fontWeight: 700, fontSize: 14, color: "#1e1b4b" }}>رتبه‌ام</div>
-                <div style={{ fontSize: 11, color: "#4b5563", marginTop: 3 }}>{displayScore.toLocaleString("fa-IR")} امتیاز</div>
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${GREEN}70, ${GREEN}20)`, borderRadius: "0 0 24px 24px" }} />
-              </div>
-
-              {/* ⑥ کلاس آنلاین — hidden until enabled */}
-
-              {/* ⑦ اعلانات — Purple, full width */}
-              <div style={{ gridColumn: "span 2", ...glassCard(PURPLE, { padding: "12px 18px", display: "flex", alignItems: "center", gap: 14 }), ...cardAnim('up', 0.52) }}
-                onClick={() => setNotifOpen(true)}
-                onMouseEnter={e => hoverIn(e.currentTarget, PURPLE)}
-                onMouseLeave={e => hoverOut(e.currentTarget, PURPLE)}>
-                <div style={{ ...glassIconStyle(PURPLE, 44), position: "relative" }}>
-                  <Bell size={20} color={PURPLE} />
-                  {unreadNotifCount > 0 && (
-                    <span style={{ position: "absolute", top: -4, right: -4, minWidth: 17, height: 17, background: "#ef4444", borderRadius: 999, border: "2px solid white", fontSize: 9, color: "white", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px" }}>
-                      {unreadNotifCount > 99 ? "۹۹+" : unreadNotifCount.toLocaleString("fa-IR")}
-                    </span>
-                  )}
-                </div>
+              {/* ③ اعلانات — full width */}
+              <div className="kid-card-hover" style={{ ...kidCard("linear-gradient(145deg,#e9d5ff,#d8b4fe)", { padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, boxShadow: "0 6px 24px #8b5cf635, 0 0 0 3px #e9d5ff80" }), ...cardAnim('up', 0.44) }}
+                onClick={() => setNotifOpen(true)}>
+                <div style={{ fontSize: 38, filter: "drop-shadow(0 3px 6px rgba(0,0,0,0.12))", animation: "bell-ring 3s ease-in-out infinite", flexShrink: 0 }}>🔔</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, fontSize: 16, color: "#1e1b4b" }}>اعلانات</div>
-                  <div style={{ fontSize: 12, color: "#4b5563", marginTop: 4 }}>
-                    {unreadNotifCount > 0 ? `${unreadNotifCount.toLocaleString("fa-IR")} اعلان خوانده‌نشده` : "بدون اعلان جدید"}
+                  <div style={{ fontWeight: 900, fontSize: 16, color: "#3b0764" }}>اعلانات</div>
+                  <div style={{ fontSize: 12, color: "#6d28d9", marginTop: 3, fontWeight: 700 }}>
+                    {unreadNotifCount > 0
+                      ? `${unreadNotifCount.toLocaleString("fa-IR")} پیام جدید داری! 📬`
+                      : "پیام جدیدی نداری"}
                   </div>
                 </div>
                 {unreadNotifCount > 0 && (
-                  <div style={{ background: `linear-gradient(135deg,${PURPLE},#6d28d9)`, borderRadius: 999, padding: "4px 14px", color: "white", fontSize: 13, fontWeight: 700, boxShadow: `0 4px 14px ${PURPLE}55` }}>
-                    {unreadNotifCount.toLocaleString("fa-IR")}
+                  <div style={{ background: "#ef4444", borderRadius: 999, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 13, fontWeight: 900, boxShadow: "0 4px 12px rgba(239,68,68,0.5)", flexShrink: 0, animation: "pulse-badge 1.4s ease-in-out infinite" }}>
+                    {unreadNotifCount > 9 ? "9+" : unreadNotifCount.toLocaleString("fa-IR")}
                   </div>
                 )}
               </div>
@@ -820,17 +825,6 @@ export default function StudentDashboard() {
               background: radial-gradient(circle, #c4b5fd 0%, #ddd6fe 40%, transparent 70%);
               filter: blur(45px); animation: fb2 15s ease-in-out infinite reverse; }
 
-        /* ── Glow rings ── */
-        .glow-ring { position: absolute; border-radius: 50%; pointer-events: none; z-index: 0; }
-        .gr1 { top: 10%; right: 5%; width: 200px; height: 200px;
-               background: transparent;
-               box-shadow: 0 0 80px 30px rgba(147,197,253,0.35);
-               animation: pulse-glow 6s ease-in-out infinite; }
-        .gr2 { bottom: 20%; left: 8%; width: 160px; height: 160px;
-               background: transparent;
-               box-shadow: 0 0 70px 25px rgba(249,168,212,0.3);
-               animation: pulse-glow 8s ease-in-out infinite 2s; }
-
         @keyframes fb1 {
           0%,100%{ transform:translate(0,0) scale(1) }
           33%    { transform:translate(-28px,22px) scale(1.07) }
@@ -849,13 +843,39 @@ export default function StudentDashboard() {
           0%,100%{ transform:translate(0,0) scale(1) }
           55%    { transform:translate(-14px,-22px) scale(1.06) }
         }
-        @keyframes pulse-glow {
-          0%,100%{ opacity:0.5; transform:scale(1) }
-          50%    { opacity:1;   transform:scale(1.35) }
+
+        /* ── Kid bubbles ── */
+        .kid-bubble {
+          position: absolute; border-radius: 50%; pointer-events: none; z-index: 0;
+          opacity: 0; animation: bubble-rise 8s ease-in infinite;
+        }
+        .kb1 { width:14px; height:14px; background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9), #c4b5fd88); border: 1px solid rgba(196,181,253,0.5); }
+        .kb2 { width:10px; height:10px; background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9), #fbcfe888); border: 1px solid rgba(251,207,232,0.5); }
+        .kb3 { width:18px; height:18px; background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9), #93c5fd88); border: 1px solid rgba(147,197,253,0.5); }
+        .kb4 { width:8px;  height:8px;  background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9), #86efac88); border: 1px solid rgba(134,239,172,0.5); }
+        .kb5 { width:12px; height:12px; background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9), #fde68a88); border: 1px solid rgba(253,230,138,0.5); }
+        .kb6 { width:16px; height:16px; background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9), #fca5a588); border: 1px solid rgba(252,165,165,0.5); }
+        @keyframes bubble-rise {
+          0%   { opacity: 0; transform: translateY(0) scale(0.6); }
+          15%  { opacity: 0.7; }
+          85%  { opacity: 0.4; }
+          100% { opacity: 0; transform: translateY(-140px) scale(1.1); }
+        }
+
+        /* ── Stars ── */
+        .star { position: absolute; pointer-events: none; z-index: 0; border-radius: 50%; }
+        .s1 { width:4px;  height:4px;  background:#818cf8; animation: twinkle 2.4s ease-in-out infinite; }
+        .s2 { width:5px;  height:5px;  background:#c084fc; animation: twinkle 3.1s ease-in-out infinite; }
+        .s3 { width:3px;  height:3px;  background:#60a5fa; animation: twinkle 2.0s ease-in-out infinite; }
+        .s4 { width:4px;  height:4px;  background:#f472b6; animation: twinkle 2.8s ease-in-out infinite; }
+        .s5 { width:6px;  height:6px;  background:#fbbf24; animation: twinkle 3.5s ease-in-out infinite; box-shadow: 0 0 8px 3px #fbbf2466; }
+        @keyframes twinkle {
+          0%,100%{ opacity:0.12; transform:scale(0.7) }
+          50%    { opacity:0.9;  transform:scale(1.5) }
         }
 
         /* ── Greeting glow ── */
-        .glow-greeting { color: #1e1b4b; animation: text-shimmer 4s ease-in-out infinite; }
+        .glow-greeting { color: #1e1b4b; }
         .glow-school {
           background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899, #6366f1);
           background-size: 200% auto;
@@ -863,55 +883,70 @@ export default function StudentDashboard() {
           -webkit-text-fill-color: transparent;
           background-clip: text;
           animation: shimmer-move 3s linear infinite;
-          filter: drop-shadow(0 0 6px rgba(139,92,246,0.6));
+          font-weight: 900;
         }
         @keyframes shimmer-move {
           0%   { background-position: 0% center }
           100% { background-position: 200% center }
         }
-        @keyframes text-shimmer {
-          0%,100% { opacity: 1 }
-          50%     { opacity: 0.82 }
-        }
-
-        /* ── Stars ── */
-        .star { position: absolute; pointer-events: none; z-index: 0; border-radius: 50%; }
-        .s1 { width:3px;  height:3px;  background:#818cf8; animation: twinkle 2.4s ease-in-out infinite; }
-        .s2 { width:4px;  height:4px;  background:#c084fc; animation: twinkle 3.1s ease-in-out infinite; }
-        .s3 { width:2px;  height:2px;  background:#60a5fa; animation: twinkle 2.0s ease-in-out infinite; }
-        .s4 { width:3px;  height:3px;  background:#f472b6; animation: twinkle 2.8s ease-in-out infinite; }
-        .s5 { width:5px;  height:5px;  background:#fbbf24; animation: twinkle 3.5s ease-in-out infinite; box-shadow: 0 0 6px 2px #fbbf2488; }
-        @keyframes twinkle {
-          0%,100%{ opacity:0.15; transform:scale(0.8) }
-          50%    { opacity:1;    transform:scale(1.4) }
-        }
-
-        /* ── Shooting stars ── */
-        .shoot { position:absolute; pointer-events:none; z-index:0;
-                 height:2px; border-radius:999px;
-                 background:linear-gradient(90deg,rgba(255,255,255,0),#a5b4fc,rgba(255,255,255,0));
-                 opacity:0; }
-        .sh1 { top:12%; right:80%; width:120px; transform:rotate(-35deg);
-               animation: shoot1 5s ease-in-out infinite 1s; }
-        .sh2 { top:30%; right:60%; width:90px;  transform:rotate(-30deg);
-               animation: shoot1 7s ease-in-out infinite 3.5s; }
-        .sh3 { top:55%; right:75%; width:150px; transform:rotate(-40deg);
-               animation: shoot1 9s ease-in-out infinite 6s; }
-        @keyframes shoot1 {
-          0%   { opacity:0; transform:rotate(-35deg) translateX(0) }
-          5%   { opacity:1 }
-          20%  { opacity:0; transform:rotate(-35deg) translateX(220px) }
-          100% { opacity:0; transform:rotate(-35deg) translateX(220px) }
-        }
 
         /* ── Score sparkle icon ── */
         .score-sparkle-icon {
-          animation: sparkle-pulse 2.4s ease-in-out infinite;
+          display: inline-block;
+          animation: star-spin 2.8s ease-in-out infinite;
         }
-        @keyframes sparkle-pulse {
-          0%,100% { transform: scale(1) rotate(0deg); opacity: 0.9; }
-          40%     { transform: scale(1.22) rotate(18deg); opacity: 1; }
-          70%     { transform: scale(0.95) rotate(-6deg); opacity: 0.85; }
+        @keyframes star-spin {
+          0%,100% { transform: scale(1) rotate(0deg); }
+          30%     { transform: scale(1.3) rotate(20deg); }
+          60%     { transform: scale(0.9) rotate(-8deg); }
+        }
+
+        /* ── Kid card hover ── */
+        .kid-card-hover { transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.22s ease; }
+        .kid-card-hover:hover { transform: scale(1.06) translateY(-3px); }
+        .kid-card-hover:active { transform: scale(0.96); }
+
+        /* ── Play button kid ── */
+        .play-btn-kid { transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.22s ease; }
+        .play-btn-kid:hover { transform: scale(1.03) translateY(-4px); }
+        .play-btn-kid:active { transform: scale(0.97); }
+
+        /* ── Rocket/unicorn bounce ── */
+        .rocket-bounce {
+          animation: rocket-float 2.2s ease-in-out infinite;
+        }
+        @keyframes rocket-float {
+          0%,100% { transform: translateY(0) rotate(-5deg); }
+          50%     { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        /* ── Shine sweep ── */
+        @keyframes shine-sweep {
+          0%   { left: -60%; opacity: 0; }
+          20%  { opacity: 1; }
+          50%  { left: 130%; opacity: 0; }
+          100% { left: 130%; opacity: 0; }
+        }
+
+        /* ── Float gentle (emoji icons) ── */
+        @keyframes float-gentle {
+          0%,100% { transform: translateY(0) scale(1); }
+          50%     { transform: translateY(-6px) scale(1.08); }
+        }
+
+        /* ── Bell ring ── */
+        @keyframes bell-ring {
+          0%,90%,100% { transform: rotate(0deg); }
+          92%          { transform: rotate(18deg); }
+          94%          { transform: rotate(-14deg); }
+          96%          { transform: rotate(10deg); }
+          98%          { transform: rotate(-6deg); }
+        }
+
+        /* ── Badge pulse ── */
+        @keyframes pulse-badge {
+          0%,100% { transform: scale(1); }
+          50%     { transform: scale(1.18); }
         }
 
         /* ── Intro entrance animations ── */
