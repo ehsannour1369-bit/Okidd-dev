@@ -684,31 +684,49 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
         {/* ── Tab: Books ── */}
         {tab === "books" && (
           <div>
-            {/* Add book row */}
-            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-              <select
-                value={addBookId}
-                onChange={e => { setAddBookId(e.target.value); setBookLicenseError(null); }}
-                style={{ ...IS(theme), flex: 1 }}
-              >
-                <option value="">افزودن کتاب به کلاس...</option>
-                {availableBooks.map((b: any) => {
-                  const lic = licenseMap[b.id];
-                  const full = lic && lic.purchased > 0 && lic.remaining <= 0;
-                  return (
-                    <option key={b.id} value={b.id}>
-                      {b.title}{full ? " 🔴 (تکمیل)" : lic?.purchased > 0 ? ` ✅ (${lic.remaining} باقی)` : ""}
-                    </option>
-                  );
-                })}
-              </select>
-              <button
-                onClick={() => addBookId && addBookMut.mutate(parseInt(addBookId))}
-                disabled={!addBookId || addBookMut.isPending}
-                style={{ padding: "10px 14px", background: `linear-gradient(135deg,${theme.primary},${theme.light})`, border: "none", borderRadius: 10, color: "white", fontFamily: "Vazirmatn, sans-serif", fontWeight: 700, fontSize: 13, cursor: "pointer", flexShrink: 0, opacity: !addBookId ? 0.5 : 1 }}
-              >
-                <Plus size={15} />
-              </button>
+            {/* Add book form */}
+            <div style={{ background: `${theme.primary}07`, border: `1px dashed ${theme.border}`, borderRadius: 12, padding: 14, marginBottom: 14 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: theme.text, marginBottom: 10, display: "flex", alignItems: "center", gap: 5 }}>
+                <BookOpen size={13} color={theme.primary} /> اضافه کردن کتاب به کلاس
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <select
+                  value={addBookId}
+                  onChange={e => { setAddBookId(e.target.value); setBookLicenseError(null); }}
+                  style={IS(theme)}
+                >
+                  <option value="">انتخاب کتاب...</option>
+                  {availableBooks.map((b: any) => {
+                    const lic = licenseMap[b.id];
+                    const full = lic && lic.purchased > 0 && lic.remaining <= 0;
+                    return (
+                      <option key={b.id} value={b.id}>
+                        {b.title}{full ? " 🔴 (تکمیل)" : lic?.purchased > 0 ? ` ✅ (${lic.remaining} باقی)` : ""}
+                      </option>
+                    );
+                  })}
+                </select>
+                <button
+                  onClick={() => {
+                    if (!addBookId) { showToast("یک کتاب انتخاب کنید", "error"); return; }
+                    addBookMut.mutate(parseInt(addBookId));
+                  }}
+                  disabled={!addBookId || addBookMut.isPending}
+                  style={{
+                    padding: "11px 0",
+                    background: !addBookId ? "rgba(0,0,0,0.08)" : `linear-gradient(135deg,${theme.primary},${theme.light})`,
+                    border: "none", borderRadius: 10, color: !addBookId ? theme.text2 : "white",
+                    fontFamily: "Vazirmatn, sans-serif", fontWeight: 700, fontSize: 14,
+                    cursor: !addBookId ? "not-allowed" : "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                    boxShadow: !addBookId ? "none" : `0 4px 14px ${theme.primary}44`,
+                    transition: "all 0.2s",
+                  }}
+                >
+                  <Plus size={15} />
+                  {addBookMut.isPending ? "در حال افزودن..." : "افزودن کتاب به کلاس"}
+                </button>
+              </div>
             </div>
 
             {/* Inline license preview for selected book */}
