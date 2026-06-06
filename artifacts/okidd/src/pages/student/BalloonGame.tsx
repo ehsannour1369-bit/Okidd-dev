@@ -87,15 +87,22 @@ export default function BalloonGame({ studentId, onBack }: Props) {
 
   const startGame = useCallback(() => {
     const shuffled = [...ALL_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, BALLOON_COUNT);
-    const bs: BalloonState[] = shuffled.map((q, i) => ({
-      id: i,
-      question: q,
-      color: COLORS[i % COLORS.length],
-      x: 4 + ((i * 19 + Math.floor(Math.random() * 12)) % 74),
-      dur: 18 + Math.floor(Math.random() * 8),
-      delay: -(i * 1.8 + Math.random() * 2),
-      status: "floating",
-    }));
+    const bs: BalloonState[] = shuffled.map((q, i) => {
+      const dur = 14 + Math.floor(Math.random() * 6); // 14–19s per balloon
+      // First 5: already mid-flight; rest: staggered every ~5s throughout game
+      const delay = i < 5
+        ? -(2 + Math.random() * (dur * 0.55))   // already in progress, max 55% into anim
+        : (i - 5) * 5 + Math.random() * 3;      // 0s … ~55s — appear during game
+      return {
+        id: i,
+        question: q,
+        color: COLORS[i % COLORS.length],
+        x: 4 + ((i * 19 + Math.floor(Math.random() * 12)) % 74),
+        dur,
+        delay,
+        status: "floating" as const,
+      };
+    });
     setBalloons(bs);
     scoreRef.current = 0;
     correctRef.current = 0;
