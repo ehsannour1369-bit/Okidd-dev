@@ -176,13 +176,10 @@ export default function LessonPlayer() {
   /* همیشه آخرین نسخه advanceContent رو در ref نگه می‌دارد */
   useEffect(() => { advanceContentRef.current = advanceContent; });
 
-  /* ── Auto-advance: در حالت قفل، پس از تکمیل محتوا خودکار به بعدی می‌رود ──
-     بازی: هرگز auto-advance ندارد — کاربر باید دکمه «بعدی/تکمیل» را بزند    */
+  /* ── Auto-advance: پس از تکمیل هر محتوا (شامل بازی) خودکار به بعدی می‌رود ── */
   useEffect(() => {
     if (freeMode) return;
     if (!contentCompleted) return;
-    const isGame = currentContent?.type === "game";
-    if (isGame) return; /* بازی فقط با دکمه دستی جلو می‌رود */
     const timer = setTimeout(() => advanceContentRef.current(), 2000);
     return () => clearTimeout(timer);
   }, [contentCompleted, freeMode, currentContent?.type]);
