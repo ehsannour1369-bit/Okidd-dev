@@ -239,7 +239,7 @@ export default function StudentDashboard() {
   }
 
   return (
-    <div style={{ height: "100dvh", background: isGirl ? "linear-gradient(160deg,#fce4f6 0%,#f3e8ff 45%,#fef3fb 100%)" : "linear-gradient(160deg,#e0f0ff 0%,#ede8ff 45%,#eafff3 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", position: "relative", overflow: "hidden" }}>
+    <div style={{ height: "100dvh", background: isGirl ? "linear-gradient(160deg,#fdf4f9 0%,#f8f0ff 50%,#fdf9ff 100%)" : "linear-gradient(160deg,#f5f8ff 0%,#f2f0ff 50%,#f4fbf8 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", position: "relative", overflow: "hidden" }}>
 
       {/* Animated background blobs */}
       <div className="blob b1" />
@@ -306,9 +306,9 @@ export default function StudentDashboard() {
                 className="play-btn-kid"
                 style={{ ...cardAnim('up', 0), ...kidCard(
                   isGirl
-                    ? "linear-gradient(135deg,#f472b6,#e879f9,#c026d3)"
-                    : "linear-gradient(135deg,#818cf8,#6366f1,#4f46e5)",
-                  { padding: "0", height: 118, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: isGirl ? "0 10px 40px #e879f955, 0 0 0 6px #f472b618" : "0 10px 40px #6366f155, 0 0 0 6px #818cf818" }
+                    ? "linear-gradient(135deg,#f5c6e7,#e8b4f8,#d8a8ee)"
+                    : "linear-gradient(135deg,#c4cef8,#b0bcf5,#9daef0)",
+                  { padding: "0", height: 114, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: isGirl ? "0 8px 28px #e8b4f840" : "0 8px 28px #b0bcf540", border: isGirl ? "1.5px solid #f0d0f0" : "1.5px solid #c8d4f8" }
                 )}}
                 onClick={() => {
                   if (enrolledBooks.length === 0) { setScreen("books"); return; }
@@ -316,16 +316,14 @@ export default function StudentDashboard() {
                   setBookPickerOpen(true);
                 }}
               >
-                {/* Shine sweep */}
-                <div style={{ position: "absolute", top: 0, left: "-60%", width: "40%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent)", transform: "skewX(-18deg)", pointerEvents: "none", animation: "shine-sweep 2.8s ease-in-out infinite" }} />
+                <div style={{ position: "absolute", top: 0, left: "-60%", width: "40%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.28),transparent)", transform: "skewX(-18deg)", pointerEvents: "none", animation: "shine-sweep 3.2s ease-in-out infinite" }} />
                 <div style={{ display: "flex", alignItems: "center", gap: 20, zIndex: 1, padding: "0 28px" }}>
-                  {/* Glass play icon — bouncing */}
-                  <div className="rocket-bounce" style={{ width: 72, height: 72, borderRadius: 24, background: "rgba(255,255,255,0.22)", backdropFilter: "blur(12px)", border: "2px solid rgba(255,255,255,0.55)", boxShadow: "0 6px 24px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.5)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <Play size={34} color="white" fill="white" style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))" }} />
+                  <div className="rocket-bounce" style={{ width: 68, height: 68, borderRadius: 22, background: "rgba(255,255,255,0.38)", backdropFilter: "blur(12px)", border: "1.5px solid rgba(255,255,255,0.65)", boxShadow: "0 4px 18px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.7)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <Play size={30} color={isGirl ? "#9d4edd" : "#5c6bc0"} fill={isGirl ? "#9d4edd" : "#5c6bc0"} />
                   </div>
-                  <div style={{ color: "white" }}>
-                    <div style={{ fontWeight: 900, fontSize: 24, textShadow: "0 2px 8px rgba(0,0,0,0.18)", letterSpacing: "0.01em" }}>شروع یادگیری!</div>
-                    <div style={{ fontSize: 13, opacity: 0.88, marginTop: 5, fontWeight: 700 }}>
+                  <div>
+                    <div style={{ fontWeight: 900, fontSize: 22, color: isGirl ? "#5a2d82" : "#2d3a8c", letterSpacing: "0.01em" }}>شروع یادگیری</div>
+                    <div style={{ fontSize: 12, color: isGirl ? "#7b4fa6" : "#4a5aaa", marginTop: 5, fontWeight: 600 }}>
                       {enrolledBooks.length > 0
                         ? `${enrolledBooks.length.toLocaleString("fa-IR")} کتاب در دسترس`
                         : "بزن بریم یاد بگیریم"}
@@ -335,77 +333,77 @@ export default function StudentDashboard() {
               </div>
 
               {/* ② 2×2 grid */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 11 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
 
-                {/* کتاب‌هایم — Blue */}
-                <div className="kid-card-hover" style={{ ...kidCard("linear-gradient(145deg,#dbeafe,#bfdbfe)", { padding: "22px 14px 18px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", boxShadow: "0 6px 28px #3b82f630, 0 0 0 3px #bfdbfe70" }), ...cardAnim('right', 0.15) }}
+                {/* کتاب‌هایم — Sky */}
+                <div className="kid-card-hover" style={{ ...kidCard("linear-gradient(145deg,#eef6ff,#deeeff)", { padding: "22px 14px 18px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", boxShadow: "0 4px 18px #93c5fd25", border: "1.5px solid #c8e4fb" }), ...cardAnim('right', 0.15) }}
                   onClick={() => navigate("/student/books")}>
-                  <div className="icon-float" style={{ width: 60, height: 60, borderRadius: 20, background: "rgba(255,255,255,0.52)", backdropFilter: "blur(14px)", border: "2px solid rgba(255,255,255,0.75)", boxShadow: "0 4px 18px #3b82f640, inset 0 1px 0 rgba(255,255,255,0.8)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12, animation: "float-gentle 3s ease-in-out infinite" }}>
-                    <BookOpen size={28} color="#1d4ed8" strokeWidth={2.2} />
+                  <div style={{ width: 58, height: 58, borderRadius: 19, background: "rgba(255,255,255,0.62)", backdropFilter: "blur(14px)", border: "1.5px solid rgba(255,255,255,0.82)", boxShadow: "0 3px 14px #93c5fd30, inset 0 1px 0 white", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 11, animation: "float-gentle 3s ease-in-out infinite" }}>
+                    <BookOpen size={26} color="#5b9bd5" strokeWidth={2} />
                   </div>
-                  <div style={{ fontWeight: 900, fontSize: 15, color: "#1e3a8a" }}>کتاب‌هایم</div>
-                  <div style={{ fontSize: 12, color: "#2563eb", marginTop: 5, fontWeight: 700 }}>
+                  <div style={{ fontWeight: 800, fontSize: 14, color: "#2d6aa0" }}>کتاب‌هایم</div>
+                  <div style={{ fontSize: 11, color: "#6ba3cc", marginTop: 4, fontWeight: 600 }}>
                     {enrolledBooks.length.toLocaleString("fa-IR")} کتاب
                   </div>
                 </div>
 
-                {/* معلم من — Pink */}
-                <div className="kid-card-hover" style={{ ...kidCard("linear-gradient(145deg,#fce7f3,#fbcfe8)", { padding: "22px 14px 18px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", boxShadow: "0 6px 28px #ec489930, 0 0 0 3px #fbcfe870" }), ...cardAnim('left', 0.15) }}
+                {/* معلم من — Rose */}
+                <div className="kid-card-hover" style={{ ...kidCard("linear-gradient(145deg,#fff0f6,#fde0ee)", { padding: "22px 14px 18px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", boxShadow: "0 4px 18px #f9a8d425", border: "1.5px solid #f8c8e0" }), ...cardAnim('left', 0.15) }}
                   onClick={() => navigate("/student/teacher")}>
-                  <div className="icon-float" style={{ width: 60, height: 60, borderRadius: 20, background: "rgba(255,255,255,0.52)", backdropFilter: "blur(14px)", border: "2px solid rgba(255,255,255,0.75)", boxShadow: "0 4px 18px #ec489940, inset 0 1px 0 rgba(255,255,255,0.8)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12, animation: "float-gentle 3.4s ease-in-out infinite 0.5s" }}>
-                    <GraduationCap size={28} color="#be185d" strokeWidth={2.2} />
+                  <div style={{ width: 58, height: 58, borderRadius: 19, background: "rgba(255,255,255,0.62)", backdropFilter: "blur(14px)", border: "1.5px solid rgba(255,255,255,0.82)", boxShadow: "0 3px 14px #f9a8d430, inset 0 1px 0 white", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 11, animation: "float-gentle 3.4s ease-in-out infinite 0.5s" }}>
+                    <GraduationCap size={26} color="#d4729a" strokeWidth={2} />
                   </div>
-                  <div style={{ fontWeight: 900, fontSize: 15, color: "#831843" }}>معلم من</div>
-                  <div style={{ fontSize: 12, color: "#be185d", marginTop: 5, fontWeight: 700 }}>کلاس من</div>
+                  <div style={{ fontWeight: 800, fontSize: 14, color: "#a04070" }}>معلم من</div>
+                  <div style={{ fontSize: 11, color: "#cc7aa0", marginTop: 4, fontWeight: 600 }}>کلاس من</div>
                 </div>
 
-                {/* مدرسه من — Orange */}
-                <div className="kid-card-hover" style={{ ...kidCard("linear-gradient(145deg,#ffedd5,#fed7aa)", { padding: "22px 14px 18px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", boxShadow: "0 6px 28px #f9731630, 0 0 0 3px #fed7aa70" }), ...cardAnim('right', 0.28) }}
+                {/* مدرسه من — Peach */}
+                <div className="kid-card-hover" style={{ ...kidCard("linear-gradient(145deg,#fff7ee,#fdecd6)", { padding: "22px 14px 18px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", boxShadow: "0 4px 18px #fdba7425", border: "1.5px solid #f9d8ae" }), ...cardAnim('right', 0.28) }}
                   onClick={() => setScreen("school")}>
-                  <div className="icon-float" style={{ width: 60, height: 60, borderRadius: 20, background: "rgba(255,255,255,0.52)", backdropFilter: "blur(14px)", border: "2px solid rgba(255,255,255,0.75)", boxShadow: "0 4px 18px #f9731640, inset 0 1px 0 rgba(255,255,255,0.8)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12, animation: "float-gentle 3.8s ease-in-out infinite 0.2s" }}>
-                    <Building2 size={28} color="#c2410c" strokeWidth={2.2} />
+                  <div style={{ width: 58, height: 58, borderRadius: 19, background: "rgba(255,255,255,0.62)", backdropFilter: "blur(14px)", border: "1.5px solid rgba(255,255,255,0.82)", boxShadow: "0 3px 14px #fdba7430, inset 0 1px 0 white", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 11, animation: "float-gentle 3.8s ease-in-out infinite 0.2s" }}>
+                    <Building2 size={26} color="#d4834a" strokeWidth={2} />
                   </div>
-                  <div style={{ fontWeight: 900, fontSize: 15, color: "#7c2d12" }}>مدرسه من</div>
-                  <div style={{ fontSize: 11, color: "#c2410c", marginTop: 5, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
+                  <div style={{ fontWeight: 800, fontSize: 14, color: "#9a5530" }}>مدرسه من</div>
+                  <div style={{ fontSize: 11, color: "#c4824a", marginTop: 4, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
                     {schoolInfo?.name ?? "—"}
                   </div>
                 </div>
 
-                {/* رتبه‌ام — Green */}
-                <div className="kid-card-hover" style={{ ...kidCard("linear-gradient(145deg,#dcfce7,#bbf7d0)", { padding: "22px 14px 18px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", boxShadow: "0 6px 28px #22c55e30, 0 0 0 3px #bbf7d070" }), ...cardAnim('left', 0.28) }}
+                {/* رتبه‌ام — Mint */}
+                <div className="kid-card-hover" style={{ ...kidCard("linear-gradient(145deg,#f0fbf4,#d8f5e4)", { padding: "22px 14px 18px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", boxShadow: "0 4px 18px #86efac25", border: "1.5px solid #b8e8cc" }), ...cardAnim('left', 0.28) }}
                   onClick={() => navigate("/student/ranking")}>
-                  <div className="icon-float" style={{ width: 60, height: 60, borderRadius: 20, background: "rgba(255,255,255,0.52)", backdropFilter: "blur(14px)", border: "2px solid rgba(255,255,255,0.75)", boxShadow: "0 4px 18px #22c55e40, inset 0 1px 0 rgba(255,255,255,0.8)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12, animation: "float-gentle 2.9s ease-in-out infinite 0.8s" }}>
-                    <Trophy size={28} color="#15803d" strokeWidth={2.2} />
+                  <div style={{ width: 58, height: 58, borderRadius: 19, background: "rgba(255,255,255,0.62)", backdropFilter: "blur(14px)", border: "1.5px solid rgba(255,255,255,0.82)", boxShadow: "0 3px 14px #86efac30, inset 0 1px 0 white", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 11, animation: "float-gentle 2.9s ease-in-out infinite 0.8s" }}>
+                    <Trophy size={26} color="#4ea87a" strokeWidth={2} />
                   </div>
-                  <div style={{ fontWeight: 900, fontSize: 15, color: "#14532d" }}>رتبه‌ام</div>
-                  <div style={{ fontSize: 12, color: "#16a34a", marginTop: 5, fontWeight: 700 }}>
+                  <div style={{ fontWeight: 800, fontSize: 14, color: "#2d7a52" }}>رتبه‌ام</div>
+                  <div style={{ fontSize: 11, color: "#5aaa7a", marginTop: 4, fontWeight: 600 }}>
                     {displayScore.toLocaleString("fa-IR")} امتیاز
                   </div>
                 </div>
               </div>
 
               {/* ③ اعلانات — full width */}
-              <div className="kid-card-hover" style={{ ...kidCard("linear-gradient(145deg,#f3e8ff,#e9d5ff)", { padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, boxShadow: "0 6px 28px #8b5cf630, 0 0 0 3px #e9d5ff70" }), ...cardAnim('up', 0.44) }}
+              <div className="kid-card-hover" style={{ ...kidCard("linear-gradient(145deg,#f8f0ff,#eedff8)", { padding: "15px 18px", display: "flex", alignItems: "center", gap: 14, boxShadow: "0 4px 18px #c4b5fd25", border: "1.5px solid #dcc8f4" }), ...cardAnim('up', 0.44) }}
                 onClick={() => setNotifOpen(true)}>
-                <div className="bell-glass" style={{ width: 56, height: 56, borderRadius: 18, background: "rgba(255,255,255,0.52)", backdropFilter: "blur(14px)", border: "2px solid rgba(255,255,255,0.75)", boxShadow: "0 4px 18px #8b5cf640, inset 0 1px 0 rgba(255,255,255,0.8)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative" }}>
-                  <Bell size={26} color="#7c3aed" strokeWidth={2.2} style={{ animation: "bell-ring 3s ease-in-out infinite" }} />
+                <div style={{ width: 52, height: 52, borderRadius: 17, background: "rgba(255,255,255,0.62)", backdropFilter: "blur(14px)", border: "1.5px solid rgba(255,255,255,0.82)", boxShadow: "0 3px 14px #c4b5fd30, inset 0 1px 0 white", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative" }}>
+                  <Bell size={24} color="#9070cc" strokeWidth={2} style={{ animation: "bell-ring 3s ease-in-out infinite" }} />
                   {unreadNotifCount > 0 && (
-                    <div style={{ position: "absolute", top: -5, right: -5, width: 18, height: 18, background: "#ef4444", borderRadius: "50%", border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 900, color: "white", animation: "pulse-badge 1.4s ease-in-out infinite" }}>
+                    <div style={{ position: "absolute", top: -4, right: -4, width: 16, height: 16, background: "#e57373", borderRadius: "50%", border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 900, color: "white", animation: "pulse-badge 1.6s ease-in-out infinite" }}>
                       {unreadNotifCount > 9 ? "9+" : unreadNotifCount}
                     </div>
                   )}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 900, fontSize: 16, color: "#3b0764" }}>اعلانات</div>
-                  <div style={{ fontSize: 12, color: "#6d28d9", marginTop: 3, fontWeight: 700 }}>
+                  <div style={{ fontWeight: 800, fontSize: 15, color: "#5a3a8a" }}>اعلانات</div>
+                  <div style={{ fontSize: 11, color: "#8a60bb", marginTop: 3, fontWeight: 600 }}>
                     {unreadNotifCount > 0
                       ? `${unreadNotifCount.toLocaleString("fa-IR")} پیام جدید داری`
                       : "پیام جدیدی نداری"}
                   </div>
                 </div>
                 {unreadNotifCount > 0 && (
-                  <div style={{ width: 36, height: 36, borderRadius: 12, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(8px)", border: "1.5px solid rgba(255,255,255,0.7)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 2px 8px #8b5cf630" }}>
-                    <ChevronRight size={18} color="#7c3aed" />
+                  <div style={{ width: 34, height: 34, borderRadius: 11, background: "rgba(255,255,255,0.55)", border: "1.5px solid rgba(255,255,255,0.75)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <ChevronRight size={16} color="#9070cc" />
                   </div>
                 )}
               </div>
@@ -828,20 +826,20 @@ export default function StudentDashboard() {
         /* ── Blobs ── */
         .blob { position: absolute; border-radius: 50%; pointer-events: none; z-index: 0; }
         .b1 { top: -10%; right: -8%; width: 480px; height: 480px;
-              background: radial-gradient(circle, #93c5fd 0%, #bfdbfe 40%, transparent 70%);
-              filter: blur(55px); animation: fb1 10s ease-in-out infinite; }
+              background: radial-gradient(circle, #c7d9f8 0%, #dde8fb 40%, transparent 70%);
+              filter: blur(65px); animation: fb1 10s ease-in-out infinite; }
         .b2 { bottom: 4%; left: -10%; width: 400px; height: 400px;
-              background: radial-gradient(circle, #fdba74 0%, #fed7aa 40%, transparent 70%);
-              filter: blur(55px); animation: fb2 12s ease-in-out infinite; }
+              background: radial-gradient(circle, #f8d8c4 0%, #fce8da 40%, transparent 70%);
+              filter: blur(65px); animation: fb2 12s ease-in-out infinite; }
         .b3 { top: 35%; left: 18%; width: 340px; height: 340px;
-              background: radial-gradient(circle, #f9a8d4 0%, #fbcfe8 40%, transparent 70%);
-              filter: blur(50px); animation: fb3 14s ease-in-out infinite; }
+              background: radial-gradient(circle, #f4c8de 0%, #f9dce9 40%, transparent 70%);
+              filter: blur(60px); animation: fb3 14s ease-in-out infinite; }
         .b4 { bottom: -8%; right: 16%; width: 320px; height: 320px;
-              background: radial-gradient(circle, #6ee7b7 0%, #a7f3d0 40%, transparent 70%);
-              filter: blur(50px); animation: fb4 11s ease-in-out infinite; }
+              background: radial-gradient(circle, #b8e8d0 0%, #d4f0e2 40%, transparent 70%);
+              filter: blur(60px); animation: fb4 11s ease-in-out infinite; }
         .b5 { top: 55%; right: -5%; width: 260px; height: 260px;
-              background: radial-gradient(circle, #c4b5fd 0%, #ddd6fe 40%, transparent 70%);
-              filter: blur(45px); animation: fb2 15s ease-in-out infinite reverse; }
+              background: radial-gradient(circle, #d8cef8 0%, #e8e2fb 40%, transparent 70%);
+              filter: blur(55px); animation: fb2 15s ease-in-out infinite reverse; }
 
         @keyframes fb1 {
           0%,100%{ transform:translate(0,0) scale(1) }
