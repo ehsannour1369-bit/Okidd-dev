@@ -264,6 +264,8 @@ function OrderForm({ books, schools, initial, onClose, onSaved }: {
   const [items, setItems] = useState<{ bookId: string; quantity: string }[]>(
     initial?.items.map(i => ({ bookId: String(i.bookId), quantity: String(i.quantity) })) ?? [{ bookId: "", quantity: "1" }]
   );
+  const [receiptUrl, setReceiptUrl] = useState(initial?.receiptUrl ?? "");
+  const [uploadingReceipt, setUploadingReceipt] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -276,6 +278,24 @@ function OrderForm({ books, schools, initial, onClose, onSaved }: {
   const discountAmt = Math.round(total * discountNum / 100);
   const final = total - discountAmt;
 
+  async function handleReceiptUpload(file: File) {
+    setUploadingReceipt(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const token = useAuthStore.getState().token;
+      const res = await fetch("/api/content/upload", {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      if (!res.ok) throw new Error("خطا در آپلود");
+      const { url } = await res.json();
+      setReceiptUrl(url);
+    } catch (_) { alert("خطا در آپلود فایل"); }
+    setUploadingReceipt(false);
+  }
+
   async function submit() {
     if (!schoolId) { setError("مدرسه را انتخاب کنید"); return; }
     if (!tracking.trim()) { setError("شماره پیگیری الزامی است"); return; }
@@ -283,7 +303,8 @@ function OrderForm({ books, schools, initial, onClose, onSaved }: {
     if (validItems.length === 0) { setError("حداقل یک کتاب انتخاب کنید"); return; }
     setLoading(true); setError("");
     try {
-      const body = { schoolId: parseInt(schoolId), trackingNumber: tracking.trim(), discount: discountNum, paymentMethod, notes, items: validItems.map(i => ({ bookId: parseInt(i.bookId), quantity: parseInt(i.quantity) })) };
+      const body: Record<string, unknown> = { schoolId: parseInt(schoolId), trackingNumber: tracking.trim(), discount: discountNum, paymentMethod, notes, items: validItems.map(i => ({ bookId: parseInt(i.bookId), quantity: parseInt(i.quantity) })) };
+      if (receiptUrl) body.receiptUrl = receiptUrl;
       if (initial) {
         await api.put(`/book-orders/${initial.id}`, body);
       } else {
@@ -388,11 +409,46 @@ function OrderForm({ books, schools, initial, onClose, onSaved }: {
           </div>
         </div>
 
-        <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "#374151", marginBottom: 16 }}>
+        <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "#374151", marginBottom: 12 }}>
           یادداشت
           <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
             style={{ padding: "8px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13, resize: "vertical" }} />
         </label>
+
+        {/* ── Receipt upload ── */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+            <FileImage size={14} color="#d97706" /> فیش پرداختی (اختیاری)
+          </div>
+          {receiptUrl ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#fffbeb", border: "1.5px solid #fde68a", borderRadius: 10, padding: "10px 12px" }}>
+              <div style={{ width: 52, height: 52, borderRadius: 8, overflow: "hidden", border: "1.5px solid #fde68a", background: "#f8fafc", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                {receiptUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+                  ? <img src={receiptUrl} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  : <FileImage size={22} color="#d97706" />}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <a href={receiptUrl} target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize: 12, color: "#2563eb", fontWeight: 600, textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
+                  <ExternalLink size={12} /> مشاهده فیش
+                </a>
+                <label style={{ fontSize: 12, color: "#64748b", cursor: "pointer", marginTop: 4, display: "block", fontFamily: "Vazirmatn, sans-serif" }}>
+                  {uploadingReceipt ? "در حال آپلود..." : "جایگزینی"}
+                  <input type="file" accept="image/*,.pdf" style={{ display: "none" }} disabled={uploadingReceipt}
+                    onChange={e => { const f = e.target.files?.[0]; if (f) handleReceiptUpload(f); e.target.value = ""; }} />
+                </label>
+              </div>
+              <button onClick={() => setReceiptUrl("")} style={{ background: "none", border: "none", cursor: "pointer", color: "#ef4444", padding: 4 }}><X size={14} /></button>
+            </div>
+          ) : (
+            <label style={{ display: "flex", alignItems: "center", gap: 7, background: uploadingReceipt ? "#f1f5f9" : "#fffbeb", border: "1.5px dashed #f59e0b", borderRadius: 10, padding: "11px 16px", cursor: uploadingReceipt ? "default" : "pointer", fontSize: 13, color: "#d97706", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif" }}>
+              <Upload size={15} />
+              {uploadingReceipt ? "در حال آپلود..." : "آپلود فیش پرداختی"}
+              <input type="file" accept="image/*,.pdf" style={{ display: "none" }} disabled={uploadingReceipt}
+                onChange={e => { const f = e.target.files?.[0]; if (f) handleReceiptUpload(f); e.target.value = ""; }} />
+            </label>
+          )}
+        </div>
 
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
           <button onClick={onClose} style={{ padding: "9px 20px", border: "1.5px solid #e2e8f0", borderRadius: 10, cursor: "pointer", fontFamily: "inherit", background: "#fff", color: "#64748b" }}>انصراف</button>
