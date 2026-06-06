@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { ArrowRight, Trophy, Clock, Star, Play } from "lucide-react";
 
@@ -53,6 +54,7 @@ interface Props {
 }
 
 export default function BalloonGame({ studentId, onBack }: Props) {
+  const qc = useQueryClient();
   const [phase, setPhase] = useState<"ready" | "playing" | "ended">("ready");
   const [balloons, setBalloons] = useState<BalloonState[]>([]);
   const [score, setScore] = useState(0);
@@ -76,9 +78,12 @@ export default function BalloonGame({ studentId, onBack }: Props) {
         gameType: "balloon",
       });
       setSaved(true);
+      qc.invalidateQueries({ queryKey: ["score-breakdown-home"] });
+      qc.invalidateQueries({ queryKey: ["score-breakdown"] });
+      qc.invalidateQueries({ queryKey: ["game-scores"] });
     } catch (_) { /* silent */ }
     setSaving(false);
-  }, [studentId]);
+  }, [studentId, qc]);
 
   const startGame = useCallback(() => {
     const shuffled = [...ALL_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, BALLOON_COUNT);
