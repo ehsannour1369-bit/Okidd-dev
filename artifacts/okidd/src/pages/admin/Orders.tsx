@@ -305,29 +305,29 @@ function OrderForm({ books, schools, initial, onClose, onSaved }: {
         </div>
         {error && <div style={{ background: "#fef2f2", color: "#ef4444", padding: "8px 12px", borderRadius: 8, marginBottom: 12, fontSize: 13 }}>{error}</div>}
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
-          <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "#374151" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
+          <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "#374151", flex: "1 1 160px" }}>
             مدرسه *
             <select value={schoolId} onChange={e => setSchoolId(e.target.value)}
-              style={{ padding: "8px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }}>
+              style={{ padding: "8px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13, width: "100%" }}>
               <option value="">انتخاب کنید</option>
               {schools.map((s: School) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </label>
-          <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "#374151" }}>
+          <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "#374151", flex: "1 1 160px" }}>
             شماره پیگیری *
             <input value={tracking} onChange={e => setTracking(e.target.value)} placeholder="TRK-2024-001"
-              style={{ padding: "8px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }} />
+              style={{ padding: "8px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13, width: "100%", boxSizing: "border-box" }} />
           </label>
-          <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "#374151" }}>
+          <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "#374151", flex: "1 1 120px" }}>
             تخفیف (%)
             <input type="number" min="0" max="100" value={discount} onChange={e => setDiscount(e.target.value)}
-              style={{ padding: "8px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }} />
+              style={{ padding: "8px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13, width: "100%", boxSizing: "border-box" }} />
           </label>
-          <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "#374151" }}>
+          <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "#374151", flex: "1 1 140px" }}>
             روش پرداخت
             <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}
-              style={{ padding: "8px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }}>
+              style={{ padding: "8px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13, width: "100%" }}>
               <option value="bank">انتقال بانکی</option>
               <option value="wallet">کیف پول</option>
               <option value="cash">نقدی</option>
@@ -340,25 +340,33 @@ function OrderForm({ books, schools, initial, onClose, onSaved }: {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
             <span style={{ fontSize: 14, fontWeight: 600, color: "#374151" }}>کتاب‌های سفارش</span>
             <button onClick={() => setItems([...items, { bookId: "", quantity: "1" }])}
-              style={{ display: "flex", alignItems: "center", gap: 4, background: "#fef3c7", color: "#d97706", border: "none", borderRadius: 8, padding: "4px 10px", cursor: "pointer", fontSize: 12, fontFamily: "inherit" }}>
+              style={{ display: "flex", alignItems: "center", gap: 4, background: "#fef3c7", color: "#d97706", border: "none", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 12, fontFamily: "inherit" }}>
               <Plus size={12} /> افزودن کتاب
             </button>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {items.map((item, i) => {
               const b = bookMap[parseInt(item.bookId)];
               const sub = b ? b.price * (parseInt(item.quantity) || 0) : 0;
               return (
-                <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 80px 100px 28px", gap: 8, alignItems: "center" }}>
-                  <select value={item.bookId} onChange={e => setItems(items.map((it, j) => j === i ? { ...it, bookId: e.target.value } : it))}
-                    style={{ padding: "7px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13 }}>
-                    <option value="">انتخاب کتاب</option>
-                    {books.map(b => <option key={b.id} value={b.id}>{b.title} — {fmt(b.price)}</option>)}
-                  </select>
-                  <input type="number" min="1" value={item.quantity} onChange={e => setItems(items.map((it, j) => j === i ? { ...it, quantity: e.target.value } : it))}
-                    style={{ padding: "7px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13, textAlign: "center" }} />
-                  <div style={{ fontSize: 12, color: "#d97706", fontWeight: 600, textAlign: "center" }}>{sub > 0 ? fmt(sub) : "—"}</div>
-                  <button onClick={() => setItems(items.filter((_, j) => j !== i))} style={{ background: "none", border: "none", cursor: "pointer", color: "#ef4444" }}><X size={16} /></button>
+                <div key={i} style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 10, padding: "10px 10px 8px" }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+                    <select value={item.bookId} onChange={e => setItems(items.map((it, j) => j === i ? { ...it, bookId: e.target.value } : it))}
+                      style={{ flex: 1, padding: "7px 10px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13, background: "#fff", minWidth: 0 }}>
+                      <option value="">انتخاب کتاب</option>
+                      {books.map(b => <option key={b.id} value={b.id}>{b.title} — {fmt(b.price)}</option>)}
+                    </select>
+                    <button onClick={() => setItems(items.filter((_, j) => j !== i))}
+                      style={{ flexShrink: 0, width: 32, height: 32, background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, cursor: "pointer", color: "#ef4444", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <X size={15} />
+                    </button>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 12, color: "#64748b" }}>تعداد:</span>
+                    <input type="number" min="1" value={item.quantity} onChange={e => setItems(items.map((it, j) => j === i ? { ...it, quantity: e.target.value } : it))}
+                      style={{ width: 72, padding: "5px 8px", border: "1.5px solid #fde68a", borderRadius: 8, fontFamily: "inherit", fontSize: 13, textAlign: "center", background: "#fff" }} />
+                    {sub > 0 && <span style={{ fontSize: 12, color: "#d97706", fontWeight: 700, marginRight: "auto" }}>{fmt(sub)}</span>}
+                  </div>
                 </div>
               );
             })}
