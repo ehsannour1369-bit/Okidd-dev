@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Letter A Quiz</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Nunito',sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:12px}
+  .card{background:#fff;border-radius:28px;padding:28px 24px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);position:relative;overflow:hidden}
+  .card::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:rgba(255,220,0,.18);border-radius:50%}
+  h1{text-align:center;font-size:clamp(1.4rem,5vw,2rem);color:#5c35b5;margin-bottom:4px}
+  .sub{text-align:center;color:#999;font-size:.9rem;margin-bottom:16px}
+  .timer-wrap{margin-bottom:18px}
+  .timer-bar-bg{background:#eee;border-radius:20px;height:18px;overflow:hidden}
+  .timer-bar{height:100%;border-radius:20px;transition:width .9s linear,background .3s;background:linear-gradient(90deg,#43e97b,#38f9d7)}
+  .timer-label{text-align:right;font-size:.85rem;color:#888;margin-top:4px}
+  .dots{display:flex;justify-content:center;gap:8px;margin-bottom:20px}
+  .dot{width:14px;height:14px;border-radius:50%;background:#e0d7f7;transition:.3s;display:inline-block}
+  .dot.active{background:#7c4dff;transform:scale(1.2)}
+  .dot.done-ok{background:#43e97b}
+  .dot.done-fail{background:#ff6b6b}
+  .q-num{font-size:.8rem;color:#aaa;text-align:center;margin-bottom:6px}
+  .emoji-big{font-size:clamp(3rem,12vw,5rem);text-align:center;margin:8px 0;line-height:1}
+  .question{font-size:clamp(1rem,4vw,1.3rem);text-align:center;color:#333;margin-bottom:20px;font-weight:800}
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
+  .opt{padding:14px 8px;border-radius:16px;border:3px solid #e0d7f7;background:#f8f6ff;font-size:clamp(.9rem,3.5vw,1.1rem);font-weight:800;cursor:pointer;transition:.18s;color:#444;text-align:center;font-family:'Nunito',sans-serif}
+  .opt:hover:not(:disabled){background:#ede7ff;border-color:#7c4dff;transform:scale(1.04)}
+  .opt.correct{background:#d4f7e0;border-color:#43e97b;color:#1a7a3c;animation:pop .3s}
+  .opt.wrong{background:#ffe0e0;border-color:#ff6b6b;color:#c0392b;animation:shake .3s}
+  .opt.reveal{background:#d4f7e0;border-color:#43e97b}
+  .opt:disabled{cursor:default}
+  @keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .feedback{text-align:center;font-size:1.1rem;font-weight:800;min-height:28px;margin-bottom:6px}
+  #result-screen{display:none;text-align:center;padding:10px 0}
+  #result-screen h2{font-size:clamp(1.3rem,5vw,2rem);color:#5c35b5;margin-bottom:8px}
+  .stars{font-size:clamp(2rem,8vw,3.5rem);margin:10px 0}
+  .score-txt{color:#555;font-size:1.1rem;margin-bottom:16px}
+  .badge{display:inline-block;border-radius:12px;padding:8px 18px;font-size:.9rem;font-weight:800;margin-bottom:8px}
+  .badge.ok{background:#e8f5e9;color:#2e7d32}
+  .badge.err{background:#fdecea;color:#c62828}
+  #history-screen{display:none}
+  #history-screen h2{text-align:center;color:#5c35b5;font-size:1.4rem;margin-bottom:16px}
+  .hist-table{width:100%;border-collapse:collapse;font-size:.92rem}
+  .hist-table th{background:#ede7ff;color:#5c35b5;padding:9px 8px;text-align:center}
+  .hist-table td{padding:9px 8px;text-align:center;border-bottom:1px solid #f0eaff;color:#444}
+  .btn{background:linear-gradient(135deg,#7c4dff,#667eea);color:#fff;border:none;border-radius:20px;padding:12px 32px;font-size:1rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:.2s;margin:4px}
+  .btn:hover{transform:scale(1.04)}
+  .empty{text-align:center;color:#bbb;padding:30px 0}
+  .floaty{position:absolute;pointer-events:none;font-size:1.6rem;animation:floatUp 1s forwards}
+  @keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-80px) scale(1.4)}}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+
+  <div id="quiz-screen">
+    <h1>🔤 Letter A Quiz!</h1>
+    <p class="sub" id="hello-name"></p>
+    <div class="timer-wrap">
+      <div class="timer-bar-bg"><div class="timer-bar" id="tbar" style="width:100%"></div></div>
+      <div class="timer-label" id="tlabel">60s</div>
+    </div>
+    <div class="dots" id="dots"></div>
+    <div class="q-num" id="qnum"></div>
+    <div class="emoji-big" id="qemoji"></div>
+    <div class="question" id="qtext"></div>
+    <div class="options" id="opts"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div id="result-screen">
+    <div class="stars" id="stars-disp"></div>
+    <h2 id="res-title"></h2>
+    <p class="score-txt" id="res-score"></p>
+    <div id="save-badge"></div>
+    <br>
+    <button class="btn" onclick="loadHistory()">📊 View My History</button>
+  </div>
+
+  <div id="history-screen">
+    <h2>📊 My Results</h2>
+    <div id="hist-content"></div>
+    <div style="text-align:center;margin-top:16px">
+      <button class="btn" onclick="show('result-screen')">← Back</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// =============================================
+//  ⚙️  CONFIG — اینا رو با مقادیر پروژه‌ات عوض کن
+// =============================================
+const CONFIG = {
+  API_BASE:       "https://YOUR_REPLIT_URL",   // آدرس بک‌اندت مثلاً https://myapp.replit.app
+  SAVE_ENDPOINT:  "/api/quiz/result",           // POST — ذخیره نتیجه
+  HISTORY_ENDPOINT: "/api/quiz/history",        // GET  — تاریخچه کاربر
+
+  // توکن رو از کجا بخونه؟
+  // اگه توی localStorage ذخیره می‌کنی، کلیدش رو بنویس:
+  TOKEN_KEY: "auth_token",
+  // اگه از جای دیگه‌ای میاد (مثلاً پارامتر URL)، تابع getToken رو پایین تغییر بده
+};
+
+function getToken() {
+  // گزینه ۱: از localStorage (پیش‌فرض)
+  return localStorage.getItem(CONFIG.TOKEN_KEY);
+
+  // گزینه ۲: از URL param  (?token=xxx)
+  // return new URLSearchParams(location.search).get("token");
+
+  // گزینه ۳: مستقیم بنویس (فقط برای تست)
+  // return "my_hardcoded_token";
+}
+
+function getUserName() {
+  // اگه نام کاربر توی localStorage هست:
+  try { return JSON.parse(localStorage.getItem("auth_user") || "{}").name || "Friend"; }
+  catch { return "Friend"; }
+}
+// =============================================
+
+const Qs = [
+  {emoji:"🍎", q:"What starts with the letter A?",        opts:["Apple","Banana","Cat","Dog"],         ans:0},
+  {emoji:"🐜", q:"This tiny bug starts with A!",          opts:["Bear","Frog","Ant","Fish"],            ans:2},
+  {emoji:"✈️", q:"You fly in this — it starts with A!",  opts:["Train","Airplane","Boat","Bus"],       ans:1},
+  {emoji:"🥑", q:"This green yummy food starts with A!",  opts:["Orange","Mango","Avocado","Lemon"],    ans:2},
+  {emoji:"🐊", q:"This big reptile starts with A!",       opts:["Lion","Alligator","Tiger","Wolf"],     ans:1},
+];
+
+let cur=0, score=0, timer=60, interval=null, answered=false;
+
+// ---- init ----
+document.getElementById('hello-name').textContent = `Good luck, ${getUserName()}! 🌟`;
+buildDots(); showQ();
+interval = setInterval(tick, 1000);
+
+function buildDots(){
+  const d = document.getElementById('dots'); d.innerHTML = '';
+  Qs.forEach((_,i) => {
+    const s = document.createElement('span');
+    s.className = 'dot' + (i===0?' active':''); s.id = 'dot'+i;
+    d.appendChild(s);
+  });
+}
+
+function showQ(){
+  answered = false;
+  const q = Qs[cur];
+  document.getElementById('qnum').textContent = `Question ${cur+1} of ${Qs.length}`;
+  document.getElementById('qemoji').textContent = q.emoji;
+  document.getElementById('qtext').textContent = q.q;
+  document.getElementById('feedback').textContent = '';
+  const op = document.getElementById('opts'); op.innerHTML = '';
+  q.opts.forEach((o,i) => {
+    const b = document.createElement('button');
+    b.className='opt'; b.textContent=o; b.onclick=()=>pick(i,b);
+    op.appendChild(b);
+  });
+  Qs.forEach((_,i) => { if(i===cur) document.getElementById('dot'+i).className='dot active'; });
+}
+
+function pick(i, btn){
+  if(answered) return;
+  answered = true;
+  const q = Qs[cur];
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  if(i===q.ans){
+    btn.classList.add('correct'); score++;
+    document.getElementById('feedback').textContent='⭐ Great job!';
+    document.getElementById('dot'+cur).className='dot done-ok';
+    spawnStars();
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt')[q.ans].classList.add('reveal');
+    document.getElementById('feedback').textContent='❌ Not quite!';
+    document.getElementById('dot'+cur).className='dot done-fail';
+  }
+  setTimeout(()=>{ cur++; cur<Qs.length ? showQ() : endQuiz(); }, 1100);
+}
+
+function tick(){
+  timer--;
+  const pct = timer/60*100;
+  document.getElementById('tbar').style.width = pct+'%';
+  document.getElementById('tlabel').textContent = timer+'s';
+  if(timer<=20) document.getElementById('tbar').style.background='linear-gradient(90deg,#f7971e,#ffd200)';
+  if(timer<=10) document.getElementById('tbar').style.background='linear-gradient(90deg,#ff6b6b,#ee0979)';
+  if(timer<=0){ clearInterval(interval); endQuiz(); }
+}
+
+async function endQuiz(){
+  clearInterval(interval);
+  const pct = score/Qs.length;
+  const stars = pct===1?'🌟🌟🌟': pct>=.8?'🌟🌟': pct>=.6?'⭐⭐':'⭐';
+  const title = pct===1?'Perfect Score! 🎉': pct>=.6?'Great job! 👍':'Keep trying! 💪';
+
+  document.getElementById('stars-disp').textContent = stars;
+  document.getElementById('res-title').textContent  = title;
+  document.getElementById('res-score').textContent  = `${getUserName()} got ${score} out of ${Qs.length} correct!`;
+  document.getElementById('save-badge').innerHTML   = '<span class="badge ok">⏳ Saving result…</span>';
+  show('result-screen');
+
+  // ---- ارسال امتیاز به اپ parent ----
+  const finalScore = Math.round((score / Qs.length) * 100);
+  window.parent.postMessage({ type: 'game-score', score: finalScore }, '*');
+
+  // ---- ارسال به API ----
+  try {
+    const res = await fetch(CONFIG.API_BASE + CONFIG.SAVE_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`
+      },
+      body: JSON.stringify({ score, total: Qs.length, stars })
+    });
+    if(res.ok){
+      document.getElementById('save-badge').innerHTML = '<span class="badge ok">✅ Result saved!</span>';
+    } else {
+      const err = await res.json().catch(()=>({}));
+      document.getElementById('save-badge').innerHTML = `<span class="badge err">⚠️ Save failed: ${err.error||res.status}</span>`;
+    }
+  } catch(e){
+    document.getElementById('save-badge').innerHTML = '<span class="badge err">⚠️ Could not reach server</span>';
+  }
+}
+
+async function loadHistory(){
+  document.getElementById('hist-content').innerHTML = '<p class="empty">Loading…</p>';
+  show('history-screen');
+  try {
+    const res = await fetch(CONFIG.API_BASE + CONFIG.HISTORY_ENDPOINT, {
+      headers: { 'Authorization': `Bearer ${getToken()}` }
+    });
+    if(!res.ok) throw new Error(res.status);
+    const rows = await res.json();
+    if(!rows.length){ document.getElementById('hist-content').innerHTML='<p class="empty">No results yet! 🌱</p>'; return; }
+    let html = '<table class="hist-table"><thead><tr><th>Score</th><th>Stars</th><th>Date</th></tr></thead><tbody>';
+    rows.forEach(r => {
+      const d = new Date(r.createdAt).toLocaleDateString('fa-IR');
+      html += `<tr><td>${r.score}/${r.total}</td><td>${r.stars}</td><td>${d}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    document.getElementById('hist-content').innerHTML = html;
+  } catch(e){
+    document.getElementById('hist-content').innerHTML = '<p class="empty">⚠️ Could not load history</p>';
+  }
+}
+
+function show(id){
+  ['quiz-screen','result-screen','history-screen'].forEach(s=>{
+    document.getElementById(s).style.display = s===id?'block':'none';
+  });
+}
+
+function spawnStars(){
+  ['⭐','✨','🌟'].forEach((s,i)=>{
+    const el=document.createElement('span');
+    el.className='floaty'; el.textContent=s;
+    el.style.left=(30+i*25)+'%'; el.style.top='50%';
+    document.getElementById('card').appendChild(el);
+    setTimeout(()=>el.remove(),1000);
+  });
+}
+</script>
+</body>
+</html>

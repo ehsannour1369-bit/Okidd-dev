@@ -13,6 +13,7 @@ export const bookOrdersTable = pgTable("book_orders", {
   status: varchar("status", { length: 20 }).notNull().default("pending"),
   paymentMethod: varchar("payment_method", { length: 50 }),
   notes: text("notes"),
+  receiptUrl: text("receipt_url"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 }, (t) => [unique("book_orders_tracking_number_unique").on(t.trackingNumber)]);

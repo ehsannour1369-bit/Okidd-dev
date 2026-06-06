@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
+import { useAuthStore } from "../../store/auth";
 import PageTopBar from "../../components/PageTopBar";
-import { ShoppingCart, Plus, Trash2, ChevronDown, ChevronUp, CheckCircle, XCircle, Search, X } from "lucide-react";
+import { ShoppingCart, Plus, Trash2, ChevronDown, ChevronUp, CheckCircle, XCircle, Search, X, Upload, ExternalLink, FileImage } from "lucide-react";
 
 const STATUS_LABEL: Record<string, string> = { pending: "در انتظار پرداخت", paid: "پرداخت‌شده", cancelled: "لغوشده", draft: "پیش‌نویس" };
 const STATUS_COLOR: Record<string, string> = { pending: "#f59e0b", paid: "#10b981", cancelled: "#ef4444", draft: "#94a3b8" };
@@ -12,7 +13,7 @@ const P_METHOD: Record<string, string> = { bank: "انتقال بانکی", wall
 function fmt(n: number) { return n.toLocaleString("fa-IR") + " ت"; }
 
 interface Item { bookId: number; quantity: number; unitPrice?: number; subtotal?: number; bookTitle?: string; }
-interface Order { id: number; schoolId: number; trackingNumber: string; discount: number; discountAmount: number; totalAmount: number; finalAmount: number; status: string; paymentMethod?: string; notes?: string; createdAt: string; items: Item[]; }
+interface Order { id: number; schoolId: number; trackingNumber: string; discount: number; discountAmount: number; totalAmount: number; finalAmount: number; status: string; paymentMethod?: string; notes?: string; receiptUrl?: string; createdAt: string; items: Item[]; }
 interface School { id: number; name: string; }
 interface Book { id: number; title: string; price: number; }
 
@@ -24,6 +25,8 @@ export default function AdminOrders() {
   const [expanded, setExpanded] = useState<number | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editOrder, setEditOrder] = useState<Order | null>(null);
+  const [uploadingId, setUploadingId] = useState<number | null>(null);
+  const [previewReceipt, setPreviewReceipt] = useState<string | null>(null);
 
   const { data: orders = [] } = useQuery<Order[]>({ queryKey: ["book-orders"], queryFn: () => api.get("/book-orders") });
   const { data: schools = [] } = useQuery<School[]>({ queryKey: ["schools"], queryFn: () => api.get("/schools") });
@@ -39,6 +42,25 @@ export default function AdminOrders() {
     mutationFn: ({ id, status }: { id: number; status: string }) => api.put(`/book-orders/${id}`, { status }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["book-orders"] }),
   });
+
+  async function handleReceiptUpload(orderId: number, file: File) {
+    setUploadingId(orderId);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const token = useAuthStore.getState().token;
+      const res = await fetch("/api/content/upload", {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      if (!res.ok) throw new Error("خطا در آپلود");
+      const { url } = await res.json();
+      await api.put(`/book-orders/${orderId}`, { receiptUrl: url });
+      qc.invalidateQueries({ queryKey: ["book-orders"] });
+    } catch (_) { alert("خطا در آپلود فایل"); }
+    setUploadingId(null);
+  }
 
   const filtered = orders.filter(o => {
     const matchSearch = !search || o.trackingNumber.includes(search) || (schoolMap[o.schoolId] ?? "").includes(search);
@@ -92,6 +114,11 @@ export default function AdminOrders() {
                     <span style={{ fontSize: 12, fontWeight: 600, color: STATUS_COLOR[order.status], background: STATUS_BG[order.status], borderRadius: 6, padding: "2px 8px", border: `1px solid ${STATUS_COLOR[order.status]}40` }}>
                       {STATUS_LABEL[order.status] ?? order.status}
                     </span>
+                    {order.receiptUrl && (
+                      <span style={{ fontSize: 11, color: "#10b981", background: "#f0fdf4", borderRadius: 6, padding: "2px 8px", border: "1px solid #10b98140", display: "flex", alignItems: "center", gap: 3 }}>
+                        <FileImage size={11} /> فیش آپلود شده
+                      </span>
+                    )}
                   </div>
                   <div style={{ marginTop: 4, display: "flex", gap: 12, fontSize: 13, color: "#64748b", flexWrap: "wrap" }}>
                     <span>{order.items.length} کتاب</span>
@@ -123,8 +150,10 @@ export default function AdminOrders() {
                   </button>
                 </div>
               </div>
+
               {expanded === order.id && (
-                <div style={{ borderTop: "1px solid #fef3c7", background: "#fef9c3", padding: "12px 16px" }}>
+                <div style={{ borderTop: "1px solid #fef3c7", background: "#fef9c3", padding: "12px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
+                  {/* Items */}
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     {order.items.map((item, i) => (
                       <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", background: "#fff", borderRadius: 8, border: "1px solid #fde68a", fontSize: 13 }}>
@@ -137,14 +166,81 @@ export default function AdminOrders() {
                       </div>
                     ))}
                   </div>
-                  {order.notes && <div style={{ marginTop: 8, fontSize: 12, color: "#d97706", background: "#fef3c7", padding: "6px 10px", borderRadius: 6 }}>یادداشت: {order.notes}</div>}
-                  {order.paymentMethod && <div style={{ marginTop: 6, fontSize: 12, color: "#64748b" }}>روش پرداخت: {P_METHOD[order.paymentMethod] ?? order.paymentMethod}</div>}
+
+                  {order.notes && <div style={{ fontSize: 12, color: "#d97706", background: "#fef3c7", padding: "6px 10px", borderRadius: 6 }}>یادداشت: {order.notes}</div>}
+                  {order.paymentMethod && <div style={{ fontSize: 12, color: "#64748b" }}>روش پرداخت: {P_METHOD[order.paymentMethod] ?? order.paymentMethod}</div>}
+
+                  {/* ── Receipt upload section ── */}
+                  <div style={{ background: "#fff", borderRadius: 10, border: "1.5px solid #fde68a", padding: "12px 14px" }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#78350f", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+                      <FileImage size={15} color="#d97706" />
+                      فیش پرداختی
+                    </div>
+
+                    {order.receiptUrl ? (
+                      <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                        {/* Thumbnail */}
+                        <div onClick={() => setPreviewReceipt(order.receiptUrl!)}
+                          style={{ width: 72, height: 72, borderRadius: 10, overflow: "hidden", border: "2px solid #fde68a", cursor: "pointer", flexShrink: 0, background: "#f8fafc", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          {order.receiptUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                            <img src={order.receiptUrl} alt="فیش" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          ) : (
+                            <FileImage size={28} color="#d97706" />
+                          )}
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          <a href={order.receiptUrl} target="_blank" rel="noopener noreferrer"
+                            style={{ display: "flex", alignItems: "center", gap: 5, color: "#2563eb", fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+                            <ExternalLink size={13} /> مشاهده / دانلود فیش
+                          </a>
+                          <label style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "#64748b", cursor: "pointer", fontFamily: "Vazirmatn, sans-serif" }}>
+                            <Upload size={12} />
+                            {uploadingId === order.id ? "در حال آپلود..." : "جایگزینی فیش"}
+                            <input type="file" accept="image/*,.pdf" style={{ display: "none" }} disabled={uploadingId === order.id}
+                              onChange={e => { const f = e.target.files?.[0]; if (f) handleReceiptUpload(order.id, f); e.target.value = ""; }} />
+                          </label>
+                        </div>
+                      </div>
+                    ) : (
+                      <label style={{ display: "inline-flex", alignItems: "center", gap: 7, background: uploadingId === order.id ? "#f1f5f9" : "#fffbeb", border: "1.5px dashed #f59e0b", borderRadius: 10, padding: "10px 16px", cursor: uploadingId === order.id ? "default" : "pointer", fontSize: 13, color: "#d97706", fontWeight: 600, fontFamily: "Vazirmatn, sans-serif" }}>
+                        <Upload size={16} />
+                        {uploadingId === order.id ? "در حال آپلود..." : "آپلود فیش پرداختی"}
+                        <input type="file" accept="image/*,.pdf" style={{ display: "none" }} disabled={uploadingId === order.id}
+                          onChange={e => { const f = e.target.files?.[0]; if (f) handleReceiptUpload(order.id, f); e.target.value = ""; }} />
+                      </label>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
           ))}
         </div>
       </div>
+
+      {/* Receipt full preview modal */}
+      {previewReceipt && (
+        <div onClick={() => setPreviewReceipt(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: 16, overflow: "hidden", maxWidth: 680, width: "100%", maxHeight: "85vh", display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderBottom: "1px solid #f1f5f9" }}>
+              <span style={{ fontWeight: 700, fontSize: 15, color: "#78350f", fontFamily: "Vazirmatn, sans-serif" }}>فیش پرداختی</span>
+              <div style={{ display: "flex", gap: 8 }}>
+                <a href={previewReceipt} target="_blank" rel="noopener noreferrer"
+                  style={{ display: "flex", alignItems: "center", gap: 5, background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe", borderRadius: 8, padding: "5px 12px", fontSize: 12, fontWeight: 600, textDecoration: "none", fontFamily: "Vazirmatn, sans-serif" }}>
+                  <ExternalLink size={13} /> باز کردن در تب جدید
+                </a>
+                <button onClick={() => setPreviewReceipt(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#64748b", padding: 4 }}><X size={20} /></button>
+              </div>
+            </div>
+            <div style={{ flex: 1, overflow: "auto", display: "flex", alignItems: "center", justifyContent: "center", padding: 16, background: "#f8fafc" }}>
+              {previewReceipt.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                <img src={previewReceipt} alt="فیش پرداختی" style={{ maxWidth: "100%", maxHeight: "70vh", borderRadius: 8, objectFit: "contain" }} />
+              ) : (
+                <iframe src={previewReceipt} style={{ width: "100%", height: "70vh", border: "none", borderRadius: 8 }} title="فیش پرداختی" />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {showForm && (
         <OrderForm books={books} schools={schools} initial={editOrder}
