@@ -9,11 +9,12 @@ import {
   Bell, MessageCircle,
   BookOpen, GraduationCap, Trophy, Play, Video,
   Building2, MapPin, Phone, Users, X, LogOut,
-  Camera, Eye, EyeOff, User, Sparkles,
+  Camera, Eye, EyeOff, User, Sparkles, Gamepad2,
 } from "lucide-react";
 import NotificationThread from "../../components/NotificationThread";
+import BalloonGame from "./BalloonGame";
 
-type Screen = "home" | "books" | "lesson" | "school";
+type Screen = "home" | "books" | "lesson" | "school" | "game";
 
 const BLUE   = "#3b82f6";
 const ORANGE = "#f97316";
@@ -238,6 +239,10 @@ export default function StudentDashboard() {
     };
   }
 
+  if (screen === "game") {
+    return <BalloonGame studentId={user!.id} onBack={() => setScreen("home")} />;
+  }
+
   return (
     <div style={{ height: "100dvh", background: isGirl ? "linear-gradient(160deg,#fdf4f9 0%,#f8f0ff 50%,#fdf9ff 100%)" : "linear-gradient(160deg,#f5f8ff 0%,#f2f0ff 50%,#f4fbf8 100%)", fontFamily: "Vazirmatn, sans-serif", direction: "rtl", position: "relative", overflow: "hidden" }}>
 
@@ -406,6 +411,21 @@ export default function StudentDashboard() {
                     <ChevronRight size={16} color="#9070cc" />
                   </div>
                 )}
+              </div>
+
+              {/* ④ سرگرمی — full width */}
+              <div className="kid-card-hover" style={{ ...kidCard("linear-gradient(145deg,#edfcf4,#d4f5e8)", { padding: "15px 18px", display: "flex", alignItems: "center", gap: 14, boxShadow: "0 4px 18px #6ee7b725", border: "1.5px solid #b8e8cc" }), ...cardAnim('up', 0.55) }}
+                onClick={() => setScreen("game")}>
+                <div style={{ width: 52, height: 52, borderRadius: 17, background: "rgba(255,255,255,0.62)", backdropFilter: "blur(14px)", border: "1.5px solid rgba(255,255,255,0.82)", boxShadow: "0 3px 14px #6ee7b730, inset 0 1px 0 white", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Gamepad2 size={24} color="#2d9e6a" strokeWidth={2} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 800, fontSize: 15, color: "#1a5c3a" }}>سرگرمی</div>
+                  <div style={{ fontSize: 11, color: "#3aaa70", marginTop: 3, fontWeight: 600 }}>بازی بادکنک — سوال و جواب</div>
+                </div>
+                <div style={{ width: 34, height: 34, borderRadius: 11, background: "rgba(255,255,255,0.55)", border: "1.5px solid rgba(255,255,255,0.75)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <ChevronRight size={16} color="#2d9e6a" />
+                </div>
               </div>
 
             </div>
