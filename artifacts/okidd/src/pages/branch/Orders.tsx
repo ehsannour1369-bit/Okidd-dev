@@ -29,8 +29,7 @@ function printInvoice(order: Order) {
       <td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;text-align:left;color:#0d9488;font-weight:700">${fmt(i.subtotal)}</td>
     </tr>`).join("");
   const html = `<!DOCTYPE html><html dir="rtl" lang="fa"><head><meta charset="UTF-8"><title>فاکتور ${order.trackingNumber}</title>
-  <style>@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800&display=swap');
-  *{box-sizing:border-box;margin:0;padding:0}body{font-family:'Vazirmatn',sans-serif;direction:rtl;background:#fff;color:#111;padding:40px}
+  <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Vazirmatn','Tahoma','Arial',sans-serif;direction:rtl;background:#fff;color:#111;padding:40px}
   .header{display:flex;justify-content:space-between;margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid #0d9488}
   .logo{font-size:26px;font-weight:800;color:#0d9488}.logo span{display:block;font-size:13px;font-weight:400;color:#6b7280;margin-top:4px}
   .meta{text-align:left;font-size:13px}.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;margin-top:8px}

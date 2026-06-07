@@ -1,11 +1,30 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { db, usersTable, branchManagersTable } from "@workspace/db";
-import { eq, and, or } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 const router = Router();
 
-// Username can be email or phone number
+function getJwtSecret(): string {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) throw new Error("SESSION_SECRET env var is required");
+  return secret;
+}
+
+function signToken(payload: { id: number; email: string; role: string }): string {
+  return jwt.sign(
+    { sub: String(payload.id), email: payload.email, role: payload.role },
+    getJwtSecret(),
+    { expiresIn: "7d" }
+  );
+}
+
+export function verifyToken(token: string): { id: number; email: string; role: string } {
+  const decoded = jwt.verify(token, getJwtSecret()) as { sub: string; email: string; role: string };
+  return { id: parseInt(decoded.sub), email: decoded.email, role: decoded.role };
+}
+
 function looksLikePhone(input: string) {
   return /^\d{10,11}$/.test(input.replace(/^0/, ""));
 }
@@ -17,7 +36,6 @@ router.post("/auth/login", async (req, res) => {
     return;
   }
 
-  // Try email first, then phone
   let users = await db.select().from(usersTable).where(eq(usersTable.email, username)).limit(1);
   let user = users[0];
 
@@ -39,7 +57,6 @@ router.post("/auth/login", async (req, res) => {
 
   await db.update(usersTable).set({ lastLoginAt: new Date() } as any).where(eq(usersTable.id, user.id));
 
-  // For branch_manager, include their active branchId
   let branchId: number | null = null;
   if (user.role === "branch_manager") {
     const bm = await db.select().from(branchManagersTable).where(
@@ -48,7 +65,7 @@ router.post("/auth/login", async (req, res) => {
     branchId = bm[0]?.branchId ?? null;
   }
 
-  const token = Buffer.from(`${user.id}:${user.email}:${user.role}`).toString("base64");
+  const token = signToken({ id: user.id, email: user.email!, role: user.role! });
   const { password: _pw, ...safeUser } = user;
   res.json({ user: { ...safeUser, lastLoginAt: new Date().toISOString(), branchId }, token });
 });
@@ -60,9 +77,7 @@ router.get("/auth/me", async (req, res) => {
     return;
   }
   try {
-    const decoded = Buffer.from(auth.slice(7), "base64").toString();
-    const [idStr] = decoded.split(":");
-    const id = parseInt(idStr);
+    const { id } = verifyToken(auth.slice(7));
     const users = await db.select().from(usersTable).where(eq(usersTable.id, id)).limit(1);
     const user = users[0];
     if (!user) {

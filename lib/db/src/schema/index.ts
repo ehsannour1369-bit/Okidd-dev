@@ -21,3 +21,4 @@ export * from "./studentEnrollments";
 export * from "./parentStudents";
 export * from "./classSchedules";
 export * from "./classSessions";
+export * from "./transactions";

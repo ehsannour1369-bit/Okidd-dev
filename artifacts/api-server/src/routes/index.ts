@@ -27,6 +27,7 @@ import studentEnrollmentsRouter from "./studentEnrollments";
 import parentStudentsRouter from "./parentStudents";
 import classSchedulesRouter from "./classSchedules";
 import classSessionsRouter from "./classSessions";
+import transactionsRouter from "./transactions";
 
 const router: IRouter = Router();
 
@@ -58,5 +59,6 @@ router.use(studentEnrollmentsRouter);
 router.use(parentStudentsRouter);
 router.use(classSchedulesRouter);
 router.use(classSessionsRouter);
+router.use(transactionsRouter);
 
 export default router;
