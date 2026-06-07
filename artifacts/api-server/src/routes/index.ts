@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import healthRouter from "./health";
-import authRouter from "./auth";
+import authRouter, { requireAuth } from "./auth";
 import usersRouter from "./users";
 import schoolsRouter from "./schools";
 import branchesRouter from "./branches";
@@ -31,8 +31,14 @@ import transactionsRouter from "./transactions";
 
 const router: IRouter = Router();
 
+// ── Public routes — no JWT required ──────────────────────────────────────────
 router.use(healthRouter);
-router.use(authRouter);
+router.use(authRouter);        // /auth/login  /auth/me  (handle own auth)
+
+// ── Global JWT guard — all routes below this line require a valid token ──────
+router.use(requireAuth);
+
+// ── Protected routes ──────────────────────────────────────────────────────────
 router.use(usersRouter);
 router.use(schoolsRouter);
 router.use(branchesRouter);

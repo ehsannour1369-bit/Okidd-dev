@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, type Request, type Response, type NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { db, usersTable, branchManagersTable } from "@workspace/db";
@@ -25,8 +25,21 @@ export function verifyToken(token: string): { id: number; email: string; role: s
   return { id: parseInt(decoded.sub), email: decoded.email, role: decoded.role };
 }
 
-function looksLikePhone(input: string) {
-  return /^\d{10,11}$/.test(input.replace(/^0/, ""));
+export function requireAuth(req: Request, res: Response, next: NextFunction): void {
+  const auth = req.headers.authorization;
+  if (!auth?.startsWith("Bearer ")) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  try {
+    const payload = verifyToken(auth.slice(7));
+    (req as any).userId = payload.id;
+    (req as any).userRole = payload.role;
+    (req as any).userEmail = payload.email;
+    next();
+  } catch {
+    res.status(401).json({ error: "Invalid or expired token" });
+  }
 }
 
 router.post("/auth/login", async (req, res) => {

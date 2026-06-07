@@ -76,7 +76,7 @@ router.post("/parent-students", async (req, res) => {
   const duplicate = existingParents.find(p => p.parentId === parentId);
   if (duplicate) { res.status(400).json({ error: "این اتصال قبلاً برقرار شده است" }); return; }
 
-  const createdBy = (req as any).session?.userId ?? null;
+  const createdBy = (req as any).userId ?? null;
   const [created] = await db.insert(parentStudentsTable).values({
     parentId, studentId,
     relationType: relationType ?? "guardian",
