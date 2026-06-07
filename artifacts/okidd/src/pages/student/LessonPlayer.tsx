@@ -83,6 +83,9 @@ export default function LessonPlayer() {
   const contentLoadTimeRef = useRef<number>(Date.now());
   /* همیشه آخرین نسخه advanceContent رو نگه می‌داره تا timer از stale closure مصون بمونه */
   const advanceContentRef  = useRef<() => void>(() => {});
+  /* ردیابی فعالیت برای اطلاع‌رسانی والدین */
+  const lessonTitleRef     = useRef<string>("");
+  const activityActiveRef  = useRef(false);
 
   useEffect(() => {
     if (!bookId) return;
@@ -209,6 +212,75 @@ export default function LessonPlayer() {
     const timer = setTimeout(() => advanceContentRef.current(), 2000);
     return () => clearTimeout(timer);
   }, [contentCompleted, freeMode, currentContent?.type]);
+
+  /* ── اطلاع‌رسانی به والدین: شروع درس ── */
+  useEffect(() => {
+    if (!currentLesson?.id || !user?.id) return;
+    lessonTitleRef.current  = currentLesson.title ?? "";
+    activityActiveRef.current = true;
+    api.post("/notifications/student-activity", {
+      action: "started",
+      lessonTitle: currentLesson.title,
+      contentType: currentContent?.type,
+    }).catch(() => {});
+
+    return () => {
+      /* هنگام تغییر درس یا خروج از player: اطلاع توقف */
+      if (!activityActiveRef.current) return;
+      activityActiveRef.current = false;
+      api.post("/notifications/student-activity", {
+        action: "stopped",
+        lessonTitle: lessonTitleRef.current,
+      }).catch(() => {});
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentLesson?.id, user?.id]);
+
+  /* ── اطلاع‌رسانی به والدین: مینیمایز / بستن تب ── */
+  useEffect(() => {
+    if (!user?.id) return;
+
+    function sendStop() {
+      if (!activityActiveRef.current) return;
+      activityActiveRef.current = false;
+      api.post("/notifications/student-activity", {
+        action: "stopped",
+        lessonTitle: lessonTitleRef.current,
+      }).catch(() => {});
+    }
+
+    function onVisibilityChange() {
+      if (document.visibilityState === "hidden") {
+        sendStop();
+      } else if (document.visibilityState === "visible" && lessonTitleRef.current) {
+        /* کاربر برگشت → دوباره شروع */
+        activityActiveRef.current = true;
+        api.post("/notifications/student-activity", {
+          action: "started",
+          lessonTitle: lessonTitleRef.current,
+        }).catch(() => {});
+      }
+    }
+
+    function onBeforeUnload() {
+      if (!activityActiveRef.current) return;
+      const token = useAuthStore.getState().token;
+      if (!token) return;
+      navigator.sendBeacon(
+        "/api/notifications/student-activity",
+        new Blob([JSON.stringify({ action: "stopped", lessonTitle: lessonTitleRef.current, token })], {
+          type: "application/json",
+        })
+      );
+    }
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
+  }, [user?.id]);
 
   function replayContent() {
     if (videoRef.current) {
