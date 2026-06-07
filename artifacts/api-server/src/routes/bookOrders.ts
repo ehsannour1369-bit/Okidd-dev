@@ -230,12 +230,34 @@ router.get("/book-license-summary", async (req, res) => {
   const books = await db.select().from(booksTable).where(inArray(booksTable.id, allBookIds));
   const bookMap = Object.fromEntries(books.map(b => [b.id, b]));
 
+  // Earliest assignedAt per book across all school classes (for expiry calculation)
+  const earliestAssignedByBook: Record<number, Date> = {};
+  if (classIds.length > 0) {
+    const cbAll = await db.select({ bookId: classBooksTable.bookId, assignedAt: classBooksTable.createdAt })
+      .from(classBooksTable).where(inArray(classBooksTable.classId, classIds));
+    for (const row of cbAll) {
+      const cur = row.assignedAt instanceof Date ? row.assignedAt : new Date(row.assignedAt);
+      const prev = earliestAssignedByBook[row.bookId];
+      if (!prev || cur < prev) earliestAssignedByBook[row.bookId] = cur;
+    }
+  }
+
+  const LICENSE_DAYS = 364;
+  const now = Date.now();
+
   res.json(allBookIds.map(bookId => {
     const p = purchased[bookId] ?? 0;
     const u = used[bookId] ?? 0;
+    const assignedAt = earliestAssignedByBook[bookId] ?? null;
+    const expiresAt = assignedAt ? new Date(assignedAt.getTime() + LICENSE_DAYS * 86400 * 1000) : null;
+    const daysLeft = expiresAt ? Math.floor((expiresAt.getTime() - now) / 86400000) : null;
     return {
       bookId, bookTitle: bookMap[bookId]?.title ?? `کتاب ${bookId}`,
       purchased: p, used: u, remaining: Math.max(0, p - u),
+      assignedAt: assignedAt?.toISOString() ?? null,
+      expiresAt: expiresAt?.toISOString() ?? null,
+      daysLeft,
+      expired: daysLeft !== null && daysLeft < 0,
     };
   }).sort((a, b) => a.bookTitle.localeCompare(b.bookTitle, "fa")));
 });

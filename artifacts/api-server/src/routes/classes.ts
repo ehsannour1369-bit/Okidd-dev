@@ -234,11 +234,28 @@ router.delete("/classes/:id/teachers/:teacherId", async (req, res) => {
 // Books
 router.get("/classes/:id/books", async (req, res) => {
   const classId = parseInt(req.params.id);
-  const rows = await db.select({ bookId: classBooksTable.bookId }).from(classBooksTable).where(eq(classBooksTable.classId, classId));
+  const rows = await db.select({ bookId: classBooksTable.bookId, assignedAt: classBooksTable.createdAt })
+    .from(classBooksTable).where(eq(classBooksTable.classId, classId));
   const bookIds = rows.map(r => r.bookId);
   if (bookIds.length === 0) { res.json([]); return; }
   const books = await db.select().from(booksTable).where(inArray(booksTable.id, bookIds));
-  res.json(books.map(b => ({ ...b, monthlyFee: parseFloat(String(b.monthlyFee)) })));
+  const LICENSE_DAYS = 364;
+  const now = Date.now();
+  const assignedMap = Object.fromEntries(rows.map(r => [r.bookId, r.assignedAt]));
+  res.json(books.map(b => {
+    const assignedAt = assignedMap[b.id] ?? null;
+    const assignedDate = assignedAt instanceof Date ? assignedAt : assignedAt ? new Date(assignedAt) : null;
+    const expiresAt = assignedDate ? new Date(assignedDate.getTime() + LICENSE_DAYS * 86400 * 1000) : null;
+    const daysLeft = expiresAt ? Math.floor((expiresAt.getTime() - now) / 86400000) : null;
+    return {
+      ...b,
+      monthlyFee: parseFloat(String(b.monthlyFee)),
+      assignedAt: assignedDate?.toISOString() ?? null,
+      expiresAt: expiresAt?.toISOString() ?? null,
+      daysLeft,
+      expired: daysLeft !== null && daysLeft < 0,
+    };
+  }));
 });
 
 router.post("/classes/:id/books", async (req, res) => {

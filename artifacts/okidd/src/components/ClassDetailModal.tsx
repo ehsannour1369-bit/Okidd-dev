@@ -816,7 +816,7 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
                         </div>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontWeight: 700, color: theme.text, fontSize: 13 }}>{b.title}</div>
-                          <div style={{ display: "flex", gap: 6, marginTop: 2, alignItems: "center" }}>
+                          <div style={{ display: "flex", gap: 6, marginTop: 3, alignItems: "center", flexWrap: "wrap" }}>
                             {b.lessonCount != null && <span style={{ fontSize: 11, color: theme.text2 }}>{b.lessonCount} درس</span>}
                             {lic?.purchased > 0 && (
                               <span style={{
@@ -825,6 +825,16 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
                                 color: over ? "#ef4444" : warn ? "#f59e0b" : "#059669",
                               }}>
                                 {over ? `🔴 تکمیل (${lic.used}/${lic.purchased})` : warn ? `⚠ ${lic.remaining} باقی` : `✅ ${lic.remaining} باقی`}
+                              </span>
+                            )}
+                            {b.daysLeft !== null && b.daysLeft !== undefined && (
+                              <span style={{
+                                fontSize: 10, borderRadius: 99, padding: "1px 7px", fontWeight: 700,
+                                background: b.expired ? "rgba(239,68,68,0.12)" : b.daysLeft <= 30 ? "rgba(245,158,11,0.12)" : "rgba(99,102,241,0.08)",
+                                color: b.expired ? "#b91c1c" : b.daysLeft <= 30 ? "#b45309" : "#4f46e5",
+                                border: `1px solid ${b.expired ? "rgba(239,68,68,0.25)" : b.daysLeft <= 30 ? "rgba(245,158,11,0.3)" : "rgba(99,102,241,0.18)"}`,
+                              }}>
+                                {b.expired ? "🔒 منقضی" : b.daysLeft <= 30 ? `⏰ ${b.daysLeft} روز` : `📅 ${b.daysLeft} روز`}
                               </span>
                             )}
                           </div>

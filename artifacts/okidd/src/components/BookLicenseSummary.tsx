@@ -8,6 +8,10 @@ export interface LicenseRow {
   purchased: number;
   used: number;
   remaining: number;
+  assignedAt?: string | null;
+  expiresAt?: string | null;
+  daysLeft?: number | null;
+  expired?: boolean;
 }
 
 interface Props {
@@ -186,8 +190,22 @@ export default function BookLicenseSummary({
                       {lbl.text}
                     </span>
                   </div>
+                  {/* Expiry badge */}
+                  {row.daysLeft !== null && row.daysLeft !== undefined && (
+                    <div style={{
+                      marginTop: 6,
+                      display: "inline-flex", alignItems: "center", gap: 4,
+                      background: row.expired ? "rgba(239,68,68,0.10)" : row.daysLeft <= 30 ? "rgba(245,158,11,0.12)" : "rgba(16,185,129,0.09)",
+                      border: `1px solid ${row.expired ? "rgba(239,68,68,0.3)" : row.daysLeft <= 30 ? "rgba(245,158,11,0.35)" : "rgba(16,185,129,0.25)"}`,
+                      borderRadius: 99, padding: "2px 8px",
+                      fontSize: 10, fontWeight: 700,
+                      color: row.expired ? "#b91c1c" : row.daysLeft <= 30 ? "#b45309" : "#059669",
+                    }}>
+                      {row.expired ? "🔒 منقضی شده" : row.daysLeft <= 30 ? `⏰ ${row.daysLeft} روز باقی` : `📅 ${row.daysLeft} روز باقی`}
+                    </div>
+                  )}
                   {/* Mini bar */}
-                  <div style={{ marginTop: 8, height: 4, background: "rgba(0,0,0,0.06)", borderRadius: 99, overflow: "hidden" }}>
+                  <div style={{ marginTop: 6, height: 4, background: "rgba(0,0,0,0.06)", borderRadius: 99, overflow: "hidden" }}>
                     <div style={{
                       height: "100%",
                       width: `${Math.min(100, pct)}%`,

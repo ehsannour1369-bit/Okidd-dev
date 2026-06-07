@@ -197,9 +197,14 @@ export default function StudentBooks() {
                         <span style={{ background: `${bc}22`, border: `1px solid ${bc}40`, borderRadius: 999, padding: "2px 8px", fontSize: 10, color: bcd, fontWeight: 700 }}>{book.gradeLevel}</span>
                       )}
                       <span style={{ background: `${bc}18`, border: `1px solid ${bc}35`, borderRadius: 999, padding: "2px 8px", fontSize: 10, color: bcd, fontWeight: 700 }}>{book.lessonCount ?? 0} درس</span>
-                      {book.daysLeft !== null && book.daysLeft <= 30 && (
-                        <span style={{ background: "rgba(245,158,11,0.15)", border: "1px solid rgba(245,158,11,0.4)", borderRadius: 999, padding: "2px 8px", fontSize: 10, color: "#b45309", fontWeight: 700 }}>
-                          ⏰ {book.daysLeft} روز باقی
+                      {book.daysLeft !== null && (
+                        <span style={{
+                          background: book.daysLeft <= 30 ? "rgba(245,158,11,0.15)" : "rgba(16,185,129,0.10)",
+                          border: `1px solid ${book.daysLeft <= 30 ? "rgba(245,158,11,0.4)" : "rgba(16,185,129,0.3)"}`,
+                          borderRadius: 999, padding: "2px 8px", fontSize: 10,
+                          color: book.daysLeft <= 30 ? "#b45309" : "#059669", fontWeight: 700,
+                        }}>
+                          {book.daysLeft <= 30 ? "⏰" : "📅"} {book.daysLeft} روز باقی
                         </span>
                       )}
                     </div>
