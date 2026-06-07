@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import healthRouter from "./health";
 import authRouter, { requireAuth } from "./auth";
+import contentRouter, { contentFilesRouter } from "./content";
 import usersRouter from "./users";
 import schoolsRouter from "./schools";
 import branchesRouter from "./branches";
@@ -12,7 +13,6 @@ import booksRouter from "./books";
 import lessonsRouter from "./lessons";
 import bookOrdersRouter from "./bookOrders";
 import walletRouter from "./wallet";
-import contentRouter from "./content";
 import dashboardRouter from "./dashboard";
 import notificationsRouter from "./notifications";
 import examScheduleRouter from "./examSchedule";
@@ -33,9 +33,10 @@ const router: IRouter = Router();
 
 // ── Public routes — no JWT required ──────────────────────────────────────────
 router.use(healthRouter);
-router.use(authRouter);        // /auth/login  /auth/me  (handle own auth)
+router.use(authRouter);           // /auth/login  /auth/me
+router.use(contentFilesRouter);   // /content/files/:filename  (browsers can't send auth headers for media)
 
-// ── Global JWT guard — all routes below this line require a valid token ──────
+// ── Global JWT guard — all routes below require a valid token ─────────────────
 router.use(requireAuth);
 
 // ── Protected routes ──────────────────────────────────────────────────────────

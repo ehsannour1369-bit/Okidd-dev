@@ -5,8 +5,6 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-const router = Router();
-
 const uploadsDir = path.resolve("uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
@@ -18,6 +16,19 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage, limits: { fileSize: 200 * 1024 * 1024 } });
+
+// ── Public: file serving — must be accessible without auth
+//    because browsers can't add Authorization headers to <video src> / <img src>
+export const contentFilesRouter = Router();
+contentFilesRouter.get("/content/files/:filename", (req, res) => {
+  const safe = path.basename(req.params.filename);
+  const filePath = path.join(uploadsDir, safe);
+  if (!fs.existsSync(filePath)) { res.status(404).json({ error: "Not found" }); return; }
+  res.sendFile(filePath);
+});
+
+// ── Protected: all other content routes require auth
+const router = Router();
 
 router.get("/content", async (req, res) => {
   const { lessonId, classId, bookId } = req.query as Record<string, string>;
@@ -33,12 +44,6 @@ router.post("/content/upload", upload.single("file"), async (req, res) => {
   if (!req.file) { res.status(400).json({ error: "No file uploaded" }); return; }
   const fileUrl = `/api/content/files/${req.file.filename}`;
   res.json({ url: fileUrl, filename: req.file.filename, originalName: req.file.originalname });
-});
-
-router.get("/content/files/:filename", (req, res) => {
-  const filePath = path.join(uploadsDir, req.params.filename);
-  if (!fs.existsSync(filePath)) { res.status(404).json({ error: "Not found" }); return; }
-  res.sendFile(filePath);
 });
 
 router.post("/content", async (req, res) => {
