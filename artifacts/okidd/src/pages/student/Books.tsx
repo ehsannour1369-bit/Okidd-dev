@@ -170,26 +170,41 @@ export default function StudentBooks() {
               const bcd = BOOK_DARKS[idx % BOOK_DARKS.length];
               return (
                 <div key={book.id}
-                  style={{ ...glassCard(bc, {
+                  style={{ ...glassCard(book.expired ? "#ef4444" : bc, {
                     padding: "18px 14px",
-                    background: `linear-gradient(145deg, ${bc}30, ${bcd}18)`,
-                    border: `1.5px solid ${bc}55`,
+                    background: book.expired
+                      ? "linear-gradient(145deg,rgba(254,226,226,0.9),rgba(252,165,165,0.4))"
+                      : `linear-gradient(145deg, ${bc}30, ${bcd}18)`,
+                    border: `1.5px solid ${book.expired ? "rgba(239,68,68,0.45)" : `${bc}55`}`,
+                    cursor: book.expired ? "default" : "pointer",
                   }), ...cardAnim(idx) }}
-                  onClick={() => { setSelectedBook(book); setSelectedLesson(null); }}
-                  onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-4px)"; el.style.boxShadow = `0 16px 40px ${bc}30`; }}
-                  onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = `0 8px 32px rgba(80,40,120,0.09), 0 0 0 1px ${bc}18`; }}
+                  onClick={() => { if (!book.expired) { setSelectedBook(book); setSelectedLesson(null); } }}
+                  onMouseEnter={e => { if (!book.expired) { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-4px)"; el.style.boxShadow = `0 16px 40px ${bc}30`; } }}
+                  onMouseLeave={e => { if (!book.expired) { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = `0 8px 32px rgba(80,40,120,0.09), 0 0 0 1px ${bc}18`; } }}
                 >
-                  <div style={{ ...glassIconBox(bc, 48), marginBottom: 12 }}>
-                    <BookOpen size={24} color={bcd} />
+                  <div style={{ ...glassIconBox(book.expired ? "#ef4444" : bc, 48), marginBottom: 12 }}>
+                    <BookOpen size={24} color={book.expired ? "#dc2626" : bcd} />
                   </div>
-                  <div style={{ fontWeight: 800, fontSize: 14, color: "#1e1b4b", marginBottom: 8, lineHeight: 1.3 }}>{book.title}</div>
-                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-                    {book.gradeLevel && (
-                      <span style={{ background: `${bc}22`, border: `1px solid ${bc}40`, borderRadius: 999, padding: "2px 8px", fontSize: 10, color: bcd, fontWeight: 700 }}>{book.gradeLevel}</span>
-                    )}
-                    <span style={{ background: `${bc}18`, border: `1px solid ${bc}35`, borderRadius: 999, padding: "2px 8px", fontSize: 10, color: bcd, fontWeight: 700 }}>{book.lessonCount ?? 0} درس</span>
-                  </div>
-                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${bc}80, ${bc}20)`, borderRadius: "0 0 22px 22px" }} />
+                  <div style={{ fontWeight: 800, fontSize: 14, color: book.expired ? "#7f1d1d" : "#1e1b4b", marginBottom: 8, lineHeight: 1.3 }}>{book.title}</div>
+                  {book.expired ? (
+                    <div style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 10, padding: "8px 10px", fontSize: 11, color: "#b91c1c", fontWeight: 700, lineHeight: 1.5 }}>
+                      🔒 اشتراک منقضی شده<br />
+                      <span style={{ fontWeight: 400, fontSize: 10 }}>برای دیدن محتوا اشتراک تمدید کنید</span>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                      {book.gradeLevel && (
+                        <span style={{ background: `${bc}22`, border: `1px solid ${bc}40`, borderRadius: 999, padding: "2px 8px", fontSize: 10, color: bcd, fontWeight: 700 }}>{book.gradeLevel}</span>
+                      )}
+                      <span style={{ background: `${bc}18`, border: `1px solid ${bc}35`, borderRadius: 999, padding: "2px 8px", fontSize: 10, color: bcd, fontWeight: 700 }}>{book.lessonCount ?? 0} درس</span>
+                      {book.daysLeft !== null && book.daysLeft <= 30 && (
+                        <span style={{ background: "rgba(245,158,11,0.15)", border: "1px solid rgba(245,158,11,0.4)", borderRadius: 999, padding: "2px 8px", fontSize: 10, color: "#b45309", fontWeight: 700 }}>
+                          ⏰ {book.daysLeft} روز باقی
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: book.expired ? "linear-gradient(90deg,rgba(239,68,68,0.7),rgba(239,68,68,0.2))" : `linear-gradient(90deg, ${bc}80, ${bc}20)`, borderRadius: "0 0 22px 22px" }} />
                 </div>
               );
             })}

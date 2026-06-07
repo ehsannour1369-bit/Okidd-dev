@@ -142,6 +142,13 @@ router.post("/classes/:id/students", async (req, res) => {
   const classId = parseInt(req.params.id);
   const { studentId } = req.body;
 
+  // Roster lock: if any book is assigned to this class, students cannot be added
+  const existingBooks = await db.select({ id: classBooksTable.id }).from(classBooksTable).where(eq(classBooksTable.classId, classId));
+  if (existingBooks.length > 0) {
+    res.status(400).json({ error: "پس از تخصیص کتاب به کلاس، امکان تغییر لیست دانش‌آموزان وجود ندارد. لطفاً با مدیریت مدرسه تماس بگیرید." });
+    return;
+  }
+
   // License check: adding a student "uses" one license for each book in this class
   const schoolId = await getSchoolIdForClass(classId);
   if (schoolId) {
@@ -167,6 +174,14 @@ router.post("/classes/:id/students", async (req, res) => {
 router.delete("/classes/:id/students/:studentId", async (req, res) => {
   const classId = parseInt(req.params.id);
   const studentId = parseInt(req.params.studentId);
+
+  // Roster lock: if any book is assigned to this class, students cannot be removed
+  const existingBooks = await db.select({ id: classBooksTable.id }).from(classBooksTable).where(eq(classBooksTable.classId, classId));
+  if (existingBooks.length > 0) {
+    res.status(400).json({ error: "پس از تخصیص کتاب به کلاس، امکان حذف دانش‌آموز وجود ندارد." });
+    return;
+  }
+
   await db.delete(classStudentsTable).where(and(eq(classStudentsTable.classId, classId), eq(classStudentsTable.studentId, studentId)));
   res.status(204).end();
 });

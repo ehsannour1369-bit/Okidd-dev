@@ -134,9 +134,17 @@ router.get("/users/:id/enrolled-books", async (req, res) => {
   const classIds = studentClasses.map(sc => sc.classId);
   if (classIds.length === 0) { res.json([]); return; }
 
-  const classBookRows = await db.select({ bookId: classBooksTable.bookId }).from(classBooksTable).where(inArray(classBooksTable.classId, classIds));
+  const classBookRows = await db.select({ bookId: classBooksTable.bookId, classId: classBooksTable.classId, assignedAt: classBooksTable.createdAt }).from(classBooksTable).where(inArray(classBooksTable.classId, classIds));
   const bookIds = [...new Set(classBookRows.map(cb => cb.bookId))];
   if (bookIds.length === 0) { res.json([]); return; }
+
+  // For each bookId, pick the latest assignedAt (most generous expiry window)
+  const assignedAtByBook: Record<number, Date> = {};
+  for (const row of classBookRows) {
+    const prev = assignedAtByBook[row.bookId];
+    const cur = row.assignedAt instanceof Date ? row.assignedAt : new Date(row.assignedAt);
+    if (!prev || cur > prev) assignedAtByBook[row.bookId] = cur;
+  }
 
   const booksData = await db.select().from(booksTable).where(inArray(booksTable.id, bookIds));
   const progress = await db.select().from(studentProgressTable).where(eq(studentProgressTable.studentId, studentId));
@@ -145,11 +153,23 @@ router.get("/users/:id/enrolled-books", async (req, res) => {
     if (p.completed && p.bookId) completedByBook[p.bookId] = (completedByBook[p.bookId] ?? 0) + 1;
   }
 
-  res.json(booksData.map(b => ({
-    ...b,
-    monthlyFee: parseFloat(String(b.monthlyFee)),
-    completedLessons: completedByBook[b.id] ?? 0,
-  })));
+  const LICENSE_DAYS = 364;
+  const now = Date.now();
+
+  res.json(booksData.map(b => {
+    const assignedAt = assignedAtByBook[b.id] ?? null;
+    const expiresAt = assignedAt ? new Date(assignedAt.getTime() + LICENSE_DAYS * 86400 * 1000) : null;
+    const daysLeft = expiresAt ? Math.floor((expiresAt.getTime() - now) / 86400000) : null;
+    return {
+      ...b,
+      monthlyFee: parseFloat(String(b.monthlyFee)),
+      completedLessons: completedByBook[b.id] ?? 0,
+      assignedAt: assignedAt?.toISOString() ?? null,
+      expiresAt: expiresAt?.toISOString() ?? null,
+      daysLeft,
+      expired: daysLeft !== null && daysLeft < 0,
+    };
+  }));
 });
 
 // Teacher's schools (with classes)

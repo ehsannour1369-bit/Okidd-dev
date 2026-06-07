@@ -71,6 +71,7 @@ export default function LessonPlayer() {
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [loading, setLoading]                   = useState(true);
   const [error, setError]                       = useState<string | null>(null);
+  const [bookExpired, setBookExpired]           = useState(false);
   const [finished, setFinished]                 = useState(false);
   const [savedScore, setSavedScore]             = useState(false);
   const [contentCompleted, setContentCompleted] = useState(false);
@@ -86,6 +87,15 @@ export default function LessonPlayer() {
   /* ردیابی فعالیت برای اطلاع‌رسانی والدین */
   const lessonTitleRef     = useRef<string>("");
   const activityActiveRef  = useRef(false);
+
+  /* ── بررسی انقضای مجوز کتاب (364 روز از تخصیص به کلاس) ── */
+  useEffect(() => {
+    if (!bookId || !user?.id) return;
+    api.get(`/users/${user.id}/enrolled-books`).then((books: any[]) => {
+      const book = books.find((b: any) => b.id === bookId);
+      if (book?.expired) setBookExpired(true);
+    }).catch(() => {});
+  }, [bookId, user?.id]);
 
   useEffect(() => {
     if (!bookId) return;
@@ -341,6 +351,24 @@ export default function LessonPlayer() {
       <button onClick={() => navigate("/student")} style={{ padding: "12px 28px", background: `linear-gradient(135deg,${accent},${accentLight})`, border: "none", borderRadius: 14, color: "white", fontFamily: "Vazirmatn", fontSize: 14, fontWeight: 700, cursor: "pointer", boxShadow: `0 4px 14px ${accentBorder}` }}>
         بازگشت
       </button>
+    </div>
+  );
+
+  if (bookExpired) return (
+    <div style={{ ...pageWrap, alignItems: "center", justifyContent: "center", gap: 0, padding: 32, textAlign: "center" }}>
+      <div style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(24px)", border: "1.5px solid rgba(239,68,68,0.25)", borderRadius: 28, padding: "48px 36px", maxWidth: 440, width: "100%", boxShadow: "0 24px 64px rgba(239,68,68,0.12)" }}>
+        <div style={{ fontSize: 64, marginBottom: 16 }}>🔒</div>
+        <h2 style={{ color: "#b91c1c", fontWeight: 900, margin: "0 0 12px", fontSize: 20 }}>اشتراک این کتاب منقضی شده</h2>
+        <p style={{ color: "#7f1d1d", fontSize: 14, lineHeight: 1.7, margin: "0 0 28px" }}>
+          برای دیدن محتوای این کتاب اشتراک خود را تمدید کنید
+        </p>
+        <div style={{ background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.18)", borderRadius: 14, padding: "14px 18px", marginBottom: 28, fontSize: 13, color: "#b91c1c" }}>
+          مدت اعتبار هر کتاب پس از تخصیص به کلاس <strong>۳۶۴ روز</strong> است
+        </div>
+        <button onClick={() => navigate("/student")} style={{ padding: "13px 32px", background: "linear-gradient(135deg,#ef4444,#dc2626)", border: "none", borderRadius: 14, color: "white", fontFamily: "Vazirmatn", fontSize: 15, fontWeight: 800, cursor: "pointer", boxShadow: "0 4px 20px rgba(239,68,68,0.35)", width: "100%" }}>
+          بازگشت به کتاب‌هایم
+        </button>
+      </div>
     </div>
   );
 

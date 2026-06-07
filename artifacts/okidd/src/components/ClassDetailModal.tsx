@@ -450,6 +450,16 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
         {/* ── Tab: Students ── */}
         {tab === "students" && (
           <div>
+            {/* Roster lock notice when books are assigned */}
+            {books.length > 0 && (
+              <div style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 14, padding: "12px 14px", borderRadius: 12, background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.3)" }}>
+                <AlertTriangle size={16} color="#d97706" style={{ flexShrink: 0, marginTop: 1 }} />
+                <div style={{ flex: 1, fontSize: 12, color: "#92400e", lineHeight: 1.6 }}>
+                  <span style={{ display: "block", fontWeight: 700, color: "#b45309", marginBottom: 2 }}>🔒 لیست دانش‌آموزان قفل شده</span>
+                  پس از تخصیص کتاب به کلاس، امکان افزودن یا حذف دانش‌آموز وجود ندارد.
+                </div>
+              </div>
+            )}
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="جستجوی دانش‌آموز..." style={{ ...IS(theme), marginBottom: 14 }} />
             {filteredStudents.length === 0
               ? <div style={{ textAlign: "center", padding: "28px 0", color: theme.text2 }}>
@@ -474,57 +484,60 @@ export function ClassDetailModal({ cls, schoolId, theme, canDelete, onClose, onD
                         <Star size={11} color="#f59e0b" fill="#f59e0b" />
                         <span style={{ fontSize: 12, fontWeight: 700, color: "#d97706" }}>{s.totalScore ?? 0}</span>
                       </div>
-                      {confirmRemoveStudent === s.id
-                        ? (
-                          <div style={{ display: "flex", gap: 4 }}>
-                            <button onClick={() => removeStudMut.mutate(s.id)} style={{ padding: "5px 10px", background: "#ef4444", border: "none", borderRadius: 7, color: "white", fontSize: 11, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontWeight: 700 }}>حذف</button>
-                            <button onClick={() => setConfirmRemoveStudent(null)} style={{ padding: "5px 8px", background: "rgba(0,0,0,0.06)", border: "none", borderRadius: 7, fontSize: 11, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>انصراف</button>
-                          </div>
-                        )
-                        : (
-                          <button onClick={() => setConfirmRemoveStudent(s.id)} style={{ width: 28, height: 28, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.18)", borderRadius: 7, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", flexShrink: 0 }}>
-                            <UserMinus size={12} />
-                          </button>
-                        )
-                      }
+                      {books.length === 0 && (
+                        confirmRemoveStudent === s.id
+                          ? (
+                            <div style={{ display: "flex", gap: 4 }}>
+                              <button onClick={() => removeStudMut.mutate(s.id)} style={{ padding: "5px 10px", background: "#ef4444", border: "none", borderRadius: 7, color: "white", fontSize: 11, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer", fontWeight: 700 }}>حذف</button>
+                              <button onClick={() => setConfirmRemoveStudent(null)} style={{ padding: "5px 8px", background: "rgba(0,0,0,0.06)", border: "none", borderRadius: 7, fontSize: 11, fontFamily: "Vazirmatn, sans-serif", cursor: "pointer" }}>انصراف</button>
+                            </div>
+                          )
+                          : (
+                            <button onClick={() => setConfirmRemoveStudent(s.id)} style={{ width: 28, height: 28, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.18)", borderRadius: 7, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", flexShrink: 0 }}>
+                              <UserMinus size={12} />
+                            </button>
+                          )
+                      )}
                     </div>
                   ))}
                 </div>
               )
             }
-            <div style={{ background: `${theme.primary}07`, border: `1px dashed ${theme.border}`, borderRadius: 12, padding: 12 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: theme.text, marginBottom: 8, display: "flex", alignItems: "center", gap: 5 }}>
-                <UserPlus size={13} color={theme.primary} /> اضافه کردن دانش‌آموز
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <select
-                  value={addStudentId}
-                  onChange={e => { setAddStudentId(e.target.value); setStudentLicenseError(null); }}
-                  style={{ ...IS(theme), flex: 1 }}
-                >
-                  <option value="">انتخاب از لیست مدرسه...</option>
-                  {availableStudents.map((s: any) => <option key={s.id} value={s.id}>{s.name} — {s.nationalId}</option>)}
-                </select>
-                <button
-                  onClick={() => addStudentId && addStudMut.mutate(parseInt(addStudentId))}
-                  disabled={!addStudentId || addStudMut.isPending}
-                  style={{ padding: "10px 14px", background: `linear-gradient(135deg,${theme.primary},${theme.light})`, border: "none", borderRadius: 10, color: "white", fontFamily: "Vazirmatn, sans-serif", fontWeight: 700, fontSize: 13, cursor: "pointer", flexShrink: 0, opacity: !addStudentId ? 0.5 : 1 }}>
-                  <Plus size={15} />
-                </button>
-              </div>
-              {studentLicenseError && (
-                <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 10, padding: "10px 12px", borderRadius: 10, background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.22)" }}>
-                  <ShieldAlert size={16} color="#ef4444" style={{ flexShrink: 0, marginTop: 1 }} />
-                  <div style={{ flex: 1, fontSize: 11, color: "#7f1d1d", lineHeight: 1.6 }}>
-                    <span style={{ display: "block", fontWeight: 700, color: "#dc2626", marginBottom: 2 }}>افزودن دانش‌آموز ناموفق بود</span>
-                    {studentLicenseError}
-                  </div>
-                  <button onClick={() => setStudentLicenseError(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: 0, flexShrink: 0 }}>
-                    <X size={13} />
+            {books.length === 0 && (
+              <div style={{ background: `${theme.primary}07`, border: `1px dashed ${theme.border}`, borderRadius: 12, padding: 12 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: theme.text, marginBottom: 8, display: "flex", alignItems: "center", gap: 5 }}>
+                  <UserPlus size={13} color={theme.primary} /> اضافه کردن دانش‌آموز
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <select
+                    value={addStudentId}
+                    onChange={e => { setAddStudentId(e.target.value); setStudentLicenseError(null); }}
+                    style={{ ...IS(theme), flex: 1 }}
+                  >
+                    <option value="">انتخاب از لیست مدرسه...</option>
+                    {availableStudents.map((s: any) => <option key={s.id} value={s.id}>{s.name} — {s.nationalId}</option>)}
+                  </select>
+                  <button
+                    onClick={() => addStudentId && addStudMut.mutate(parseInt(addStudentId))}
+                    disabled={!addStudentId || addStudMut.isPending}
+                    style={{ padding: "10px 14px", background: `linear-gradient(135deg,${theme.primary},${theme.light})`, border: "none", borderRadius: 10, color: "white", fontFamily: "Vazirmatn, sans-serif", fontWeight: 700, fontSize: 13, cursor: "pointer", flexShrink: 0, opacity: !addStudentId ? 0.5 : 1 }}>
+                    <Plus size={15} />
                   </button>
                 </div>
-              )}
-            </div>
+                {studentLicenseError && (
+                  <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 10, padding: "10px 12px", borderRadius: 10, background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.22)" }}>
+                    <ShieldAlert size={16} color="#ef4444" style={{ flexShrink: 0, marginTop: 1 }} />
+                    <div style={{ flex: 1, fontSize: 11, color: "#7f1d1d", lineHeight: 1.6 }}>
+                      <span style={{ display: "block", fontWeight: 700, color: "#dc2626", marginBottom: 2 }}>افزودن دانش‌آموز ناموفق بود</span>
+                      {studentLicenseError}
+                    </div>
+                    <button onClick={() => setStudentLicenseError(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: 0, flexShrink: 0 }}>
+                      <X size={13} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
