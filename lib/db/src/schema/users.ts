@@ -15,6 +15,7 @@ export const usersTable = pgTable("users", {
   gender: text("gender").default("male"),
   avatarUrl: text("avatar_url"),
   parentId: integer("parent_id"),
+  tokenVersion: integer("token_version").notNull().default(1),
   lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
