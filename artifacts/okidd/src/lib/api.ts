@@ -18,7 +18,7 @@ export async function apiRequest<T>(
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
     // Session expired or account locked mid-session → auto logout
-    if ((res.status === 401 || res.status === 423) && token) {
+    if ((res.status === 401 || res.status === 403 || res.status === 423) && token) {
       useAuthStore.getState().logout();
     }
     const error = new Error(err.error || res.statusText) as Error & { status: number; body: any };

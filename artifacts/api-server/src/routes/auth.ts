@@ -63,6 +63,10 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
       res.status(423).json({ error: "account_locked" });
       return;
     }
+    if (user.status === "suspended") {
+      res.status(403).json({ error: "account_suspended" });
+      return;
+    }
     if (user.status !== "active" || user.tokenVersion !== payload.tokenVersion) {
       res.status(401).json({ error: "Session expired. Please log in again." });
       return;
@@ -186,6 +190,20 @@ router.get("/auth/me", async (req, res) => {
   } catch {
     res.status(401).json({ error: "Invalid token" });
   }
+});
+
+router.post("/auth/report-violation", requireAuth, async (req, res) => {
+  const userId = (req as any).userId;
+  const role = (req as any).userRole;
+  if (role === "admin") {
+    res.json({ ok: true });
+    return;
+  }
+  await db
+    .update(usersTable)
+    .set({ status: "suspended", tokenVersion: 0 } as any)
+    .where(eq(usersTable.id, userId));
+  res.json({ ok: true });
 });
 
 export default router;

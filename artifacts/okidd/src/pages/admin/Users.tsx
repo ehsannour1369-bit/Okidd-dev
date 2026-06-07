@@ -297,7 +297,11 @@ export default function AdminUsers() {
                   <span style={{ background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 999, padding: "2px 10px", fontSize: 12, color: "#d97706" }}>{roleLabel(u.role)}</span>
                 </td>
                 <td style={{ padding: "12px 16px", borderBottom: "1px solid rgba(139,92,246,0.08)" }}>
-                  {u.status === "locked" ? (
+                  {u.status === "suspended" ? (
+                    <span style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.40)", borderRadius: 999, padding: "2px 10px", fontSize: 12, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      🚫 تعلیق قوانین
+                    </span>
+                  ) : u.status === "locked" ? (
                     <span style={{ background: "rgba(234,88,12,0.18)", color: "#f97316", border: "1px solid rgba(234,88,12,0.40)", borderRadius: 999, padding: "2px 10px", fontSize: 12, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 4 }}>
                       🔒 قفل شده
                     </span>
@@ -313,8 +317,8 @@ export default function AdminUsers() {
                       <button onClick={() => setViewDetailId(u.id)} title="مشاهده جزئیات" style={{ background: "rgba(59,130,246,0.15)", border: "1px solid rgba(59,130,246,0.3)", borderRadius: 8, color: "#60a5fa", padding: "6px 10px", cursor: "pointer" }}><Eye size={14} /></button>
                     )}
                     <button onClick={() => openEdit(u)} style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.3)", borderRadius: 8, color: "#d97706", padding: "6px 10px", cursor: "pointer" }}><Edit2 size={14} /></button>
-                    {u.status === "locked" ? (
-                      <button onClick={() => unlockMut.mutate(u.id)} title="آزادسازی اکانت" style={{ background: "rgba(234,88,12,0.18)", border: "1px solid rgba(234,88,12,0.4)", borderRadius: 8, color: "#f97316", padding: "6px 10px", cursor: "pointer", fontWeight: 700 }}><LockOpen size={14} /></button>
+                    {(u.status === "locked" || u.status === "suspended") ? (
+                      <button onClick={() => unlockMut.mutate(u.id)} title={u.status === "suspended" ? "رفع تعلیق اکانت" : "آزادسازی اکانت"} style={{ background: u.status === "suspended" ? "rgba(239,68,68,0.15)" : "rgba(234,88,12,0.18)", border: `1px solid ${u.status === "suspended" ? "rgba(239,68,68,0.4)" : "rgba(234,88,12,0.4)"}`, borderRadius: 8, color: u.status === "suspended" ? "#ef4444" : "#f97316", padding: "6px 10px", cursor: "pointer", fontWeight: 700 }}><LockOpen size={14} /></button>
                     ) : (
                       <button onClick={() => toggleMut.mutate(u.id)} style={{ background: u.status === "active" ? "rgba(248,113,113,0.15)" : "rgba(34,197,94,0.15)", border: `1px solid ${u.status === "active" ? "rgba(248,113,113,0.3)" : "rgba(34,197,94,0.3)"}`, borderRadius: 8, color: u.status === "active" ? "#f87171" : "#15803d", padding: "6px 10px", cursor: "pointer" }}><Power size={14} /></button>
                     )}

@@ -1,6 +1,7 @@
 import { Switch, Route, Router as WouterRouter, useLocation, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAuthStore } from "./store/auth";
+import { useAntiPiracy } from "./hooks/useAntiPiracy";
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import NotFound from "./pages/not-found";
@@ -87,6 +88,7 @@ function roleHome(role: string) {
 
 function AuthGuard({ children, allowedRoles }: { children: React.ReactNode; allowedRoles: string[] }) {
   const { user } = useAuthStore();
+  useAntiPiracy();
   if (!user) return <Redirect to="/login" />;
   if (!allowedRoles.includes(user.role)) return <Redirect to={roleHome(user.role)} />;
   return <>{children}</>;

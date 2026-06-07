@@ -6,6 +6,32 @@ import { ChevronLeft, ChevronRight, Film, Gamepad2, ClipboardCheck, PenLine, Fil
 
 const VIDEO_TYPES = new Set(["video", "animation"]);
 
+function ContentWatermark({ name }: { name: string }) {
+  const text = `${name} • oKidd • `;
+  return (
+    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 8, overflow: "hidden", userSelect: "none" }} aria-hidden>
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} style={{
+          position: "absolute",
+          top: `${i * 13 - 5}%`,
+          left: "-25%",
+          width: "150%",
+          color: "rgba(255,255,255,0.20)",
+          fontSize: 11,
+          fontFamily: "Vazirmatn, sans-serif",
+          fontWeight: 700,
+          whiteSpace: "nowrap",
+          transform: "rotate(-32deg)",
+          letterSpacing: "0.25em",
+          textShadow: "0 1px 3px rgba(0,0,0,0.6)",
+        }}>
+          {text.repeat(5)}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 const TYPE_ORDER: Record<string, number> = { animation: 1, video: 2, game: 3, quiz: 4, exercise: 5, pdf: 6 };
 const TYPE_LABELS: Record<string, string> = { animation: "انیمیشن", video: "ویدیو", game: "بازی", quiz: "آزمونک", exercise: "تکالیف", pdf: "PDF" };
 const TYPE_ICONS: Record<string, any> = { animation: Film, video: Film, game: Gamepad2, quiz: ClipboardCheck, exercise: PenLine, pdf: FileText };
@@ -453,6 +479,7 @@ export default function LessonPlayer() {
             <>
               {isVideo ? (
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#fff", position: "relative" }}>
+                  <ContentWatermark name={user?.name ?? ""} />
                   <video
                     ref={videoRef}
                     key={currentContent.url}
@@ -498,13 +525,16 @@ export default function LessonPlayer() {
                   </div>
                 </div>
               ) : (
-                <iframe
-                  ref={iframeRef}
-                  src={currentContent.url}
-                  style={{ width: "100%", flex: 1, border: "none", display: "block" }}
-                  sandbox="allow-scripts allow-same-origin allow-popups"
-                  allow="fullscreen"
-                />
+                <div style={{ flex: 1, position: "relative", display: "flex", flexDirection: "column", minHeight: 0 }}>
+                  <ContentWatermark name={user?.name ?? ""} />
+                  <iframe
+                    ref={iframeRef}
+                    src={currentContent.url}
+                    style={{ width: "100%", flex: 1, border: "none", display: "block", minHeight: 0 }}
+                    sandbox="allow-scripts allow-same-origin allow-popups"
+                    allow="fullscreen"
+                  />
+                </div>
               )}
               {contentCompleted && (
                 <div style={{ position: "absolute", top: 12, left: 12, background: "rgba(34,197,94,0.92)", backdropFilter: "blur(8px)", borderRadius: 20, padding: "6px 14px", display: "flex", alignItems: "center", gap: 6, color: "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 700, boxShadow: "0 4px 12px rgba(34,197,94,0.3)" }}>
