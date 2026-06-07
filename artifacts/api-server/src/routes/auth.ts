@@ -2,7 +2,7 @@ import { Router, type Request, type Response, type NextFunction } from "express"
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { db, usersTable, branchManagersTable } from "@workspace/db";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 const router = Router();
 
@@ -42,18 +42,30 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     (req as any).userRole = payload.role;
     (req as any).userEmail = payload.email;
 
-    // For non-admin roles: verify tokenVersion matches DB (single-session enforcement)
-    if (payload.role !== "admin") {
-      const [user] = await db
-        .select({ tokenVersion: usersTable.tokenVersion })
-        .from(usersTable)
-        .where(eq(usersTable.id, payload.id))
-        .limit(1);
+    // Admin: no session restriction
+    if (payload.role === "admin") {
+      next();
+      return;
+    }
 
-      if (!user || user.tokenVersion !== payload.tokenVersion) {
-        res.status(401).json({ error: "Session expired. Please log in again." });
-        return;
-      }
+    // Non-admin: check tokenVersion matches AND account is active
+    const [user] = await db
+      .select({ tokenVersion: usersTable.tokenVersion, status: usersTable.status })
+      .from(usersTable)
+      .where(eq(usersTable.id, payload.id))
+      .limit(1);
+
+    if (!user) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    if (user.status === "locked") {
+      res.status(423).json({ error: "account_locked" });
+      return;
+    }
+    if (user.status !== "active" || user.tokenVersion !== payload.tokenVersion) {
+      res.status(401).json({ error: "Session expired. Please log in again." });
+      return;
     }
 
     next();
@@ -82,19 +94,43 @@ router.post("/auth/login", async (req, res) => {
     return;
   }
 
+  // Locked accounts cannot log in at all
+  if (user.status === "locked") {
+    res.status(423).json({ error: "account_locked", message: "اکانت شما قفل شده است. لطفاً با مدیر سیستم تماس بگیرید." });
+    return;
+  }
+
+  if (user.status !== "active") {
+    res.status(401).json({ error: "Invalid credentials" });
+    return;
+  }
+
   const valid = await bcrypt.compare(password, user.password);
   if (!valid) {
     res.status(401).json({ error: "Invalid credentials" });
     return;
   }
 
-  // For non-admin: increment tokenVersion to invalidate all previous sessions
-  let tokenVersion = user.tokenVersion ?? 1;
-  if (user.role !== "admin") {
-    tokenVersion = tokenVersion + 1;
+  // Non-admin: if tokenVersion > 0, user is already logged in somewhere → lock account
+  if (user.role !== "admin" && (user.tokenVersion ?? 0) > 0) {
     await db
       .update(usersTable)
-      .set({ tokenVersion, lastLoginAt: new Date() } as any)
+      .set({ status: "locked", tokenVersion: 0 } as any)
+      .where(eq(usersTable.id, user.id));
+    res.status(423).json({
+      error: "account_locked",
+      message: "اکانت شما به دلیل ورود از دستگاه دیگر قفل شد. لطفاً با مدیر سیستم تماس بگیرید.",
+    });
+    return;
+  }
+
+  // Set tokenVersion = 1 for non-admin (marks session as active)
+  let tokenVersion = user.tokenVersion ?? 0;
+  if (user.role !== "admin") {
+    tokenVersion = 1;
+    await db
+      .update(usersTable)
+      .set({ tokenVersion: 1, lastLoginAt: new Date() } as any)
       .where(eq(usersTable.id, user.id));
   } else {
     await db
@@ -130,13 +166,14 @@ router.get("/auth/me", async (req, res) => {
       res.status(401).json({ error: "User not found" });
       return;
     }
-
-    // Single-session check for non-admin
+    if (user.status === "locked") {
+      res.status(423).json({ error: "account_locked" });
+      return;
+    }
     if (user.role !== "admin" && user.tokenVersion !== payload.tokenVersion) {
       res.status(401).json({ error: "Session expired. Please log in again." });
       return;
     }
-
     let branchId: number | null = null;
     if (user.role === "branch_manager") {
       const bm = await db.select().from(branchManagersTable).where(

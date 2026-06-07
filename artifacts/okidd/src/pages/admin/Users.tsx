@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import PageTopBar from "../../components/PageTopBar";
-import { Plus, Power, Edit2, Search, Download, FileText, Eye, X, BookOpen, Clock, Star, Users, Trash2, UserRound } from "lucide-react";
+import { Plus, Power, Edit2, Search, Download, FileText, Eye, X, BookOpen, Clock, Star, Users, Trash2, UserRound, LockOpen } from "lucide-react";
 
 interface User { id: number; name: string; email: string; role: string; status: string; schoolName?: string; gender?: string; nationalId?: string; }
 
@@ -228,6 +228,7 @@ export default function AdminUsers() {
   const createMut = useMutation({ mutationFn: (d: any) => api.post("/users", d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["users"] }); setShowModal(false); } });
   const updateMut = useMutation({ mutationFn: ({ id, d }: any) => api.put(`/users/${id}`, d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["users"] }); setShowModal(false); setEditing(null); } });
   const toggleMut = useMutation({ mutationFn: (id: number) => api.patch(`/users/${id}/toggle-status`), onSuccess: () => qc.invalidateQueries({ queryKey: ["users"] }) });
+  const unlockMut = useMutation({ mutationFn: (id: number) => api.patch(`/users/${id}/unlock`), onSuccess: () => qc.invalidateQueries({ queryKey: ["users"] }) });
   const deleteMut = useMutation({
     mutationFn: (id: number) => api.delete(`/users/${id}`),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["users"] }); setDeleteConfirmId(null); },
@@ -296,9 +297,15 @@ export default function AdminUsers() {
                   <span style={{ background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 999, padding: "2px 10px", fontSize: 12, color: "#d97706" }}>{roleLabel(u.role)}</span>
                 </td>
                 <td style={{ padding: "12px 16px", borderBottom: "1px solid rgba(139,92,246,0.08)" }}>
-                  <span style={{ background: u.status === "active" ? "rgba(34,197,94,0.15)" : "rgba(248,113,113,0.15)", color: u.status === "active" ? "#15803d" : "#f87171", border: `1px solid ${u.status === "active" ? "rgba(34,197,94,0.3)" : "rgba(248,113,113,0.3)"}`, borderRadius: 999, padding: "2px 10px", fontSize: 12, fontWeight: 600 }}>
-                    {u.status === "active" ? "فعال" : "غیرفعال"}
-                  </span>
+                  {u.status === "locked" ? (
+                    <span style={{ background: "rgba(234,88,12,0.18)", color: "#f97316", border: "1px solid rgba(234,88,12,0.40)", borderRadius: 999, padding: "2px 10px", fontSize: 12, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      🔒 قفل شده
+                    </span>
+                  ) : (
+                    <span style={{ background: u.status === "active" ? "rgba(34,197,94,0.15)" : "rgba(248,113,113,0.15)", color: u.status === "active" ? "#15803d" : "#f87171", border: `1px solid ${u.status === "active" ? "rgba(34,197,94,0.3)" : "rgba(248,113,113,0.3)"}`, borderRadius: 999, padding: "2px 10px", fontSize: 12, fontWeight: 600 }}>
+                      {u.status === "active" ? "فعال" : "غیرفعال"}
+                    </span>
+                  )}
                 </td>
                 <td style={{ padding: "12px 16px", borderBottom: "1px solid rgba(139,92,246,0.08)" }}>
                   <div style={{ display: "flex", gap: 6 }}>
@@ -306,7 +313,11 @@ export default function AdminUsers() {
                       <button onClick={() => setViewDetailId(u.id)} title="مشاهده جزئیات" style={{ background: "rgba(59,130,246,0.15)", border: "1px solid rgba(59,130,246,0.3)", borderRadius: 8, color: "#60a5fa", padding: "6px 10px", cursor: "pointer" }}><Eye size={14} /></button>
                     )}
                     <button onClick={() => openEdit(u)} style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.3)", borderRadius: 8, color: "#d97706", padding: "6px 10px", cursor: "pointer" }}><Edit2 size={14} /></button>
-                    <button onClick={() => toggleMut.mutate(u.id)} style={{ background: u.status === "active" ? "rgba(248,113,113,0.15)" : "rgba(34,197,94,0.15)", border: `1px solid ${u.status === "active" ? "rgba(248,113,113,0.3)" : "rgba(34,197,94,0.3)"}`, borderRadius: 8, color: u.status === "active" ? "#f87171" : "#15803d", padding: "6px 10px", cursor: "pointer" }}><Power size={14} /></button>
+                    {u.status === "locked" ? (
+                      <button onClick={() => unlockMut.mutate(u.id)} title="آزادسازی اکانت" style={{ background: "rgba(234,88,12,0.18)", border: "1px solid rgba(234,88,12,0.4)", borderRadius: 8, color: "#f97316", padding: "6px 10px", cursor: "pointer", fontWeight: 700 }}><LockOpen size={14} /></button>
+                    ) : (
+                      <button onClick={() => toggleMut.mutate(u.id)} style={{ background: u.status === "active" ? "rgba(248,113,113,0.15)" : "rgba(34,197,94,0.15)", border: `1px solid ${u.status === "active" ? "rgba(248,113,113,0.3)" : "rgba(34,197,94,0.3)"}`, borderRadius: 8, color: u.status === "active" ? "#f87171" : "#15803d", padding: "6px 10px", cursor: "pointer" }}><Power size={14} /></button>
+                    )}
                     <button onClick={() => setDeleteConfirmId(u.id)} title="حذف کاربر" style={{ background: "rgba(248,113,113,0.12)", border: "1px solid rgba(248,113,113,0.3)", borderRadius: 8, color: "#f87171", padding: "6px 10px", cursor: "pointer" }}><Trash2 size={14} /></button>
                   </div>
                 </td>

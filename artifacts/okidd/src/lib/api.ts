@@ -17,7 +17,14 @@ export async function apiRequest<T>(
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(err.error || res.statusText);
+    // Session expired or account locked mid-session → auto logout
+    if ((res.status === 401 || res.status === 423) && token) {
+      useAuthStore.getState().logout();
+    }
+    const error = new Error(err.error || res.statusText) as Error & { status: number; body: any };
+    error.status = res.status;
+    error.body = err;
+    throw error;
   }
   if (res.status === 204) return undefined as T;
   return res.json();
@@ -36,6 +43,9 @@ export const api = {
     const res = await fetch(`${BASE}${path}`, { method: "POST", headers, body: formData });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ error: res.statusText }));
+      if ((res.status === 401 || res.status === 423) && token) {
+        useAuthStore.getState().logout();
+      }
       throw new Error(err.error || res.statusText);
     }
     return res.json();

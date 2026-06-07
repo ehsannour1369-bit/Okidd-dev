@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "../store/auth";
 import { api } from "../lib/api";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Lock } from "lucide-react";
 
 function InteractiveEye({ isRight = false }: { isRight?: boolean }) {
   const eyeRef = useRef<HTMLDivElement>(null);
@@ -41,7 +41,6 @@ function InteractiveEye({ isRight = false }: { isRight?: boolean }) {
         flexShrink: 0,
       }}
     >
-      {/* Pupil */}
       <div
         style={{
           position: "absolute",
@@ -56,18 +55,14 @@ function InteractiveEye({ isRight = false }: { isRight?: boolean }) {
           transition: "transform 0.06s ease-out",
         }}
       >
-        {/* Shine dot */}
         <div style={{
           position: "absolute",
-          top: 7,
-          left: 9,
-          width: 10,
-          height: 10,
+          top: 7, left: 9,
+          width: 10, height: 10,
           borderRadius: "50%",
           background: "rgba(255,255,255,0.75)",
         }} />
       </div>
-      {/* Subtle eyelid shadow at top */}
       <div style={{
         position: "absolute",
         top: 0, left: 0, right: 0,
@@ -94,6 +89,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [isLocked, setIsLocked] = useState(false);
   const [loading, setLoading] = useState(false);
   const { setAuth } = useAuthStore();
   const [, navigate] = useLocation();
@@ -102,6 +98,7 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setIsLocked(false);
     try {
       const res = await api.post<{ user: any; token: string }>("/auth/login", { username, password });
       setAuth(res.user, res.token);
@@ -114,7 +111,11 @@ export default function Login() {
       else if (role === "consultant") navigate("/consultant");
       else navigate("/student");
     } catch (err: any) {
-      setError(err.message || "خطا در ورود");
+      if (err.message === "account_locked") {
+        setIsLocked(true);
+      } else {
+        setError(err.message || "خطا در ورود");
+      }
     } finally {
       setLoading(false);
     }
@@ -126,7 +127,6 @@ export default function Login() {
       background: "#0d0a1a", fontFamily: "Vazirmatn, sans-serif", direction: "rtl",
       position: "relative",
     }}>
-      {/* Ambient glow blobs */}
       <div style={{ position: "absolute", top: "18%", right: "18%", width: 320, height: 320, borderRadius: "50%", background: "rgba(124,58,237,0.14)", filter: "blur(90px)", pointerEvents: "none" }} />
       <div style={{ position: "absolute", bottom: "18%", left: "18%", width: 220, height: 220, borderRadius: "50%", background: "rgba(168,85,247,0.10)", filter: "blur(70px)", pointerEvents: "none" }} />
       <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 400, height: 400, borderRadius: "50%", background: "rgba(109,40,217,0.06)", filter: "blur(100px)", pointerEvents: "none" }} />
@@ -134,13 +134,15 @@ export default function Login() {
       <div style={{
         width: "90%", maxWidth: 420,
         background: "rgba(30,18,60,0.88)",
-        border: "1px solid rgba(139,92,246,0.32)",
+        border: `1px solid ${isLocked ? "rgba(234,88,12,0.55)" : "rgba(139,92,246,0.32)"}`,
         borderRadius: 28, padding: "40px 40px 36px",
         backdropFilter: "blur(20px)",
-        boxShadow: "0 24px 64px rgba(0,0,0,0.55), 0 0 48px rgba(124,58,237,0.18)",
+        boxShadow: isLocked
+          ? "0 24px 64px rgba(0,0,0,0.55), 0 0 48px rgba(234,88,12,0.22)"
+          : "0 24px 64px rgba(0,0,0,0.55), 0 0 48px rgba(124,58,237,0.18)",
         position: "relative", zIndex: 1,
+        transition: "border-color 0.3s, box-shadow 0.3s",
       }}>
-        {/* Interactive Eyes logo */}
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <div style={{ marginBottom: 18 }}>
             <InteractiveEyes />
@@ -148,6 +150,27 @@ export default function Login() {
           <h1 style={{ fontSize: 28, fontWeight: 800, color: "#f8f5ff", margin: 0 }}>اوکید</h1>
           <p style={{ color: "#8b5cf6", fontSize: 14, marginTop: 6, marginBottom: 0 }}>پلتفرم آموزشی هوشمند</p>
         </div>
+
+        {/* Account locked banner */}
+        {isLocked && (
+          <div style={{
+            background: "rgba(234,88,12,0.15)",
+            border: "1px solid rgba(234,88,12,0.45)",
+            borderRadius: 14, padding: "16px 18px",
+            marginBottom: 20, textAlign: "center",
+          }}>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(234,88,12,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Lock size={22} color="#f97316" />
+              </div>
+            </div>
+            <div style={{ fontWeight: 700, color: "#f97316", fontSize: 15, marginBottom: 6 }}>اکانت شما قفل شده است</div>
+            <div style={{ color: "#fed7aa", fontSize: 13, lineHeight: 1.7 }}>
+              ورود از دستگاه دیگری تشخیص داده شد.<br />
+              لطفاً با مدیر سیستم تماس بگیرید تا اکانت شما آزاد شود.
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: 16 }}>

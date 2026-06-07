@@ -103,6 +103,20 @@ router.patch("/users/:id/toggle-status", async (req, res) => {
   res.json(safeUser);
 });
 
+// Unlock a locked account — admin only action
+// Resets status to active and clears tokenVersion so user can log in fresh
+router.patch("/users/:id/unlock", async (req, res) => {
+  const id = parseInt(req.params.id);
+  const [user] = await db
+    .update(usersTable)
+    .set({ status: "active", tokenVersion: 0 } as any)
+    .where(eq(usersTable.id, id))
+    .returning();
+  if (!user) { res.status(404).json({ error: "Not found" }); return; }
+  const { password: _pw, ...safeUser } = user;
+  res.json(safeUser);
+});
+
 router.put("/users/:id/teacher-classes", async (req, res) => {
   const teacherId = parseInt(req.params.id);
   const { classIds } = req.body as { classIds: number[] };
