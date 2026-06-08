@@ -14,7 +14,7 @@ const CFG: Record<string, {
 }> = {
   branch_manager: { accent: "#0d9488", dark: "#0f766e", dashPath: "/branch",     notifPath: "/branch/notifications",    hasBell: true,  walletPath: "/branch/wallet"  },
   teacher:        { accent: "#f59e0b", dark: "#d97706", dashPath: "/teacher",    notifPath: "/teacher/notifications",   hasBell: true  },
-  parent:         { accent: "#f43f5e", dark: "#e11d48", dashPath: "/parent",     notifPath: "/parent/notifications",    hasBell: true  },
+  parent:         { accent: "#f43f5e", dark: "#e11d48", dashPath: "/parent",     notifPath: "/parent/notifications",    hasBell: true  }, // overridden below for male parents
   consultant:     { accent: "#06b6d4", dark: "#0891b2", dashPath: "/consultant", notifPath: "/consultant/schedule",     hasBell: false },
   admin:          { accent: "#f59e0b", dark: "#d97706", dashPath: "/admin",      notifPath: "",                          hasBell: false },
   school_manager: { accent: "#6366f1", dark: "#4f46e5", dashPath: "/school",     notifPath: "/school/notifications",    hasBell: true,  walletPath: "/school/wallet"  },
@@ -56,7 +56,10 @@ export default function PageTopBar() {
   const cfg = CFG[user.role];
   if (!cfg) return null;
 
-  const { accent, dark, dashPath, notifPath, hasBell, walletPath } = cfg;
+  const isMaleParent = user.role === "parent" && user.gender !== "female";
+  const accent = isMaleParent ? "#3b82f6" : cfg.accent;
+  const dark   = isMaleParent ? "#2563eb" : cfg.dark;
+  const { dashPath, notifPath, hasBell, walletPath } = cfg;
   const isOnSubPage   = location !== dashPath;
   const isOnNotifPage = location === notifPath;
 
