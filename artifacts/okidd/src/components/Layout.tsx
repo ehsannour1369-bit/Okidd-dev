@@ -379,7 +379,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   return (
     <SidebarContext.Provider value={{ openSidebar: () => setSidebarOpen(true) }}>
-    <div style={{ display: "flex", minHeight: "100vh", direction: "rtl" }}>
+    <div style={{ display: "flex", height: "100vh", overflow: "hidden", direction: "rtl" }}>
 
       {/* ═══════════════ DESKTOP SIDEBAR (admin only) ═══════════════ */}
       {showDesktopSidebar && (
@@ -547,17 +547,15 @@ export default function Layout({ children }: { children: ReactNode }) {
       {/* ═══════════════ MAIN CONTENT ═══════════════ */}
       <div style={{
         marginRight: showDesktopSidebar ? 240 : 0,
-        flex: 1, minHeight: "100vh",
+        flex: 1, height: "100vh", overflowY: "auto", overflowX: "hidden",
         width: showDesktopSidebar ? "calc(100% - 240px)" : "100%",
-        maxWidth: "100%", overflowX: "hidden",
+        maxWidth: "100%",
         background: isStudent
           ? (isGirl
             ? "linear-gradient(135deg, #4facfe 0%, #c084fc 38%, #f472b6 72%, #fb7185 100%)"
             : "linear-gradient(135deg, #4facfe 0%, #818cf8 42%, #a78bfa 72%, #c084fc 100%)")
           : theme.dashBg,
       }}>
-
-
         {/* Page content */}
         <div style={{ padding: (isStudent || isTeacherOrParentDash) ? 0 : (isMobile ? "12px" : "24px") }}>{children}</div>
       </div>
