@@ -9,6 +9,9 @@ export const classSessionsTable = pgTable("class_sessions", {
   title: text("title").notNull(),
   roomCode: text("room_code").notNull(),
   status: text("status").notNull().default("active"), // "active" | "ended"
+  skyroomRoomId: integer("skyroom_room_id"),
+  skyroomPresenterUrl: text("skyroom_presenter_url"),
+  skyroomAttendeeUrl: text("skyroom_attendee_url"),
   startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
   endedAt: timestamp("ended_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

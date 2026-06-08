@@ -1,7 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import { db, usersTable, schoolsTable, classStudentsTable, classTeachersTable, classBooksTable, classesTable, gradesTable, gradeLevelsTable, branchesTable, booksTable, presenceLogTable, studentProgressTable, lessonsTable } from "@workspace/db";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, and } from "drizzle-orm";
 
 const router = Router();
 

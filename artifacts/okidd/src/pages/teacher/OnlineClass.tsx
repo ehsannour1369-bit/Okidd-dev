@@ -150,7 +150,7 @@ export default function TeacherOnlineClass() {
                   🕐 شروع: {new Date(activeSession.startedAt).toLocaleTimeString("fa-IR")}
                 </div>
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                  <Btn onClick={() => window.open(`${activeSession.videoConferenceUrl || "https://meet.jit.si"}/${activeSession.roomCode}`, "_blank")} color="#10b981">
+                  <Btn onClick={() => window.open(activeSession.skyroomPresenterUrl || activeSession.skyroomAttendeeUrl || `${activeSession.videoConferenceUrl || "https://meet.jit.si"}/${activeSession.roomCode}`, "_blank")} color="#10b981">
                     <ExternalLink size={16} /> ورود به کلاس
                   </Btn>
                   <Btn ghost color="#ef4444" danger onClick={() => setConfirmEnd(true)}>

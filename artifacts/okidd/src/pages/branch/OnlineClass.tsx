@@ -234,7 +234,7 @@ export default function BranchOnlineClass() {
                     </div>
                     <SessionStatusBadge status={s.status} />
                     {s.status === "active" && (
-                      <Btn small onClick={() => window.open(`${s.videoConferenceUrl || "https://meet.jit.si"}/${s.roomCode}`, "_blank")}>
+                      <Btn small onClick={() => window.open(s.skyroomAttendeeUrl || `${s.videoConferenceUrl || "https://meet.jit.si"}/${s.roomCode}`, "_blank")}>
                         <Video size={14} /> ورود به جلسه
                       </Btn>
                     )}

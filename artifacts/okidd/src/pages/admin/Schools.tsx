@@ -386,6 +386,7 @@ function SchoolModal({ editing, onClose, onSuccess }: {
   const [form, setForm] = useState({
     name: editing?.name ?? "", address: editing?.address ?? "", phone: editing?.phone ?? "",
     videoConferenceUrl: editing?.videoConferenceUrl ?? "",
+    skyroomApiKey: "",
     managerName: editing?.managerName ?? "",
     managerPhone: editing?.managerPhone ?? "",
     managerNationalId: editing?.managerNationalId ?? "",
@@ -407,7 +408,10 @@ function SchoolModal({ editing, onClose, onSuccess }: {
     if (!form.name) { setError("نام مدرسه الزامی است"); return; }
     setLoading(true); setError("");
     try {
-      const payload: any = { ...form };
+      const { skyroomApiKey, ...formRest } = form;
+      const payload: any = { ...formRest };
+      if (skyroomApiKey === "clear") payload.skyroomApiKey = null;
+      else if (skyroomApiKey) payload.skyroomApiKey = skyroomApiKey;
       if (selectedManagerUserId && selectedManagerUserId > 0) payload.selectedManagerUserId = selectedManagerUserId;
       let result: any;
       if (editing) result = await api.put(`/schools/${editing.id}`, payload) as any;
@@ -447,6 +451,14 @@ function SchoolModal({ editing, onClose, onSuccess }: {
         <Field label="تلفن" value={form.phone} onChange={f("phone")} type="tel" placeholder="۰۲۱..." />
         <div style={{ gridColumn: "1/-1" }}>
           <Field label="آدرس سرور کلاس آنلاین" value={form.videoConferenceUrl} onChange={f("videoConferenceUrl")} placeholder="مثال: https://meet.myschool.ir (خالی = Jitsi پیش‌فرض)" />
+        </div>
+        <div style={{ gridColumn: "1/-1" }}>
+          <Field label="کلید API اسکای‌روم" value={form.skyroomApiKey} onChange={f("skyroomApiKey")} placeholder={editing ? "برای تغییر کلید جدید وارد کنید — خالی = بدون تغییر" : "مثال: API-XXXX-XXXX (برای ساخت اتوماتیک اتاق Skyroom)"} />
+          {editing && (
+            <div style={{ fontSize: 12, color: "#6b7280", marginTop: 4, paddingRight: 2 }}>
+              🔒 کلید فعلی به دلایل امنیتی نمایش داده نمی‌شود. برای پاک کردن آن، مقدار «clear» را وارد کنید.
+            </div>
+          )}
         </div>
       </div>
 

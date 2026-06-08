@@ -8,6 +8,11 @@ import { eq, count, inArray, or } from "drizzle-orm";
 
 const router = Router();
 
+function safeSchool<T extends { skyroomApiKey?: unknown }>(s: T) {
+  const { skyroomApiKey: _key, ...rest } = s;
+  return rest;
+}
+
 async function getSchoolCounts(schoolId: number) {
   const branches = await db.select().from(branchesTable).where(eq(branchesTable.schoolId, schoolId));
   const branchIds = branches.map(b => b.id);
@@ -68,7 +73,7 @@ router.get("/schools", async (req, res) => {
     const counts = await getSchoolCounts(s.id);
     const totalPackages = 0;
     const branchDetails = await getSchoolBranchDetails(s.id);
-    return { ...s, ...counts, totalPackages, branchDetails };
+    return { ...safeSchool(s), ...counts, totalPackages, branchDetails };
   }));
   res.json(enriched);
 });
@@ -86,7 +91,7 @@ router.get("/schools/:id", async (req, res) => {
     const [u] = await db.select().from(usersTable).where(eq(usersTable.id, school.managerUserId));
     if (u) { const { password: _pw, ...safe } = u; manager = safe; }
   }
-  res.json({ ...school, ...counts, totalPackages, branchDetails, manager });
+  res.json({ ...safeSchool(school), ...counts, totalPackages, branchDetails, manager });
 });
 
 // ─── Create ───────────────────────────────────────────────────────────────────
@@ -140,7 +145,7 @@ router.post("/schools", async (req, res) => {
   const counts = await getSchoolCounts(school.id);
   const totalPackages = 0;
   const branchDetails = await getSchoolBranchDetails(school.id);
-  res.status(201).json({ ...school, ...counts, totalPackages, branchDetails });
+  res.status(201).json({ ...safeSchool(school), ...counts, totalPackages, branchDetails });
 });
 
 // ─── Update ───────────────────────────────────────────────────────────────────
@@ -155,7 +160,7 @@ router.put("/schools/:id", async (req, res) => {
   const counts = await getSchoolCounts(id);
   const totalPackages = 0;
   const branchDetails = await getSchoolBranchDetails(id);
-  res.json({ ...school, ...counts, totalPackages, branchDetails });
+  res.json({ ...safeSchool(school), ...counts, totalPackages, branchDetails });
 });
 
 // ─── Toggle status ────────────────────────────────────────────────────────────

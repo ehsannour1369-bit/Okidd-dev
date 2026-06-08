@@ -25,7 +25,7 @@ router.get("/class-schedules", async (req, res) => {
   }
 
   const result = rows.map(r => ({ ...r, teacherName: r.teacherId ? teacherMap[r.teacherId] ?? null : null }));
-  res.json(result);
+  return res.json(result);
 });
 
 // POST /class-schedules
@@ -45,7 +45,7 @@ router.post("/class-schedules", async (req, res) => {
     academicYear: academicYear ?? "1404",
   }).returning();
 
-  res.status(201).json(row);
+  return res.status(201).json(row);
 });
 
 // PUT /class-schedules/:id
@@ -66,7 +66,7 @@ router.put("/class-schedules/:id", async (req, res) => {
     .returning();
 
   if (!row) return res.status(404).json({ error: "Not found" });
-  res.json(row);
+  return res.json(row);
 });
 
 // DELETE /class-schedules/:id

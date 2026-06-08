@@ -98,7 +98,7 @@ export default function StudentOnlineClass() {
           </div>
           <p style={{ fontSize: 14, color: "#047857", margin: "0 0 18px", fontWeight: 700 }}>{activeSession.title}</p>
           <button
-            onClick={() => window.open(`${activeSession.videoConferenceUrl || "https://meet.jit.si"}/${activeSession.roomCode}`, "_blank")}
+            onClick={() => window.open(activeSession.skyroomAttendeeUrl || `${activeSession.videoConferenceUrl || "https://meet.jit.si"}/${activeSession.roomCode}`, "_blank")}
             style={{
               display: "inline-flex", alignItems: "center", gap: 10,
               padding: "13px 28px", borderRadius: 14,

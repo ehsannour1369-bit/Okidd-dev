@@ -2,18 +2,75 @@ import { Router } from "express";
 import { db, classSessionsTable, usersTable, classesTable, gradesTable, gradeLevelsTable, branchesTable, schoolsTable } from "@workspace/db";
 import { eq, and, desc } from "drizzle-orm";
 
-async function getSchoolVideoUrl(classId: number): Promise<string | null> {
+async function getSchoolConfig(classId: number): Promise<{ videoConferenceUrl: string | null; skyroomApiKey: string | null }> {
   const [cls] = await db.select({ gradeId: classesTable.gradeId }).from(classesTable).where(eq(classesTable.id, classId)).limit(1);
-  if (!cls) return null;
+  if (!cls) return { videoConferenceUrl: null, skyroomApiKey: null };
   const [grade] = await db.select({ gradeLevelId: gradesTable.gradeLevelId }).from(gradesTable).where(eq(gradesTable.id, cls.gradeId)).limit(1);
-  if (!grade) return null;
+  if (!grade) return { videoConferenceUrl: null, skyroomApiKey: null };
   const [gradeLevel] = await db.select({ branchId: gradeLevelsTable.branchId }).from(gradeLevelsTable).where(eq(gradeLevelsTable.id, grade.gradeLevelId)).limit(1);
-  if (!gradeLevel) return null;
+  if (!gradeLevel) return { videoConferenceUrl: null, skyroomApiKey: null };
   const [branch] = await db.select({ schoolId: branchesTable.schoolId }).from(branchesTable).where(eq(branchesTable.id, gradeLevel.branchId)).limit(1);
-  if (!branch) return null;
-  const [school] = await db.select({ videoConferenceUrl: schoolsTable.videoConferenceUrl }).from(schoolsTable).where(eq(schoolsTable.id, branch.schoolId)).limit(1);
-  return school?.videoConferenceUrl ?? null;
+  if (!branch) return { videoConferenceUrl: null, skyroomApiKey: null };
+  const [school] = await db
+    .select({ videoConferenceUrl: schoolsTable.videoConferenceUrl, skyroomApiKey: schoolsTable.skyroomApiKey })
+    .from(schoolsTable)
+    .where(eq(schoolsTable.id, branch.schoolId))
+    .limit(1);
+  return {
+    videoConferenceUrl: school?.videoConferenceUrl ?? null,
+    skyroomApiKey: school?.skyroomApiKey ?? null,
+  };
 }
+
+// ─── Skyroom helpers ──────────────────────────────────────────────────────────
+
+async function callSkyroom(apiKey: string, action: string, params: Record<string, unknown>): Promise<any> {
+  const res = await fetch(`https://skyroom.online/api/${apiKey}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, params }),
+  });
+  if (!res.ok) throw new Error(`Skyroom HTTP ${res.status}`);
+  const data = await res.json() as { ok: boolean; result: any; error_code?: number; error_message?: string };
+  if (!data.ok) throw new Error(data.error_message ?? `Skyroom error code ${data.error_code}`);
+  return data.result;
+}
+
+async function createSkyroomSession(
+  apiKey: string,
+  roomCode: string,
+  title: string,
+): Promise<{ roomId: number; presenterUrl: string; attendeeUrl: string }> {
+  const room = await callSkyroom(apiKey, "createRoom", {
+    name: roomCode,
+    title,
+    guest_login: 1,
+    max_users: 100,
+    active: 1,
+  }) as { id: number };
+
+  const presenterUrl = await callSkyroom(apiKey, "getLoginUrl", {
+    room_id: room.id,
+    user_id: "teacher_okidd",
+    user_fname: "معلم",
+    user_lname: "",
+    user_role: 1,
+    language: "fa",
+  }) as string;
+
+  const attendeeUrl = await callSkyroom(apiKey, "getLoginUrl", {
+    room_id: room.id,
+    user_id: "student_okidd",
+    user_fname: "دانش‌آموز",
+    user_lname: "",
+    user_role: 2,
+    language: "fa",
+  }) as string;
+
+  return { roomId: room.id, presenterUrl, attendeeUrl };
+}
+
+// ─── Router ───────────────────────────────────────────────────────────────────
 
 const router = Router();
 
@@ -34,8 +91,8 @@ router.get("/class-sessions", async (req, res) => {
     : [];
   const tMap = Object.fromEntries(teachers.map(t => [t.id, t.name]));
 
-  const videoConferenceUrl = await getSchoolVideoUrl(parseInt(classId));
-  res.json(rows.map(r => ({ ...r, teacherName: tMap[r.teacherId] ?? null, videoConferenceUrl })));
+  const { videoConferenceUrl } = await getSchoolConfig(parseInt(classId));
+  return res.json(rows.map(r => ({ ...r, teacherName: tMap[r.teacherId] ?? null, videoConferenceUrl })));
 });
 
 // GET /class-sessions/active?classId=X
@@ -54,8 +111,8 @@ router.get("/class-sessions/active", async (req, res) => {
     .limit(1);
 
   if (!row) { res.json(null); return; }
-  const videoConferenceUrl = await getSchoolVideoUrl(parseInt(classId));
-  res.json({ ...row, videoConferenceUrl });
+  const { videoConferenceUrl } = await getSchoolConfig(parseInt(classId));
+  return res.json({ ...row, videoConferenceUrl });
 });
 
 // POST /class-sessions — teacher starts a session
@@ -65,7 +122,6 @@ router.post("/class-sessions", async (req, res) => {
     return res.status(400).json({ error: "classId, teacherId, title required" });
   }
 
-  // check for already-active session in this class
   const [existing] = await db
     .select()
     .from(classSessionsTable)
@@ -77,7 +133,23 @@ router.post("/class-sessions", async (req, res) => {
 
   if (existing) return res.status(409).json({ error: "کلاس آنلاین فعالی برای این کلاس وجود دارد" });
 
-  const roomCode = `okidd-class-${classId}-${Date.now()}`;
+  const roomCode = `okidd-${classId}-${Date.now()}`;
+
+  let skyroomRoomId: number | null = null;
+  let skyroomPresenterUrl: string | null = null;
+  let skyroomAttendeeUrl: string | null = null;
+
+  const { skyroomApiKey } = await getSchoolConfig(Number(classId));
+  if (skyroomApiKey) {
+    try {
+      const skyroom = await createSkyroomSession(skyroomApiKey, roomCode, title);
+      skyroomRoomId = skyroom.roomId;
+      skyroomPresenterUrl = skyroom.presenterUrl;
+      skyroomAttendeeUrl = skyroom.attendeeUrl;
+    } catch (err: any) {
+      (req as any).log?.warn?.({ err: err?.message }, "Skyroom room creation failed, using URL fallback");
+    }
+  }
 
   const [row] = await db.insert(classSessionsTable).values({
     classId: Number(classId),
@@ -85,10 +157,13 @@ router.post("/class-sessions", async (req, res) => {
     title,
     roomCode,
     status: "active",
+    skyroomRoomId,
+    skyroomPresenterUrl,
+    skyroomAttendeeUrl,
     endedAt: null,
   }).returning();
 
-  res.status(201).json(row);
+  return res.status(201).json(row);
 });
 
 // PATCH /class-sessions/:id/end
@@ -101,7 +176,7 @@ router.patch("/class-sessions/:id/end", async (req, res) => {
     .returning();
 
   if (!row) return res.status(404).json({ error: "Not found" });
-  res.json(row);
+  return res.json(row);
 });
 
 export default router;
