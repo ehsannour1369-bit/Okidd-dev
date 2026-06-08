@@ -115,26 +115,13 @@ router.post("/auth/login", async (req, res) => {
     return;
   }
 
-  // Non-admin: if tokenVersion > 0, user is already logged in somewhere → lock account
-  if (user.role !== "admin" && (user.tokenVersion ?? 0) > 0) {
-    await db
-      .update(usersTable)
-      .set({ status: "locked", tokenVersion: 0 } as any)
-      .where(eq(usersTable.id, user.id));
-    res.status(423).json({
-      error: "account_locked",
-      message: "اکانت شما به دلیل ورود از دستگاه دیگر قفل شد. لطفاً با مدیر سیستم تماس بگیرید.",
-    });
-    return;
-  }
-
-  // Set tokenVersion = 1 for non-admin (marks session as active)
+  // Non-admin: increment tokenVersion to invalidate any existing session on another device
   let tokenVersion = user.tokenVersion ?? 0;
   if (user.role !== "admin") {
-    tokenVersion = 1;
+    tokenVersion = tokenVersion + 1;
     await db
       .update(usersTable)
-      .set({ tokenVersion: 1, lastLoginAt: new Date() } as any)
+      .set({ tokenVersion, lastLoginAt: new Date() } as any)
       .where(eq(usersTable.id, user.id));
   } else {
     await db
