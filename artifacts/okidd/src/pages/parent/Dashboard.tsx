@@ -240,7 +240,9 @@ export default function ParentDashboard() {
               {/* School logo banner for selected child */}
               {childSchoolInfo?.logoUrl && (
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, padding: "10px 14px", background: "rgba(255,255,255,0.62)", border: "1.5px solid rgba(200,190,255,0.28)", borderRadius: 16, backdropFilter: "blur(12px)", ...cardAnim(3) }}>
-                  <img src={childSchoolInfo.logoUrl} alt="لوگوی مدرسه" style={{ width: 44, height: 44, borderRadius: 12, objectFit: "contain", background: "white", border: "1px solid rgba(0,0,0,0.06)", flexShrink: 0 }} />
+                  <div style={{ width: 44, height: 44, borderRadius: "50%", overflow: "hidden", background: "white", border: "1px solid rgba(0,0,0,0.06)", flexShrink: 0 }}>
+                    <img src={childSchoolInfo.logoUrl} alt="لوگوی مدرسه" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  </div>
                   <div>
                     <div style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600 }}>مدرسه</div>
                     <div style={{ fontSize: 14, fontWeight: 800, color: "#1e1b4b" }}>{childSchoolInfo.name}</div>

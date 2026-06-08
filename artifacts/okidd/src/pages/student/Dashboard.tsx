@@ -270,8 +270,8 @@ export default function StudentDashboard() {
         {/* ── Logo banner ── */}
         {schoolInfo?.logoUrl && (
           <div style={{ display: "flex", justifyContent: "center", paddingTop: 14, paddingBottom: 0 }}>
-            <div style={{ ...headerAnim, width: 72, height: 72, borderRadius: 20, background: "rgba(255,255,255,0.88)", backdropFilter: "blur(16px)", border: "2px solid rgba(255,255,255,0.95)", boxShadow: "0 6px 28px rgba(0,0,0,0.09)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <img src={schoolInfo.logoUrl} alt="لوگو" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+            <div style={{ ...headerAnim, width: 72, height: 72, borderRadius: "50%", background: "rgba(255,255,255,0.88)", backdropFilter: "blur(16px)", border: "2px solid rgba(255,255,255,0.95)", boxShadow: "0 6px 28px rgba(0,0,0,0.09)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <img src={schoolInfo.logoUrl} alt="لوگو" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
           </div>
         )}
@@ -603,8 +603,8 @@ export default function StudentDashboard() {
       {introPhase !== 'done' && (
         <div style={{ position: "fixed", inset: 0, zIndex: 99, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none", gap: 20, animation: introPhase === 'animate' ? 'splash-exit 1.3s cubic-bezier(0.4,0,0.2,1) forwards' : 'none' }}>
           {schoolInfo?.logoUrl && (
-            <div style={{ width: 110, height: 110, borderRadius: 28, background: "rgba(255,255,255,0.82)", backdropFilter: "blur(18px)", border: "2px solid rgba(255,255,255,0.92)", boxShadow: "0 8px 36px rgba(0,0,0,0.10)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <img src={schoolInfo.logoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+            <div style={{ width: 110, height: 110, borderRadius: "50%", background: "rgba(255,255,255,0.82)", backdropFilter: "blur(18px)", border: "2px solid rgba(255,255,255,0.92)", boxShadow: "0 8px 36px rgba(0,0,0,0.10)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <img src={schoolInfo.logoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
           )}
           <div className="glow-greeting" style={{ fontWeight: 800, fontSize: 18, textAlign: "center", lineHeight: 1.7, padding: "0 24px" }}>
