@@ -198,7 +198,8 @@ router.get("/student-lesson-scores", async (req, res) => {
   for (const p of progress) {
     if (p.bookId === bid && lessonScores.has(p.lessonId)) {
       const current = lessonStageMap.get(p.lessonId) ?? "none";
-      const pStage = (p as any).lessonStage ?? (p.completed ? "completed" : "none");
+      const rawStage = (p as any).lessonStage;
+      const pStage = (rawStage && rawStage !== "none") ? rawStage : (p.completed ? "completed" : "none");
       if (STAGE_ORDER.indexOf(pStage) > STAGE_ORDER.indexOf(current)) {
         lessonStageMap.set(p.lessonId, pStage);
       }

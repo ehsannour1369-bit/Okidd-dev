@@ -296,7 +296,7 @@ export default function LessonPlayer() {
     const totalScore = sessionScore + 10;
     api.post("/student-progress", {
       studentId: user.id, lessonId: currentLesson.id, bookId,
-      completed: true, score: totalScore,
+      completed: true, score: totalScore, lessonStage: "completed",
     }).catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finished]);

@@ -99,7 +99,8 @@ export interface LessonScore {
 }
 
 export function LessonStarRow({ lesson }: { lesson: LessonScore }) {
-  const stage: LessonStage = lesson.lessonStage ?? (lesson.completed ? "completed" : "none");
+  const rawStage = lesson.lessonStage;
+  const stage: LessonStage = (rawStage && rawStage !== "none") ? rawStage : (lesson.completed ? "completed" : "none");
   const fullyDone = stage === "completed";
   const stars = scoreToStars(lesson.score, fullyDone);
 
