@@ -23,6 +23,7 @@ interface TeacherAssignment {
 
 interface ClassSession {
   id: number;
+  teacherId: number;
   title: string;
   status: string;
   startedAt: string;
@@ -55,14 +56,14 @@ export default function StudentTeacher() {
     enabled: classes.length > 0,
   });
 
-  const { data: sessionsMap = {}, isLoading: sessionsLoading } = useQuery<Record<number, ClassSession | null>>({
-    queryKey: ["class-sessions-latest", classes.map((c: any) => c.id).join(",")],
+  const { data: sessionsMap = {}, isLoading: sessionsLoading } = useQuery<Record<number, ClassSession[]>>({
+    queryKey: ["class-sessions-all", classes.map((c: any) => c.id).join(",")],
     queryFn: async () => {
-      const map: Record<number, ClassSession | null> = {};
+      const map: Record<number, ClassSession[]> = {};
       await Promise.all(
         classes.map(async (cls: any) => {
           const sessions = await api.get(`/class-sessions?classId=${cls.id}`) as ClassSession[];
-          map[cls.id] = sessions[0] ?? null;
+          map[cls.id] = sessions; // keep all — sorted desc by startedAt from server
         })
       );
       return map;
@@ -76,12 +77,14 @@ export default function StudentTeacher() {
     return <div style={{ color: "#5b21b6", textAlign: "center", padding: 40 }}>در حال بارگذاری...</div>;
   }
 
-  // Build list: one card per teacher-book assignment, grouped by class
+  // One card per teacher-book assignment; find each teacher's own latest session
   const cards: (TeacherAssignment & { className: string; lastSession: ClassSession | null })[] = [];
   classes.forEach((cls: any) => {
     const teachers = teachersMap[cls.id] || [];
-    const lastSession = sessionsMap[cls.id] ?? null;
+    const classSessions = sessionsMap[cls.id] || [];
     teachers.forEach((t: TeacherAssignment) => {
+      // Most recent session by THIS teacher in this class
+      const lastSession = classSessions.find(s => s.teacherId === t.teacherId) ?? null;
       cards.push({ ...t, className: cls.name, lastSession });
     });
   });
