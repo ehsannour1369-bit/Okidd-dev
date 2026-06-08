@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
+import { useAuthStore } from "../../store/auth";
 import PageTopBar from "../../components/PageTopBar";
 import { showToast } from "../../lib/toast";
 import { Plus, Edit2, Trash2, Upload, Film, Gamepad2, ClipboardCheck, PenLine, X } from "lucide-react";
@@ -58,11 +59,19 @@ function DropZone({ onUploaded, currentUrl }: { onUploaded: (url: string) => voi
   const doUpload = useCallback(async (file: File) => {
     setUploading(true);
     try {
+      const token = useAuthStore.getState().token;
       const fd = new FormData();
       fd.append("file", file);
-      const res = await fetch("/api/content/upload", { method: "POST", body: fd });
+      const res = await fetch("/api/content/upload", {
+        method: "POST",
+        body: fd,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       const data = await res.json();
       if (data.url) { onUploaded(data.url); setFileName(file.name); }
+      else { showToast(data.error ?? "خطا در آپلود فایل", "error"); }
+    } catch {
+      showToast("آپلود فایل ناموفق بود", "error");
     } finally { setUploading(false); }
   }, [onUploaded]);
 
