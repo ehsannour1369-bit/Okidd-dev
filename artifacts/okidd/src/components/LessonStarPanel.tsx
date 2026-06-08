@@ -3,70 +3,58 @@ import { api } from "../lib/api";
 import { Star, ChevronDown, ChevronUp, Play, Gamepad2, ClipboardList, CheckCircle2, Circle } from "lucide-react";
 import { useState } from "react";
 
-export function scoreToStars(score: number, completed: boolean): number {
-  if (!completed) return 0;
-  if (score < 100) return 1;
-  if (score < 300) return 2;
-  if (score < 500) return 3;
-  if (score < 700) return 4;
-  return 5;
-}
-
-export function starInfo(stars: number): { label: string; color: string; bg: string } {
-  if (stars >= 5) return { label: "عالی", color: "#16a34a", bg: "rgba(22,163,74,0.08)" };
-  if (stars >= 3) return { label: "نیاز به تمرین بیشتر", color: "#d97706", bg: "rgba(245,158,11,0.08)" };
-  if (stars === 0) return { label: "انجام نشده", color: "#9ca3af", bg: "rgba(156,163,175,0.07)" };
-  return { label: "نیازمند رسیدگی فوری", color: "#dc2626", bg: "rgba(220,38,38,0.08)" };
-}
-
 export type LessonStage = "none" | "animation" | "game" | "quiz" | "completed";
 
 const STAGE_ORDER: LessonStage[] = ["none", "animation", "game", "quiz", "completed"];
 
+/* ── Stars: only meaningful when lessonStage === "completed" ── */
+export function scoreToStars(score: number, fullyDone: boolean): number {
+  if (!fullyDone) return 0;
+  if (score < 40)  return 1;  // انجام داده اما ضعیف
+  if (score < 80)  return 2;  // نیاز به تمرین
+  if (score < 130) return 3;  // متوسط
+  if (score < 180) return 4;  // خوب
+  return 5;                   // عالی
+}
+
+export function starInfo(stars: number, stage: LessonStage): { label: string; color: string; bg: string } {
+  if (stage === "none")      return { label: "شروع نشده",   color: "#9ca3af", bg: "rgba(255,255,255,0.82)" };
+  if (stage === "animation") return { label: "انیمیشن دیده", color: "#3b82f6", bg: "rgba(255,255,255,0.82)" };
+  if (stage === "game")      return { label: "بازی انجام شد", color: "#8b5cf6", bg: "rgba(255,255,255,0.82)" };
+  if (stage === "quiz")      return { label: "کوئیز انجام شد", color: "#f59e0b", bg: "rgba(255,255,255,0.82)" };
+  // completed — use stars
+  if (stars >= 5) return { label: "عالی ★★★★★",          color: "#16a34a", bg: "rgba(255,255,255,0.88)" };
+  if (stars >= 4) return { label: "خوب ★★★★",            color: "#22c55e", bg: "rgba(255,255,255,0.88)" };
+  if (stars >= 3) return { label: "متوسط ★★★",           color: "#d97706", bg: "rgba(255,255,255,0.88)" };
+  if (stars >= 2) return { label: "نیاز به تمرین ★★",     color: "#ea580c", bg: "rgba(255,255,255,0.88)" };
+  return               { label: "نیازمند رسیدگی ★",       color: "#dc2626", bg: "rgba(255,255,255,0.88)" };
+}
+
 interface StageDef {
-  label: string;
   color: string;
-  bg: string;
   Icon: React.ComponentType<{ size?: number; color?: string }>;
 }
 
 const STAGE_META: Record<LessonStage, StageDef> = {
-  none:      { label: "شروع نشده",  color: "#9ca3af", bg: "rgba(156,163,175,0.10)", Icon: Circle },
-  animation: { label: "انیمیشن",    color: "#3b82f6", bg: "rgba(59,130,246,0.10)",  Icon: Play },
-  game:      { label: "بازی",       color: "#8b5cf6", bg: "rgba(139,92,246,0.10)",  Icon: Gamepad2 },
-  quiz:      { label: "کوئیز",      color: "#f59e0b", bg: "rgba(245,158,11,0.10)",  Icon: ClipboardList },
-  completed: { label: "کامل شده",   color: "#16a34a", bg: "rgba(22,163,74,0.10)",   Icon: CheckCircle2 },
+  none:      { color: "#d1d5db", Icon: Circle },
+  animation: { color: "#3b82f6", Icon: Play },
+  game:      { color: "#8b5cf6", Icon: Gamepad2 },
+  quiz:      { color: "#f59e0b", Icon: ClipboardList },
+  completed: { color: "#16a34a", Icon: CheckCircle2 },
 };
-
-function StageBadge({ stage }: { stage: LessonStage }) {
-  const meta = STAGE_META[stage] ?? STAGE_META.none;
-  const IconComp = meta.Icon;
-  return (
-    <span style={{
-      display: "inline-flex", alignItems: "center", gap: 3,
-      fontSize: 10, fontWeight: 700, color: meta.color,
-      background: meta.bg, borderRadius: 999,
-      padding: "2px 7px", flexShrink: 0, whiteSpace: "nowrap",
-      border: `1px solid ${meta.color}30`,
-    }}>
-      <IconComp size={9} color={meta.color} />
-      {meta.label}
-    </span>
-  );
-}
 
 function StageProgress({ stage }: { stage: LessonStage }) {
   const current = STAGE_ORDER.indexOf(stage);
-  const steps: { key: LessonStage; label: string; Icon: React.ComponentType<{ size?: number; color?: string }> }[] = [
-    { key: "animation", label: "انیمیشن", Icon: Play },
-    { key: "game",      label: "بازی",    Icon: Gamepad2 },
-    { key: "quiz",      label: "کوئیز",   Icon: ClipboardList },
-    { key: "completed", label: "کامل",    Icon: CheckCircle2 },
+  const steps: { key: LessonStage; Icon: React.ComponentType<{ size?: number; color?: string }> }[] = [
+    { key: "animation", Icon: Play },
+    { key: "game",      Icon: Gamepad2 },
+    { key: "quiz",      Icon: ClipboardList },
+    { key: "completed", Icon: CheckCircle2 },
   ];
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 2, flexShrink: 0 }}>
-      {steps.map((s, idx) => {
+      {steps.map((s) => {
         const stepOrder = STAGE_ORDER.indexOf(s.key);
         const done = current >= stepOrder;
         const meta = STAGE_META[s.key];
@@ -75,15 +63,29 @@ function StageProgress({ stage }: { stage: LessonStage }) {
           <span key={s.key} style={{
             display: "inline-flex", alignItems: "center", justifyContent: "center",
             width: 18, height: 18, borderRadius: "50%",
-            background: done ? meta.bg : "rgba(156,163,175,0.08)",
-            border: `1px solid ${done ? meta.color : "#d1d5db"}`,
-            title: s.label,
+            background: done ? `${meta.color}18` : "rgba(0,0,0,0.04)",
+            border: `1.5px solid ${done ? meta.color : "#d1d5db"}`,
           }}>
             <IconComp size={9} color={done ? meta.color : "#d1d5db"} />
           </span>
         );
       })}
     </div>
+  );
+}
+
+function StageBadge({ stage, stars }: { stage: LessonStage; stars: number }) {
+  const info = starInfo(stars, stage);
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 3,
+      fontSize: 10, fontWeight: 700, color: info.color,
+      background: `${info.color}15`, borderRadius: 999,
+      padding: "2px 7px", flexShrink: 0, whiteSpace: "nowrap",
+      border: `1px solid ${info.color}35`,
+    }}>
+      {info.label}
+    </span>
   );
 }
 
@@ -98,24 +100,35 @@ export interface LessonScore {
 
 export function LessonStarRow({ lesson }: { lesson: LessonScore }) {
   const stage: LessonStage = lesson.lessonStage ?? (lesson.completed ? "completed" : "none");
-  const stars = scoreToStars(lesson.score, lesson.completed);
-  const info = starInfo(stars);
+  const fullyDone = stage === "completed";
+  const stars = scoreToStars(lesson.score, fullyDone);
+
   return (
     <div style={{
       display: "flex", alignItems: "center", gap: 8,
-      padding: "7px 10px", background: info.bg,
-      borderRadius: 10, border: `1px solid ${info.color}22`,
+      padding: "8px 12px",
+      background: "rgba(255,255,255,0.90)",
+      borderRadius: 10,
+      border: "1px solid rgba(0,0,0,0.07)",
+      backdropFilter: "blur(8px)",
+      WebkitBackdropFilter: "blur(8px)",
     }}>
-      <div style={{ fontSize: 12, color: "#374151", fontWeight: 600, flex: 1, minWidth: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+      <div style={{
+        fontSize: 12, color: "#1f2937", fontWeight: 600,
+        flex: 1, minWidth: 0, whiteSpace: "nowrap",
+        overflow: "hidden", textOverflow: "ellipsis",
+      }}>
         {lesson.lessonIndex}. {lesson.lessonTitle}
       </div>
       <StageProgress stage={stage} />
       <div style={{ display: "flex", gap: 1, flexShrink: 0 }}>
         {[1, 2, 3, 4, 5].map(i => (
-          <Star key={i} size={11} color={i <= stars ? "#f59e0b" : "#d1d5db"} fill={i <= stars ? "#f59e0b" : "none"} />
+          <Star key={i} size={11}
+            color={i <= stars ? "#f59e0b" : "#d1d5db"}
+            fill={i <= stars ? "#f59e0b" : "none"} />
         ))}
       </div>
-      <StageBadge stage={stage} />
+      <StageBadge stage={stage} stars={stars} />
     </div>
   );
 }
@@ -123,7 +136,7 @@ export function LessonStarRow({ lesson }: { lesson: LessonScore }) {
 export function LessonStarList({ lessons }: { lessons: LessonScore[] }) {
   if (lessons.length === 0) return null;
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
       {lessons.map(l => <LessonStarRow key={l.lessonId} lesson={l} />)}
     </div>
   );

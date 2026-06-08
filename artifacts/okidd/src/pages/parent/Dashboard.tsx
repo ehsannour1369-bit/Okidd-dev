@@ -18,14 +18,12 @@ const MALE_THEME   = { p: "#3b82f6", pD: "#2563eb", s: "#6366f1", sD: "#4f46e5",
 
 function gradCard(color: string, dark: string, extra?: React.CSSProperties): React.CSSProperties {
   return {
-    background: `linear-gradient(145deg, ${color}c8, ${dark}a0)`,
-    backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)",
-    border: `1.5px solid ${color}a0`,
+    background: `linear-gradient(145deg, ${color}, ${dark})`,
+    border: `1.5px solid ${dark}80`,
     borderRadius: 22,
     position: "relative",
     overflow: "hidden",
-    boxShadow: `0 7px 24px ${color}40, inset 0 1px 0 rgba(255,255,255,0.30)`,
+    boxShadow: `0 7px 24px ${color}50, inset 0 1px 0 rgba(255,255,255,0.22)`,
     transition: "all 0.26s cubic-bezier(0.4,0,0.2,1)",
     ...extra,
   };
