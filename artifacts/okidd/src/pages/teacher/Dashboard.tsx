@@ -210,9 +210,13 @@ export default function TeacherDashboard() {
         {/* ── Top bar ── */}
         <div style={{ ...cardAnim(0), display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 20px 0" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ ...glassIcon(AMBER, 50), background: `linear-gradient(135deg, ${AMBER}, ${ORANGE})`, border: "none", boxShadow: `0 6px 20px ${AMBER}66` }}>
-              <GraduationCap size={24} color="white" />
-            </div>
+            <button
+              onClick={openSidebar}
+              title="منو"
+              style={{ width: 50, height: 50, borderRadius: 14, background: `linear-gradient(135deg, ${AMBER}, ${ORANGE})`, border: "none", boxShadow: `0 6px 20px ${AMBER}66`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}
+            >
+              <Menu size={24} color="white" />
+            </button>
             <div>
               <div style={{ fontWeight: 900, fontSize: 19, color: "#78350f" }}>
                 سلام استاد {user?.name?.split(" ")[0]}
@@ -222,13 +226,6 @@ export default function TeacherDashboard() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <button
-              onClick={openSidebar}
-              title="منو"
-              style={{ width: 40, height: 40, borderRadius: 12, background: `linear-gradient(135deg,${AMBER},${AMBER_D})`, border: "none", boxShadow: `0 4px 14px ${AMBER}55`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}
-            >
-              <Menu size={20} color="white" />
-            </button>
             <button
               onClick={() => navigate("/teacher/notifications")}
               style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(245,158,11,0.15)", border: "1.5px solid rgba(245,158,11,0.40)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", position: "relative" }}
