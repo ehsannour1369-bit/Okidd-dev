@@ -7,13 +7,13 @@ import { Video, Play, Square, ExternalLink, Clock, Calendar, ChevronDown, BookMa
 import PageTopBar from "../../components/PageTopBar";
 
 const C = {
-  accent: "#f59e0b", dark: "#d97706", light: "#fbbf24",
-  text: "#78350f", text2: "#92400e",
-  bg: "rgba(255,255,255,0.88)", border: "rgba(245,158,11,0.22)",
+  accent: "#059669", dark: "#047857", light: "#34d399",
+  text: "#064e3b", text2: "#065f46",
+  bg: "rgba(255,255,255,0.88)", border: "rgba(5,150,105,0.22)",
 };
 
 const IS: React.CSSProperties = {
-  width: "100%", background: "rgba(255,251,235,0.9)", border: "1px solid rgba(245,158,11,0.30)",
+  width: "100%", background: "rgba(240,253,244,0.92)", border: "1px solid rgba(5,150,105,0.30)",
   borderRadius: 10, color: C.text, padding: "10px 12px", fontSize: 14,
   fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl",
   boxSizing: "border-box",

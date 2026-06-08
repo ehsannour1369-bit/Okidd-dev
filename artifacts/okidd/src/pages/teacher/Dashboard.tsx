@@ -11,9 +11,12 @@ import {
 } from "lucide-react";
 import { useSidebar } from "../../contexts/SidebarContext";
 
-const AMBER   = "#f59e0b";
-const AMBER_D = "#d97706";
-const ORANGE  = "#f97316";
+const TEAL    = "#059669";
+const TEAL_D  = "#047857";
+const CYAN    = "#0891b2";
+const AMBER   = TEAL;
+const AMBER_D = TEAL_D;
+const ORANGE  = CYAN;
 const BLUE    = "#3b82f6";
 const BLUE_D  = "#2563eb";
 const PINK    = "#ec4899";
@@ -195,14 +198,14 @@ export default function TeacherDashboard() {
   return (
     <div style={{
       height: "100dvh",
-      background: "linear-gradient(160deg,#fffbeb 0%,#fef3c7 40%,#fff7ed 100%)",
+      background: "linear-gradient(160deg,#f0fdf4 0%,#dcfce7 40%,#ecfdf5 100%)",
       fontFamily: "Vazirmatn, sans-serif", direction: "rtl",
       position: "relative", overflow: "hidden",
     }}>
 
       {/* Background blobs */}
-      <div style={{ position: "absolute", top: "-12%", right: "-8%", width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle,rgba(245,158,11,0.36) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat1 9s ease-in-out infinite" }} />
-      <div style={{ position: "absolute", bottom: "5%", left: "-8%", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle,rgba(249,115,22,0.24) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat2 12s ease-in-out infinite" }} />
+      <div style={{ position: "absolute", top: "-12%", right: "-8%", width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle,rgba(5,150,105,0.30) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat1 9s ease-in-out infinite" }} />
+      <div style={{ position: "absolute", bottom: "5%", left: "-8%", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle,rgba(8,145,178,0.20) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat2 12s ease-in-out infinite" }} />
       <div style={{ position: "absolute", top: "35%", left: "40%", width: 180, height: 180, borderRadius: "50%", background: "radial-gradient(circle,rgba(251,191,36,0.22) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat1 14s ease-in-out infinite reverse" }} />
 
       <div style={{ position: "relative", zIndex: 1, height: "100%", display: "flex", flexDirection: "column" }}>
@@ -218,17 +221,17 @@ export default function TeacherDashboard() {
               <Menu size={24} color="white" />
             </button>
             <div>
-              <div style={{ fontWeight: 900, fontSize: 19, color: "#78350f" }}>
+              <div style={{ fontWeight: 900, fontSize: 19, color: "#064e3b" }}>
                 سلام استاد {user?.name?.split(" ")[0]}
               </div>
-              <div style={{ fontSize: 12, color: "#92400e", fontWeight: 600, marginTop: 1 }}>پنل معلم</div>
+              <div style={{ fontSize: 12, color: "#065f46", fontWeight: 600, marginTop: 1 }}>پنل معلم</div>
             </div>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <button
               onClick={() => navigate("/teacher/notifications")}
-              style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(245,158,11,0.15)", border: "1.5px solid rgba(245,158,11,0.40)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", position: "relative" }}
+              style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(5,150,105,0.15)", border: "1.5px solid rgba(5,150,105,0.40)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", position: "relative" }}
             >
               <Bell size={18} color={AMBER_D} />
               {unreadCount > 0 && (
@@ -616,7 +619,7 @@ export default function TeacherDashboard() {
                     <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 5, fontWeight: 600 }}>{f.label}</div>
                     <input
                       type={f.type} value={f.value} onChange={e => f.set(e.target.value)}
-                      style={{ width: "100%", padding: "10px 14px", borderRadius: 12, border: `1.5px solid ${AMBER}55`, background: "rgba(255,251,235,0.9)", fontFamily: "Vazirmatn", fontSize: 14, color: "#1e1b4b", outline: "none", boxSizing: "border-box" }}
+                      style={{ width: "100%", padding: "10px 14px", borderRadius: 12, border: `1.5px solid ${AMBER}55`, background: "rgba(240,253,244,0.9)", fontFamily: "Vazirmatn", fontSize: 14, color: "#1e1b4b", outline: "none", boxSizing: "border-box" }}
                     />
                   </div>
                 ))}

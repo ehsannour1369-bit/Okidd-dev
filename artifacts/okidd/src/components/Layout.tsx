@@ -68,10 +68,10 @@ const branchManagerNav: NavItem[] = [
 ];
 
 const teacherNav: NavItem[] = [
-  { label: "داشبورد", path: "/teacher", icon: LayoutDashboard, color: "#f59e0b", bgGradient: "linear-gradient(135deg, #d97706, #f59e0b)" },
-  // { label: "کلاس آنلاین", path: "/teacher/online-class", icon: Video, color: "#d97706", bgGradient: "linear-gradient(135deg, #b45309, #d97706)" },
-  { label: "عملکرد کلاس", path: "/teacher/progress", icon: BarChart2, color: "#f97316", bgGradient: "linear-gradient(135deg, #ea580c, #f97316)" },
-  { label: "اعلان‌ها", path: "/teacher/notifications", icon: Bell, color: "#fbbf24", bgGradient: "linear-gradient(135deg, #f59e0b, #fbbf24)" },
+  { label: "داشبورد", path: "/teacher", icon: LayoutDashboard, color: "#059669", bgGradient: "linear-gradient(135deg, #047857, #059669)" },
+  // { label: "کلاس آنلاین", path: "/teacher/online-class", icon: Video, color: "#047857", bgGradient: "linear-gradient(135deg, #065f46, #047857)" },
+  { label: "عملکرد کلاس", path: "/teacher/progress", icon: BarChart2, color: "#0891b2", bgGradient: "linear-gradient(135deg, #0e7490, #0891b2)" },
+  { label: "اعلان‌ها", path: "/teacher/notifications", icon: Bell, color: "#34d399", bgGradient: "linear-gradient(135deg, #059669, #34d399)" },
 ];
 
 function getParentNav(isFemale: boolean): NavItem[] {
@@ -153,11 +153,11 @@ function getRoleTheme(role: string, isGirl: boolean): RoleTheme {
     TEXT: "#134e4a", TEXT2: "#0f766e",
   };
   if (role === "teacher") return {
-    dashBg: "linear-gradient(160deg,#fffbeb 0%,#fef3c7 40%,#fff7ed 100%)",
-    accent: "#f59e0b", accentDark: "#d97706",
-    blob1: "rgba(245,158,11,0.35)", blob2: "rgba(249,115,22,0.22)", blob3: "rgba(251,191,36,0.18)",
-    logoGrad: "linear-gradient(135deg, #f59e0b, #f97316)",
-    TEXT: "#78350f", TEXT2: "#92400e",
+    dashBg: "linear-gradient(160deg,#f0fdf4 0%,#dcfce7 40%,#ecfdf5 100%)",
+    accent: "#059669", accentDark: "#047857",
+    blob1: "rgba(5,150,105,0.30)", blob2: "rgba(8,145,178,0.20)", blob3: "rgba(52,211,153,0.18)",
+    logoGrad: "linear-gradient(135deg, #059669, #0891b2)",
+    TEXT: "#064e3b", TEXT2: "#065f46",
   };
   if (role === "parent") {
     const ac  = isGirl ? "#d4547a" : "#3b82f6";

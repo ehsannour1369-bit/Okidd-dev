@@ -6,13 +6,16 @@ import { showToast } from "../../lib/toast";
 import { Lock, Unlock, BarChart2, Star, Clock, CheckCircle, UserRound, ChevronDown, ChevronUp, Trophy, BookOpen, GraduationCap, AlertCircle } from "lucide-react";
 import PageTopBar from "../../components/PageTopBar";
 
-const AMBER   = "#f59e0b";
-const AMBER_D = "#d97706";
+const TEAL    = "#059669";
+const TEAL_D  = "#047857";
+const CYAN    = "#0891b2";
 const GREEN   = "#22c55e";
 const GREEN_D = "#16a34a";
 const BLUE    = "#3b82f6";
 const PINK    = "#ec4899";
-const ORANGE  = "#f97316";
+const AMBER   = TEAL;
+const AMBER_D = TEAL_D;
+const ORANGE  = CYAN;
 
 type ProgTab = "manage" | "performance" | "lesson-report";
 
@@ -117,32 +120,32 @@ export default function TeacherProgress() {
     alignItems: "center",
     gap: 7,
     transition: "all 0.2s",
-    background: active ? `linear-gradient(135deg,${AMBER},${AMBER_D})` : "rgba(245,158,11,0.10)",
-    color: active ? "#1a0a00" : "#d97706",
-    border: `1.5px solid ${active ? "transparent" : AMBER + "44"}`,
-    boxShadow: active ? `0 4px 14px ${AMBER}55` : "none",
+    background: active ? `linear-gradient(135deg,${TEAL},${TEAL_D})` : "rgba(5,150,105,0.10)",
+    color: active ? "white" : TEAL_D,
+    border: `1.5px solid ${active ? "transparent" : TEAL + "44"}`,
+    boxShadow: active ? `0 4px 14px ${TEAL}55` : "none",
   });
 
   const inputStyle: React.CSSProperties = {
     width: "100%",
-    background: "rgba(255,255,255,0.80)",
-    border: "1px solid rgba(245,158,11,0.45)",
+    background: "rgba(255,255,255,0.85)",
+    border: `1px solid rgba(5,150,105,0.35)`,
     borderRadius: 10,
-    color: "#78350f",
+    color: "#064e3b",
     padding: "10px 14px",
     fontSize: 14,
     fontFamily: "Vazirmatn, sans-serif",
     outline: "none",
     appearance: "none" as any,
   };
-  const optStyle: React.CSSProperties = { background: "#fef3c7", color: "#78350f" };
+  const optStyle: React.CSSProperties = { background: "#ecfdf5", color: "#064e3b" };
 
   return (
     <div dir="rtl" style={{ fontFamily: "Vazirmatn, sans-serif", minHeight: "100vh" }}>
       <PageTopBar />
 
       <div style={{ padding: "4px 0 24px" }}>
-        <h1 style={{ fontSize: 20, fontWeight: 800, color: "#92400e", marginBottom: 16 }}>مدیریت کلاس و عملکرد</h1>
+        <h1 style={{ fontSize: 20, fontWeight: 800, color: "#064e3b", marginBottom: 16 }}>مدیریت کلاس و عملکرد</h1>
 
         {/* Tabs */}
         <div style={{ display: "flex", gap: 10, marginBottom: 22, flexWrap: "wrap" }}>
@@ -162,7 +165,7 @@ export default function TeacherProgress() {
           <div>
             <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
               <div style={{ flex: 1, minWidth: 200 }}>
-                <label style={{ display: "block", color: "#92400e", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>کلاس</label>
+                <label style={{ display: "block", color: "#065f46", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>کلاس</label>
                 <select value={selClass?.id ?? ""} onChange={e => { setSelClass(classes.find(c => c.id === parseInt(e.target.value)) ?? null); setSelBook(null); }} style={inputStyle}>
                   <option value="" style={optStyle}>انتخاب کنید</option>
                   {classes.map(c => <option key={c.id} value={c.id} style={optStyle}>{c.name}</option>)}
@@ -170,7 +173,7 @@ export default function TeacherProgress() {
               </div>
               {selClass && (
                 <div style={{ flex: 1, minWidth: 200 }}>
-                  <label style={{ display: "block", color: "#92400e", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>کتاب</label>
+                  <label style={{ display: "block", color: "#065f46", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>کتاب</label>
                   <select value={selBook?.id ?? ""} onChange={e => setSelBook(classBooks.find(b => b.id === parseInt(e.target.value)) ?? null)} style={inputStyle}>
                     <option value="" style={optStyle}>انتخاب کنید</option>
                     {classBooks.map(b => <option key={b.id} value={b.id} style={optStyle}>{b.title}</option>)}
@@ -181,7 +184,7 @@ export default function TeacherProgress() {
 
             {selClass && selBook && (
               <div style={{ ...glass(AMBER, { padding: 20 }) }}>
-                <h3 style={{ color: "#92400e", fontWeight: 700, margin: "0 0 16px", fontSize: 15 }}>
+                <h3 style={{ color: "#065f46", fontWeight: 700, margin: "0 0 16px", fontSize: 15 }}>
                   درس‌های {selBook.title} — {selClass.name}
                 </h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -189,13 +192,13 @@ export default function TeacherProgress() {
                     const unlocked = unlockedIds.has(lesson.id);
                     const ue = unlocks.find((u: any) => u.lessonId === lesson.id);
                     return (
-                      <div key={lesson.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: unlocked ? "rgba(34,197,94,0.10)" : "rgba(255,255,255,0.60)", border: `1px solid ${unlocked ? "rgba(34,197,94,0.30)" : "rgba(245,158,11,0.30)"}`, borderRadius: 10 }}>
+                      <div key={lesson.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: unlocked ? "rgba(34,197,94,0.10)" : "rgba(255,255,255,0.60)", border: `1px solid ${unlocked ? "rgba(34,197,94,0.30)" : "rgba(5,150,105,0.30)"}`, borderRadius: 10 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <div style={{ width: 32, height: 32, borderRadius: 8, background: unlocked ? "rgba(34,197,94,0.22)" : "rgba(245,158,11,0.18)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <div style={{ width: 32, height: 32, borderRadius: 8, background: unlocked ? "rgba(34,197,94,0.22)" : "rgba(5,150,105,0.18)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                             {unlocked ? <Unlock size={15} style={{ color: "#4ade80" }} /> : <Lock size={15} style={{ color: AMBER }} />}
                           </div>
                           <div>
-                            <div style={{ fontWeight: 600, color: "#78350f", fontSize: 13 }}>درس {i + 1}: {lesson.title}</div>
+                            <div style={{ fontWeight: 600, color: "#064e3b", fontSize: 13 }}>درس {i + 1}: {lesson.title}</div>
                             {unlocked && ue?.createdAt && <div style={{ fontSize: 11, color: "#4ade80", marginTop: 2 }}>باز شده: {new Date(ue.createdAt).toLocaleDateString("fa-IR")}</div>}
                           </div>
                         </div>
@@ -219,7 +222,7 @@ export default function TeacherProgress() {
         {tab === "performance" && (
           <div>
             <div style={{ marginBottom: 20 }}>
-              <label style={{ display: "block", color: "#92400e", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>انتخاب کلاس</label>
+              <label style={{ display: "block", color: "#065f46", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>انتخاب کلاس</label>
               <select value={perfSelClass?.id ?? ""} onChange={e => { setPerfSelClass(classes.find(c => c.id === parseInt(e.target.value)) ?? null); setExpanded(null); }} style={{ ...inputStyle, maxWidth: 320 }}>
                 <option value="" style={optStyle}>انتخاب کنید</option>
                 {classes.map(c => <option key={c.id} value={c.id} style={optStyle}>{c.name}</option>)}
@@ -227,7 +230,7 @@ export default function TeacherProgress() {
             </div>
 
             {!perfSelClass && (
-              <div style={{ textAlign: "center", padding: 60, color: "#92400e", fontSize: 14 }}>
+              <div style={{ textAlign: "center", padding: 60, color: "#065f46", fontSize: 14 }}>
                 یک کلاس انتخاب کنید تا عملکرد دانش‌آموزان را ببینید
               </div>
             )}
@@ -237,7 +240,7 @@ export default function TeacherProgress() {
             )}
 
             {perfSelClass && !perfLoading && perfSorted.length === 0 && (
-              <div style={{ textAlign: "center", padding: 60, color: "#92400e" }}>دانش‌آموزی در این کلاس یافت نشد</div>
+              <div style={{ textAlign: "center", padding: 60, color: "#065f46" }}>دانش‌آموزی در این کلاس یافت نشد</div>
             )}
 
             {perfSelClass && !perfLoading && perfSorted.length > 0 && (
@@ -263,9 +266,9 @@ export default function TeacherProgress() {
                     const totalLessons = (st.bookProgress ?? []).reduce((s: number, b: any) => s + (b.lessonCount ?? 0), 0);
                     const doneLessons  = (st.bookProgress ?? []).reduce((s: number, b: any) => s + (b.completedLessons ?? 0), 0);
                     const isGirl = st.gender === "female";
-                    const rankColor = st.rank === 1 ? "#f59e0b" : st.rank === 2 ? "#94a3b8" : st.rank === 3 ? "#d97706" : "#6b7280";
+                    const rankColor = st.rank === 1 ? "#059669" : st.rank === 2 ? "#94a3b8" : st.rank === 3 ? "#047857" : "#6b7280";
                     return (
-                      <div key={st.id} style={{ background: isExp ? "rgba(245,158,11,0.10)" : "rgba(255,255,255,0.60)", border: `1.5px solid ${isExp ? AMBER + "55" : "rgba(245,158,11,0.30)"}`, borderRadius: 14, overflow: "hidden", transition: "all 0.2s" }}>
+                      <div key={st.id} style={{ background: isExp ? "rgba(5,150,105,0.10)" : "rgba(255,255,255,0.60)", border: `1.5px solid ${isExp ? AMBER + "55" : "rgba(5,150,105,0.30)"}`, borderRadius: 14, overflow: "hidden", transition: "all 0.2s" }}>
                         <div
                           onClick={() => setExpanded(isExp ? null : st.id)}
                           style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", cursor: "pointer" }}
@@ -280,8 +283,8 @@ export default function TeacherProgress() {
                           </div>
                           {/* Name */}
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontWeight: 700, color: "#78350f", fontSize: 13, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{st.name}</div>
-                            <div style={{ fontSize: 10, color: "#92400e", marginTop: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{fmtDate(st.lastPresenceAt)}</div>
+                            <div style={{ fontWeight: 700, color: "#064e3b", fontSize: 13, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{st.name}</div>
+                            <div style={{ fontSize: 10, color: "#065f46", marginTop: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{fmtDate(st.lastPresenceAt)}</div>
                           </div>
                           {/* Stats */}
                           <div style={{ display: "flex", gap: 7, alignItems: "center", flexShrink: 0 }}>
@@ -290,30 +293,30 @@ export default function TeacherProgress() {
                                 <Star size={11} color={AMBER} />
                                 <span style={{ fontWeight: 800, color: AMBER, fontSize: 12 }}>{st.totalScore.toLocaleString("fa-IR")}</span>
                               </div>
-                              <div style={{ fontSize: 9, color: "#92400e" }}>امتیاز</div>
+                              <div style={{ fontSize: 9, color: "#065f46" }}>امتیاز</div>
                             </div>
                             <div style={{ textAlign: "center" }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
                                 <CheckCircle size={10} color={GREEN} />
                                 <span style={{ fontWeight: 700, color: GREEN, fontSize: 12 }}>{doneLessons}/{totalLessons}</span>
                               </div>
-                              <div style={{ fontSize: 9, color: "#92400e" }}>درس</div>
+                              <div style={{ fontSize: 9, color: "#065f46" }}>درس</div>
                             </div>
                             <div style={{ textAlign: "center" }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
                                 <Clock size={10} color={BLUE} />
                                 <span style={{ fontWeight: 700, color: BLUE, fontSize: 11 }}>{fmtDuration(st.totalMinutesInApp)}</span>
                               </div>
-                              <div style={{ fontSize: 9, color: "#92400e" }}>زمان</div>
+                              <div style={{ fontSize: 9, color: "#065f46" }}>زمان</div>
                             </div>
-                            {isExp ? <ChevronUp size={13} color="#d97706" /> : <ChevronDown size={13} color="#d97706" />}
+                            {isExp ? <ChevronUp size={13} color="#047857" /> : <ChevronDown size={13} color="#047857" />}
                           </div>
                         </div>
 
                         {/* Expanded: book progress */}
                         {isExp && st.bookProgress?.length > 0 && (
-                          <div style={{ padding: "0 16px 14px", borderTop: "1px solid rgba(245,158,11,0.15)" }}>
-                            <div style={{ fontSize: 12, color: "#d97706", fontWeight: 700, marginBottom: 10, paddingTop: 10, display: "flex", alignItems: "center", gap: 5 }}>
+                          <div style={{ padding: "0 16px 14px", borderTop: "1px solid rgba(5,150,105,0.15)" }}>
+                            <div style={{ fontSize: 12, color: "#047857", fontWeight: 700, marginBottom: 10, paddingTop: 10, display: "flex", alignItems: "center", gap: 5 }}>
                               <BookOpen size={13} /> پیشرفت کتاب‌ها
                             </div>
                             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -322,10 +325,10 @@ export default function TeacherProgress() {
                                 return (
                                   <div key={bp.bookId}>
                                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                                      <span style={{ fontSize: 12, color: "#92400e", fontWeight: 600 }}>{bp.bookTitle}</span>
-                                      <span style={{ fontSize: 12, color: "#d97706" }}>{bp.completedLessons}/{bp.lessonCount} درس — {pct}%</span>
+                                      <span style={{ fontSize: 12, color: "#065f46", fontWeight: 600 }}>{bp.bookTitle}</span>
+                                      <span style={{ fontSize: 12, color: "#047857" }}>{bp.completedLessons}/{bp.lessonCount} درس — {pct}%</span>
                                     </div>
-                                    <div style={{ height: 6, background: "rgba(245,158,11,0.15)", borderRadius: 999, overflow: "hidden", marginBottom: 8 }}>
+                                    <div style={{ height: 6, background: "rgba(5,150,105,0.15)", borderRadius: 999, overflow: "hidden", marginBottom: 8 }}>
                                       <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg,${GREEN},${GREEN_D})`, borderRadius: 999, transition: "width 0.5s" }} />
                                     </div>
                                   </div>
@@ -349,7 +352,7 @@ export default function TeacherProgress() {
             {/* Selectors */}
             <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
               <div style={{ flex: 1, minWidth: 200 }}>
-                <label style={{ display: "block", color: "#92400e", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>کلاس</label>
+                <label style={{ display: "block", color: "#065f46", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>کلاس</label>
                 <select
                   value={rptSelClass?.id ?? ""}
                   onChange={e => {
@@ -365,7 +368,7 @@ export default function TeacherProgress() {
               </div>
               {rptSelClass && (
                 <div style={{ flex: 1, minWidth: 200 }}>
-                  <label style={{ display: "block", color: "#92400e", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>
+                  <label style={{ display: "block", color: "#065f46", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>
                     کتاب (تدریسی شما)
                   </label>
                   <select
@@ -377,7 +380,7 @@ export default function TeacherProgress() {
                     {teacherBooks.map((b: any) => <option key={b.id} value={b.id} style={optStyle}>{b.title}</option>)}
                   </select>
                   {teacherBooks.length === 0 && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 7, color: "#d97706", fontSize: 12 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 7, color: "#047857", fontSize: 12 }}>
                       <AlertCircle size={13} /> در این کلاس کتابی برای تدریس ندارید
                     </div>
                   )}
@@ -386,10 +389,10 @@ export default function TeacherProgress() {
             </div>
 
             {!rptSelClass && (
-              <div style={{ textAlign: "center", padding: 60, color: "#92400e", fontSize: 14 }}>یک کلاس انتخاب کنید</div>
+              <div style={{ textAlign: "center", padding: 60, color: "#065f46", fontSize: 14 }}>یک کلاس انتخاب کنید</div>
             )}
             {rptSelClass && !rptSelBook && teacherBooks.length > 0 && (
-              <div style={{ textAlign: "center", padding: 40, color: "#92400e", fontSize: 14 }}>یک کتاب انتخاب کنید</div>
+              <div style={{ textAlign: "center", padding: 40, color: "#065f46", fontSize: 14 }}>یک کتاب انتخاب کنید</div>
             )}
             {rptSelClass && rptSelBook && rptLoading && (
               <div style={{ textAlign: "center", padding: 60, color: AMBER }}>در حال بارگذاری...</div>
@@ -400,16 +403,16 @@ export default function TeacherProgress() {
                 {/* Header info bar */}
                 <div style={{ ...glass(ORANGE, { padding: "10px 16px", marginBottom: 16, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }) }}>
                   <BookOpen size={15} color={ORANGE} />
-                  <span style={{ fontWeight: 700, color: "#92400e", fontSize: 13 }}>{rptSelBook.title}</span>
-                  <span style={{ color: "#d97706", fontSize: 12 }}>—</span>
-                  <span style={{ color: "#92400e", fontSize: 12 }}>{rptSelClass.name}</span>
-                  <span style={{ marginRight: "auto", fontSize: 12, color: "#d97706", fontWeight: 600 }}>
+                  <span style={{ fontWeight: 700, color: "#065f46", fontSize: 13 }}>{rptSelBook.title}</span>
+                  <span style={{ color: "#047857", fontSize: 12 }}>—</span>
+                  <span style={{ color: "#065f46", fontSize: 12 }}>{rptSelClass.name}</span>
+                  <span style={{ marginRight: "auto", fontSize: 12, color: "#047857", fontWeight: 600 }}>
                     {lessonReport.lessons.length} درس · {lessonReport.students.length} دانش‌آموز
                   </span>
                 </div>
 
                 {lessonReport.students.length === 0 && (
-                  <div style={{ textAlign: "center", padding: 40, color: "#92400e" }}>دانش‌آموزی در این کلاس یافت نشد</div>
+                  <div style={{ textAlign: "center", padding: 40, color: "#065f46" }}>دانش‌آموزی در این کلاس یافت نشد</div>
                 )}
 
                 {lessonReport.students.length > 0 && (
@@ -417,13 +420,13 @@ export default function TeacherProgress() {
                     {lessonReport.students.map((st: any, rank: number) => {
                       const isExp = rptExpanded === st.id;
                       const isGirl = st.gender === "female";
-                      const rankColor = rank === 0 ? "#f59e0b" : rank === 1 ? "#94a3b8" : rank === 2 ? "#d97706" : "#6b7280";
+                      const rankColor = rank === 0 ? "#059669" : rank === 1 ? "#94a3b8" : rank === 2 ? "#047857" : "#6b7280";
                       const completedCount = st.completedCount ?? 0;
                       const totalLessons = lessonReport.lessons.length;
                       const pct = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
                       return (
-                        <div key={st.id} style={{ background: isExp ? "rgba(249,115,22,0.08)" : "rgba(255,255,255,0.65)", border: `1.5px solid ${isExp ? ORANGE + "55" : "rgba(249,115,22,0.25)"}`, borderRadius: 14, overflow: "hidden", transition: "all 0.2s" }}>
+                        <div key={st.id} style={{ background: isExp ? "rgba(8,145,178,0.08)" : "rgba(255,255,255,0.65)", border: `1.5px solid ${isExp ? ORANGE + "55" : "rgba(8,145,178,0.25)"}`, borderRadius: 14, overflow: "hidden", transition: "all 0.2s" }}>
                           {/* Student header row */}
                           <div
                             onClick={() => setRptExpanded(isExp ? null : st.id)}
@@ -436,8 +439,8 @@ export default function TeacherProgress() {
                               <UserRound size={16} color={isGirl ? PINK : "#818cf8"} />
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontWeight: 700, color: "#78350f", fontSize: 13, marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{st.name}</div>
-                              <div style={{ height: 5, background: "rgba(249,115,22,0.15)", borderRadius: 999, overflow: "hidden" }}>
+                              <div style={{ fontWeight: 700, color: "#064e3b", fontSize: 13, marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{st.name}</div>
+                              <div style={{ height: 5, background: "rgba(8,145,178,0.15)", borderRadius: 999, overflow: "hidden" }}>
                                 <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg,${GREEN},${GREEN_D})`, borderRadius: 999, transition: "width 0.5s" }} />
                               </div>
                             </div>
@@ -447,14 +450,14 @@ export default function TeacherProgress() {
                                   <CheckCircle size={11} color={GREEN} />
                                   <span style={{ fontWeight: 700, color: GREEN, fontSize: 12 }}>{completedCount}/{totalLessons}</span>
                                 </div>
-                                <div style={{ fontSize: 10, color: "#92400e" }}>درس</div>
+                                <div style={{ fontSize: 10, color: "#065f46" }}>درس</div>
                               </div>
                               <div style={{ textAlign: "center" }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
                                   <Star size={11} color={AMBER} />
                                   <span style={{ fontWeight: 800, color: AMBER, fontSize: 13 }}>{(st.totalScore ?? 0).toLocaleString("fa-IR")}</span>
                                 </div>
-                                <div style={{ fontSize: 10, color: "#92400e" }}>امتیاز</div>
+                                <div style={{ fontSize: 10, color: "#065f46" }}>امتیاز</div>
                               </div>
                               <div style={{ fontSize: 12, color: ORANGE, fontWeight: 700 }}>{pct}%</div>
                               {isExp ? <ChevronUp size={13} color={ORANGE} /> : <ChevronDown size={13} color={ORANGE} />}
@@ -463,7 +466,7 @@ export default function TeacherProgress() {
 
                           {/* Expanded: lesson-by-lesson list */}
                           {isExp && (
-                            <div style={{ padding: "0 14px 14px", borderTop: `1px solid rgba(249,115,22,0.15)` }}>
+                            <div style={{ padding: "0 14px 14px", borderTop: `1px solid rgba(8,145,178,0.15)` }}>
                               <div style={{ fontSize: 12, color: ORANGE, fontWeight: 700, marginBottom: 10, paddingTop: 10, display: "flex", alignItems: "center", gap: 5 }}>
                                 <GraduationCap size={13} /> وضعیت درس به درس
                               </div>
@@ -477,12 +480,12 @@ export default function TeacherProgress() {
                                   const stageColor: Record<string, string> = { none: "#94a3b8", animation: BLUE, game: "#a855f7", quiz: AMBER, completed: GREEN };
                                   const sc = stageColor[stage] ?? "#94a3b8";
                                   return (
-                                    <div key={lesson.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", background: done ? "rgba(34,197,94,0.07)" : "rgba(255,255,255,0.55)", border: `1px solid ${done ? "rgba(34,197,94,0.28)" : "rgba(249,115,22,0.18)"}`, borderRadius: 10 }}>
-                                      <div style={{ width: 26, height: 26, borderRadius: 7, background: done ? "rgba(34,197,94,0.18)" : "rgba(249,115,22,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                    <div key={lesson.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", background: done ? "rgba(34,197,94,0.07)" : "rgba(255,255,255,0.55)", border: `1px solid ${done ? "rgba(34,197,94,0.28)" : "rgba(8,145,178,0.18)"}`, borderRadius: 10 }}>
+                                      <div style={{ width: 26, height: 26, borderRadius: 7, background: done ? "rgba(34,197,94,0.18)" : "rgba(8,145,178,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                                         {done ? <CheckCircle size={13} color={GREEN} /> : <span style={{ fontSize: 10, fontWeight: 800, color: ORANGE }}>{lesson.orderIndex}</span>}
                                       </div>
                                       <div style={{ flex: 1, minWidth: 0 }}>
-                                        <span style={{ fontWeight: 600, color: "#78350f", fontSize: 12 }}>درس {lesson.orderIndex}: {lesson.title}</span>
+                                        <span style={{ fontWeight: 600, color: "#064e3b", fontSize: 12 }}>درس {lesson.orderIndex}: {lesson.title}</span>
                                       </div>
                                       <div style={{ padding: "3px 9px", borderRadius: 20, background: `${sc}18`, border: `1px solid ${sc}44`, color: sc, fontSize: 10, fontWeight: 700, flexShrink: 0, whiteSpace: "nowrap" }}>
                                         {stageLabel[stage] ?? stage}
