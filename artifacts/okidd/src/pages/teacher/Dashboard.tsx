@@ -7,8 +7,9 @@ import { useLocation } from "wouter";
 import {
   School, ChevronDown, ChevronLeft, ChevronRight, Users, BookOpen, Lock, Unlock,
   BarChart2, Clock, Star, GraduationCap, TrendingUp, UserRound, Video,
-  Bell, User, LogOut, Eye, EyeOff, Camera, Pencil, Check, X, KeyRound,
+  Bell, User, LogOut, Eye, EyeOff, Camera, Pencil, Check, X, KeyRound, Menu,
 } from "lucide-react";
+import { useSidebar } from "../../contexts/SidebarContext";
 
 const AMBER   = "#f59e0b";
 const AMBER_D = "#d97706";
@@ -56,6 +57,7 @@ function shine(): React.CSSProperties {
 export default function TeacherDashboard() {
   const { user, logout } = useAuthStore();
   const [, navigate] = useLocation();
+  const { openSidebar } = useSidebar();
   const [mounted, setMounted]             = useState(false);
   const [schoolsOpen, setSchoolsOpen]     = useState(false);
   const [profileOpen, setProfileOpen]     = useState(false);
@@ -220,6 +222,13 @@ export default function TeacherDashboard() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <button
+              onClick={openSidebar}
+              title="منو"
+              style={{ width: 40, height: 40, borderRadius: 12, background: `linear-gradient(135deg,${AMBER},${AMBER_D})`, border: "none", boxShadow: `0 4px 14px ${AMBER}55`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}
+            >
+              <Menu size={20} color="white" />
+            </button>
             <button
               onClick={() => navigate("/teacher/notifications")}
               style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(245,158,11,0.15)", border: "1.5px solid rgba(245,158,11,0.40)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", position: "relative" }}
