@@ -199,12 +199,18 @@ router.get("/classes/:id/teachers", async (req, res) => {
   ]);
   const teacherMap = new Map(teachers.map(t => [t.id, t]));
   const bookMap = new Map((books as any[]).map((b: any) => [b.id, b]));
+  const callerRole = (req as any).userRole as string | undefined;
   res.json(rows.map(row => {
     const t = teacherMap.get(row.teacherId);
     const book = row.bookId ? bookMap.get(row.bookId) : null;
     if (!t) return null;
-    const { password: _pw, ...safeT } = t;
-    return { assignmentId: row.id, classId: row.classId, teacherId: row.teacherId, bookId: row.bookId ?? null, bookTitle: (book as any)?.title ?? null, ...safeT };
+    const { password: _pw, email: _em, phone: _ph, nationalId: _ni, ...publicT } = t;
+    const base = { assignmentId: row.id, classId: row.classId, teacherId: row.teacherId, bookId: row.bookId ?? null, bookTitle: (book as any)?.title ?? null };
+    // Only managers/admin/teachers see contact info
+    if (callerRole === "admin" || callerRole === "school_manager" || callerRole === "branch_manager" || callerRole === "teacher") {
+      return { ...base, ...publicT, email: _em, phone: _ph };
+    }
+    return { ...base, ...publicT };
   }).filter(Boolean));
 });
 
