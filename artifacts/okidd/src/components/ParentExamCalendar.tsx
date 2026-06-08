@@ -161,13 +161,40 @@ export default function ParentExamCalendar({ children, TEXT, TEXT2, accent, acce
   /* ── popover position ── */
   const popoverStyle = (() => {
     if (!popover) return {};
-    const PW = 288, PH = 420, GAP = 8;
+    const PW = 288, PH = 360, GAP = 8;
     const vw = window.innerWidth, vh = window.innerHeight;
+    const isMobile = vw < 540;
+
+    // On narrow mobile screens, center vertically near the tap point
+    if (isMobile) {
+      const left = Math.max(GAP, Math.min(popover.anchor.left + popover.anchor.width / 2 - PW / 2, vw - PW - GAP));
+      const roomBelow = vh - popover.anchor.bottom - GAP;
+      const roomAbove = popover.anchor.top - GAP;
+      const maxH = Math.min(PH, vh - 2 * GAP);
+      let top: number;
+      if (roomBelow >= 120) {
+        // enough room below — open just below the chip
+        top = popover.anchor.bottom + GAP;
+      } else if (roomAbove >= 120) {
+        // open above the chip
+        top = Math.max(GAP, popover.anchor.top - GAP - Math.min(PH, roomAbove));
+      } else {
+        // no room either side — center in viewport
+        top = Math.max(GAP, (vh - maxH) / 2);
+      }
+      return { top, left, maxHeight: maxH };
+    }
+
+    // Desktop: smart below/above placement
     const chipCenterX = popover.anchor.left + popover.anchor.width / 2;
     const left = Math.max(GAP, Math.min(chipCenterX - PW / 2, vw - PW - GAP));
-    const hasRoomBelow = popover.anchor.bottom + GAP + PH <= vh - GAP;
-    const top = hasRoomBelow ? popover.anchor.bottom + GAP : Math.max(GAP, popover.anchor.top - GAP - PH);
-    return { top, left, maxHeight: vh - 2 * GAP };
+    const roomBelow = vh - popover.anchor.bottom - GAP;
+    const roomAbove = popover.anchor.top - GAP;
+    const maxH = Math.min(PH, Math.max(roomBelow, roomAbove));
+    const top = roomBelow >= roomAbove
+      ? popover.anchor.bottom + GAP
+      : Math.max(GAP, popover.anchor.top - GAP - Math.min(PH, roomAbove));
+    return { top, left, maxHeight: maxH };
   })();
 
   const grid = buildGrid(year, month);
