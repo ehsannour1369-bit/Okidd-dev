@@ -7,7 +7,7 @@ import { eq, and } from "drizzle-orm";
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10,                   // max 10 attempts per IP per window
+  max: 5,                    // max 5 attempts per IP per window
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "too_many_attempts", message: "تعداد تلاش‌های ورود بیش از حد مجاز است. لطفاً ۱۵ دقیقه دیگر دوباره امتحان کنید." },
