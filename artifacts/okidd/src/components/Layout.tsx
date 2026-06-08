@@ -57,13 +57,13 @@ const branchManagerNav: NavItem[] = [
   { label: "کلاس‌ها", path: "/branch/classes", icon: BookMarked, color: "#10b981", bgGradient: "linear-gradient(135deg, #059669, #10b981)" },
   { label: "معلمان", path: "/branch/teachers", icon: GraduationCap, color: "#2dd4bf", bgGradient: "linear-gradient(135deg, #0d9488, #2dd4bf)" },
   { label: "دانش‌آموزان", path: "/branch/students", icon: Users, color: "#34d399", bgGradient: "linear-gradient(135deg, #10b981, #34d399)" },
-  { label: "گزارش عملکرد", path: "/branch/report", icon: BarChart2, color: "#0d9488", bgGradient: "linear-gradient(135deg, #0f766e, #0d9488)" },
+  { label: "گزارش عملکرد", path: "/branch/report", icon: BarChart2, color: "#0f766e", bgGradient: "linear-gradient(135deg, #134e4a, #0f766e)" },
   { label: "اعلان‌ها", path: "/branch/notifications", icon: Bell, color: "#0d9488", bgGradient: "linear-gradient(135deg, #0f766e, #0d9488)" },
   { label: "برنامه امتحانات", path: "/branch/exams", icon: ClipboardList, color: "#10b981", bgGradient: "linear-gradient(135deg, #059669, #10b981)" },
   // { label: "کلاس آنلاین", path: "/branch/online-class", icon: Video, color: "#0d9488", bgGradient: "linear-gradient(135deg, #0f766e, #0d9488)" },
-  { label: "فروشگاه کتاب", path: "/branch/shop", icon: ShoppingCart, color: "#22d3ee", bgGradient: "linear-gradient(135deg, #06b6d4, #22d3ee)" },
+  { label: "فروشگاه کتاب", path: "/branch/shop", icon: ShoppingCart, color: "#0d9488", bgGradient: "linear-gradient(135deg, #0f766e, #0d9488)" },
   { label: "سفارشات من", path: "/branch/orders", icon: Receipt, color: "#2dd4bf", bgGradient: "linear-gradient(135deg, #0d9488, #2dd4bf)" },
-  { label: "کیف پول", path: "/branch/wallet", icon: Wallet, color: "#34d399", bgGradient: "linear-gradient(135deg, #10b981, #34d399)" },
+  { label: "کیف پول", path: "/branch/wallet", icon: Wallet, color: "#10b981", bgGradient: "linear-gradient(135deg, #059669, #10b981)" },
 ];
 
 const teacherNav: NavItem[] = [
