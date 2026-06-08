@@ -357,9 +357,20 @@ router.get("/users/:id/details", async (req, res) => {
   }
 
   if (user.role === "parent") {
-    const children = await db.select().from(usersTable);
-    const filteredChildren = children.filter(c => c.role === "student" && c.schoolId === user.schoolId);
-    res.json({ ...safeUser, school, children: filteredChildren.map(({ password: _pw2, ...c }) => c) });
+    const { parentStudentsTable } = await import("@workspace/db/schema");
+    const links = await db.select().from(parentStudentsTable).where(
+      and(eq(parentStudentsTable.parentId, id), eq(parentStudentsTable.isActive, true))
+    );
+    const childRows = await Promise.all(
+      links.map(async (l) => {
+        const [child] = await db.select().from(usersTable).where(eq(usersTable.id, l.studentId));
+        if (!child) return null;
+        const { password: _pw2, ...safeChild } = child;
+        return { ...safeChild, relationType: l.relationType };
+      })
+    );
+    const children = childRows.filter(Boolean);
+    res.json({ ...safeUser, school, children });
     return;
   }
 
