@@ -41,15 +41,15 @@ const schoolManagerNav: NavItem[] = [
   { label: "شعبه‌ها", path: "/school/branches", icon: GitBranch, color: "#3b82f6", bgGradient: "linear-gradient(135deg, #2563eb, #3b82f6)" },
   { label: "معلمان", path: "/school/teachers", icon: GraduationCap, color: "#818cf8", bgGradient: "linear-gradient(135deg, #6366f1, #818cf8)" },
   { label: "دانش‌آموزان", path: "/school/students", icon: Users, color: "#60a5fa", bgGradient: "linear-gradient(135deg, #3b82f6, #60a5fa)" },
-  { label: "کلاس‌ها", path: "/school/classes", icon: BookMarked, color: "#a5b4fc", bgGradient: "linear-gradient(135deg, #818cf8, #a5b4fc)" },
-  { label: "پراگرس چارت", path: "/school/progress", icon: BarChart2, color: "#6366f1", bgGradient: "linear-gradient(135deg, #4f46e5, #6366f1)" },
-  { label: "گزارش عملکرد", path: "/school/report", icon: BarChart2, color: "#818cf8", bgGradient: "linear-gradient(135deg, #6366f1, #818cf8)" },
+  { label: "کلاس‌ها", path: "/school/classes", icon: BookMarked, color: "#818cf8", bgGradient: "linear-gradient(135deg, #6366f1, #818cf8)" },
+  { label: "پراگرس چارت", path: "/school/progress", icon: BarChart2, color: "#7c3aed", bgGradient: "linear-gradient(135deg, #6d28d9, #7c3aed)" },
+  { label: "گزارش عملکرد", path: "/school/report", icon: BarChart2, color: "#6366f1", bgGradient: "linear-gradient(135deg, #4f46e5, #6366f1)" },
   { label: "اعلان‌ها", path: "/school/notifications", icon: Bell, color: "#3b82f6", bgGradient: "linear-gradient(135deg, #2563eb, #3b82f6)" },
-  { label: "برنامه امتحانات", path: "/school/exams", icon: ClipboardList, color: "#60a5fa", bgGradient: "linear-gradient(135deg, #3b82f6, #60a5fa)" },
+  { label: "برنامه امتحانات", path: "/school/exams", icon: ClipboardList, color: "#6366f1", bgGradient: "linear-gradient(135deg, #4f46e5, #6366f1)" },
   // { label: "کلاس آنلاین", path: "/school/online-class", icon: Video, color: "#4f46e5", bgGradient: "linear-gradient(135deg, #4338ca, #4f46e5)" },
-  { label: "فروشگاه کتاب", path: "/school/shop", icon: ShoppingCart, color: "#22d3ee", bgGradient: "linear-gradient(135deg, #06b6d4, #22d3ee)" },
+  { label: "فروشگاه کتاب", path: "/school/shop", icon: ShoppingCart, color: "#7c3aed", bgGradient: "linear-gradient(135deg, #6d28d9, #7c3aed)" },
   { label: "سفارشات من", path: "/school/orders", icon: Receipt, color: "#818cf8", bgGradient: "linear-gradient(135deg, #6366f1, #818cf8)" },
-  { label: "کیف پول", path: "/school/wallet", icon: Wallet, color: "#34d399", bgGradient: "linear-gradient(135deg, #10b981, #34d399)" },
+  { label: "کیف پول", path: "/school/wallet", icon: Wallet, color: "#4f46e5", bgGradient: "linear-gradient(135deg, #3730a3, #4f46e5)" },
 ];
 
 const branchManagerNav: NavItem[] = [
@@ -194,45 +194,56 @@ function NavCard({ item, active, onClick, TEXT }: { item: NavItem; active: boole
         style={{
           background: active
             ? item.bgGradient
-            : `linear-gradient(145deg, ${item.color}38, ${item.color}20)`,
+            : `linear-gradient(145deg, ${item.color}72, ${item.color}52)`,
           border: active
-            ? `2px solid ${item.color}cc`
-            : `1.5px solid ${item.color}60`,
+            ? `2px solid ${item.color}ee`
+            : `1.5px solid ${item.color}88`,
           borderRadius: 20,
           padding: "14px 10px",
           display: "flex", flexDirection: "column", alignItems: "center",
           gap: 7, cursor: "pointer",
           transition: "all 0.22s cubic-bezier(0.4,0,0.2,1)",
           boxShadow: active
-            ? `0 8px 24px ${item.color}55, inset 0 1px 0 rgba(255,255,255,0.3)`
-            : `0 3px 10px ${item.color}18`,
+            ? `0 8px 28px ${item.color}65, inset 0 1px 0 rgba(255,255,255,0.32)`
+            : `0 4px 14px ${item.color}38, inset 0 1px 0 rgba(255,255,255,0.25)`,
           minHeight: 88, justifyContent: "center",
-          backdropFilter: "blur(12px)",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
         }}
         onMouseEnter={e => {
           if (!active) {
             const el = e.currentTarget as HTMLElement;
-            el.style.background = `linear-gradient(145deg, ${item.color}55, ${item.color}35)`;
-            el.style.transform = "translateY(-2px)";
-            el.style.boxShadow = `0 8px 22px ${item.color}33`;
+            el.style.background = item.bgGradient;
+            el.style.transform = "translateY(-2px) scale(1.02)";
+            el.style.boxShadow = `0 10px 26px ${item.color}55`;
+            el.style.border = `1.5px solid ${item.color}cc`;
           }
         }}
         onMouseLeave={e => {
           if (!active) {
             const el = e.currentTarget as HTMLElement;
-            el.style.background = `linear-gradient(145deg, ${item.color}38, ${item.color}20)`;
+            el.style.background = `linear-gradient(145deg, ${item.color}72, ${item.color}52)`;
             el.style.transform = "";
-            el.style.boxShadow = `0 3px 10px ${item.color}18`;
+            el.style.boxShadow = `0 4px 14px ${item.color}38, inset 0 1px 0 rgba(255,255,255,0.25)`;
+            el.style.border = `1.5px solid ${item.color}88`;
           }
         }}
       >
-        <div style={{ width: 44, height: 44, borderRadius: 14, background: active ? "rgba(255,255,255,0.30)" : `${item.color}28`, border: `1.5px solid ${active ? "rgba(255,255,255,0.55)" : item.color + "50"}`, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", flexShrink: 0 }}>
-          <item.icon size={22} color={active ? "white" : item.color} />
+        <div style={{
+          width: 44, height: 44, borderRadius: 14,
+          background: active ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.22)",
+          border: `1.5px solid rgba(255,255,255,${active ? "0.55" : "0.40"})`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
+          flexShrink: 0,
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.35)",
+        }}>
+          <item.icon size={22} color="white" strokeWidth={2} />
         </div>
         <div style={{
           fontSize: 12, fontWeight: 700, textAlign: "center", lineHeight: 1.3,
-          color: active ? "#fff" : TEXT,
-          textShadow: active ? "0 1px 4px rgba(0,0,0,0.3)" : "none",
+          color: "white",
+          textShadow: active ? "0 1px 6px rgba(0,0,0,0.35)" : "0 1px 4px rgba(0,0,0,0.28)",
         }}>{item.label}</div>
       </div>
     </Link>
