@@ -3,6 +3,7 @@ import { db, notificationsTable, parentStudentsTable, usersTable } from "@worksp
 import { notificationRepliesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { verifyToken } from "./auth";
+import { sendPushForNotification } from "../lib/push";
 
 const router = Router();
 
@@ -20,6 +21,13 @@ router.get("/notifications", async (req, res) => {
 router.post("/notifications", async (req, res) => {
   const [notification] = await db.insert(notificationsTable).values(req.body).returning();
   res.status(201).json(notification);
+  sendPushForNotification({
+    schoolId: notification.schoolId,
+    targetRole: notification.targetRole,
+    targetUserId: notification.targetUserId,
+    title: notification.title,
+    body: notification.body,
+  }).catch(() => {});
 });
 
 router.delete("/notifications/:id", async (req, res) => {

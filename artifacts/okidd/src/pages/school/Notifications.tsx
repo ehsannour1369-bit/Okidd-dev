@@ -4,7 +4,8 @@ import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import PageTopBar from "../../components/PageTopBar";
 import { showToast } from "../../lib/toast";
-import { Plus, Trash2, Bell, Filter, ChevronDown } from "lucide-react";
+import { Plus, Trash2, Bell, Filter, ChevronDown, Calendar } from "lucide-react";
+import { formatFaDateTime } from "../../lib/dateUtils";
 
 interface Notification {
   id: number; title: string; body: string; targetRole: string;
@@ -289,7 +290,12 @@ export default function SchoolNotifications() {
                 </div>
                 <p style={{ color: "#3730a3", fontSize: 13, margin: "0 0 6px", lineHeight: 1.6 }}>{n.body}</p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 5, alignItems: "center" }}>
-                  {n.createdAt && <span style={{ color: "#4f46e5", fontSize: 11 }}>{new Date(n.createdAt).toLocaleDateString("fa-IR")}</span>}
+                  {n.createdAt && (
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "#4f46e5", fontSize: 11 }}>
+                      <Calendar size={11} />
+                      {formatFaDateTime(n.createdAt)}
+                    </span>
+                  )}
                   {n.branchId && !n.classId && !n.gradeLevelId && (
                     <span style={{ fontSize: 11, background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.2)", borderRadius: 999, padding: "1px 7px", color: "#93c5fd" }}>شعبه: {allBranchMap[n.branchId] ?? n.branchId}</span>
                   )}

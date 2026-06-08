@@ -5,8 +5,9 @@ import { useAuthStore } from "../../store/auth";
 import { useNotificationReads } from "../../hooks/useNotificationReads";
 import NotificationThread from "../../components/NotificationThread";
 import { showToast } from "../../lib/toast";
-import { Bell, Send, Plus, Users, User, ChevronDown, Calendar, CheckCheck, MessageCircle, ChevronUp } from "lucide-react";
+import { Bell, Send, Plus, Users, User, ChevronDown, Calendar, Clock, CheckCheck, MessageCircle, ChevronUp } from "lucide-react";
 import PageTopBar from "../../components/PageTopBar";
+import { formatFaDateTime } from "../../lib/dateUtils";
 
 const AMBER   = "#f59e0b";
 const AMBER_D = "#d97706";
@@ -43,7 +44,7 @@ const TARGET_OPTIONS: { value: TargetType; label: string }[] = [
 export default function TeacherNotifications() {
   const { user } = useAuthStore();
   const qc = useQueryClient();
-  const { markRead, markAllRead, isRead, countUnread } = useNotificationReads(user?.id);
+  const { markRead, markAllRead, isRead, getReadAt, countUnread } = useNotificationReads(user?.id);
   const [tab, setTab] = useState<"inbox" | "send">("inbox");
   const [form, setForm] = useState({ title: "", body: "", classId: "", targetType: "all_students" as TargetType });
   const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>([]);
@@ -204,7 +205,13 @@ export default function TeacherNotifications() {
                       {n.createdAt && (
                         <div style={{ display: "flex", alignItems: "center", gap: 5, color: AMBER_D, fontSize: 11, marginTop: 8 }}>
                           <Calendar size={11} />
-                          {new Date(n.createdAt).toLocaleDateString("fa-IR", { year: "numeric", month: "long", day: "numeric" })}
+                          {formatFaDateTime(n.createdAt)}
+                        </div>
+                      )}
+                      {getReadAt(n.id) && (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5, color: "#10b981", fontSize: 11, marginTop: 3 }}>
+                          <Clock size={11} />
+                          خوانده شد: {formatFaDateTime(getReadAt(n.id))}
                         </div>
                       )}
                     </div>

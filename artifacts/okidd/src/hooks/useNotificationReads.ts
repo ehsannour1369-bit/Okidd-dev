@@ -1,35 +1,40 @@
 import { useState, useCallback } from "react";
 
-function storageKey(userId: number) {
-  return `notif_read_ids_${userId}`;
+type ReadMap = Record<number, string>;
+
+function mapKey(userId: number) { return `notif_read_map_${userId}`; }
+function legacyKey(userId: number) { return `notif_read_ids_${userId}`; }
+
+function loadMap(userId: number): ReadMap {
+  try {
+    const raw = localStorage.getItem(mapKey(userId));
+    if (raw) return JSON.parse(raw) as ReadMap;
+    const legacy = localStorage.getItem(legacyKey(userId));
+    if (legacy) {
+      const ids = JSON.parse(legacy) as number[];
+      const map: ReadMap = {};
+      ids.forEach(id => { map[id] = ""; });
+      return map;
+    }
+    return {};
+  } catch { return {}; }
 }
 
-function loadIds(userId: number): Set<number> {
-  try {
-    const raw = localStorage.getItem(storageKey(userId));
-    return raw ? new Set(JSON.parse(raw) as number[]) : new Set<number>();
-  } catch {
-    return new Set<number>();
-  }
-}
-
-function saveIds(userId: number, ids: Set<number>) {
-  try {
-    localStorage.setItem(storageKey(userId), JSON.stringify([...ids]));
-  } catch {}
+function saveMap(userId: number, map: ReadMap) {
+  try { localStorage.setItem(mapKey(userId), JSON.stringify(map)); } catch {}
 }
 
 export function useNotificationReads(userId?: number | null) {
-  const [readIds, setReadIds] = useState<Set<number>>(
-    () => (userId ? loadIds(userId) : new Set<number>())
+  const [readMap, setReadMap] = useState<ReadMap>(
+    () => (userId ? loadMap(userId) : {})
   );
 
   const update = useCallback(
-    (fn: (prev: Set<number>) => Set<number>) => {
+    (fn: (prev: ReadMap) => ReadMap) => {
       if (!userId) return;
-      setReadIds(prev => {
+      setReadMap(prev => {
         const next = fn(prev);
-        saveIds(userId, next);
+        saveMap(userId, next);
         return next;
       });
     },
@@ -37,21 +42,33 @@ export function useNotificationReads(userId?: number | null) {
   );
 
   const markRead = useCallback(
-    (id: number) => update(prev => new Set([...prev, id])),
+    (id: number) => update(prev =>
+      id in prev ? prev : { ...prev, [id]: new Date().toISOString() }
+    ),
     [update]
   );
 
   const markAllRead = useCallback(
-    (ids: number[]) => update(prev => new Set([...prev, ...ids])),
+    (ids: number[]) => update(prev => {
+      const now = new Date().toISOString();
+      const patch: ReadMap = {};
+      ids.forEach(id => { if (!(id in prev)) patch[id] = now; });
+      return Object.keys(patch).length ? { ...prev, ...patch } : prev;
+    }),
     [update]
   );
 
-  const isRead = useCallback((id: number) => readIds.has(id), [readIds]);
+  const isRead = useCallback((id: number) => id in readMap, [readMap]);
 
-  const countUnread = useCallback(
-    (notifs: { id: number }[]) => notifs.filter(n => !readIds.has(n.id)).length,
-    [readIds]
+  const getReadAt = useCallback(
+    (id: number): string | undefined => readMap[id] || undefined,
+    [readMap]
   );
 
-  return { markRead, markAllRead, isRead, countUnread };
+  const countUnread = useCallback(
+    (notifs: { id: number }[]) => notifs.filter(n => !(n.id in readMap)).length,
+    [readMap]
+  );
+
+  return { markRead, markAllRead, isRead, getReadAt, countUnread };
 }

@@ -4,8 +4,9 @@ import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { useNotificationReads } from "../../hooks/useNotificationReads";
 import NotificationThread from "../../components/NotificationThread";
-import { Bell, Calendar, CheckCheck, MessageCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { Bell, Calendar, Clock, CheckCheck, MessageCircle, ChevronDown, ChevronUp } from "lucide-react";
 import PageTopBar from "../../components/PageTopBar";
+import { formatFaDateTime } from "../../lib/dateUtils";
 
 const FEMALE_THEME = { p: "#d4547a", pD: "#ae3a5e", s: "#d870a2", sD: "#b5538a", text: "#2d1820", text2: "#7a3552", bg: "linear-gradient(160deg,#fef5f7 0%,#fceef5 42%,#fdf6f9 100%)", b1: "rgba(212,84,122,0.14)", b2: "rgba(216,112,162,0.10)" };
 const MALE_THEME   = { p: "#3b82f6", pD: "#2563eb", s: "#6366f1", sD: "#4f46e5", text: "#1e1b4b", text2: "#3730a3", bg: "linear-gradient(160deg,#eff6ff 0%,#e0e7ff 42%,#f0f9ff 100%)", b1: "rgba(59,130,246,0.18)", b2: "rgba(99,102,241,0.14)" };
@@ -15,7 +16,7 @@ export default function ParentNotifications() {
   const T     = user?.gender === "female" ? FEMALE_THEME : MALE_THEME;
   const ROSE  = T.p;  const PINK = T.s;
   const TEXT  = T.text; const TEXT2 = T.text2;
-  const { markRead, markAllRead, isRead, countUnread } = useNotificationReads(user?.id);
+  const { markRead, markAllRead, isRead, getReadAt, countUnread } = useNotificationReads(user?.id);
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
 
   const { data: notifs = [], isLoading } = useQuery<any[]>({
@@ -114,7 +115,13 @@ export default function ParentNotifications() {
                     {n.createdAt && (
                       <div style={{ display: "flex", alignItems: "center", gap: 5, color: `${PINK}aa`, fontSize: 11, marginTop: 10 }}>
                         <Calendar size={11} />
-                        {new Date(n.createdAt).toLocaleDateString("fa-IR", { year: "numeric", month: "long", day: "numeric" })}
+                        {formatFaDateTime(n.createdAt)}
+                      </div>
+                    )}
+                    {getReadAt(n.id) && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 5, color: "#10b981", fontSize: 11, marginTop: 3 }}>
+                        <Clock size={11} />
+                        خوانده شد: {formatFaDateTime(getReadAt(n.id))}
                       </div>
                     )}
                   </div>

@@ -4,7 +4,8 @@ import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
 import { useNotificationReads } from "../../hooks/useNotificationReads";
 import { showToast } from "../../lib/toast";
-import { Bell, Calendar, Plus, X, MessageCircle, ChevronDown, ChevronUp, Send as SendIcon, ChevronRight, CheckCheck } from "lucide-react";
+import { Bell, Calendar, Clock, Plus, X, MessageCircle, ChevronDown, ChevronUp, Send as SendIcon, ChevronRight, CheckCheck } from "lucide-react";
+import { formatFaDateTime } from "../../lib/dateUtils";
 import { useLocation } from "wouter";
 import NotificationThread from "../../components/NotificationThread";
 
@@ -38,7 +39,7 @@ export default function StudentNotifications() {
   const { user } = useAuthStore();
   const [, navigate] = useLocation();
   const qc = useQueryClient();
-  const { markRead, isRead, countUnread } = useNotificationReads(user?.id);
+  const { markRead, isRead, getReadAt, countUnread } = useNotificationReads(user?.id);
   const [tab, setTab] = useState<"received" | "sent">("received");
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: "", body: "", targetRole: "teacher" });
@@ -184,7 +185,18 @@ export default function StudentNotifications() {
                       به: {n.targetRole === "school_manager" ? "مدیر مدرسه" : n.targetRole === "teacher" ? "معلم" : n.targetRole}
                     </span>
                   )}
-                  {n.createdAt && <div style={{ color: "#7c3aed", fontSize: 11, marginTop: 4 }}>{new Date(n.createdAt).toLocaleDateString("fa-IR")}</div>}
+                  {n.createdAt && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 5, color: "#7c3aed", fontSize: 11, marginTop: 4 }}>
+                      <Calendar size={11} />
+                      {formatFaDateTime(n.createdAt)}
+                    </div>
+                  )}
+                  {!isMine && getReadAt(n.id) && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 5, color: "#10b981", fontSize: 11, marginTop: 3 }}>
+                      <Clock size={11} />
+                      خوانده شد: {formatFaDateTime(getReadAt(n.id))}
+                    </div>
+                  )}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 5, flexShrink: 0 }}>
                   <button onClick={() => toggleExpand(n.id)}

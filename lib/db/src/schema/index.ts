@@ -22,3 +22,4 @@ export * from "./parentStudents";
 export * from "./classSchedules";
 export * from "./classSessions";
 export * from "./transactions";
+export * from "./pushSubscriptions";

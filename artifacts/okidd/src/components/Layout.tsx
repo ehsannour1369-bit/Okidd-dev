@@ -2,6 +2,7 @@ import { ReactNode, ComponentType, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { useNotificationReads } from "../hooks/useNotificationReads";
+import { usePushNotifications } from "../hooks/usePushNotifications";
 import { Link, useLocation } from "wouter";
 import { useAuthStore } from "../store/auth";
 import {
@@ -316,6 +317,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const [location, navigate] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  usePushNotifications();
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);

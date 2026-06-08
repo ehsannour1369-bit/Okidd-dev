@@ -5,8 +5,9 @@ import { useAuthStore } from "../../store/auth";
 import { useNotificationReads } from "../../hooks/useNotificationReads";
 import NotificationThread from "../../components/NotificationThread";
 import { showToast } from "../../lib/toast";
-import { Bell, Send, Plus, Filter, Calendar, ChevronDown, CheckCheck, MessageCircle, ChevronUp } from "lucide-react";
+import { Bell, Send, Plus, Filter, Calendar, Clock, ChevronDown, CheckCheck, MessageCircle, ChevronUp } from "lucide-react";
 import PageTopBar from "../../components/PageTopBar";
+import { formatFaDateTime } from "../../lib/dateUtils";
 
 const TEAL   = "#0d9488";
 const TEAL_D = "#0f766e";
@@ -43,7 +44,7 @@ const TARGET_ROLES = [
 export default function BranchNotifications() {
   const { user } = useAuthStore();
   const qc = useQueryClient();
-  const { markRead, markAllRead, isRead, countUnread } = useNotificationReads(user?.id);
+  const { markRead, markAllRead, isRead, getReadAt, countUnread } = useNotificationReads(user?.id);
   const [tab, setTab] = useState<"inbox" | "send">("inbox");
   const [filter, setFilter] = useState("");
   const [form, setForm] = useState({ title: "", body: "", targetRole: "student" });
@@ -218,7 +219,13 @@ export default function BranchNotifications() {
                         {n.createdAt && (
                           <div style={{ display: "flex", alignItems: "center", gap: 5, color: TEAL_D, fontSize: 11, marginTop: 8 }}>
                             <Calendar size={11} />
-                            {new Date(n.createdAt).toLocaleDateString("fa-IR", { year: "numeric", month: "long", day: "numeric" })}
+                            {formatFaDateTime(n.createdAt)}
+                          </div>
+                        )}
+                        {getReadAt(n.id) && (
+                          <div style={{ display: "flex", alignItems: "center", gap: 5, color: "#10b981", fontSize: 11, marginTop: 3 }}>
+                            <Clock size={11} />
+                            خوانده شد: {formatFaDateTime(getReadAt(n.id))}
                           </div>
                         )}
                       </div>
