@@ -54,6 +54,7 @@ import TeacherProgress from "./pages/teacher/Progress";
 import TeacherNotifications from "./pages/teacher/Notifications";
 import TeacherOnlineClass from "./pages/teacher/OnlineClass";
 
+import ParentGenderSetup from "./components/ParentGenderSetup";
 import ParentDashboard from "./pages/parent/Dashboard";
 import ParentChildren from "./pages/parent/Children";
 import ParentConsultations from "./pages/parent/Consultations";
@@ -199,6 +200,7 @@ export default function App() {
         <AppRouter />
       </WouterRouter>
       <ToastContainer />
+      <ParentGenderSetup />
     </QueryClientProvider>
   );
 }

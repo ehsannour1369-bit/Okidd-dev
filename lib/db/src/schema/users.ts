@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -13,6 +13,7 @@ export const usersTable = pgTable("users", {
   schoolId: integer("school_id"),
   nationalId: text("national_id"),
   gender: text("gender").default("male"),
+  genderConfirmed: boolean("gender_confirmed").notNull().default(false),
   avatarUrl: text("avatar_url"),
   parentId: integer("parent_id"),
   tokenVersion: integer("token_version").notNull().default(1),

@@ -12,14 +12,9 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useSidebar } from "../../contexts/SidebarContext";
 
-/* ─── Fixed parent theme — always rose/pink ─── */
-const ROSE   = "#f43f5e";
-const ROSE_D = "#e11d48";
-const PINK   = "#ec4899";
-const PINK_D = "#db2777";
-const TEXT   = "#4c0519";
-const TEXT2  = "#881337";
-const BG     = "linear-gradient(160deg,#fff1f2 0%,#fce7f3 42%,#fdf2f8 100%)";
+/* ─── Parent theme helpers — resolved inside component by gender ─── */
+const FEMALE_THEME = { p: "#f43f5e", pD: "#e11d48", s: "#ec4899", sD: "#db2777", text: "#4c0519", text2: "#881337", bg: "linear-gradient(160deg,#fff1f2 0%,#fce7f3 42%,#fdf2f8 100%)", b1: "rgba(244,63,94,0.28)", b2: "rgba(236,72,153,0.20)", b3: "rgba(251,113,133,0.15)" };
+const MALE_THEME   = { p: "#3b82f6", pD: "#2563eb", s: "#6366f1", sD: "#4f46e5", text: "#1e1b4b", text2: "#3730a3", bg: "linear-gradient(160deg,#eff6ff 0%,#e0e7ff 42%,#f0f9ff 100%)",  b1: "rgba(59,130,246,0.26)", b2: "rgba(99,102,241,0.20)", b3: "rgba(147,197,253,0.15)" };
 
 function gradCard(color: string, dark: string, extra?: React.CSSProperties): React.CSSProperties {
   return {
@@ -44,18 +39,19 @@ function shine(): React.CSSProperties {
   };
 }
 
-/* STAT_META — all rose/pink family */
-const STAT_META = [
-  { label: "آخرین ورود",        key: "lastLogin", icon: Calendar,  color: "#f43f5e", dark: "#e11d48" },
-  { label: "زمان در برنامه",    key: "duration",  icon: Clock,     color: "#ec4899", dark: "#db2777" },
-  { label: "کتاب‌های ثبت‌نامی", key: "books",     icon: BookOpen,  color: "#fb7185", dark: "#f43f5e" },
-  { label: "امتیاز کل",         key: "score",     icon: Star,      color: "#f43f5e", dark: "#be123c" },
-  { label: "رتبه کلاس",         key: "rank",      icon: Trophy,    color: "#e11d48", dark: "#9d174d" },
-  { label: "دروس تکمیل‌شده",    key: "lessons",   icon: Star,      color: "#ec4899", dark: "#be185d" },
-];
-
 export default function ParentDashboard() {
   const { user } = useAuthStore();
+  const T    = user?.gender === "female" ? FEMALE_THEME : MALE_THEME;
+  const ROSE = T.p; const ROSE_D = T.pD; const PINK = T.s; const PINK_D = T.sD;
+  const TEXT = T.text; const TEXT2 = T.text2; const BG = T.bg;
+  const STAT_META = [
+    { label: "آخرین ورود",        key: "lastLogin", icon: Calendar,  color: ROSE,    dark: ROSE_D },
+    { label: "زمان در برنامه",    key: "duration",  icon: Clock,     color: PINK,    dark: PINK_D },
+    { label: "کتاب‌های ثبت‌نامی", key: "books",     icon: BookOpen,  color: T.p,     dark: T.pD   },
+    { label: "امتیاز کل",         key: "score",     icon: Star,      color: ROSE,    dark: ROSE_D },
+    { label: "رتبه کلاس",         key: "rank",      icon: Trophy,    color: ROSE_D,  dark: T.text2 },
+    { label: "دروس تکمیل‌شده",    key: "lessons",   icon: Star,      color: PINK,    dark: PINK_D },
+  ];
   const [, navigate] = useLocation();
   const { openSidebar } = useSidebar();
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
@@ -141,9 +137,9 @@ export default function ParentDashboard() {
       position: "relative", overflow: "hidden",
     }}>
       {/* Blobs */}
-      <div style={{ position: "absolute", top: "-12%", right: "-8%", width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle,rgba(244,63,94,0.28) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat1 9s ease-in-out infinite" }} />
-      <div style={{ position: "absolute", bottom: "5%", left: "-8%", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle,rgba(236,72,153,0.20) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat2 12s ease-in-out infinite" }} />
-      <div style={{ position: "absolute", top: "45%", left: "36%", width: 180, height: 180, borderRadius: "50%", background: "radial-gradient(circle,rgba(251,113,133,0.15) 0%,transparent 70%)", pointerEvents: "none", animation: "blobFloat1 14s ease-in-out infinite reverse" }} />
+      <div style={{ position: "absolute", top: "-12%", right: "-8%", width: 380, height: 380, borderRadius: "50%", background: `radial-gradient(circle,${T.b1} 0%,transparent 70%)`, pointerEvents: "none", animation: "blobFloat1 9s ease-in-out infinite" }} />
+      <div style={{ position: "absolute", bottom: "5%", left: "-8%", width: 300, height: 300, borderRadius: "50%", background: `radial-gradient(circle,${T.b2} 0%,transparent 70%)`, pointerEvents: "none", animation: "blobFloat2 12s ease-in-out infinite" }} />
+      <div style={{ position: "absolute", top: "45%", left: "36%", width: 180, height: 180, borderRadius: "50%", background: `radial-gradient(circle,${T.b3} 0%,transparent 70%)`, pointerEvents: "none", animation: "blobFloat1 14s ease-in-out infinite reverse" }} />
 
       <div style={{ position: "relative", zIndex: 1, height: "100%", display: "flex", flexDirection: "column" }}>
 

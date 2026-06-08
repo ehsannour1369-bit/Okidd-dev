@@ -11,14 +11,9 @@ import {
 import { LessonStarRow } from "../../components/LessonStarPanel";
 import PageTopBar from "../../components/PageTopBar";
 
-/* ─── Fixed parent theme — always rose/pink ─── */
-const ROSE   = "#f43f5e";
-const ROSE_D = "#e11d48";
-const PINK   = "#ec4899";
-const PINK_D = "#db2777";
-const TEXT   = "#4c0519";
-const TEXT2  = "#881337";
-const BG     = "linear-gradient(160deg,#fff1f2 0%,#fce7f3 42%,#fdf2f8 100%)";
+/* ─── Parent theme helpers — resolved inside component by gender ─── */
+const FEMALE_THEME = { p: "#f43f5e", pD: "#e11d48", s: "#ec4899", sD: "#db2777", text: "#4c0519", text2: "#881337", bg: "linear-gradient(160deg,#fff1f2 0%,#fce7f3 42%,#fdf2f8 100%)", b1: "rgba(244,63,94,0.18)", b2: "rgba(236,72,153,0.14)" };
+const MALE_THEME   = { p: "#3b82f6", pD: "#2563eb", s: "#6366f1", sD: "#4f46e5", text: "#1e1b4b", text2: "#3730a3", bg: "linear-gradient(160deg,#eff6ff 0%,#e0e7ff 42%,#f0f9ff 100%)",  b1: "rgba(59,130,246,0.18)",  b2: "rgba(99,102,241,0.14)"  };
 
 function gradCard(color: string, dark: string, extra?: React.CSSProperties): React.CSSProperties {
   return {
@@ -33,14 +28,6 @@ function shine(): React.CSSProperties {
   return { position: "absolute", top: 0, left: 0, right: 0, height: "45%", background: "linear-gradient(180deg, rgba(255,255,255,0.20) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" };
 }
 
-const STAT_META = [
-  { label: "آخرین ورود",        key: "lastLogin", icon: Calendar,      color: ROSE,   dark: ROSE_D },
-  { label: "زمان در برنامه",    key: "duration",  icon: Clock,         color: PINK,   dark: PINK_D },
-  { label: "کتاب‌ها",           key: "books",     icon: BookOpen,      color: "#fb7185", dark: ROSE },
-  { label: "امتیاز کل",         key: "score",     icon: Star,          color: ROSE,   dark: "#be123c" },
-  { label: "رتبه کلاس",         key: "rank",      icon: Trophy,        color: ROSE_D, dark: "#9d174d" },
-  { label: "دروس تکمیل‌شده",    key: "lessons",   icon: GraduationCap, color: PINK,   dark: "#be185d" },
-];
 
 const BREAKDOWN_META = [
   { key: "lesson",    label: "دروس",    icon: BookOpen  },
@@ -56,6 +43,17 @@ const RELATION_LABELS: Record<string, string> = { father: "پدر", mother: "م�
 
 export default function ParentChildren() {
   const { user } = useAuthStore();
+  const T     = user?.gender === "female" ? FEMALE_THEME : MALE_THEME;
+  const ROSE  = T.p; const ROSE_D = T.pD; const PINK = T.s; const PINK_D = T.sD;
+  const TEXT  = T.text; const TEXT2 = T.text2; const BG = T.bg;
+  const STAT_META = [
+    { label: "آخرین ورود",        key: "lastLogin", icon: Calendar,      color: ROSE,   dark: ROSE_D },
+    { label: "زمان در برنامه",    key: "duration",  icon: Clock,         color: PINK,   dark: PINK_D },
+    { label: "کتاب‌ها",           key: "books",     icon: BookOpen,      color: ROSE,   dark: ROSE_D },
+    { label: "امتیاز کل",         key: "score",     icon: Star,          color: ROSE,   dark: ROSE_D },
+    { label: "رتبه کلاس",         key: "rank",      icon: Trophy,        color: ROSE_D, dark: T.text2 },
+    { label: "دروس تکمیل‌شده",    key: "lessons",   icon: GraduationCap, color: PINK,   dark: PINK_D },
+  ];
   const qc = useQueryClient();
   const [selected, setSelected] = useState<any>(null);
   const [expandedBook, setExpandedBook] = useState<number | null>(null);
@@ -118,8 +116,8 @@ export default function ParentChildren() {
     <div dir="rtl" style={{ fontFamily: "Vazirmatn, sans-serif", background: BG, minHeight: "100vh", position: "relative", overflow: "hidden" }}>
       {/* Blobs */}
       <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}>
-        <div style={{ position: "absolute", top: "5%", right: "-10%", width: "55%", paddingTop: "55%", borderRadius: "50%", background: "rgba(244,63,94,0.18)", filter: "blur(56px)" }} />
-        <div style={{ position: "absolute", bottom: "10%", left: "-8%", width: "45%", paddingTop: "45%", borderRadius: "50%", background: "rgba(236,72,153,0.14)", filter: "blur(48px)" }} />
+        <div style={{ position: "absolute", top: "5%", right: "-10%", width: "55%", paddingTop: "55%", borderRadius: "50%", background: T.b1, filter: "blur(56px)" }} />
+        <div style={{ position: "absolute", bottom: "10%", left: "-8%", width: "45%", paddingTop: "45%", borderRadius: "50%", background: T.b2, filter: "blur(48px)" }} />
       </div>
 
       <div style={{ position: "relative", zIndex: 1, padding: "16px 16px 40px" }}>
@@ -339,6 +337,8 @@ export default function ParentChildren() {
         <ConnectChildModal
           parentId={user!.id}
           existingStudentIds={children.map((c: any) => c.id)}
+          accent={ROSE} dark={ROSE_D} text={TEXT} text2={TEXT2}
+          defaultRelation={user?.gender === "female" ? "mother" : "father"}
           onClose={() => setShowConnect(false)}
           onConnected={() => {
             qc.invalidateQueries({ queryKey: ["parent-students", user?.id] });
@@ -353,21 +353,21 @@ export default function ParentChildren() {
   );
 }
 
-/* ─── Input style ─── */
-const IS: React.CSSProperties = {
-  width: "100%", background: "rgba(255,241,242,0.90)",
-  border: `1px solid ${ROSE}40`, borderRadius: 10,
-  color: TEXT, padding: "10px 12px", fontSize: 14,
-  fontFamily: "Vazirmatn, sans-serif", outline: "none",
-  direction: "rtl", boxSizing: "border-box",
-};
-
-function ConnectChildModal({ parentId, existingStudentIds, onClose, onConnected }: {
+function ConnectChildModal({ parentId, existingStudentIds, accent, dark, text, text2, defaultRelation, onClose, onConnected }: {
   parentId: number; existingStudentIds: number[];
+  accent: string; dark: string; text: string; text2: string;
+  defaultRelation: string;
   onClose: () => void; onConnected: () => void;
 }) {
+  const IS: React.CSSProperties = {
+    width: "100%", background: "rgba(255,255,255,0.85)",
+    border: `1px solid ${accent}40`, borderRadius: 10,
+    color: text, padding: "10px 12px", fontSize: 14,
+    fontFamily: "Vazirmatn, sans-serif", outline: "none",
+    direction: "rtl", boxSizing: "border-box",
+  };
   const [nationalId, setNationalId] = useState("");
-  const [relationType, setRelationType] = useState("father");
+  const [relationType, setRelationType] = useState(defaultRelation);
   const [found, setFound] = useState<any>(null);
   const [searching, setSearching] = useState(false);
   const [searchErr, setSearchErr] = useState("");
@@ -397,19 +397,19 @@ function ConnectChildModal({ parentId, existingStudentIds, onClose, onConnected 
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.70)", backdropFilter: "blur(6px)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-      <div style={{ background: "#fff1f2", border: `1.5px solid ${ROSE}40`, borderRadius: 22, padding: 28, width: "90%", maxWidth: 460, direction: "rtl", fontFamily: "Vazirmatn, sans-serif", boxShadow: `0 24px 60px ${ROSE}30` }}>
+      <div style={{ background: "white", border: `1.5px solid ${accent}30`, borderRadius: 22, padding: 28, width: "90%", maxWidth: 460, direction: "rtl", fontFamily: "Vazirmatn, sans-serif", boxShadow: `0 24px 60px ${accent}25` }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <div style={{ fontWeight: 800, fontSize: 17, color: TEXT, display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 38, height: 38, borderRadius: 12, background: `linear-gradient(135deg,${ROSE},${PINK})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 4px 14px ${ROSE}44` }}>
+          <div style={{ fontWeight: 800, fontSize: 17, color: text, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 38, height: 38, borderRadius: 12, background: `linear-gradient(135deg,${accent},${dark})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 4px 14px ${accent}44` }}>
               <Search size={17} color="white" />
             </div>
             افزودن فرزند
           </div>
-          <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: 10, border: `1px solid ${ROSE}30`, background: `${ROSE}12`, color: ROSE_D, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontFamily: "Vazirmatn" }}>×</button>
+          <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: 10, border: `1px solid ${accent}30`, background: `${accent}10`, color: dark, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontFamily: "Vazirmatn" }}>×</button>
         </div>
 
         <div style={{ marginBottom: 14 }}>
-          <label style={{ fontSize: 13, fontWeight: 700, color: TEXT2, display: "block", marginBottom: 6 }}>کد ملی فرزند</label>
+          <label style={{ fontSize: 13, fontWeight: 700, color: text2, display: "block", marginBottom: 6 }}>کد ملی فرزند</label>
           <div style={{ display: "flex", gap: 8 }}>
             <input
               value={nationalId} onChange={e => setNationalId(e.target.value)}
@@ -418,28 +418,28 @@ function ConnectChildModal({ parentId, existingStudentIds, onClose, onConnected 
               style={IS}
             />
             <button onClick={search} disabled={searching}
-              style={{ padding: "10px 18px", background: `linear-gradient(135deg,${ROSE},${PINK})`, border: "none", borderRadius: 10, color: "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap", boxShadow: `0 4px 12px ${ROSE}44`, opacity: searching ? 0.7 : 1 }}>
+              style={{ padding: "10px 18px", background: `linear-gradient(135deg,${accent},${dark})`, border: "none", borderRadius: 10, color: "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap", boxShadow: `0 4px 12px ${accent}44`, opacity: searching ? 0.7 : 1 }}>
               {searching ? "..." : "جستجو"}
             </button>
           </div>
-          {searchErr && <div style={{ color: "#be123c", fontSize: 12, marginTop: 6, fontWeight: 600 }}>{searchErr}</div>}
+          {searchErr && <div style={{ color: dark, fontSize: 12, marginTop: 6, fontWeight: 600 }}>{searchErr}</div>}
         </div>
 
         {found && (
           <>
-            <div style={{ background: `${ROSE}10`, border: `1px solid ${ROSE}30`, borderRadius: 14, padding: "14px 16px", marginBottom: 14, display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 44, height: 44, borderRadius: 13, background: `linear-gradient(135deg,${ROSE}d8,${ROSE_D}b0)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <div style={{ background: `${accent}08`, border: `1px solid ${accent}25`, borderRadius: 14, padding: "14px 16px", marginBottom: 14, display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 13, background: `linear-gradient(135deg,${accent}d8,${dark}b0)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <UserRound size={22} color="white" strokeWidth={2} />
               </div>
               <div>
-                <div style={{ fontWeight: 800, fontSize: 15, color: TEXT }}>{found.name}</div>
-                <div style={{ fontSize: 12, color: TEXT2, marginTop: 2 }}>{found.email}</div>
+                <div style={{ fontWeight: 800, fontSize: 15, color: text }}>{found.name}</div>
+                <div style={{ fontSize: 12, color: text2, marginTop: 2 }}>{found.email}</div>
                 <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 1 }}>{found.gender === "female" ? "دختر" : "پسر"}</div>
               </div>
             </div>
 
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 13, fontWeight: 700, color: TEXT2, display: "block", marginBottom: 6 }}>نسبت</label>
+              <label style={{ fontSize: 13, fontWeight: 700, color: text2, display: "block", marginBottom: 6 }}>نسبت</label>
               <select value={relationType} onChange={e => setRelationType(e.target.value)} style={{ ...IS }}>
                 <option value="father">پدر</option>
                 <option value="mother">مادر</option>
@@ -447,10 +447,10 @@ function ConnectChildModal({ parentId, existingStudentIds, onClose, onConnected 
               </select>
             </div>
 
-            {linkErr && <div style={{ color: "#be123c", fontSize: 12, marginBottom: 10, fontWeight: 600 }}>{linkErr}</div>}
+            {linkErr && <div style={{ color: dark, fontSize: 12, marginBottom: 10, fontWeight: 600 }}>{linkErr}</div>}
 
             <button onClick={link} disabled={linking}
-              style={{ width: "100%", padding: "13px 0", background: `linear-gradient(135deg,${ROSE},${PINK})`, border: "none", borderRadius: 14, color: "white", fontFamily: "Vazirmatn", fontSize: 15, fontWeight: 800, cursor: "pointer", boxShadow: `0 6px 20px ${ROSE}44`, opacity: linking ? 0.75 : 1 }}>
+              style={{ width: "100%", padding: "13px 0", background: `linear-gradient(135deg,${accent},${dark})`, border: "none", borderRadius: 14, color: "white", fontFamily: "Vazirmatn", fontSize: 15, fontWeight: 800, cursor: "pointer", boxShadow: `0 6px 20px ${accent}44`, opacity: linking ? 0.75 : 1 }}>
               {linking ? "در حال اتصال..." : "اتصال فرزند"}
             </button>
           </>

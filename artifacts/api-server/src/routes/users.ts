@@ -45,15 +45,17 @@ router.put("/users/:id", async (req, res) => {
   res.json(safeUser);
 });
 
-// Safe self-edit: only name, phone, nationalId, email
+// Safe self-edit: name, phone, nationalId, email, gender, genderConfirmed
 router.patch("/users/:id/profile", async (req, res) => {
   const id = parseInt(req.params.id);
-  const { name, phone, nationalId, email } = req.body as Record<string, string>;
+  const { name, phone, nationalId, email, gender, genderConfirmed } = req.body as Record<string, any>;
   const updates: Record<string, unknown> = {};
   if (name !== undefined) updates.name = name;
   if (phone !== undefined) updates.phone = phone;
   if (nationalId !== undefined) updates.nationalId = nationalId;
   if (email !== undefined) updates.email = email;
+  if (gender !== undefined) updates.gender = gender;
+  if (genderConfirmed !== undefined) updates.genderConfirmed = genderConfirmed;
   const [user] = await db.update(usersTable).set(updates).where(eq(usersTable.id, id)).returning();
   if (!user) { res.status(404).json({ error: "Not found" }); return; }
   const { password: _pw, ...safeUser } = user;
