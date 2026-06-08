@@ -6,43 +6,50 @@ import { showToast } from "../../lib/toast";
 import {
   BookOpen, Star, UserRound, Clock, Calendar,
   ChevronDown, ChevronUp, Trophy, GraduationCap,
-  Gamepad2, Brain, Film, Dumbbell, Zap, Plus, X, Search, Link,
+  Gamepad2, Brain, Film, Dumbbell, Zap, Plus, Search,
 } from "lucide-react";
-import { LessonStarRow, scoreToStars } from "../../components/LessonStarPanel";
+import { LessonStarRow } from "../../components/LessonStarPanel";
 import PageTopBar from "../../components/PageTopBar";
 
-function glassCard(color: string, dark: string, extra?: React.CSSProperties): React.CSSProperties {
+/* ─── Fixed parent theme — always rose/pink ─── */
+const ROSE   = "#f43f5e";
+const ROSE_D = "#e11d48";
+const PINK   = "#ec4899";
+const PINK_D = "#db2777";
+const TEXT   = "#4c0519";
+const TEXT2  = "#881337";
+const BG     = "linear-gradient(160deg,#fff1f2 0%,#fce7f3 42%,#fdf2f8 100%)";
+
+function gradCard(color: string, dark: string, extra?: React.CSSProperties): React.CSSProperties {
   return {
-    background: `linear-gradient(145deg, ${color}68, ${dark}42)`,
-    backdropFilter: "blur(22px)", WebkitBackdropFilter: "blur(22px)",
-    border: `1.5px solid ${color}88`, borderRadius: 22, position: "relative", overflow: "hidden",
-    boxShadow: `0 6px 28px ${color}44, inset 0 1px 0 rgba(255,255,255,0.32)`,
-    transition: "transform 0.26s cubic-bezier(.34,1.56,.64,1), box-shadow 0.26s ease", ...extra,
+    background: `linear-gradient(145deg, ${color}d8, ${dark}b0)`,
+    backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+    border: `1.5px solid ${color}cc`, borderRadius: 22, position: "relative", overflow: "hidden",
+    boxShadow: `0 8px 28px ${color}55, inset 0 1px 0 rgba(255,255,255,0.28)`,
+    transition: "all 0.26s cubic-bezier(0.4,0,0.2,1)", ...extra,
   };
 }
-function glassIcon(color: string, size = 46): React.CSSProperties {
-  return { width: size, height: size, borderRadius: 14, background: "rgba(255,255,255,0.35)", backdropFilter: "blur(12px)", border: "1.5px solid rgba(255,255,255,0.60)", boxShadow: `0 2px 10px ${color}22`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 };
-}
 function shine(): React.CSSProperties {
-  return { position: "absolute", top: 0, left: 0, right: 0, height: "45%", background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" };
+  return { position: "absolute", top: 0, left: 0, right: 0, height: "45%", background: "linear-gradient(180deg, rgba(255,255,255,0.20) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" };
 }
 
 const STAT_META = [
-  { label: "آخرین ورود",     key: "lastLogin", icon: Calendar,      color: "#3b82f6", dark: "#2563eb" },
-  { label: "زمان در برنامه", key: "duration",  icon: Clock,         color: "#22c55e", dark: "#16a34a" },
-  { label: "کتاب‌ها",        key: "books",     icon: BookOpen,      color: "#f59e0b", dark: "#d97706" },
-  { label: "امتیاز کل",      key: "score",     icon: Star,          color: "#ec4899", dark: "#db2777" },
-  { label: "رتبه کلاس",      key: "rank",      icon: Trophy,        color: "#8b5cf6", dark: "#7c3aed" },
-  { label: "دروس تکمیل‌شده", key: "lessons",   icon: GraduationCap, color: "#10b981", dark: "#059669" },
+  { label: "آخرین ورود",        key: "lastLogin", icon: Calendar,      color: ROSE,   dark: ROSE_D },
+  { label: "زمان در برنامه",    key: "duration",  icon: Clock,         color: PINK,   dark: PINK_D },
+  { label: "کتاب‌ها",           key: "books",     icon: BookOpen,      color: "#fb7185", dark: ROSE },
+  { label: "امتیاز کل",         key: "score",     icon: Star,          color: ROSE,   dark: "#be123c" },
+  { label: "رتبه کلاس",         key: "rank",      icon: Trophy,        color: ROSE_D, dark: "#9d174d" },
+  { label: "دروس تکمیل‌شده",    key: "lessons",   icon: GraduationCap, color: PINK,   dark: "#be185d" },
 ];
+
 const BREAKDOWN_META = [
-  { key: "lesson", label: "دروس", color: "#6366f1", icon: BookOpen },
-  { key: "game", label: "بازی", color: "#f59e0b", icon: Gamepad2 },
-  { key: "quiz", label: "کوییز", color: "#ec4899", icon: Brain },
-  { key: "exercise", label: "تمرین", color: "#10b981", icon: Dumbbell },
-  { key: "animation", label: "انیمیشن", color: "#3b82f6", icon: Film },
-  { key: "balloon", label: "بالون", color: "#f97316", icon: Zap },
-  { key: "video", label: "ویدیو", color: "#a855f7", icon: Film },
+  { key: "lesson",    label: "دروس",    icon: BookOpen  },
+  { key: "game",      label: "بازی",    icon: Gamepad2  },
+  { key: "quiz",      label: "کوییز",   icon: Brain     },
+  { key: "exercise",  label: "تمرین",   icon: Dumbbell  },
+  { key: "animation", label: "انیمیشن", icon: Film      },
+  { key: "balloon",   label: "بالون",   icon: Zap       },
+  { key: "video",     label: "ویدیو",   icon: Film      },
 ];
 
 const RELATION_LABELS: Record<string, string> = { father: "پدر", mother: "مادر", guardian: "سرپرست" };
@@ -55,15 +62,13 @@ export default function ParentChildren() {
   const [mounted, setMounted] = useState(false);
   const [showConnect, setShowConnect] = useState(false);
 
-  useEffect(() => { const t = setTimeout(() => setMounted(true), 80); return () => clearTimeout(t); }, []);
+  useEffect(() => { const t = setTimeout(() => setMounted(true), 60); return () => clearTimeout(t); }, []);
 
-  // Get linked children via parent_students
   const { data: links = [], isLoading: linksLoading } = useQuery<any[]>({
     queryKey: ["parent-students", user?.id],
     queryFn: () => api.get(`/parent-students?parentId=${user?.id}`),
     enabled: !!user?.id,
   });
-
   const children = links.map((l: any) => ({ ...l.student, relationType: l.relationType, linkId: l.id }));
   const currentChild = selected ?? children[0];
 
@@ -83,16 +88,10 @@ export default function ParentChildren() {
     enabled: !!currentChild?.id,
   });
 
-  const isGirl     = currentChild?.gender === "female";
-  const accent     = isGirl ? "#e879f9" : "#818cf8";
-  const accentDark = isGirl ? "#c026d3" : "#4f46e5";
-  const bgGrad     = isGirl ? "linear-gradient(160deg,#fdf2f8 0%,#fce7f3 40%,#fff1f2 100%)" : "linear-gradient(160deg,#f5f3ff 0%,#ede9fe 40%,#eef2ff 100%)";
-  const TEXT       = isGirl ? "#4a044e" : "#1e1b4b";
-  const TEXT2      = isGirl ? "#86198f" : "#3730a3";
-
-  function cardAnim(idx: number): React.CSSProperties {
-    if (!mounted) return { opacity: 0, transform: "translateY(22px)" };
-    return { animation: `childUp 0.5s cubic-bezier(0.16,1,0.3,1) ${idx * 0.07}s both` };
+  function anim(i: number): React.CSSProperties {
+    return mounted
+      ? { animation: `childUp 0.44s cubic-bezier(0.16,1,0.3,1) ${i * 0.07}s both` }
+      : { opacity: 0 };
   }
   function fmtDateTime(d: string | null) {
     if (!d) return "—";
@@ -111,42 +110,45 @@ export default function ParentChildren() {
     books:     (summary?.books?.length ?? 0).toLocaleString("fa-IR"),
     score:     (summary?.totalScore ?? 0).toLocaleString("fa-IR"),
     rank:      myRank ? `${myRank.rank.toLocaleString("fa-IR")} از ${rankings.length.toLocaleString("fa-IR")}` : "—",
-    lessons:   ((summary?.books ?? []) as any[]).reduce((s, b) => s + (b.completedLessons ?? 0), 0).toLocaleString("fa-IR"),
+    lessons:   ((summary?.books ?? []) as any[]).reduce((s: number, b: any) => s + (b.completedLessons ?? 0), 0).toLocaleString("fa-IR"),
   };
   const bdTotal = breakdown?.total ?? 0;
 
   return (
-    <div dir="rtl" style={{ fontFamily: "Vazirmatn, sans-serif", margin: "-12px", background: bgGrad, minHeight: "100vh", transition: "background 0.4s" }}>
+    <div dir="rtl" style={{ fontFamily: "Vazirmatn, sans-serif", background: BG, minHeight: "100vh", position: "relative", overflow: "hidden" }}>
+      {/* Blobs */}
       <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}>
-        <div style={{ position: "absolute", top: "5%", right: "-10%", width: "55%", paddingTop: "55%", borderRadius: "50%", background: isGirl ? "rgba(232,121,249,0.18)" : "rgba(129,140,248,0.18)", filter: "blur(56px)" }} />
-        <div style={{ position: "absolute", bottom: "10%", left: "-8%", width: "45%", paddingTop: "45%", borderRadius: "50%", background: isGirl ? "rgba(240,100,220,0.14)" : "rgba(99,102,241,0.14)", filter: "blur(48px)" }} />
+        <div style={{ position: "absolute", top: "5%", right: "-10%", width: "55%", paddingTop: "55%", borderRadius: "50%", background: "rgba(244,63,94,0.18)", filter: "blur(56px)" }} />
+        <div style={{ position: "absolute", bottom: "10%", left: "-8%", width: "45%", paddingTop: "45%", borderRadius: "50%", background: "rgba(236,72,153,0.14)", filter: "blur(48px)" }} />
       </div>
 
-      <div style={{ position: "relative", zIndex: 1, padding: "20px 16px 40px" }}>
+      <div style={{ position: "relative", zIndex: 1, padding: "16px 16px 40px" }}>
         <PageTopBar />
 
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, ...cardAnim(0) }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, ...anim(0) }}>
           <div style={{ fontWeight: 800, fontSize: 18, color: TEXT, display: "flex", alignItems: "center", gap: 8 }}>
-            <UserRound size={18} style={{ color: accent }} /> مدیریت فرزندان
-            {children.length > 0 && <span style={{ background: `${accent}33`, color: accentDark, borderRadius: 999, padding: "1px 10px", fontSize: 13 }}>{children.length}</span>}
+            <UserRound size={18} style={{ color: ROSE }} /> مدیریت فرزندان
+            {children.length > 0 && <span style={{ background: `${ROSE}22`, color: ROSE_D, borderRadius: 999, padding: "1px 10px", fontSize: 13, fontWeight: 700 }}>{children.length}</span>}
           </div>
-          <button onClick={() => setShowConnect(true)}
-            style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", background: `linear-gradient(135deg,${accent},${accentDark})`, border: "none", borderRadius: 12, color: "white", fontSize: 13, fontWeight: 700, fontFamily: "Vazirmatn", cursor: "pointer", boxShadow: `0 4px 14px ${accent}55` }}>
+          <button
+            onClick={() => setShowConnect(true)}
+            style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", background: `linear-gradient(135deg,${ROSE},${PINK})`, border: "none", borderRadius: 12, color: "white", fontSize: 13, fontWeight: 700, fontFamily: "Vazirmatn", cursor: "pointer", boxShadow: `0 4px 14px ${ROSE}55` }}
+          >
             <Plus size={14} /> افزودن فرزند
           </button>
         </div>
 
         {/* Child selector tabs */}
         {children.length > 1 && (
-          <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap", ...cardAnim(1) }}>
+          <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap", ...anim(1) }}>
             {children.map((child: any) => {
               const isActive = currentChild?.id === child.id;
-              const cc = child.gender === "female" ? "#e879f9" : "#818cf8";
-              const ccd = child.gender === "female" ? "#c026d3" : "#4f46e5";
+              const cc  = child.gender === "female" ? PINK  : ROSE;
+              const ccd = child.gender === "female" ? PINK_D : ROSE_D;
               return (
                 <button key={child.id} onClick={() => { setSelected(child); setExpandedBook(null); }}
-                  style={{ display: "flex", alignItems: "center", gap: 7, padding: "9px 16px", borderRadius: 14, cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: isActive ? 700 : 500, background: isActive ? `linear-gradient(135deg,${cc}bb,${ccd}99)` : `${cc}18`, border: `2px solid ${isActive ? cc + "dd" : cc + "44"}`, color: isActive ? "white" : ccd, backdropFilter: "blur(12px)", transform: isActive ? "scale(1.04)" : "scale(1)", boxShadow: isActive ? `0 6px 20px ${cc}44` : "none", transition: "all 0.25s" }}>
+                  style={{ display: "flex", alignItems: "center", gap: 7, padding: "9px 16px", borderRadius: 14, cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: isActive ? 700 : 500, background: isActive ? `linear-gradient(135deg,${cc}d8,${ccd}b0)` : `rgba(255,255,255,0.65)`, border: `2px solid ${isActive ? cc + "dd" : cc + "55"}`, color: isActive ? "white" : ccd, backdropFilter: "blur(12px)", transform: isActive ? "scale(1.04)" : "scale(1)", boxShadow: isActive ? `0 6px 20px ${cc}55, inset 0 1px 0 rgba(255,255,255,0.28)` : "0 2px 8px rgba(0,0,0,0.06)", transition: "all 0.25s" }}>
                   <UserRound size={13} /> {child.name}
                   <span style={{ fontSize: 10, opacity: 0.8 }}>{RELATION_LABELS[child.relationType] ?? child.relationType}</span>
                 </button>
@@ -157,13 +159,15 @@ export default function ParentChildren() {
 
         {/* Empty state */}
         {!linksLoading && children.length === 0 && (
-          <div style={{ ...glassCard(accent, accentDark, { padding: 40, textAlign: "center" }), ...cardAnim(2) }}>
+          <div style={{ ...gradCard(ROSE, ROSE_D, { padding: 40, textAlign: "center" }), ...anim(2) }}>
             <div style={shine()} />
-            <div style={{ ...glassIcon(accent, 56), margin: "0 auto 16px" }}><UserRound size={26} color="white" /></div>
-            <div style={{ color: "rgba(255,255,255,0.88)", fontWeight: 700, fontSize: 15, marginBottom: 8 }}>هنوز فرزندی اضافه نشده</div>
-            <div style={{ color: "rgba(255,255,255,0.65)", fontSize: 13, marginBottom: 20 }}>با کد ملی فرزندتان حساب کاربری او را پیدا و اتصال برقرار کنید</div>
+            <div style={{ width: 56, height: 56, borderRadius: 17, background: "rgba(255,255,255,0.26)", border: "1.5px solid rgba(255,255,255,0.50)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", position: "relative", zIndex: 1 }}>
+              <UserRound size={26} color="white" strokeWidth={2} />
+            </div>
+            <div style={{ color: "rgba(255,255,255,0.88)", fontWeight: 700, fontSize: 15, marginBottom: 8, position: "relative", zIndex: 1 }}>هنوز فرزندی اضافه نشده</div>
+            <div style={{ color: "rgba(255,255,255,0.68)", fontSize: 13, marginBottom: 20, position: "relative", zIndex: 1 }}>با کد ملی فرزندتان حساب او را پیدا کنید</div>
             <button onClick={() => setShowConnect(true)}
-              style={{ padding: "10px 24px", background: "rgba(255,255,255,0.25)", border: "1.5px solid rgba(255,255,255,0.55)", borderRadius: 12, color: "white", fontWeight: 700, fontFamily: "Vazirmatn", cursor: "pointer", fontSize: 14 }}>
+              style={{ padding: "10px 24px", background: "rgba(255,255,255,0.24)", border: "1.5px solid rgba(255,255,255,0.55)", borderRadius: 12, color: "white", fontWeight: 700, fontFamily: "Vazirmatn", cursor: "pointer", fontSize: 14, position: "relative", zIndex: 1 }}>
               <Plus size={14} style={{ display: "inline", marginLeft: 6 }} /> افزودن فرزند
             </button>
           </div>
@@ -173,20 +177,18 @@ export default function ParentChildren() {
         {currentChild && (
           <>
             {/* Profile card */}
-            <div style={{ ...glassCard(accent, accentDark, { padding: "16px 18px", marginBottom: 12 }), ...cardAnim(2) }}>
+            <div style={{ ...gradCard(ROSE, ROSE_D, { padding: "16px 18px", marginBottom: 12 }), ...anim(2) }}>
               <div style={shine()} />
               <div style={{ display: "flex", alignItems: "center", gap: 14, position: "relative", zIndex: 1 }}>
-                <div style={{ width: 52, height: 52, borderRadius: 16, background: "rgba(255,255,255,0.30)", border: "1.5px solid rgba(255,255,255,0.60)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <UserRound size={26} color="white" />
+                <div style={{ width: 52, height: 52, borderRadius: 16, background: "rgba(255,255,255,0.28)", border: "1.5px solid rgba(255,255,255,0.55)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <UserRound size={26} color="white" strokeWidth={2} />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 800, fontSize: 17, color: "white", textShadow: "0 1px 6px rgba(0,0,0,0.15)" }}>{currentChild.name}</div>
+                  <div style={{ fontWeight: 800, fontSize: 17, color: "white", textShadow: "0 1px 6px rgba(0,0,0,0.18)" }}>{currentChild.name}</div>
                   <div style={{ fontSize: 12, color: "rgba(255,255,255,0.78)", marginTop: 2 }}>{currentChild.email}</div>
-                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.65)", marginTop: 3, display: "flex", gap: 8 }}>
-                    <span style={{ background: "rgba(255,255,255,0.18)", borderRadius: 6, padding: "1px 8px" }}>
-                      {RELATION_LABELS[currentChild.relationType] ?? currentChild.relationType}
-                    </span>
-                    {currentChild.nationalId && <span style={{ background: "rgba(255,255,255,0.18)", borderRadius: 6, padding: "1px 8px" }}>کد ملی: {currentChild.nationalId}</span>}
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.65)", marginTop: 3, display: "flex", gap: 7, flexWrap: "wrap" }}>
+                    <span style={{ background: "rgba(255,255,255,0.20)", borderRadius: 6, padding: "1px 8px" }}>{RELATION_LABELS[currentChild.relationType] ?? currentChild.relationType}</span>
+                    {currentChild.nationalId && <span style={{ background: "rgba(255,255,255,0.20)", borderRadius: 6, padding: "1px 8px" }}>کد ملی: {currentChild.nationalId}</span>}
                   </div>
                   {summary?.classes?.length > 0 && (
                     <div style={{ fontSize: 11, color: "rgba(255,255,255,0.68)", marginTop: 4, display: "flex", gap: 5, flexWrap: "wrap" }}>
@@ -201,19 +203,29 @@ export default function ParentChildren() {
               </div>
             </div>
 
-            {/* Stats */}
+            {/* Section label */}
             {summary && (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 9, marginBottom: 12 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: TEXT2, marginBottom: 10, display: "flex", alignItems: "center", gap: 6, ...anim(3) }}>
+                <div style={{ width: 4, height: 16, borderRadius: 2, background: `linear-gradient(180deg, ${ROSE}, ${PINK})` }} />
+                گزارش عملکرد
+              </div>
+            )}
+
+            {/* Stats 3×2 grid */}
+            {summary && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 9, marginBottom: 14 }}>
                 {STAT_META.map((sm, idx) => {
                   const Icon = sm.icon;
                   return (
-                    <div key={sm.key} style={{ ...glassCard(sm.color, sm.dark, { padding: "13px 11px" }), ...cardAnim(idx + 3) }}>
+                    <div key={sm.key} style={{ ...gradCard(sm.color, sm.dark, { padding: "14px 11px" }), ...anim(idx + 4) }}>
                       <div style={shine()} />
-                      <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 6, position: "relative", zIndex: 1 }}>
-                        <div style={{ width: 26, height: 26, borderRadius: 8, background: "rgba(255,255,255,0.22)", border: "1.5px solid rgba(255,255,255,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon size={12} color="white" /></div>
-                        <span style={{ color: "rgba(255,255,255,0.82)", fontSize: 10, fontWeight: 700, lineHeight: 1.2 }}>{sm.label}</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 7, position: "relative", zIndex: 1 }}>
+                        <div style={{ width: 28, height: 28, borderRadius: 9, background: "rgba(255,255,255,0.26)", border: "1.5px solid rgba(255,255,255,0.50)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <Icon size={13} color="white" strokeWidth={2} />
+                        </div>
+                        <span style={{ color: "rgba(255,255,255,0.86)", fontSize: 10, fontWeight: 700, lineHeight: 1.2 }}>{sm.label}</span>
                       </div>
-                      <div style={{ color: "white", fontWeight: 800, fontSize: 12, position: "relative", zIndex: 1, textShadow: "0 1px 5px rgba(0,0,0,0.18)", wordBreak: "break-word" }}>{statValues[sm.key]}</div>
+                      <div style={{ color: "white", fontWeight: 800, fontSize: 12, position: "relative", zIndex: 1, textShadow: "0 1px 5px rgba(0,0,0,0.20)", wordBreak: "break-word" }}>{statValues[sm.key]}</div>
                     </div>
                   );
                 })}
@@ -222,7 +234,7 @@ export default function ParentChildren() {
 
             {/* Score breakdown */}
             {breakdown && bdTotal > 0 && (
-              <div style={{ ...glassCard(accent, accentDark, { padding: "16px 18px", marginBottom: 14 }), ...cardAnim(10) }}>
+              <div style={{ ...gradCard(PINK, PINK_D, { padding: "16px 18px", marginBottom: 14 }), ...anim(11) }}>
                 <div style={shine()} />
                 <div style={{ position: "relative", zIndex: 1 }}>
                   <div style={{ fontWeight: 800, fontSize: 14, color: "white", marginBottom: 12, display: "flex", alignItems: "center", gap: 7 }}>
@@ -231,7 +243,7 @@ export default function ParentChildren() {
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {BREAKDOWN_META.map(m => {
-                      const val = breakdown[m.key] ?? 0;
+                      const val = (breakdown as any)[m.key] ?? 0;
                       if (val === 0) return null;
                       const pct = bdTotal > 0 ? Math.round((val / bdTotal) * 100) : 0;
                       const Icon = m.icon;
@@ -239,15 +251,17 @@ export default function ParentChildren() {
                         <div key={m.key}>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                              <div style={{ width: 20, height: 20, borderRadius: 6, background: "rgba(255,255,255,0.22)", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon size={11} color="white" /></div>
+                              <div style={{ width: 22, height: 22, borderRadius: 7, background: "rgba(255,255,255,0.24)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                <Icon size={11} color="white" strokeWidth={2} />
+                              </div>
                               <span style={{ fontSize: 12, color: "rgba(255,255,255,0.88)", fontWeight: 600 }}>{m.label}</span>
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                              <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>{val.toLocaleString("fa-IR")}</span>
-                              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", background: "rgba(255,255,255,0.14)", borderRadius: 5, padding: "1px 5px" }}>{pct}%</span>
+                              <span style={{ fontSize: 12, color: "rgba(255,255,255,0.78)" }}>{val.toLocaleString("fa-IR")}</span>
+                              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.58)", background: "rgba(255,255,255,0.16)", borderRadius: 5, padding: "1px 6px" }}>{pct}%</span>
                             </div>
                           </div>
-                          <div style={{ height: 5, background: "rgba(255,255,255,0.20)", borderRadius: 999, overflow: "hidden" }}>
+                          <div style={{ height: 5, background: "rgba(255,255,255,0.22)", borderRadius: 999, overflow: "hidden" }}>
                             <div style={{ height: "100%", width: `${pct}%`, background: "rgba(255,255,255,0.72)", borderRadius: 999, transition: "width 0.6s ease" }} />
                           </div>
                         </div>
@@ -260,16 +274,19 @@ export default function ParentChildren() {
 
             {/* Books progress */}
             {summary?.books?.length > 0 && (
-              <div style={{ ...cardAnim(11) }}>
-                <div style={{ fontSize: 14, fontWeight: 800, color: TEXT, marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
-                  <BookOpen size={15} style={{ color: accent }} /> کتاب‌ها و پیشرفت درسی
+              <div style={{ ...anim(12) }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: TEXT2, marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={{ width: 4, height: 16, borderRadius: 2, background: `linear-gradient(180deg, ${ROSE_D}, ${PINK})` }} />
+                  <BookOpen size={13} color={ROSE} /> کتاب‌ها و پیشرفت درسی
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {summary.books.map((book: any, bi: number) => {
+                  {(summary.books as any[]).map((book: any, bi: number) => {
                     const pct = book.lessonCount > 0 ? Math.round((book.completedLessons / book.lessonCount) * 100) : 0;
                     const isExpanded = expandedBook === book.id;
+                    const bColor = bi % 2 === 0 ? ROSE : PINK;
+                    const bDark  = bi % 2 === 0 ? ROSE_D : PINK_D;
                     return (
-                      <div key={book.id} style={{ ...glassCard(accent, accentDark, {}), ...cardAnim(bi + 12) }}>
+                      <div key={book.id} style={{ ...gradCard(bColor, bDark, {}), ...anim(bi + 13) }}>
                         <div style={shine()} />
                         <div onClick={() => setExpandedBook(isExpanded ? null : book.id)} style={{ padding: "14px 16px", cursor: "pointer", position: "relative", zIndex: 1 }}>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
@@ -278,22 +295,22 @@ export default function ParentChildren() {
                               {book.totalScore > 0 && <span style={{ background: "rgba(255,255,255,0.22)", color: "white", borderRadius: 6, padding: "1px 7px", fontSize: 11, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 3 }}><Star size={9} /> {book.totalScore.toLocaleString("fa-IR")}</span>}
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                              <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>{book.completedLessons}/{book.lessonCount}</span>
+                              <span style={{ fontSize: 12, color: "rgba(255,255,255,0.78)" }}>{book.completedLessons}/{book.lessonCount}</span>
                               {isExpanded ? <ChevronUp size={13} color="rgba(255,255,255,0.8)" /> : <ChevronDown size={13} color="rgba(255,255,255,0.8)" />}
                             </div>
                           </div>
-                          <div style={{ height: 6, background: "rgba(255,255,255,0.20)", borderRadius: 999, overflow: "hidden" }}>
+                          <div style={{ height: 6, background: "rgba(255,255,255,0.22)", borderRadius: 999, overflow: "hidden" }}>
                             <div style={{ height: "100%", width: `${pct}%`, background: "rgba(255,255,255,0.80)", borderRadius: 999, transition: "width 0.5s" }} />
                           </div>
                           <div style={{ fontSize: 11, color: "rgba(255,255,255,0.72)", marginTop: 4, fontWeight: 600 }}>{pct}% پیشرفت</div>
                         </div>
                         {isExpanded && book.lessons && (
                           <div style={{ padding: "0 16px 14px", borderTop: "1px solid rgba(255,255,255,0.18)", position: "relative", zIndex: 1 }}>
-                            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)", marginBottom: 8, paddingTop: 10, fontWeight: 600, display: "flex", alignItems: "center", gap: 5 }}>
+                            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.78)", marginBottom: 8, paddingTop: 10, fontWeight: 600, display: "flex", alignItems: "center", gap: 5 }}>
                               <Star size={11} color="#fbbf24" fill="#fbbf24" /> عملکرد درس به درس
                             </div>
                             <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                              {book.lessons.map((lesson: any) => (
+                              {(book.lessons as any[]).map((lesson: any) => (
                                 <LessonStarRow key={lesson.lessonId} lesson={{
                                   lessonId: lesson.lessonId,
                                   lessonTitle: lesson.lessonTitle ?? `درس ${lesson.lessonIndex}`,
@@ -331,12 +348,19 @@ export default function ParentChildren() {
         />
       )}
 
-      <style>{`@keyframes childUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }`}</style>
+      <style>{`@keyframes childUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }`}</style>
     </div>
   );
 }
 
-const IS: React.CSSProperties = { width: "100%", background: "rgba(245,243,255,0.9)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 10, color: "#1e1b4b", padding: "10px 12px", fontSize: 14, fontFamily: "Vazirmatn, sans-serif", outline: "none", direction: "rtl", boxSizing: "border-box" };
+/* ─── Input style ─── */
+const IS: React.CSSProperties = {
+  width: "100%", background: "rgba(255,241,242,0.90)",
+  border: `1px solid ${ROSE}40`, borderRadius: 10,
+  color: TEXT, padding: "10px 12px", fontSize: 14,
+  fontFamily: "Vazirmatn, sans-serif", outline: "none",
+  direction: "rtl", boxSizing: "border-box",
+};
 
 function ConnectChildModal({ parentId, existingStudentIds, onClose, onConnected }: {
   parentId: number; existingStudentIds: number[];
@@ -355,9 +379,9 @@ function ConnectChildModal({ parentId, existingStudentIds, onClose, onConnected 
     setSearching(true); setSearchErr(""); setFound(null);
     try {
       const results: any[] = await api.get(`/students/search-by-national-id?nationalId=${nationalId}`);
-      if (results.length === 0) { setSearchErr("دانش‌آموزی با این کد ملی یافت نشد. لطفاً از مدیر مدرسه بخواهید حساب کاربری فرزندتان را بسازد."); }
-      else if (existingStudentIds.includes(results[0].id)) { setSearchErr("این فرزند قبلاً اضافه شده است."); }
-      else { setFound(results[0]); }
+      if (results.length === 0) setSearchErr("دانش‌آموزی با این کد ملی یافت نشد.");
+      else if (existingStudentIds.includes(results[0].id)) setSearchErr("این فرزند قبلاً اضافه شده است.");
+      else setFound(results[0]);
     } catch { setSearchErr("خطا در جستجو"); }
     setSearching(false);
   }
@@ -368,73 +392,69 @@ function ConnectChildModal({ parentId, existingStudentIds, onClose, onConnected 
     try {
       await api.post("/parent-students", { parentId, studentId: found.id, relationType });
       onConnected();
-    } catch (e: any) {
-      setLinkErr(e?.message ?? "خطا در اتصال");
-      setLinking(false);
-    }
+    } catch (e: any) { setLinkErr(e?.message ?? "خطا در اتصال"); setLinking(false); }
   }
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(5px)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-      <div style={{ background: "#f5f3ff", border: "1px solid rgba(124,58,237,0.5)", borderRadius: 20, padding: 28, width: "90%", maxWidth: 460 }}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.70)", backdropFilter: "blur(6px)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div style={{ background: "#fff1f2", border: `1.5px solid ${ROSE}40`, borderRadius: 22, padding: 28, width: "90%", maxWidth: 460, direction: "rtl", fontFamily: "Vazirmatn, sans-serif", boxShadow: `0 24px 60px ${ROSE}30` }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <h3 style={{ margin: 0, color: "#1e1b4b", fontSize: 17, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}><Link size={16} color="#7c3aed" /> افزودن فرزند</h3>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "#4f46e5", cursor: "pointer" }}><X size={20} /></button>
+          <div style={{ fontWeight: 800, fontSize: 17, color: TEXT, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 38, height: 38, borderRadius: 12, background: `linear-gradient(135deg,${ROSE},${PINK})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 4px 14px ${ROSE}44` }}>
+              <Search size={17} color="white" />
+            </div>
+            افزودن فرزند
+          </div>
+          <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: 10, border: `1px solid ${ROSE}30`, background: `${ROSE}12`, color: ROSE_D, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontFamily: "Vazirmatn" }}>×</button>
         </div>
 
-        <div style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 10, padding: "10px 14px", marginBottom: 18, fontSize: 13, color: "#4f46e5", lineHeight: 1.7 }}>
-          کد ملی فرزندتان را وارد کنید. اگر حساب کاربری دارد، به شما متصل می‌شود.
-        </div>
-
-        {/* Search */}
         <div style={{ marginBottom: 14 }}>
-          <label style={{ display: "block", color: "#3730a3", fontSize: 13, marginBottom: 6, fontWeight: 600 }}>کد ملی فرزند *</label>
+          <label style={{ fontSize: 13, fontWeight: 700, color: TEXT2, display: "block", marginBottom: 6 }}>کد ملی فرزند</label>
           <div style={{ display: "flex", gap: 8 }}>
-            <input value={nationalId} onChange={e => { setNationalId(e.target.value); setFound(null); setSearchErr(""); }}
+            <input
+              value={nationalId} onChange={e => setNationalId(e.target.value)}
               onKeyDown={e => e.key === "Enter" && search()}
-              style={{ ...IS, flex: 1 }} placeholder="مثال: ۱۲۳۴۵۶۷۸۹۰" maxLength={10} />
-            <button onClick={search} disabled={searching || nationalId.length < 5}
-              style={{ padding: "10px 16px", background: "linear-gradient(135deg,#7c3aed,#a855f7)", border: "none", borderRadius: 10, color: "white", cursor: "pointer", fontFamily: "Vazirmatn", fontWeight: 600, fontSize: 13, display: "flex", alignItems: "center", gap: 5, opacity: nationalId.length < 5 ? 0.5 : 1 }}>
-              <Search size={14} /> {searching ? "..." : "جستجو"}
+              placeholder="کد ملی را وارد کنید"
+              style={IS}
+            />
+            <button onClick={search} disabled={searching}
+              style={{ padding: "10px 18px", background: `linear-gradient(135deg,${ROSE},${PINK})`, border: "none", borderRadius: 10, color: "white", fontFamily: "Vazirmatn", fontSize: 13, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap", boxShadow: `0 4px 12px ${ROSE}44`, opacity: searching ? 0.7 : 1 }}>
+              {searching ? "..." : "جستجو"}
             </button>
           </div>
-          {searchErr && <div style={{ color: "#ef4444", fontSize: 12, marginTop: 6 }}>{searchErr}</div>}
+          {searchErr && <div style={{ color: "#be123c", fontSize: 12, marginTop: 6, fontWeight: 600 }}>{searchErr}</div>}
         </div>
 
-        {/* Result */}
         {found && (
-          <div style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 12, padding: "12px 16px", marginBottom: 14 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-              <div style={{ width: 38, height: 38, borderRadius: 10, background: found.gender === "female" ? "rgba(236,72,153,0.15)" : "rgba(99,102,241,0.13)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <UserRound size={18} color={found.gender === "female" ? "#ec4899" : "#6366f1"} />
+          <>
+            <div style={{ background: `${ROSE}10`, border: `1px solid ${ROSE}30`, borderRadius: 14, padding: "14px 16px", marginBottom: 14, display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 13, background: `linear-gradient(135deg,${ROSE}d8,${ROSE_D}b0)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <UserRound size={22} color="white" strokeWidth={2} />
               </div>
               <div>
-                <div style={{ fontWeight: 700, color: "#065f46", fontSize: 14 }}>{found.name}</div>
-                <div style={{ fontSize: 12, color: "#047857" }}>{found.email}</div>
+                <div style={{ fontWeight: 800, fontSize: 15, color: TEXT }}>{found.name}</div>
+                <div style={{ fontSize: 12, color: TEXT2, marginTop: 2 }}>{found.email}</div>
+                <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 1 }}>{found.gender === "female" ? "دختر" : "پسر"}</div>
               </div>
-              <span style={{ marginRight: "auto", fontSize: 11, background: "rgba(16,185,129,0.15)", color: "#065f46", borderRadius: 999, padding: "2px 10px", fontWeight: 600 }}>✓ یافت شد</span>
             </div>
 
-            <div>
-              <label style={{ display: "block", color: "#3730a3", fontSize: 13, marginBottom: 5, fontWeight: 600 }}>نسبت *</label>
-              <select value={relationType} onChange={e => setRelationType(e.target.value)} style={{ ...IS, appearance: "none" }}>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 13, fontWeight: 700, color: TEXT2, display: "block", marginBottom: 6 }}>نسبت</label>
+              <select value={relationType} onChange={e => setRelationType(e.target.value)} style={{ ...IS }}>
                 <option value="father">پدر</option>
                 <option value="mother">مادر</option>
                 <option value="guardian">سرپرست</option>
               </select>
             </div>
-          </div>
+
+            {linkErr && <div style={{ color: "#be123c", fontSize: 12, marginBottom: 10, fontWeight: 600 }}>{linkErr}</div>}
+
+            <button onClick={link} disabled={linking}
+              style={{ width: "100%", padding: "13px 0", background: `linear-gradient(135deg,${ROSE},${PINK})`, border: "none", borderRadius: 14, color: "white", fontFamily: "Vazirmatn", fontSize: 15, fontWeight: 800, cursor: "pointer", boxShadow: `0 6px 20px ${ROSE}44`, opacity: linking ? 0.75 : 1 }}>
+              {linking ? "در حال اتصال..." : "اتصال فرزند"}
+            </button>
+          </>
         )}
-
-        {linkErr && <div style={{ background: "#fef2f2", color: "#ef4444", padding: "8px 12px", borderRadius: 8, marginBottom: 12, fontSize: 13 }}>{linkErr}</div>}
-
-        <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-          <button onClick={link} disabled={!found || linking}
-            style={{ flex: 1, padding: "11px 0", background: found ? "linear-gradient(135deg,#7c3aed,#a855f7)" : "#e2e8f0", border: "none", borderRadius: 10, color: found ? "white" : "#94a3b8", fontWeight: 700, fontFamily: "Vazirmatn", cursor: found ? "pointer" : "default", fontSize: 14 }}>
-            {linking ? "در حال اتصال..." : "اتصال فرزند"}
-          </button>
-          <button onClick={onClose} style={{ flex: 1, padding: "11px 0", background: "transparent", border: "1px solid rgba(124,58,237,0.4)", borderRadius: 10, color: "#7c3aed", fontWeight: 600, fontFamily: "Vazirmatn", cursor: "pointer", fontSize: 14 }}>انصراف</button>
-        </div>
       </div>
     </div>
   );
