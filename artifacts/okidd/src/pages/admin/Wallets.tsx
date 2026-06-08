@@ -133,8 +133,8 @@ function SchoolWalletPanel({ schoolId }: { schoolId: number }) {
                 : <ArrowUpCircle size={15} color="#ef4444" />}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "#1e293b", marginBottom: 1 }}>{tx.description ?? (tx.type === "credit" ? "واریز" : "برداشت")}</div>
-              <div style={{ fontSize: 10, color: "#94a3b8" }}>{fmtD(tx.createdAt)} — موجودی پس از: {fmt(Number(tx.balanceAfter))}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "#1e293b", marginBottom: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{tx.description ?? (tx.type === "credit" ? "واریز" : "برداشت")}</div>
+              <div style={{ fontSize: 10, color: "#94a3b8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fmtD(tx.createdAt)} — موجودی پس از: {fmt(Number(tx.balanceAfter))}</div>
             </div>
             <div style={{ fontSize: 14, fontWeight: 700, color: tx.type === "credit" ? "#10b981" : "#ef4444", flexShrink: 0, whiteSpace: "nowrap" }}>
               {tx.type === "credit" ? "+" : "-"}{fmt(Number(tx.amount))}
@@ -215,7 +215,7 @@ export default function AdminWallets() {
                     <Building2 size={18} color="#d97706" />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: 14, color: "#78350f" }}>{school.name}</div>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: "#78350f", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{school.name}</div>
                     <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 1 }}>شناسه: {school.id}</div>
                   </div>
                   <div style={{ padding: "6px 14px", background: balance > 0 ? "#f0fdf4" : "#f9fafb", border: `1px solid ${balance > 0 ? "#86efac" : "#e5e7eb"}`, borderRadius: 10, textAlign: "center", flexShrink: 0 }}>

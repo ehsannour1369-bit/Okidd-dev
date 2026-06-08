@@ -62,8 +62,8 @@ export default function SchoolWallet() {
                   {tx.type === "credit" ? <ArrowDownCircle size={20} color="#6366f1" /> : <ArrowUpCircle size={20} color="#ef4444" />}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b", marginBottom: 2 }}>{tx.description ?? (tx.type === "credit" ? "واریز" : "برداشت")}</div>
-                  <div style={{ fontSize: 11, color: "#94a3b8" }}>{new Date(tx.createdAt).toLocaleDateString("fa-IR")} — موجودی بعد: {fmt(Number(tx.balanceAfter))}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{tx.description ?? (tx.type === "credit" ? "واریز" : "برداشت")}</div>
+                  <div style={{ fontSize: 11, color: "#94a3b8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{new Date(tx.createdAt).toLocaleDateString("fa-IR")} — موجودی بعد: {fmt(Number(tx.balanceAfter))}</div>
                 </div>
                 <div style={{ fontSize: 15, fontWeight: 700, color: tx.type === "credit" ? "#10b981" : "#ef4444" }}>
                   {tx.type === "credit" ? "+" : "-"}{fmt(Number(tx.amount))}

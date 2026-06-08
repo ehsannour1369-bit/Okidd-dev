@@ -268,45 +268,45 @@ export default function TeacherProgress() {
                       <div key={st.id} style={{ background: isExp ? "rgba(245,158,11,0.10)" : "rgba(255,255,255,0.60)", border: `1.5px solid ${isExp ? AMBER + "55" : "rgba(245,158,11,0.30)"}`, borderRadius: 14, overflow: "hidden", transition: "all 0.2s" }}>
                         <div
                           onClick={() => setExpanded(isExp ? null : st.id)}
-                          style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", cursor: "pointer" }}
+                          style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", cursor: "pointer" }}
                         >
                           {/* Rank */}
-                          <div style={{ width: 32, height: 32, borderRadius: 10, background: `${rankColor}22`, border: `1.5px solid ${rankColor}55`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                            {st.rank <= 3 ? <Trophy size={14} color={rankColor} /> : <span style={{ fontSize: 12, fontWeight: 800, color: rankColor }}>{st.rank}</span>}
+                          <div style={{ width: 28, height: 28, borderRadius: 8, background: `${rankColor}22`, border: `1.5px solid ${rankColor}55`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            {st.rank <= 3 ? <Trophy size={12} color={rankColor} /> : <span style={{ fontSize: 11, fontWeight: 800, color: rankColor }}>{st.rank}</span>}
                           </div>
                           {/* Avatar */}
-                          <div style={{ width: 38, height: 38, borderRadius: 12, background: isGirl ? "rgba(236,72,153,0.22)" : "rgba(99,102,241,0.22)", border: `1.5px solid ${isGirl ? PINK + "55" : "#818cf855"}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                            <UserRound size={18} color={isGirl ? PINK : "#818cf8"} />
+                          <div style={{ width: 34, height: 34, borderRadius: 10, background: isGirl ? "rgba(236,72,153,0.22)" : "rgba(99,102,241,0.22)", border: `1.5px solid ${isGirl ? PINK + "55" : "#818cf855"}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            <UserRound size={16} color={isGirl ? PINK : "#818cf8"} />
                           </div>
                           {/* Name */}
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontWeight: 700, color: "#78350f", fontSize: 13, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{st.name}</div>
-                            <div style={{ fontSize: 11, color: "#92400e", marginTop: 1 }}>{fmtDate(st.lastPresenceAt)}</div>
+                            <div style={{ fontSize: 10, color: "#92400e", marginTop: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{fmtDate(st.lastPresenceAt)}</div>
                           </div>
                           {/* Stats */}
-                          <div style={{ display: "flex", gap: 12, alignItems: "center", flexShrink: 0 }}>
+                          <div style={{ display: "flex", gap: 7, alignItems: "center", flexShrink: 0 }}>
                             <div style={{ textAlign: "center" }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
-                                <Star size={12} color={AMBER} />
-                                <span style={{ fontWeight: 800, color: AMBER, fontSize: 14 }}>{st.totalScore.toLocaleString("fa-IR")}</span>
+                              <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+                                <Star size={11} color={AMBER} />
+                                <span style={{ fontWeight: 800, color: AMBER, fontSize: 12 }}>{st.totalScore.toLocaleString("fa-IR")}</span>
                               </div>
-                              <div style={{ fontSize: 10, color: "#92400e" }}>امتیاز</div>
+                              <div style={{ fontSize: 9, color: "#92400e" }}>امتیاز</div>
                             </div>
                             <div style={{ textAlign: "center" }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
-                                <CheckCircle size={11} color={GREEN} />
-                                <span style={{ fontWeight: 700, color: GREEN, fontSize: 13 }}>{doneLessons}/{totalLessons}</span>
+                              <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+                                <CheckCircle size={10} color={GREEN} />
+                                <span style={{ fontWeight: 700, color: GREEN, fontSize: 12 }}>{doneLessons}/{totalLessons}</span>
                               </div>
-                              <div style={{ fontSize: 10, color: "#92400e" }}>درس</div>
+                              <div style={{ fontSize: 9, color: "#92400e" }}>درس</div>
                             </div>
                             <div style={{ textAlign: "center" }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
-                                <Clock size={11} color={BLUE} />
-                                <span style={{ fontWeight: 700, color: BLUE, fontSize: 12 }}>{fmtDuration(st.totalMinutesInApp)}</span>
+                              <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+                                <Clock size={10} color={BLUE} />
+                                <span style={{ fontWeight: 700, color: BLUE, fontSize: 11 }}>{fmtDuration(st.totalMinutesInApp)}</span>
                               </div>
-                              <div style={{ fontSize: 10, color: "#92400e" }}>زمان</div>
+                              <div style={{ fontSize: 9, color: "#92400e" }}>زمان</div>
                             </div>
-                            {isExp ? <ChevronUp size={14} color="#d97706" /> : <ChevronDown size={14} color="#d97706" />}
+                            {isExp ? <ChevronUp size={13} color="#d97706" /> : <ChevronDown size={13} color="#d97706" />}
                           </div>
                         </div>
 
