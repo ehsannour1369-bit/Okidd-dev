@@ -124,7 +124,6 @@ export default function LessonPlayer() {
         if (idx >= 0) setCurrentContentIndex(idx);
       }
       setLoading(false);
-      if (sorted.length === 0) setFinished(true);
     }).catch(() => { setError("خطا در بارگذاری محتوا"); setLoading(false); });
   }, [currentLesson?.id]);
 
@@ -292,6 +291,7 @@ export default function LessonPlayer() {
   /* ── Auto-save progress when lesson finishes (bonus +10) ── */
   useEffect(() => {
     if (!finished || freeMode || !user?.id || !currentLesson?.id || progressSaved.current) return;
+    if (content.length === 0) return; // درسی که محتوا ندارد امتیاز نمی‌گیرد
     progressSaved.current = true;
     const totalScore = sessionScore + 10;
     api.post("/student-progress", {
