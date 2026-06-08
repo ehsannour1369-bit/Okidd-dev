@@ -83,19 +83,21 @@ export default function PageTopBar() {
       padding: "14px 0 10px", direction: "rtl",
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <button
-          onClick={openSidebar}
-          style={{
-            background: `linear-gradient(135deg,${accent},${dark})`,
-            border: "none", borderRadius: 13, color: "#fff",
-            cursor: "pointer", padding: "9px 14px",
-            display: "flex", alignItems: "center",
-            boxShadow: `0 4px 14px ${accent}55`,
-            flexShrink: 0,
-          }}
-        >
-          <Menu size={20} />
-        </button>
+        {user.role !== "parent" && (
+          <button
+            onClick={openSidebar}
+            style={{
+              background: `linear-gradient(135deg,${accent},${dark})`,
+              border: "none", borderRadius: 13, color: "#fff",
+              cursor: "pointer", padding: "9px 14px",
+              display: "flex", alignItems: "center",
+              boxShadow: `0 4px 14px ${accent}55`,
+              flexShrink: 0,
+            }}
+          >
+            <Menu size={20} />
+          </button>
+        )}
         {isOnSubPage && (
           <button
             onClick={() => navigate(dashPath)}
