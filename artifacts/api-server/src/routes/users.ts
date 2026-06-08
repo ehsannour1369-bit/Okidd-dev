@@ -1,6 +1,6 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
-import { db, usersTable, schoolsTable, classStudentsTable, classTeachersTable, classBooksTable, classesTable, gradesTable, gradeLevelsTable, branchesTable, booksTable, presenceLogTable, studentProgressTable } from "@workspace/db";
+import { db, usersTable, schoolsTable, classStudentsTable, classTeachersTable, classBooksTable, classesTable, gradesTable, gradeLevelsTable, branchesTable, booksTable, presenceLogTable, studentProgressTable, lessonsTable } from "@workspace/db";
 import { eq, inArray } from "drizzle-orm";
 
 const router = Router();
@@ -234,14 +234,21 @@ router.get("/users/:id/student-summary", async (req, res) => {
     if (bookIds.length > 0) {
       const booksData = await db.select().from(booksTable).where(inArray(booksTable.id, bookIds));
       const progress = await db.select().from(studentProgressTable).where(eq(studentProgressTable.studentId, studentId));
+      const allLessons = await db.select().from(lessonsTable).where(inArray(lessonsTable.bookId, bookIds));
       books = booksData.map(b => {
         const bookProg = progress.filter(p => p.bookId === b.id);
+        const bookLessons = allLessons.filter(l => l.bookId === b.id).sort((a, x) => a.orderIndex - x.orderIndex);
         const completedLessons = bookProg.filter(p => p.completed).length;
         const totalScore = bookProg.reduce((s, p) => s + (p.score ?? 0), 0);
-        const lessons = Array.from({ length: b.lessonCount }, (_, i) => {
-          const lp = bookProg.find(p => p.lessonId === i + 1);
-          return { lessonId: i + 1, completed: lp?.completed ?? false, score: lp?.score ?? 0 };
-        });
+        const lessons = bookLessons.length > 0
+          ? bookLessons.map(l => {
+              const lp = bookProg.find(p => p.lessonId === l.id);
+              return { lessonId: l.id, lessonTitle: l.title, lessonIndex: l.orderIndex, completed: lp?.completed ?? false, score: lp?.score ?? 0 };
+            })
+          : Array.from({ length: b.lessonCount }, (_, i) => {
+              const lp = bookProg.find(p => p.lessonId === i + 1);
+              return { lessonId: i + 1, lessonTitle: `درس ${i + 1}`, lessonIndex: i + 1, completed: lp?.completed ?? false, score: lp?.score ?? 0 };
+            });
         return {
           ...b, monthlyFee: parseFloat(String(b.monthlyFee)),
           completedLessons, totalScore, lessons,

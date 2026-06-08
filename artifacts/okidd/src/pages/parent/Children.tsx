@@ -311,8 +311,8 @@ export default function ParentChildren() {
                               {(book.lessons as any[]).map((lesson: any) => (
                                 <LessonStarRow key={lesson.lessonId} lesson={{
                                   lessonId: lesson.lessonId,
-                                  lessonTitle: lesson.lessonTitle ?? `درس ${lesson.lessonIndex}`,
-                                  lessonIndex: lesson.lessonIndex,
+                                  lessonTitle: lesson.lessonTitle ?? lesson.title ?? `درس ${lesson.lessonId}`,
+                                  lessonIndex: lesson.lessonIndex ?? lesson.lessonId,
                                   score: lesson.score ?? 0,
                                   completed: lesson.completed ?? false,
                                 }} />
