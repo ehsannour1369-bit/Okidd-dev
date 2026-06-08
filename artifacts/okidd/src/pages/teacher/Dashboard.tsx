@@ -242,21 +242,25 @@ export default function TeacherDashboard() {
           </div>
         </div>
 
-        {/* ── Stats strip ── */}
-        <div style={{ display: "flex", gap: 10, padding: "14px 20px 0", flexWrap: "wrap", ...cardAnim(1) }}>
+        {/* ── Stats cards ── */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, padding: "14px 20px 0", ...cardAnim(1) }}>
           {[
-            { label: "مدرسه", value: schools.length, color: AMBER, dark: AMBER_D },
-            { label: "کلاس", value: allClasses.length, color: ORANGE, dark: "#ea580c" },
+            { label: "مدارس من", value: schools.length, color: AMBER, dark: AMBER_D, icon: "🏫" },
+            { label: "کلاس‌هایم", value: allClasses.length, color: ORANGE, dark: "#ea580c", icon: "📚" },
           ].map((s, i) => (
             <div key={i} style={{
-              display: "flex", alignItems: "center", gap: 8,
-              background: `linear-gradient(135deg,${s.color}22,${s.dark}14)`,
+              background: `linear-gradient(145deg,${s.color}28,${s.dark}18)`,
               border: `1.5px solid ${s.color}50`,
-              borderRadius: 999, padding: "7px 16px",
-              backdropFilter: "blur(12px)",
+              borderRadius: 18, padding: "14px 16px",
+              backdropFilter: "blur(14px)",
+              display: "flex", alignItems: "center", gap: 12,
+              boxShadow: `0 4px 18px ${s.color}22`,
             }}>
-              <span style={{ fontWeight: 900, fontSize: 18, color: s.dark }}>{s.value.toLocaleString("fa-IR")}</span>
-              <span style={{ fontSize: 12, color: s.dark, fontWeight: 600 }}>{s.label}</span>
+              <div style={{ fontSize: 28, lineHeight: 1 }}>{s.icon}</div>
+              <div>
+                <div style={{ fontWeight: 900, fontSize: 22, color: s.dark, lineHeight: 1 }}>{s.value.toLocaleString("fa-IR")}</div>
+                <div style={{ fontSize: 12, color: s.dark, fontWeight: 600, marginTop: 3, opacity: 0.8 }}>{s.label}</div>
+              </div>
             </div>
           ))}
         </div>

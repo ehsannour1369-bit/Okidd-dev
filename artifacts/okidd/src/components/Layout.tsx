@@ -380,7 +380,8 @@ export default function Layout({ children }: { children: ReactNode }) {
           {/* Nav items */}
           <nav style={{ flex: 1, padding: "6px 10px", overflowY: "auto", position: "relative", zIndex: 1 }}>
             {nav.map(item => {
-              const active = location === item.path || (item.path !== "/" && location.startsWith(item.path));
+              const hasSubsegments = item.path.split("/").filter(Boolean).length > 1;
+              const active = location === item.path || (hasSubsegments && item.path !== "/" && location.startsWith(item.path));
               return (
                 <Link key={item.path} href={item.path} style={{
                   display: "flex", alignItems: "center", gap: 10,
@@ -476,9 +477,10 @@ export default function Layout({ children }: { children: ReactNode }) {
 
           {/* Nav grid */}
           <div style={{ flex: 1, overflowY: "auto", padding: "4px 16px 16px", position: "relative", zIndex: 2 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+            <div style={{ display: "grid", gridTemplateColumns: nav.length <= 3 ? "repeat(3, 1fr)" : "repeat(2, 1fr)", gap: 10 }}>
               {nav.map((item) => {
-                const active = location === item.path || (item.path !== "/" && location.startsWith(item.path));
+                const hasSubsegments = item.path.split("/").filter(Boolean).length > 1;
+                const active = location === item.path || (hasSubsegments && item.path !== "/" && location.startsWith(item.path));
                 return (
                   <NavCard key={item.path} item={item} active={active} onClick={() => setSidebarOpen(false)} TEXT={TEXT} />
                 );
