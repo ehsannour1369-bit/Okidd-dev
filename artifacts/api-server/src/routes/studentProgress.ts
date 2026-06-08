@@ -192,12 +192,37 @@ router.get("/student-lesson-scores", async (req, res) => {
     }
   }
 
+  // Compute max lessonStage per lesson from student_progress
+  const lessonStageMap = new Map<number, string>();
+  const STAGE_ORDER = ["none", "animation", "game", "quiz", "completed"];
+  for (const p of progress) {
+    if (p.bookId === bid && lessonScores.has(p.lessonId)) {
+      const current = lessonStageMap.get(p.lessonId) ?? "none";
+      const pStage = (p as any).lessonStage ?? (p.completed ? "completed" : "none");
+      if (STAGE_ORDER.indexOf(pStage) > STAGE_ORDER.indexOf(current)) {
+        lessonStageMap.set(p.lessonId, pStage);
+      }
+    }
+  }
+  // If no explicit stage but has game scores, infer at least "game"
+  for (const gs of gameScores) {
+    let lid: number | null = null;
+    if (gs.lessonId && lessonScores.has(gs.lessonId)) lid = gs.lessonId;
+    if (lid) {
+      const current = lessonStageMap.get(lid) ?? "none";
+      if (STAGE_ORDER.indexOf("game") > STAGE_ORDER.indexOf(current)) {
+        lessonStageMap.set(lid, "game");
+      }
+    }
+  }
+
   const result = lessons.map((l, i) => ({
     lessonId: l.id,
     lessonTitle: l.title,
     lessonIndex: i + 1,
     score: lessonScores.get(l.id) ?? 0,
     completed: lessonCompleted.get(l.id) ?? false,
+    lessonStage: lessonStageMap.get(l.id) ?? "none",
   }));
 
   res.json(result);

@@ -315,6 +315,7 @@ export default function ParentChildren() {
                                   lessonIndex: lesson.lessonIndex ?? lesson.lessonId,
                                   score: lesson.score ?? 0,
                                   completed: lesson.completed ?? false,
+                                  lessonStage: lesson.lessonStage,
                                 }} />
                               ))}
                             </div>

@@ -1,6 +1,9 @@
-import { pgTable, serial, timestamp, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, serial, timestamp, integer, boolean, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+
+export const LESSON_STAGES = ["none", "animation", "game", "quiz", "completed"] as const;
+export type LessonStage = typeof LESSON_STAGES[number];
 
 export const studentProgressTable = pgTable("student_progress", {
   id: serial("id").primaryKey(),
@@ -10,6 +13,7 @@ export const studentProgressTable = pgTable("student_progress", {
   bookId: integer("book_id"),
   completed: boolean("completed").notNull().default(false),
   score: integer("score").notNull().default(0),
+  lessonStage: varchar("lesson_stage", { length: 20 }).notNull().default("none"),
   completedAt: timestamp("completed_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
