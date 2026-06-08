@@ -127,14 +127,14 @@ export default function BranchNotifications() {
               <Bell size={22} color="white" />
             </div>
             <div>
-              <h1 style={{ fontSize: 22, fontWeight: 900, color: TEXT, margin: 0 }}>
-                اعلان‌ها
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "nowrap" }}>
+                <h1 style={{ fontSize: 22, fontWeight: 900, color: TEXT, margin: 0, whiteSpace: "nowrap" }}>اعلان‌ها</h1>
                 {unreadCount > 0 && (
-                  <span style={{ marginRight: 10, background: "#dc2626", color: "white", fontSize: 12, fontWeight: 800, borderRadius: 999, padding: "2px 9px", verticalAlign: "middle" }}>
-                    {unreadCount} جدید
+                  <span style={{ background: "#dc2626", color: "white", fontSize: 13, fontWeight: 800, borderRadius: 999, padding: "2px 9px", lineHeight: 1.5, whiteSpace: "nowrap" }}>
+                    {unreadCount}
                   </span>
                 )}
-              </h1>
+              </div>
               <div style={{ fontSize: 13, color: TEXT2, marginTop: 2 }}>{isLoading ? "در حال بارگذاری..." : `${notifs.length} اعلان`}</div>
             </div>
           </div>
