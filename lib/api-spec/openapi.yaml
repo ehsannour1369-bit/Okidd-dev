@@ -1689,6 +1689,8 @@ components:
           type: ["string", "null"]
         phone:
           type: ["string", "null"]
+        videoConferenceUrl:
+          type: ["string", "null"]
         status:
           type: string
         branchCount:
@@ -1712,6 +1714,8 @@ components:
           type: string
         phone:
           type: string
+        videoConferenceUrl:
+          type: string
 
     SchoolUpdate:
       type: object
@@ -1721,6 +1725,8 @@ components:
         address:
           type: string
         phone:
+          type: string
+        videoConferenceUrl:
           type: string
         status:
           type: string

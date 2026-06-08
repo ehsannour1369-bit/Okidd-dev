@@ -10,5 +10,6 @@ export interface SchoolUpdate {
   name?: string;
   address?: string;
   phone?: string;
+  videoConferenceUrl?: string;
   status?: string;
 }

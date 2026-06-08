@@ -150,7 +150,7 @@ export default function TeacherOnlineClass() {
                   🕐 شروع: {new Date(activeSession.startedAt).toLocaleTimeString("fa-IR")}
                 </div>
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                  <Btn onClick={() => window.open(`https://meet.jit.si/${activeSession.roomCode}`, "_blank")} color="#10b981">
+                  <Btn onClick={() => window.open(`${activeSession.videoConferenceUrl || "https://meet.jit.si"}/${activeSession.roomCode}`, "_blank")} color="#10b981">
                     <ExternalLink size={16} /> ورود به کلاس
                   </Btn>
                   <Btn ghost color="#ef4444" danger onClick={() => setConfirmEnd(true)}>
@@ -190,7 +190,7 @@ export default function TeacherOnlineClass() {
                   <Play size={16} /> {startMutation.isPending ? "در حال شروع..." : "شروع کلاس"}
                 </Btn>
                 <p style={{ fontSize: 12, color: C.text2, marginTop: 10, lineHeight: 1.6 }}>
-                  پس از شروع، یک لینک Jitsi Meet برای شما ایجاد می‌شود. دانش‌آموزان می‌توانند پیوستن به جلسه را در اپ ببینند.
+                  پس از شروع، یک لینک کلاس آنلاین برای شما ایجاد می‌شود. دانش‌آموزان می‌توانند پیوستن به جلسه را در اپ ببینند.
                 </p>
               </div>
             )}

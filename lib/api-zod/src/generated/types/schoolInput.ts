@@ -11,4 +11,5 @@ export interface SchoolInput {
   userId?: number;
   address?: string;
   phone?: string;
+  videoConferenceUrl?: string;
 }

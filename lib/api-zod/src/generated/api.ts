@@ -167,6 +167,7 @@ export const ListSchoolsResponseItem = zod.object({
   "userId": zod.number().nullish(),
   "address": zod.string().nullish(),
   "phone": zod.string().nullish(),
+  "videoConferenceUrl": zod.string().nullish(),
   "status": zod.string(),
   "branchCount": zod.number().optional(),
   "studentCount": zod.number().optional(),
@@ -180,7 +181,8 @@ export const CreateSchoolBody = zod.object({
   "name": zod.string(),
   "userId": zod.number().optional(),
   "address": zod.string().optional(),
-  "phone": zod.string().optional()
+  "phone": zod.string().optional(),
+  "videoConferenceUrl": zod.string().optional()
 })
 
 
@@ -194,6 +196,7 @@ export const GetSchoolResponse = zod.object({
   "userId": zod.number().nullish(),
   "address": zod.string().nullish(),
   "phone": zod.string().nullish(),
+  "videoConferenceUrl": zod.string().nullish(),
   "status": zod.string(),
   "branchCount": zod.number().optional(),
   "studentCount": zod.number().optional(),
@@ -210,6 +213,7 @@ export const UpdateSchoolBody = zod.object({
   "name": zod.string().optional(),
   "address": zod.string().optional(),
   "phone": zod.string().optional(),
+  "videoConferenceUrl": zod.string().optional(),
   "status": zod.string().optional()
 })
 
@@ -219,6 +223,7 @@ export const UpdateSchoolResponse = zod.object({
   "userId": zod.number().nullish(),
   "address": zod.string().nullish(),
   "phone": zod.string().nullish(),
+  "videoConferenceUrl": zod.string().nullish(),
   "status": zod.string(),
   "branchCount": zod.number().optional(),
   "studentCount": zod.number().optional(),
@@ -237,6 +242,7 @@ export const ToggleSchoolStatusResponse = zod.object({
   "userId": zod.number().nullish(),
   "address": zod.string().nullish(),
   "phone": zod.string().nullish(),
+  "videoConferenceUrl": zod.string().nullish(),
   "status": zod.string(),
   "branchCount": zod.number().optional(),
   "studentCount": zod.number().optional(),

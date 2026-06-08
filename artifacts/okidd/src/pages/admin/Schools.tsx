@@ -13,6 +13,7 @@ interface BranchDetail {
 interface School {
   id: number; name: string; address?: string; phone?: string;
   managerName?: string; managerPhone?: string; managerNationalId?: string;
+  videoConferenceUrl?: string;
   status: string; branchCount: number; studentCount: number; teacherCount: number;
   totalPackages: number; branchDetails: BranchDetail[];
 }
@@ -384,6 +385,7 @@ function SchoolModal({ editing, onClose, onSuccess }: {
 }) {
   const [form, setForm] = useState({
     name: editing?.name ?? "", address: editing?.address ?? "", phone: editing?.phone ?? "",
+    videoConferenceUrl: editing?.videoConferenceUrl ?? "",
     managerName: editing?.managerName ?? "",
     managerPhone: editing?.managerPhone ?? "",
     managerNationalId: editing?.managerNationalId ?? "",
@@ -443,6 +445,9 @@ function SchoolModal({ editing, onClose, onSuccess }: {
         </div>
         <Field label="آدرس" value={form.address} onChange={f("address")} placeholder="آدرس مدرسه" />
         <Field label="تلفن" value={form.phone} onChange={f("phone")} type="tel" placeholder="۰۲۱..." />
+        <div style={{ gridColumn: "1/-1" }}>
+          <Field label="آدرس سرور کلاس آنلاین" value={form.videoConferenceUrl} onChange={f("videoConferenceUrl")} placeholder="مثال: https://meet.myschool.ir (خالی = Jitsi پیش‌فرض)" />
+        </div>
       </div>
 
       {sectionDivider("اطلاعات مدیر مدرسه")}

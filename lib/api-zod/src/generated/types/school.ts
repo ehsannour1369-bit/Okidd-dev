@@ -15,6 +15,8 @@ export interface School {
   address?: string | null;
   /** @nullable */
   phone?: string | null;
+  /** @nullable */
+  videoConferenceUrl?: string | null;
   status: string;
   branchCount?: number;
   studentCount?: number;

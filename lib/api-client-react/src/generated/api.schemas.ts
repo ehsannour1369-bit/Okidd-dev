@@ -71,6 +71,8 @@ export interface School {
   address?: string | null;
   /** @nullable */
   phone?: string | null;
+  /** @nullable */
+  videoConferenceUrl?: string | null;
   status: string;
   branchCount?: number;
   studentCount?: number;
@@ -84,12 +86,14 @@ export interface SchoolInput {
   userId?: number;
   address?: string;
   phone?: string;
+  videoConferenceUrl?: string;
 }
 
 export interface SchoolUpdate {
   name?: string;
   address?: string;
   phone?: string;
+  videoConferenceUrl?: string;
   status?: string;
 }
 
