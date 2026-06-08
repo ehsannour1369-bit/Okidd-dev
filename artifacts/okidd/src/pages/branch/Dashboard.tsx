@@ -138,7 +138,7 @@ export default function BranchDashboard() {
           آمار کلی
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 22 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 12, marginBottom: 22 }}>
           {STAT_CARDS.map((sc, idx) => {
             const Icon = sc.icon;
             const value = (stats as any)?.[sc.key] ?? 0;

@@ -68,8 +68,8 @@ function SchoolWalletPanel({ schoolId }: { schoolId: number }) {
         <div style={{ fontWeight: 700, fontSize: 14, color: "#92400e", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
           <Plus size={14} color="#d97706" /> شارژ کیف پول
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 10, alignItems: "flex-end" }}>
-          <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12, color: "#b45309" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "flex-end" }}>
+          <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12, color: "#b45309", flex: "1 1 160px" }}>
             مبلغ (تومان) *
             <input
               type="number" min="1"
@@ -79,7 +79,7 @@ function SchoolWalletPanel({ schoolId }: { schoolId: number }) {
               style={{ ...inp, minWidth: 0 }}
             />
           </label>
-          <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12, color: "#b45309" }}>
+          <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12, color: "#b45309", flex: "1 1 160px" }}>
             توضیحات
             <input
               value={form.desc}

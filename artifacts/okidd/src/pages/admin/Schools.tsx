@@ -316,7 +316,7 @@ function ActiveStudentsPopup({ school, onClose }: { school: School; onClose: () 
       </div>
       {school.branchDetails.length === 0
         ? <p style={{ color: "#b45309", textAlign: "center", padding: 16 }}>شعبه‌ای ثبت نشده</p>
-        : <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        : <div style={{ overflowX: "auto" }}><table style={{ width: "100%", borderCollapse: "collapse", minWidth: 280 }}>
           <thead>
             <tr>
               {["شعبه","دانش‌آموزان","سال تحصیلی"].map(h => (
@@ -333,7 +333,7 @@ function ActiveStudentsPopup({ school, onClose }: { school: School; onClose: () 
               </tr>
             ))}
           </tbody>
-        </table>}
+        </table></div>}
     </Modal>
   );
 }
@@ -354,7 +354,7 @@ function TotalPackagesPopup({ school, onClose }: { school: School; onClose: () =
           <p style={{ color: "#b45309", fontSize: 12, marginBottom: 10 }}>
             تفکیک پکیج به تفکیک شعبه پس از ثبت تراکنش برای هر شعبه نمایش داده می‌شود.
           </p>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <div style={{ overflowX: "auto" }}><table style={{ width: "100%", borderCollapse: "collapse", minWidth: 280 }}>
             <thead>
               <tr>
                 {["شعبه","سال تحصیلی","دانش‌آموزان"].map(h => (
@@ -373,7 +373,7 @@ function TotalPackagesPopup({ school, onClose }: { school: School; onClose: () =
                   </tr>
                 ))}
             </tbody>
-          </table>
+          </table></div>
         </div>}
     </Modal>
   );

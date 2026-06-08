@@ -111,7 +111,7 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
       {/* Student info */}
       {detail.role === "student" && (
         <div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 20 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 10, marginBottom: 20 }}>
             <StatCard icon={<Clock size={16} />} color="#15803d" label="زمان در برنامه" value={fmtDuration(detail.totalMinutes ?? 0)} />
             <StatCard icon={<Star size={16} />} color="#fbbf24" label="امتیاز کل" value={(detail.totalScore ?? 0).toLocaleString("fa-IR")} />
             <StatCard icon={<BookOpen size={16} />} color="#d97706" label="کتاب‌های ثبت‌نامی" value={(detail.books?.length ?? 0).toLocaleString("fa-IR")} />

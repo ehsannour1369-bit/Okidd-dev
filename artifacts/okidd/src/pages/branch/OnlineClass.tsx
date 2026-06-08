@@ -186,7 +186,7 @@ export default function BranchOnlineClass() {
                 <Btn onClick={() => setShowAddForm(true)} small><Plus size={15} /> افزودن ردیف</Btn>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 12 }}>
                 {DAYS.map((day, d) => (
                   <Card key={d} style={{ padding: 16 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, paddingBottom: 10, borderBottom: `2px solid ${DAY_COLORS[d]}33` }}>

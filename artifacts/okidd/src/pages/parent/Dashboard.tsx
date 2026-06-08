@@ -254,7 +254,7 @@ export default function ParentDashboard() {
               </div>
 
               {/* Stats 3×2 grid */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 9, marginBottom: 14 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", gap: 9, marginBottom: 14 }}>
                 {STAT_META.map((sm, idx) => {
                   const Icon = sm.icon;
                   return (
