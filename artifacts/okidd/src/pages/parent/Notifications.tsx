@@ -40,7 +40,7 @@ export default function ParentNotifications() {
       margin: -24, padding: 24, minHeight: "100vh",
       background: T.bg,
       fontFamily: "Vazirmatn, sans-serif", direction: "rtl",
-      position: "relative", overflow: "hidden",
+      position: "relative",
     }}>
       <div style={{ position: "absolute", top: "-10%", right: "-6%", width: 340, height: 340, borderRadius: "50%", background: `radial-gradient(circle,${ROSE}22 0%,transparent 70%)`, pointerEvents: "none", animation: "blobFloat1 9s ease-in-out infinite" }} />
       <div style={{ position: "absolute", bottom: "5%", left: "-6%", width: 290, height: 290, borderRadius: "50%", background: `radial-gradient(circle,${PINK}18 0%,transparent 70%)`, pointerEvents: "none", animation: "blobFloat2 12s ease-in-out infinite" }} />
@@ -124,27 +124,26 @@ export default function ParentNotifications() {
                         خوانده شد: {formatFaDateTime(getReadAt(n.id))}
                       </div>
                     )}
-                  </div>
-
-                  {/* Actions */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0 }}>
-                    <button
-                      onClick={() => toggleExpand(n.id)}
-                      style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", background: expanded ? `${PINK}18` : `${ROSE}0c`, border: `1px solid ${PINK}30`, borderRadius: 8, color: PINK, cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 11, fontWeight: 600 }}
-                    >
-                      <MessageCircle size={12} />
-                      پاسخ
-                      {expanded ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
-                    </button>
-                    {!read && (
+                    {/* Actions row — below content, full width, no side-column */}
+                    <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
                       <button
-                        onClick={() => markRead(n.id)}
-                        style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", background: `${ROSE}0c`, border: `1px solid ${ROSE}25`, borderRadius: 8, color: TEXT2, cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 11, fontWeight: 600 }}
+                        onClick={() => toggleExpand(n.id)}
+                        style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", background: expanded ? `${PINK}18` : `${ROSE}0c`, border: `1px solid ${PINK}30`, borderRadius: 8, color: PINK, cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 11, fontWeight: 600 }}
                       >
-                        <CheckCheck size={12} />
-                        خوانده شد
+                        <MessageCircle size={12} />
+                        پاسخ
+                        {expanded ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
                       </button>
-                    )}
+                      {!read && (
+                        <button
+                          onClick={() => markRead(n.id)}
+                          style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", background: `${ROSE}0c`, border: `1px solid ${ROSE}25`, borderRadius: 8, color: TEXT2, cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 11, fontWeight: 600 }}
+                        >
+                          <CheckCheck size={12} />
+                          خوانده شد
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
