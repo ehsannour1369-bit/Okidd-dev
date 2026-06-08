@@ -161,30 +161,6 @@ export default function BranchDashboard() {
           </div>
         )}
 
-        {/* Quick links */}
-        <div style={cardAnim(9)}>
-          <h2 style={{ fontSize: 15, fontWeight: 800, color: "#134e4a", marginBottom: 12 }}>دسترسی سریع</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>
-            {QUICK_LINKS.map((item, idx) => {
-              const Icon = item.icon;
-              return (
-                <Link key={item.path} href={item.path} style={{ textDecoration: "none" }}>
-                  <div
-                    style={{ ...colorCard(item.color, item.dark, { padding: "14px 16px", display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }), ...cardAnim(idx + 9) }}
-                    onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-4px)"; el.style.boxShadow = `0 18px 40px ${item.color}70`; }}
-                    onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = `0 8px 32px ${item.color}55, inset 0 1px 0 rgba(255,255,255,0.28)`; }}
-                  >
-                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.16) 0%, transparent 100%)", borderRadius: "22px 22px 0 0", pointerEvents: "none" }} />
-                    <div style={{ width: 36, height: 36, borderRadius: 11, background: "rgba(255,255,255,0.22)", backdropFilter: "blur(8px)", border: "1.5px solid rgba(255,255,255,0.45)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <Icon size={17} color="white" />
-                    </div>
-                    <span style={{ color: "white", fontSize: 14, fontWeight: 700, textShadow: "0 1px 4px rgba(0,0,0,0.2)", position: "relative", zIndex: 1 }}>{item.label}</span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
       </div>
 
       <style>{`

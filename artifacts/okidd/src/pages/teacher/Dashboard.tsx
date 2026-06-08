@@ -281,25 +281,31 @@ export default function TeacherDashboard() {
               <div
                 onClick={() => toggle(ac.id)}
                 style={{
-                  ...glassCard(ac.color, {
-                    padding: "18px 20px", display: "flex", alignItems: "center", gap: 14,
-                    cursor: "pointer",
-                    borderRadius: ac.open ? "22px 22px 0 0" : 22,
-                  }),
+                  background: "rgba(255,255,255,0.85)",
+                  backdropFilter: "blur(18px)",
+                  WebkitBackdropFilter: "blur(18px)",
+                  border: `1.5px solid ${ac.color}28`,
+                  borderRight: `4px solid ${ac.color}`,
+                  borderRadius: ac.open ? "18px 18px 0 0" : 18,
+                  padding: "16px 18px",
+                  display: "flex", alignItems: "center", gap: 14,
+                  cursor: "pointer",
+                  boxShadow: `0 4px 20px ${ac.color}18`,
+                  transition: "all 0.25s cubic-bezier(0.4,0,0.2,1)",
+                  position: "relative",
                 }}
-                onMouseEnter={e => { if (!ac.open) (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ""; }}
+                onMouseEnter={e => { if (!ac.open) { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-2px)"; el.style.boxShadow = `0 8px 28px ${ac.color}30`; } }}
+                onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = `0 4px 20px ${ac.color}18`; }}
               >
-                <div style={shine()} />
-                <div style={{ ...glassIcon(ac.color, 46) }}>
-                  <ac.icon size={22} color="white" />
+                <div style={{ width: 44, height: 44, borderRadius: 14, background: `${ac.color}18`, border: `1.5px solid ${ac.color}35`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <ac.icon size={22} color={ac.color} />
                 </div>
-                <div style={{ flex: 1, position: "relative", zIndex: 1 }}>
-                  <div style={{ fontWeight: 800, fontSize: 15, color: "white", marginBottom: 2, textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>{ac.label}</div>
-                  <div style={{ color: "rgba(255,255,255,0.78)", fontSize: 12, fontWeight: 500 }}>{ac.desc}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 800, fontSize: 15, color: "#1c1917", marginBottom: 2 }}>{ac.label}</div>
+                  <div style={{ color: "#78716c", fontSize: 12, fontWeight: 500 }}>{ac.desc}</div>
                 </div>
-                <div style={{ width: 30, height: 30, borderRadius: 9, background: "rgba(255,255,255,0.20)", border: "1px solid rgba(255,255,255,0.40)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
-                  {ac.open ? <ChevronDown size={16} color="white" /> : <ChevronLeft size={16} color="rgba(255,255,255,0.8)" />}
+                <div style={{ width: 28, height: 28, borderRadius: 8, background: `${ac.color}15`, border: `1px solid ${ac.color}30`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  {ac.open ? <ChevronDown size={15} color={ac.color} /> : <ChevronLeft size={15} color={ac.color} />}
                 </div>
               </div>
 
@@ -481,25 +487,37 @@ export default function TeacherDashboard() {
 
           {/* Notifications shortcut card */}
           <div
-            style={{ ...glassCard(ORANGE, { padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }), ...cardAnim(5) }}
+            style={{
+              background: "rgba(255,255,255,0.85)",
+              backdropFilter: "blur(18px)",
+              WebkitBackdropFilter: "blur(18px)",
+              border: `1.5px solid ${ORANGE}28`,
+              borderRight: `4px solid ${ORANGE}`,
+              borderRadius: 18,
+              padding: "16px 18px",
+              display: "flex", alignItems: "center", gap: 14,
+              cursor: "pointer",
+              boxShadow: `0 4px 20px ${ORANGE}18`,
+              transition: "all 0.25s cubic-bezier(0.4,0,0.2,1)",
+              ...cardAnim(5),
+            }}
             onClick={() => navigate("/teacher/notifications")}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ""; }}
+            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-2px)"; el.style.boxShadow = `0 8px 28px ${ORANGE}30`; }}
+            onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = `0 4px 20px ${ORANGE}18`; }}
           >
-            <div style={shine()} />
-            <div style={{ ...glassIcon(ORANGE, 44), position: "relative" }}>
-              <Bell size={20} color="white" />
+            <div style={{ width: 44, height: 44, borderRadius: 14, background: `${ORANGE}18`, border: `1.5px solid ${ORANGE}35`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative" }}>
+              <Bell size={20} color={ORANGE} />
               {unreadCount > 0 && (
-                <span style={{ position: "absolute", top: -4, right: -4, minWidth: 18, height: 18, borderRadius: 999, background: "#ef4444", border: "2px solid rgba(255,255,255,0.9)", color: "white", fontSize: 10, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px", fontFamily: "Vazirmatn" }}>
+                <span style={{ position: "absolute", top: -4, right: -4, minWidth: 18, height: 18, borderRadius: 999, background: "#ef4444", border: "2px solid white", color: "white", fontSize: 10, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px", fontFamily: "Vazirmatn" }}>
                   {unreadCount > 99 ? "۹۹+" : unreadCount.toLocaleString("fa-IR")}
                 </span>
               )}
             </div>
-            <div style={{ flex: 1, position: "relative", zIndex: 1 }}>
-              <div style={{ fontWeight: 800, fontSize: 15, color: "white", textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>اعلانات{unreadCount > 0 ? ` (${unreadCount.toLocaleString("fa-IR")} جدید)` : ""}</div>
-              <div style={{ color: "rgba(255,255,255,0.78)", fontSize: 12 }}>مشاهده و ارسال اعلانات</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, fontSize: 15, color: "#1c1917" }}>اعلانات{unreadCount > 0 ? ` (${unreadCount.toLocaleString("fa-IR")} جدید)` : ""}</div>
+              <div style={{ color: "#78716c", fontSize: 12, fontWeight: 500 }}>مشاهده و ارسال اعلانات</div>
             </div>
-            <ChevronLeft size={18} color="rgba(255,255,255,0.8)" style={{ position: "relative", zIndex: 1 }} />
+            <ChevronLeft size={18} color={ORANGE} />
           </div>
 
         </div>
