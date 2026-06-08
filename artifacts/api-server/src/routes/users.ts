@@ -244,7 +244,8 @@ router.get("/users/:id/student-summary", async (req, res) => {
         const stageMap = new Map<number, string>();
         for (const p of bookProg) {
           const cur = stageMap.get(p.lessonId) ?? "none";
-          const ps = (p as any).lessonStage ?? (p.completed ? "completed" : "none");
+          const rawStage = (p as any).lessonStage;
+          const ps = (rawStage && rawStage !== "none") ? rawStage : (p.completed ? "completed" : "none");
           if (STAGE_ORDER.indexOf(ps) > STAGE_ORDER.indexOf(cur)) stageMap.set(p.lessonId, ps);
         }
         const lessons = bookLessons.length > 0
