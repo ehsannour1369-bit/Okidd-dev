@@ -6,10 +6,11 @@ import ParentExamCalendar from "../../components/ParentExamCalendar";
 import ProfilePanel from "../../components/ProfilePanel";
 import {
   Bell, BookOpen, Clock, Star, Calendar,
-  Trophy, Heart, UserRound, Users, ChevronLeft,
+  Trophy, Heart, UserRound, Users, ChevronLeft, Menu,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useSidebar } from "../../contexts/SidebarContext";
 
 /* ─── Fixed parent theme — always rose/pink ─── */
 const ROSE   = "#f43f5e";
@@ -56,6 +57,7 @@ const STAT_META = [
 export default function ParentDashboard() {
   const { user } = useAuthStore();
   const [, navigate] = useLocation();
+  const { openSidebar } = useSidebar();
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
   useEffect(() => { const t = setTimeout(() => setMounted(true), 60); return () => clearTimeout(t); }, []);
@@ -146,24 +148,32 @@ export default function ParentDashboard() {
       <div style={{ position: "relative", zIndex: 1, height: "100%", display: "flex", flexDirection: "column" }}>
 
         {/* ── Top bar ── */}
-        <div style={{ ...anim(0), display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 20px 0" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 50, height: 50, borderRadius: 16, background: `linear-gradient(135deg, ${ROSE}, ${PINK})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 6px 20px ${ROSE}55` }}>
-              <Heart size={24} color="white" />
-            </div>
-            <div>
-              <div style={{ fontWeight: 900, fontSize: 19, color: TEXT }}>پنل والدین</div>
-              <div style={{ fontSize: 12, color: TEXT2, fontWeight: 600, marginTop: 1 }}>خوش آمدید، {user?.name}</div>
+        <div style={{ ...anim(0), display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px 0" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <button
+              onClick={openSidebar}
+              style={{ background: `linear-gradient(135deg,${ROSE},${PINK})`, border: "none", borderRadius: 13, color: "#fff", cursor: "pointer", padding: "9px 14px", display: "flex", alignItems: "center", boxShadow: `0 4px 14px ${ROSE}55`, flexShrink: 0 }}
+            >
+              <Menu size={20} />
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 42, height: 42, borderRadius: 14, background: `linear-gradient(135deg, ${ROSE}, ${PINK})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 4px 14px ${ROSE}44` }}>
+                <Heart size={20} color="white" />
+              </div>
+              <div>
+                <div style={{ fontWeight: 900, fontSize: 17, color: TEXT }}>پنل والدین</div>
+                <div style={{ fontSize: 11, color: TEXT2, fontWeight: 600, marginTop: 1 }}>خوش آمدید، {user?.name}</div>
+              </div>
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <button
               onClick={() => navigate("/parent/notifications")}
-              style={{ width: 40, height: 40, borderRadius: "50%", background: `${ROSE}18`, border: `1.5px solid ${ROSE}45`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", position: "relative" }}
+              style={{ width: 38, height: 38, borderRadius: 12, background: `${ROSE}18`, border: `1.5px solid ${ROSE}45`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", position: "relative" }}
             >
-              <Bell size={18} color={ROSE_D} />
+              <Bell size={17} color={ROSE_D} />
               {unreadCount > 0 && (
-                <span style={{ position: "absolute", top: -3, right: -3, minWidth: 17, height: 17, borderRadius: 999, background: "#ef4444", border: "2px solid white", color: "white", fontSize: 10, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px", fontFamily: "Vazirmatn" }}>
+                <span style={{ position: "absolute", top: -4, right: -4, minWidth: 16, height: 16, borderRadius: 999, background: "#ef4444", border: "2px solid white", color: "white", fontSize: 9, fontWeight: 900, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px", fontFamily: "Vazirmatn" }}>
                   {unreadCount > 99 ? "۹۹+" : unreadCount.toLocaleString("fa-IR")}
                 </span>
               )}
