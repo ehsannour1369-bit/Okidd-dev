@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, classesTable, classStudentsTable, classTeachersTable, classBooksTable, usersTable, booksTable, gradesTable, gradeLevelsTable, branchesTable, schoolsTable, presenceLogTable, studentProgressTable, bookOrdersTable, bookOrderItemsTable } from "@workspace/db";
+import { db, classesTable, classStudentsTable, classTeachersTable, classBooksTable, usersTable, booksTable, gradesTable, gradeLevelsTable, branchesTable, schoolsTable, presenceLogTable, studentProgressTable, bookOrdersTable, bookOrderItemsTable, lessonsTable } from "@workspace/db";
 import { eq, inArray, count, and, sum } from "drizzle-orm";
 
 const router = Router();
@@ -315,6 +315,68 @@ router.get("/classes/:id/school", async (req, res) => {
 });
 
 // Performance: per-student stats for a class
+// Books a specific teacher teaches in a class (from class_teachers.book_id)
+router.get("/classes/:id/teacher-books", async (req, res) => {
+  const classId = parseInt(req.params.id);
+  const { teacherId } = req.query as Record<string, string>;
+  if (!teacherId) { res.status(400).json({ error: "teacherId required" }); return; }
+  const rows = await db.select().from(classTeachersTable)
+    .where(and(eq(classTeachersTable.classId, classId), eq(classTeachersTable.teacherId, parseInt(teacherId))));
+  const bookIds = [...new Set(rows.map(r => r.bookId).filter((id): id is number => id != null))];
+  if (bookIds.length === 0) { res.json([]); return; }
+  const books = await db.select().from(booksTable).where(inArray(booksTable.id, bookIds));
+  res.json(books);
+});
+
+// Per-lesson progress for every student in a class, for a specific book
+router.get("/classes/:id/book/:bookId/lesson-report", async (req, res) => {
+  const classId  = parseInt(req.params.id);
+  const bookId   = parseInt(req.params.bookId);
+
+  const [studentRows, lessons] = await Promise.all([
+    db.select({ studentId: classStudentsTable.studentId }).from(classStudentsTable).where(eq(classStudentsTable.classId, classId)),
+    db.select().from(lessonsTable).where(eq(lessonsTable.bookId, bookId)),
+  ]);
+  lessons.sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
+
+  const studentIds = studentRows.map(r => r.studentId);
+  if (studentIds.length === 0) { res.json({ lessons: [], students: [] }); return; }
+
+  const [students, allProgress] = await Promise.all([
+    db.select().from(usersTable).where(inArray(usersTable.id, studentIds)),
+    db.select().from(studentProgressTable).where(
+      and(inArray(studentProgressTable.studentId, studentIds), eq(studentProgressTable.bookId, bookId))
+    ),
+  ]);
+
+  const STAGE_ORDER = ["none", "animation", "game", "quiz", "completed"];
+
+  const studentData = students.map(({ password: _pw, ...s }) => {
+    const prog = allProgress.filter(p => p.studentId === s.id);
+    const lessonProgress = lessons.map(l => {
+      const rows = prog.filter(p => p.lessonId === l.id);
+      const completed = rows.some(p => p.completed);
+      const score = rows.reduce((sum, p) => sum + (p.score ?? 0), 0);
+      const stage = rows.reduce((best, p) => {
+        const ps = (p as any).lessonStage ?? (p.completed ? "completed" : "none");
+        return STAGE_ORDER.indexOf(ps) > STAGE_ORDER.indexOf(best) ? ps : best;
+      }, "none");
+      return { lessonId: l.id, score, completed, lessonStage: stage };
+    });
+    const totalScore = prog.reduce((sum, p) => sum + (p.score ?? 0), 0);
+    const completedCount = lessonProgress.filter(lp => lp.completed).length;
+    return { ...s, totalScore, completedCount, lessonProgress };
+  });
+
+  // Sort by totalScore desc
+  studentData.sort((a, b) => b.totalScore - a.totalScore);
+
+  res.json({
+    lessons: lessons.map((l, i) => ({ id: l.id, title: l.title, orderIndex: i + 1 })),
+    students: studentData,
+  });
+});
+
 router.get("/classes/:id/performance", async (req, res) => {
   const classId = parseInt(req.params.id);
   const studentRows = await db.select({ studentId: classStudentsTable.studentId }).from(classStudentsTable).where(eq(classStudentsTable.classId, classId));
