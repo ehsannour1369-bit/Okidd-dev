@@ -47,7 +47,7 @@ const schoolManagerNav: NavItem[] = [
   { label: "گزارش عملکرد", path: "/school/report", icon: BarChart2, color: "#6366f1", bgGradient: "linear-gradient(135deg, #4f46e5, #6366f1)" },
   { label: "اعلان‌ها", path: "/school/notifications", icon: Bell, color: "#3b82f6", bgGradient: "linear-gradient(135deg, #2563eb, #3b82f6)" },
   { label: "برنامه امتحانات", path: "/school/exams", icon: ClipboardList, color: "#6366f1", bgGradient: "linear-gradient(135deg, #4f46e5, #6366f1)" },
-  // { label: "کلاس آنلاین", path: "/school/online-class", icon: Video, color: "#4f46e5", bgGradient: "linear-gradient(135deg, #4338ca, #4f46e5)" },
+  { label: "کلاس آنلاین", path: "/school/online-class", icon: Video, color: "#4f46e5", bgGradient: "linear-gradient(135deg, #4338ca, #4f46e5)" },
   { label: "فروشگاه کتاب", path: "/school/shop", icon: ShoppingCart, color: "#7c3aed", bgGradient: "linear-gradient(135deg, #6d28d9, #7c3aed)" },
   { label: "سفارشات من", path: "/school/orders", icon: Receipt, color: "#818cf8", bgGradient: "linear-gradient(135deg, #6366f1, #818cf8)" },
   { label: "کیف پول", path: "/school/wallet", icon: Wallet, color: "#4f46e5", bgGradient: "linear-gradient(135deg, #3730a3, #4f46e5)" },
@@ -61,7 +61,7 @@ const branchManagerNav: NavItem[] = [
   { label: "گزارش عملکرد", path: "/branch/report", icon: BarChart2, color: "#0f766e", bgGradient: "linear-gradient(135deg, #134e4a, #0f766e)" },
   { label: "اعلان‌ها", path: "/branch/notifications", icon: Bell, color: "#0d9488", bgGradient: "linear-gradient(135deg, #0f766e, #0d9488)" },
   { label: "برنامه امتحانات", path: "/branch/exams", icon: ClipboardList, color: "#10b981", bgGradient: "linear-gradient(135deg, #059669, #10b981)" },
-  // { label: "کلاس آنلاین", path: "/branch/online-class", icon: Video, color: "#0d9488", bgGradient: "linear-gradient(135deg, #0f766e, #0d9488)" },
+  { label: "کلاس آنلاین", path: "/branch/online-class", icon: Video, color: "#0d9488", bgGradient: "linear-gradient(135deg, #0f766e, #0d9488)" },
   { label: "فروشگاه کتاب", path: "/branch/shop", icon: ShoppingCart, color: "#0d9488", bgGradient: "linear-gradient(135deg, #0f766e, #0d9488)" },
   { label: "سفارشات من", path: "/branch/orders", icon: Receipt, color: "#2dd4bf", bgGradient: "linear-gradient(135deg, #0d9488, #2dd4bf)" },
   { label: "کیف پول", path: "/branch/wallet", icon: Wallet, color: "#10b981", bgGradient: "linear-gradient(135deg, #059669, #10b981)" },
@@ -69,7 +69,7 @@ const branchManagerNav: NavItem[] = [
 
 const teacherNav: NavItem[] = [
   { label: "داشبورد", path: "/teacher", icon: LayoutDashboard, color: "#059669", bgGradient: "linear-gradient(135deg, #047857, #059669)" },
-  // { label: "کلاس آنلاین", path: "/teacher/online-class", icon: Video, color: "#047857", bgGradient: "linear-gradient(135deg, #065f46, #047857)" },
+  { label: "کلاس آنلاین", path: "/teacher/online-class", icon: Video, color: "#059669", bgGradient: "linear-gradient(135deg, #047857, #059669)" },
   { label: "عملکرد کلاس", path: "/teacher/progress", icon: BarChart2, color: "#0891b2", bgGradient: "linear-gradient(135deg, #0e7490, #0891b2)" },
   { label: "اعلان‌ها", path: "/teacher/notifications", icon: Bell, color: "#34d399", bgGradient: "linear-gradient(135deg, #059669, #34d399)" },
 ];
@@ -90,7 +90,7 @@ function getParentNav(isFemale: boolean): NavItem[] {
 const studentNav: NavItem[] = [
   { label: "داشبورد", path: "/student", icon: Home, color: "#8b5cf6", bgGradient: "linear-gradient(135deg, #7c3aed, #a855f7)" },
   { label: "کتاب‌هایم", path: "/student/books", icon: BookOpen, color: "#3b82f6", bgGradient: "linear-gradient(135deg, #2563eb, #3b82f6)" },
-  // { label: "کلاس آنلاین", path: "/student/online-class", icon: Video, color: "#7c3aed", bgGradient: "linear-gradient(135deg, #6d28d9, #7c3aed)" },
+  { label: "کلاس آنلاین", path: "/student/online-class", icon: Video, color: "#7c3aed", bgGradient: "linear-gradient(135deg, #6d28d9, #7c3aed)" },
   { label: "رتبه‌بندی", path: "/student/ranking", icon: Star, color: "#f59e0b", bgGradient: "linear-gradient(135deg, #d97706, #f59e0b)" },
   { label: "بازی", path: "/student/game", icon: Package, color: "#ec4899", bgGradient: "linear-gradient(135deg, #db2777, #ec4899)" },
 ];
@@ -340,7 +340,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   const dashboardPath = nav[0].path;
   const isOnSubPage = location !== dashboardPath;
-  const isTeacherOrParentDash = (user.role === "teacher" || user.role === "parent") && !isOnSubPage;
+  const isTeacherOrParentDash = (user.role === "teacher" || user.role === "parent" || user.role === "school_manager" || user.role === "branch_manager") && !isOnSubPage;
 
   // Back button — rendered in topbar OR in a standalone sticky bar
   const hasTopbar = !isStudent && user.role !== "admin" && user.role !== "school_manager";
