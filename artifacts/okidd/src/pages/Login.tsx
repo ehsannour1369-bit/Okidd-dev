@@ -113,6 +113,8 @@ export default function Login() {
     } catch (err: any) {
       if (err.message === "account_locked") {
         setIsLocked(true);
+      } else if (err.message === "too_many_attempts") {
+        setError("تعداد تلاش‌های ورود بیش از حد مجاز است. لطفاً ۱۵ دقیقه دیگر دوباره امتحان کنید.");
       } else {
         setError(err.message || "خطا در ورود");
       }
@@ -190,11 +192,11 @@ export default function Login() {
             />
           </div>
           <div style={{ marginBottom: 24 }}>
-            <label style={{ display: "block", color: "#c4b5fd", fontSize: 13, fontWeight: 500, marginBottom: 6 }}>رمز عبور: کد ملی</label>
+            <label style={{ display: "block", color: "#c4b5fd", fontSize: 13, fontWeight: 500, marginBottom: 6 }}>رمز عبور</label>
             <div style={{ position: "relative" }}>
               <input
                 type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)}
-                placeholder="کد ملی" required
+                placeholder="رمز عبور" required
                 style={{
                   width: "100%", background: "rgba(13,10,26,0.55)",
                   border: "1px solid rgba(139,92,246,0.32)", borderRadius: 12,

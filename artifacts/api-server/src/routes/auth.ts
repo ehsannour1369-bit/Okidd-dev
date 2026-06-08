@@ -1,8 +1,18 @@
 import { Router, type Request, type Response, type NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import rateLimit from "express-rate-limit";
 import { db, usersTable, branchManagersTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,                   // max 10 attempts per IP per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "too_many_attempts", message: "تعداد تلاش‌های ورود بیش از حد مجاز است. لطفاً ۱۵ دقیقه دیگر دوباره امتحان کنید." },
+  skipSuccessfulRequests: true, // successful logins don't count against limit
+});
 
 const router = Router();
 
@@ -78,7 +88,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   }
 }
 
-router.post("/auth/login", async (req, res) => {
+router.post("/auth/login", loginLimiter, async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
     res.status(400).json({ error: "Username and password required" });
