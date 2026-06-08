@@ -86,7 +86,7 @@ export default function PageTopBar() {
       padding: "14px 0 10px", direction: "rtl",
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        {user.role !== "parent" && (
+        {user.role !== "parent" && !isOnSubPage && (
           <button
             onClick={openSidebar}
             style={{
