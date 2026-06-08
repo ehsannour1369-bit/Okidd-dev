@@ -13,19 +13,19 @@ import { useLocation } from "wouter";
 import { useSidebar } from "../../contexts/SidebarContext";
 
 /* ─── Parent theme helpers — resolved inside component by gender ─── */
-const FEMALE_THEME = { p: "#f43f5e", pD: "#e11d48", s: "#ec4899", sD: "#db2777", text: "#4c0519", text2: "#881337", bg: "linear-gradient(160deg,#fff1f2 0%,#fce7f3 42%,#fdf2f8 100%)", b1: "rgba(244,63,94,0.28)", b2: "rgba(236,72,153,0.20)", b3: "rgba(251,113,133,0.15)" };
-const MALE_THEME   = { p: "#3b82f6", pD: "#2563eb", s: "#6366f1", sD: "#4f46e5", text: "#1e1b4b", text2: "#3730a3", bg: "linear-gradient(160deg,#eff6ff 0%,#e0e7ff 42%,#f0f9ff 100%)",  b1: "rgba(59,130,246,0.26)", b2: "rgba(99,102,241,0.20)", b3: "rgba(147,197,253,0.15)" };
+const FEMALE_THEME = { p: "#b5607a", pD: "#8f4860", s: "#b87898", sD: "#9a6080", text: "#2d1820", text2: "#6b3a50", bg: "linear-gradient(160deg,#fdfafb 0%,#faf5f8 42%,#fdf8fa 100%)", b1: "rgba(181,96,122,0.07)", b2: "rgba(184,120,152,0.05)", b3: "rgba(181,96,122,0.04)" };
+const MALE_THEME   = { p: "#3b82f6", pD: "#2563eb", s: "#6366f1", sD: "#4f46e5", text: "#1e1b4b", text2: "#3730a3", bg: "linear-gradient(160deg,#eff6ff 0%,#e0e7ff 42%,#f0f9ff 100%)",  b1: "rgba(59,130,246,0.20)", b2: "rgba(99,102,241,0.14)", b3: "rgba(147,197,253,0.10)" };
 
 function gradCard(color: string, dark: string, extra?: React.CSSProperties): React.CSSProperties {
   return {
-    background: `linear-gradient(145deg, ${color}d8, ${dark}b0)`,
+    background: `linear-gradient(145deg, ${color}c0, ${dark}95)`,
     backdropFilter: "blur(20px)",
     WebkitBackdropFilter: "blur(20px)",
-    border: `1.5px solid ${color}cc`,
+    border: `1.5px solid ${color}88`,
     borderRadius: 22,
     position: "relative",
     overflow: "hidden",
-    boxShadow: `0 8px 28px ${color}55, inset 0 1px 0 rgba(255,255,255,0.28)`,
+    boxShadow: `0 6px 22px ${color}30, inset 0 1px 0 rgba(255,255,255,0.30)`,
     transition: "all 0.26s cubic-bezier(0.4,0,0.2,1)",
     ...extra,
   };
