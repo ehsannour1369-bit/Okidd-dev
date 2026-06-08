@@ -73,13 +73,18 @@ const teacherNav: NavItem[] = [
   { label: "اعلان‌ها", path: "/teacher/notifications", icon: Bell, color: "#fbbf24", bgGradient: "linear-gradient(135deg, #f59e0b, #fbbf24)" },
 ];
 
-const parentNav: NavItem[] = [
-  { label: "داشبورد", path: "/parent", icon: LayoutDashboard, color: "#f43f5e", bgGradient: "linear-gradient(135deg, #e11d48, #f43f5e)" },
-  { label: "فرزندانم", path: "/parent/children", icon: Users, color: "#ec4899", bgGradient: "linear-gradient(135deg, #db2777, #ec4899)" },
-  // { label: "کلاس آنلاین", path: "/parent/online-class", icon: Video, color: "#e11d48", bgGradient: "linear-gradient(135deg, #be123c, #e11d48)" },
-  { label: "مشاوره", path: "/parent/consultations", icon: BookOpen, color: "#fb7185", bgGradient: "linear-gradient(135deg, #f43f5e, #fb7185)" },
-  { label: "اعلان‌ها", path: "/parent/notifications", icon: Bell, color: "#f43f5e", bgGradient: "linear-gradient(135deg, #e11d48, #f43f5e)" },
-];
+function getParentNav(isFemale: boolean): NavItem[] {
+  const c1 = isFemale ? "#f43f5e" : "#3b82f6";
+  const c1d = isFemale ? "#e11d48" : "#2563eb";
+  const c2 = isFemale ? "#ec4899" : "#6366f1";
+  const c2d = isFemale ? "#db2777" : "#4f46e5";
+  return [
+    { label: "داشبورد", path: "/parent", icon: LayoutDashboard, color: c1, bgGradient: `linear-gradient(135deg, ${c1d}, ${c1})` },
+    { label: "فرزندانم", path: "/parent/children", icon: Users, color: c2, bgGradient: `linear-gradient(135deg, ${c2d}, ${c2})` },
+    { label: "مشاوره", path: "/parent/consultations", icon: BookOpen, color: c1, bgGradient: `linear-gradient(135deg, ${c1d}, ${c1})` },
+    { label: "اعلان‌ها", path: "/parent/notifications", icon: Bell, color: c2, bgGradient: `linear-gradient(135deg, ${c2d}, ${c2})` },
+  ];
+}
 
 const studentNav: NavItem[] = [
   { label: "داشبورد", path: "/student", icon: Home, color: "#8b5cf6", bgGradient: "linear-gradient(135deg, #7c3aed, #a855f7)" },
@@ -94,12 +99,12 @@ const consultantNav: NavItem[] = [
   { label: "برنامه مشاوره‌ها", path: "/consultant/schedule", icon: ClipboardList, color: "#22d3ee", bgGradient: "linear-gradient(135deg, #06b6d4, #22d3ee)" },
 ];
 
-function getNav(role: string): NavItem[] {
+function getNav(role: string, isFemaleParent = false): NavItem[] {
   if (role === "admin") return adminNav;
   if (role === "school_manager") return schoolManagerNav;
   if (role === "branch_manager") return branchManagerNav;
   if (role === "teacher") return teacherNav;
-  if (role === "parent") return parentNav;
+  if (role === "parent") return getParentNav(isFemaleParent);
   if (role === "consultant") return consultantNav;
   return studentNav;
 }
@@ -153,13 +158,22 @@ function getRoleTheme(role: string, isGirl: boolean): RoleTheme {
     logoGrad: "linear-gradient(135deg, #f59e0b, #f97316)",
     TEXT: "#78350f", TEXT2: "#92400e",
   };
-  if (role === "parent") return {
-    dashBg: "linear-gradient(160deg,#fff1f2 0%,#fce7f3 40%,#fdf2f8 100%)",
-    accent: "#f43f5e", accentDark: "#e11d48",
-    blob1: "rgba(244,63,94,0.28)", blob2: "rgba(236,72,153,0.20)", blob3: "rgba(249,168,212,0.22)",
-    logoGrad: "linear-gradient(135deg, #f43f5e, #ec4899)",
-    TEXT: "#4c0519", TEXT2: "#881337",
-  };
+  if (role === "parent") {
+    const ac  = isGirl ? "#d4547a" : "#3b82f6";
+    const acd = isGirl ? "#ae3a5e" : "#2563eb";
+    return {
+      dashBg: isGirl
+        ? "linear-gradient(160deg,#fef5f7 0%,#fceef5 42%,#fdf6f9 100%)"
+        : "linear-gradient(160deg,#eff6ff 0%,#e0e7ff 42%,#f0f9ff 100%)",
+      accent: ac, accentDark: acd,
+      blob1: isGirl ? "rgba(212,84,122,0.14)" : "rgba(59,130,246,0.20)",
+      blob2: isGirl ? "rgba(216,112,162,0.10)" : "rgba(99,102,241,0.14)",
+      blob3: isGirl ? "rgba(212,84,122,0.07)" : "rgba(147,197,253,0.10)",
+      logoGrad: `linear-gradient(135deg, ${ac}, ${acd})`,
+      TEXT:  isGirl ? "#2d1820" : "#1e1b4b",
+      TEXT2: isGirl ? "#7a3552" : "#3730a3",
+    };
+  }
   // student / consultant / default
   const ac = isGirl ? "#ec4899" : "#7c3aed";
   const acd = isGirl ? "#db2777" : "#6d28d9";
@@ -311,8 +325,8 @@ export default function Layout({ children }: { children: ReactNode }) {
   }, []);
 
   if (!user) return null;
-  const nav = getNav(user.role);
-  const isGirl = user.role === "student" && user.gender === "female";
+  const isGirl = (user.role === "student" || user.role === "parent") && user.gender === "female";
+  const nav = getNav(user.role, isGirl);
   const isAdmin = user.role === "admin";
   const isStudent = user.role === "student";
 
