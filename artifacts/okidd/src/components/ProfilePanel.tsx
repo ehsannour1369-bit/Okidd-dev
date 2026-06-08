@@ -275,8 +275,8 @@ export default function ProfilePanel({ accent, dark }: ProfilePanelProps) {
                     <ImageIcon size={12} color="#9ca3af" /> لوگوی مدرسه
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                    <div style={{ width: 68, height: 68, borderRadius: 16, flexShrink: 0, border: `1.5px solid ${accent}40`, background: "rgba(255,255,255,0.85)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-                      {schoolInfo?.logoUrl ? <img src={schoolInfo.logoUrl} alt="لوگو" style={{ width: "100%", height: "100%", objectFit: "contain" }} /> : <ImageIcon size={28} color={`${accent}70`} />}
+                    <div style={{ width: 68, height: 68, borderRadius: "50%", flexShrink: 0, border: `2px solid ${accent}50`, background: "rgba(255,255,255,0.9)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", boxShadow: `0 2px 14px ${accent}28` }}>
+                      {schoolInfo?.logoUrl ? <img src={schoolInfo.logoUrl} alt="لوگو" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <ImageIcon size={28} color={`${accent}70`} />}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 800, fontSize: 14, color: "#1e1b4b", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{schoolInfo?.name ?? "مدرسه"}</div>
@@ -301,7 +301,9 @@ export default function ProfilePanel({ accent, dark }: ProfilePanelProps) {
               {isBranchMgr && branchData && mode === "view" && (
                 <div style={{ background: `linear-gradient(135deg,${accent}14,${dark}0a)`, border: `1.5px solid ${accent}35`, borderRadius: 14, padding: "12px 14px", marginBottom: 14, display: "flex", alignItems: "center", gap: 12 }}>
                   {branchSchool?.logoUrl ? (
-                    <img src={branchSchool.logoUrl} alt="لوگو" style={{ width: 44, height: 44, borderRadius: 12, objectFit: "contain", border: `1px solid ${accent}30`, background: "white", flexShrink: 0 }} />
+                    <div style={{ width: 44, height: 44, borderRadius: "50%", flexShrink: 0, border: `2px solid ${accent}50`, background: "white", overflow: "hidden", boxShadow: `0 2px 10px ${accent}28` }}>
+                      <img src={branchSchool.logoUrl} alt="لوگو" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    </div>
                   ) : (
                     <div style={{ width: 44, height: 44, borderRadius: 12, background: `${accent}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><GitBranch size={20} color={dark} /></div>
                   )}
