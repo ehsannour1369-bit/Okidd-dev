@@ -88,6 +88,36 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   }
 }
 
+/** Convert Persian/Arabic-Indic digits to ASCII digits */
+function toEnDigits(s: string): string {
+  return s
+    .replace(/[۰-۹]/g, d => String(d.charCodeAt(0) - 0x06F0))
+    .replace(/[٠-٩]/g, d => String(d.charCodeAt(0) - 0x0660));
+}
+
+/**
+ * Normalise a login identifier:
+ * - always converts Persian/Arabic digits to English
+ * - if it looks like a phone number, converts to 09XXXXXXXXXX format:
+ *     +989XXXXXXXX  → 09XXXXXXXXX
+ *     00989XXXXXXXX → 09XXXXXXXXX
+ *     989XXXXXXXX   → 09XXXXXXXXX  (10 digits after 98)
+ *     9XXXXXXXXX    → 09XXXXXXXXX  (10-digit without leading 0)
+ * - emails are returned as-is (lower-cased)
+ */
+function normalizeUsername(raw: string): string {
+  const s = toEnDigits(raw.trim());
+  // Looks like an e-mail — keep it lowercase
+  if (s.includes("@")) return s.toLowerCase();
+  // Strip common prefixes for phone numbers
+  let phone = s.replace(/\s|-/g, "");
+  if (phone.startsWith("+98"))  phone = "0" + phone.slice(3);
+  else if (phone.startsWith("0098")) phone = "0" + phone.slice(4);
+  else if (phone.startsWith("98") && phone.length === 12) phone = "0" + phone.slice(2);
+  else if (phone.startsWith("9")  && phone.length === 10) phone = "0" + phone;
+  return phone;
+}
+
 router.post("/auth/login", loginLimiter, async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
@@ -95,11 +125,13 @@ router.post("/auth/login", loginLimiter, async (req, res) => {
     return;
   }
 
-  let users = await db.select().from(usersTable).where(eq(usersTable.email, username)).limit(1);
+  const normalizedUsername = normalizeUsername(String(username));
+
+  let users = await db.select().from(usersTable).where(eq(usersTable.email, normalizedUsername)).limit(1);
   let user = users[0];
 
   if (!user) {
-    const phoneUsers = await db.select().from(usersTable).where(eq(usersTable.phone, username)).limit(1);
+    const phoneUsers = await db.select().from(usersTable).where(eq(usersTable.phone, normalizedUsername)).limit(1);
     user = phoneUsers[0];
   }
 
