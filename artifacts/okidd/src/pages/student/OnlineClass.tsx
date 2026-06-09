@@ -43,24 +43,39 @@ export default function StudentOnlineClass() {
     enabled: !!user?.id,
   });
 
-  const firstClassId = (classes[0] as any)?.id;
-
-  const { data: schedules = [] } = useQuery<any[]>({
-    queryKey: ["class-schedules-student", firstClassId],
-    queryFn: () => api.get(`/class-schedules?classId=${firstClassId}`),
-    enabled: !!firstClassId,
-  });
-
+  // Fetch active session across ALL enrolled classes (not just the first one)
   const { data: activeSession } = useQuery<any>({
-    queryKey: ["class-session-active-student", firstClassId],
-    queryFn: () => api.get(`/class-sessions/active?classId=${firstClassId}`),
-    enabled: !!firstClassId,
+    queryKey: ["class-session-active-for-student", user?.id],
+    queryFn: () => api.get(`/class-sessions/active-for-student?studentId=${user?.id}`),
+    enabled: !!user?.id,
     refetchInterval: 20000,
   });
+
+  // Fetch schedules for ALL enrolled classes and merge them
+  const classIds = (classes as any[]).map((c: any) => c.id as number);
+
+  // Fixed 3 hooks (handles up to 3 classes; enabled flag guards unset IDs)
+  const { data: sch0 = [] } = useQuery<any[]>({
+    queryKey: ["class-schedules-student", classIds[0]],
+    queryFn: () => api.get(`/class-schedules?classId=${classIds[0]}`),
+    enabled: !!classIds[0],
+  });
+  const { data: sch1 = [] } = useQuery<any[]>({
+    queryKey: ["class-schedules-student", classIds[1]],
+    queryFn: () => api.get(`/class-schedules?classId=${classIds[1]}`),
+    enabled: !!classIds[1],
+  });
+  const { data: sch2 = [] } = useQuery<any[]>({
+    queryKey: ["class-schedules-student", classIds[2]],
+    queryFn: () => api.get(`/class-schedules?classId=${classIds[2]}`),
+    enabled: !!classIds[2],
+  });
+  const schedules = [...sch0, ...sch1, ...sch2];
 
   const byDay: Record<number, any[]> = {};
   for (let d = 0; d < 6; d++) byDay[d] = schedules.filter((s: any) => s.dayOfWeek === d).sort((a: any, b: any) => a.startTime.localeCompare(b.startTime));
   const hasSchedule = schedules.length > 0;
+  const firstClassId = classIds[0];
 
   return (
     <div dir="rtl" style={{ fontFamily: "Vazirmatn, sans-serif", paddingBottom: 32 }}>

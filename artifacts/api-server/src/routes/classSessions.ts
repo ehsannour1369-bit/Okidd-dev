@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { db, classSessionsTable, usersTable, classesTable, gradesTable, gradeLevelsTable, branchesTable, schoolsTable } from "@workspace/db";
-import { eq, and, desc } from "drizzle-orm";
+import { db, classSessionsTable, classStudentsTable, usersTable, classesTable, gradesTable, gradeLevelsTable, branchesTable, schoolsTable } from "@workspace/db";
+import { eq, and, desc, inArray } from "drizzle-orm";
 
 async function getSchoolConfig(classId: number): Promise<{ videoConferenceUrl: string | null; skyroomApiKey: string | null }> {
   const [cls] = await db.select({ gradeId: classesTable.gradeId }).from(classesTable).where(eq(classesTable.id, classId)).limit(1);
@@ -93,6 +93,35 @@ router.get("/class-sessions", async (req, res) => {
 
   const { videoConferenceUrl } = await getSchoolConfig(parseInt(classId));
   return res.json(rows.map(r => ({ ...r, teacherName: tMap[r.teacherId] ?? null, videoConferenceUrl })));
+});
+
+// GET /class-sessions/active-for-student?studentId=X
+// Returns the first active session across ALL classes the student is enrolled in
+router.get("/class-sessions/active-for-student", async (req, res) => {
+  const { studentId } = req.query as Record<string, string>;
+  if (!studentId) return res.status(400).json({ error: "studentId required" });
+
+  const enrollments = await db
+    .select({ classId: classStudentsTable.classId })
+    .from(classStudentsTable)
+    .where(eq(classStudentsTable.studentId, parseInt(studentId)));
+
+  if (enrollments.length === 0) { res.json(null); return; }
+
+  const classIds = enrollments.map(e => e.classId);
+  const [row] = await db
+    .select()
+    .from(classSessionsTable)
+    .where(and(
+      inArray(classSessionsTable.classId, classIds),
+      eq(classSessionsTable.status, "active"),
+    ))
+    .orderBy(desc(classSessionsTable.startedAt))
+    .limit(1);
+
+  if (!row) { res.json(null); return; }
+  const { videoConferenceUrl } = await getSchoolConfig(row.classId);
+  return res.json({ ...row, videoConferenceUrl });
 });
 
 // GET /class-sessions/active?classId=X
