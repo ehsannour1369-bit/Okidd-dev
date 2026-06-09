@@ -131,6 +131,12 @@ export default function StudentDashboard() {
     queryFn: () => api.get(`/schools/${user?.schoolId}`),
     enabled: !!user?.schoolId,
   });
+  const { data: activeSession } = useQuery<any>({
+    queryKey: ["class-session-active-for-student", user?.id],
+    queryFn: () => api.get(`/class-sessions/active-for-student?studentId=${user?.id}`),
+    enabled: !!user?.id,
+    refetchInterval: 20000,
+  });
 
   const displayScore = scoreBreakdown?.total ?? 0;
 
@@ -413,8 +419,28 @@ export default function StudentDashboard() {
                 )}
               </div>
 
-              {/* ④ سرگرمی — full width */}
-              <div className="kid-card-hover" style={{ ...kidCard("linear-gradient(145deg,#edfcf4,#d4f5e8)", { padding: "15px 18px", display: "flex", alignItems: "center", gap: 14, boxShadow: "0 4px 18px #6ee7b725", border: "1.5px solid #b8e8cc" }), ...cardAnim('up', 0.55) }}
+              {/* ④ کلاس آنلاین — full width */}
+              <div className="kid-card-hover" style={{ ...kidCard("linear-gradient(145deg,#eaf4ff,#d0eaff)", { padding: "15px 18px", display: "flex", alignItems: "center", gap: 14, boxShadow: "0 4px 18px #60a5fa25", border: activeSession ? "1.5px solid #60a5fa" : "1.5px solid #b8d8f4" }), ...cardAnim('up', 0.50) }}
+                onClick={() => navigate("/student/online-class")}>
+                <div style={{ width: 52, height: 52, borderRadius: 17, background: "rgba(255,255,255,0.62)", backdropFilter: "blur(14px)", border: "1.5px solid rgba(255,255,255,0.82)", boxShadow: "0 3px 14px #60a5fa30, inset 0 1px 0 white", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative" }}>
+                  <Video size={24} color="#2563eb" strokeWidth={2} />
+                  {activeSession && (
+                    <div style={{ position: "absolute", top: -4, right: -4, width: 14, height: 14, background: "#22c55e", borderRadius: "50%", border: "2px solid white", animation: "pulse-badge 1.6s ease-in-out infinite" }} />
+                  )}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 800, fontSize: 15, color: "#1d4ed8" }}>کلاس آنلاین</div>
+                  <div style={{ fontSize: 11, color: activeSession ? "#16a34a" : "#5a8abf", marginTop: 3, fontWeight: 600 }}>
+                    {activeSession ? "🟢 کلاس در حال برگزاری است" : "برنامه و لینک ورود به کلاس"}
+                  </div>
+                </div>
+                <div style={{ width: 34, height: 34, borderRadius: 11, background: "rgba(255,255,255,0.55)", border: "1.5px solid rgba(255,255,255,0.75)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <ChevronRight size={16} color="#2563eb" />
+                </div>
+              </div>
+
+              {/* ⑤ سرگرمی — full width */}
+              <div className="kid-card-hover" style={{ ...kidCard("linear-gradient(145deg,#edfcf4,#d4f5e8)", { padding: "15px 18px", display: "flex", alignItems: "center", gap: 14, boxShadow: "0 4px 18px #6ee7b725", border: "1.5px solid #b8e8cc" }), ...cardAnim('up', 0.62) }}
                 onClick={() => setScreen("game")}>
                 <div style={{ width: 52, height: 52, borderRadius: 17, background: "rgba(255,255,255,0.62)", backdropFilter: "blur(14px)", border: "1.5px solid rgba(255,255,255,0.82)", boxShadow: "0 3px 14px #6ee7b730, inset 0 1px 0 white", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <Gamepad2 size={24} color="#2d9e6a" strokeWidth={2} />
