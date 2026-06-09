@@ -192,7 +192,7 @@ export default function StudentOnlineClass() {
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 22 }}>
           {/* Back button */}
           <button
-            onClick={() => navigate("/student/dashboard")}
+            onClick={() => navigate("/student")}
             style={{
               width: 42, height: 42, borderRadius: 14, flexShrink: 0,
               background: "rgba(255,255,255,0.72)", backdropFilter: "blur(14px)",
