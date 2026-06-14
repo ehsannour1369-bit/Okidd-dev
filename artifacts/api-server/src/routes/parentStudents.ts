@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { parentStudentsTable, usersTable } from "@workspace/db/schema";
 import { eq, and, or, ilike } from "drizzle-orm";
+import { maskUser } from "../lib/mask";
 
 const router = Router();
 
@@ -31,7 +32,7 @@ router.get("/students/search-by-national-id", async (req, res) => {
     phone: usersTable.phone, nationalId: usersTable.nationalId,
     gender: usersTable.gender, schoolId: usersTable.schoolId,
   }).from(usersTable).where(and(eq(usersTable.role, "student"), eq(usersTable.nationalId, nationalId)));
-  res.json(students);
+  res.json(students.map(maskUser));
 });
 
 // GET /parents/search — search parents by name/email/phone/nationalId
@@ -52,7 +53,7 @@ router.get("/parents/search", async (req, res) => {
       )
     )
   ).limit(20);
-  res.json(parents);
+  res.json(parents.map(maskUser));
 });
 
 // POST /parent-students — create link

@@ -1,16 +1,22 @@
 import { Router } from "express";
-import { db, bookOrdersTable, bookOrderItemsTable, booksTable, schoolsTable, walletsTable, walletTransactionsTable } from "@workspace/db";
+import { db, bookOrdersTable, bookOrderItemsTable, booksTable, schoolsTable, walletsTable, walletTransactionsTable, branchesTable } from "@workspace/db";
 import { eq, inArray, and, desc, sum } from "drizzle-orm";
 
 const router = Router();
 
 async function enrichOrder(order: typeof bookOrdersTable.$inferSelect) {
-  const items = await db.select().from(bookOrderItemsTable).where(eq(bookOrderItemsTable.orderId, order.id));
+  const [items, branchRows] = await Promise.all([
+    db.select().from(bookOrderItemsTable).where(eq(bookOrderItemsTable.orderId, order.id)),
+    order.branchId
+      ? db.select({ name: branchesTable.name }).from(branchesTable).where(eq(branchesTable.id, order.branchId))
+      : Promise.resolve([] as { name: string }[]),
+  ]);
   const bookIds = items.map(i => i.bookId);
   const books = bookIds.length > 0 ? await db.select().from(booksTable).where(inArray(booksTable.id, bookIds)) : [];
   const bookMap = Object.fromEntries(books.map(b => [b.id, b]));
   return {
     ...order,
+    branchName: branchRows[0]?.name ?? null,
     discount: parseFloat(String(order.discount)),
     discountAmount: parseFloat(String(order.discountAmount)),
     totalAmount: parseFloat(String(order.totalAmount)),
@@ -26,9 +32,10 @@ async function enrichOrder(order: typeof bookOrdersTable.$inferSelect) {
 }
 
 router.get("/book-orders", async (req, res) => {
-  const { schoolId, status } = req.query as Record<string, string>;
+  const { schoolId, status, branchId } = req.query as Record<string, string>;
   let rows = await db.select().from(bookOrdersTable).orderBy(desc(bookOrdersTable.createdAt));
   if (schoolId) rows = rows.filter(o => o.schoolId === parseInt(schoolId));
+  if (branchId) rows = rows.filter(o => o.branchId === parseInt(branchId));
   if (status) rows = rows.filter(o => o.status === status);
   res.json(await Promise.all(rows.map(enrichOrder)));
 });
@@ -42,6 +49,7 @@ router.get("/book-orders/:id", async (req, res) => {
 router.post("/book-orders", async (req, res) => {
   const { items, ...rest } = req.body as {
     schoolId: number;
+    branchId?: number;
     trackingNumber: string;
     discount?: number;
     paymentMethod?: string;
@@ -168,10 +176,12 @@ router.get("/book-license-summary", async (req, res) => {
   if (!schoolId) { res.status(400).json({ error: "schoolId required" }); return; }
   const sid = parseInt(schoolId);
 
-  // Purchased: sum quantities from paid order items for this school
+  // Purchased: sum quantities from paid order items — scoped to branch if branchId given, else whole school
   const paidOrders = await db.select({ id: bookOrdersTable.id })
     .from(bookOrdersTable)
-    .where(and(eq(bookOrdersTable.schoolId, sid), eq(bookOrdersTable.status, "paid")));
+    .where(branchId
+      ? and(eq(bookOrdersTable.branchId, parseInt(branchId)), eq(bookOrdersTable.status, "paid"))
+      : and(eq(bookOrdersTable.schoolId, sid), eq(bookOrdersTable.status, "paid")));
   const paidOrderIds = paidOrders.map(o => o.id);
 
   const purchased: Record<number, number> = {};

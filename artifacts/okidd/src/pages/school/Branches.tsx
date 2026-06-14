@@ -125,7 +125,7 @@ export default function SchoolBranches() {
     setManagerIsSearching(true);
     managerSearchTimer.current = setTimeout(async () => {
       try {
-        const res = await api.get(`/school-teachers/search?q=${encodeURIComponent(q)}&schoolId=${schoolId}`);
+        const res = await api.get(`/branch-managers/search?q=${encodeURIComponent(q)}`);
         setManagerSearchResults(res as any[]);
       } catch { setManagerSearchResults([]); }
       setManagerIsSearching(false);

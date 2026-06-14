@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSearch } from "wouter";
 import { api } from "../../lib/api";
 import PageTopBar from "../../components/PageTopBar";
 import { Plus, Power, Edit2, Search, Download, FileText, Eye, X, BookOpen, Clock, Star, Users, Trash2, UserRound, LockOpen } from "lucide-react";
@@ -214,8 +215,10 @@ function StatCard({ icon, color, label, value }: any) {
 
 export default function AdminUsers() {
   const qc = useQueryClient();
+  const searchStr = useSearch();
+  const initialRole = new URLSearchParams(searchStr).get("role") ?? "";
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
+  const [roleFilter, setRoleFilter] = useState(initialRole);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<User | null>(null);
   const [viewDetailId, setViewDetailId] = useState<number | null>(null);

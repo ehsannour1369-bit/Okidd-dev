@@ -2,6 +2,7 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import { db, schoolTeachersTable, usersTable } from "@workspace/db";
 import { eq, and, or, ilike, inArray } from "drizzle-orm";
+import { maskUser } from "../lib/mask";
 
 const router = Router();
 
@@ -11,11 +12,14 @@ router.get("/school-teachers/search", async (req, res) => {
   if (!q || q.length < 2) { res.json([]); return; }
 
   const users = await db.select().from(usersTable).where(
-    or(
-      ilike(usersTable.phone, `%${q}%`),
-      ilike(usersTable.email, `%${q}%`),
-      ilike(usersTable.nationalId, `%${q}%`),
-      ilike(usersTable.name, `%${q}%`)
+    and(
+      eq(usersTable.role, "teacher"),
+      or(
+        ilike(usersTable.phone, `%${q}%`),
+        ilike(usersTable.email, `%${q}%`),
+        ilike(usersTable.nationalId, `%${q}%`),
+        ilike(usersTable.name, `%${q}%`)
+      )
     )
   );
 
@@ -27,7 +31,7 @@ router.get("/school-teachers/search", async (req, res) => {
 
   const result = users
     .filter(u => !existingTeacherIds.includes(u.id))
-    .map(({ password: _pw, ...safe }) => safe)
+    .map(({ password: _pw, ...safe }) => maskUser(safe))
     .slice(0, 10);
 
   res.json(result);

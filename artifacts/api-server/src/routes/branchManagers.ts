@@ -1,9 +1,34 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import { db, branchManagersTable, branchesTable, usersTable, schoolsTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, or, ilike, inArray } from "drizzle-orm";
+import { maskUser } from "../lib/mask";
 
 const router = Router();
+
+// Search users with role=branch_manager OR school_manager (school managers can also be branch managers)
+router.get("/branch-managers/search", async (req, res) => {
+  const { q } = req.query as Record<string, string>;
+  if (!q || q.length < 2) { res.json([]); return; }
+
+  const users = await db.select({
+    id: usersTable.id, name: usersTable.name, email: usersTable.email,
+    phone: usersTable.phone, nationalId: usersTable.nationalId,
+    gender: usersTable.gender, role: usersTable.role,
+  }).from(usersTable).where(
+    and(
+      inArray(usersTable.role, ["branch_manager", "school_manager"]),
+      or(
+        ilike(usersTable.name, `%${q}%`),
+        ilike(usersTable.email, `%${q}%`),
+        ilike(usersTable.phone ?? "", `%${q}%`),
+        ilike(usersTable.nationalId ?? "", `%${q}%`),
+      )
+    )
+  ).limit(10);
+
+  res.json(users.map(maskUser));
+});
 
 // List branch managers (optionally filtered by branchId or schoolId)
 router.get("/branch-managers", async (req, res) => {

@@ -33,7 +33,7 @@ export default function AdminDashboard() {
     { label: "مدارس فعال",    path: "/admin/schools",      icon: UserCheck,     color: "#22c55e", dark: "#16a34a", statValue: stats.activeSchools != null ? Number(stats.activeSchools).toLocaleString("fa-IR") : null },
     { label: "معلمان",         path: "/admin/teachers",     icon: GraduationCap, color: "#3b82f6", dark: "#2563eb", statValue: stats.totalTeachers != null ? Number(stats.totalTeachers).toLocaleString("fa-IR") : null },
     { label: "دانش‌آموزان",    path: "/admin/students",     icon: Users,         color: "#a855f7", dark: "#7c3aed", statValue: stats.totalStudents != null ? Number(stats.totalStudents).toLocaleString("fa-IR") : null },
-    { label: "والدین",         path: "/admin/users",        icon: Users,         color: "#ec4899", dark: "#db2777", statValue: stats.totalParents != null ? Number(stats.totalParents).toLocaleString("fa-IR") : null },
+    { label: "والدین",         path: "/admin/users?role=parent", icon: Users,    color: "#ec4899", dark: "#db2777", statValue: stats.totalParents != null ? Number(stats.totalParents).toLocaleString("fa-IR") : null },
     { label: "درآمد سفارشات", path: "/admin/orders",       icon: CreditCard,    color: "#f97316", dark: "#ea580c", statValue: stats.totalRevenue != null ? `${Math.round(Number(stats.totalRevenue)).toLocaleString("fa-IR")} ت` : null },
     { label: "شعبه‌ها",        path: "/admin/branches",     icon: GitBranch,     color: "#f59e0b", dark: "#d97706" },
     { label: "کلاس‌ها",        path: "/admin/classes",      icon: BookMarked,    color: "#fbbf24", dark: "#f59e0b" },

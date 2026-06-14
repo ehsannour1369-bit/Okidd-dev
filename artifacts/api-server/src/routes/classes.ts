@@ -6,23 +6,21 @@ const router = Router();
 
 /* ─── License helpers ─────────────────────────────────────────────────── */
 
-/** Resolve schoolId for a classId (class → grade → gradeLevel → branch → school) */
-async function getSchoolIdForClass(classId: number): Promise<number | null> {
+/** Resolve branchId for a classId (class → grade → gradeLevel → branch) */
+async function getBranchIdForClass(classId: number): Promise<number | null> {
   const [cls] = await db.select().from(classesTable).where(eq(classesTable.id, classId));
   if (!cls?.gradeId) return null;
   const [grade] = await db.select().from(gradesTable).where(eq(gradesTable.id, cls.gradeId));
   if (!grade?.gradeLevelId) return null;
   const [gl] = await db.select().from(gradeLevelsTable).where(eq(gradeLevelsTable.id, grade.gradeLevelId));
-  if (!gl?.branchId) return null;
-  const [branch] = await db.select().from(branchesTable).where(eq(branchesTable.id, gl.branchId));
-  return branch?.schoolId ?? null;
+  return gl?.branchId ?? null;
 }
 
-/** Count purchased licenses for a book in a school (from paid book orders) */
-async function getPurchasedCount(schoolId: number, bookId: number): Promise<number> {
+/** Count purchased licenses for a book in a branch (from paid book orders tagged with this branchId) */
+async function getPurchasedCount(branchId: number, bookId: number): Promise<number> {
   const paidOrders = await db.select({ id: bookOrdersTable.id })
     .from(bookOrdersTable)
-    .where(and(eq(bookOrdersTable.schoolId, schoolId), eq(bookOrdersTable.status, "paid")));
+    .where(and(eq(bookOrdersTable.branchId, branchId), eq(bookOrdersTable.status, "paid")));
   if (paidOrders.length === 0) return 0;
   const paidOrderIds = paidOrders.map(o => o.id);
   const result = await db.select({ total: sum(bookOrderItemsTable.quantity) })
@@ -31,12 +29,9 @@ async function getPurchasedCount(schoolId: number, bookId: number): Promise<numb
   return Number(result[0]?.total ?? 0);
 }
 
-/** Count currently used licenses for a book in a school (distinct students in classes with this book) */
-async function getUsedCount(schoolId: number, bookId: number): Promise<number> {
-  const branches = await db.select({ id: branchesTable.id }).from(branchesTable).where(eq(branchesTable.schoolId, schoolId));
-  if (branches.length === 0) return 0;
-  const branchIds = branches.map(b => b.id);
-  const gls = await db.select({ id: gradeLevelsTable.id }).from(gradeLevelsTable).where(inArray(gradeLevelsTable.branchId, branchIds));
+/** Count currently used licenses for a book in a branch (distinct students in branch's classes with this book) */
+async function getUsedCount(branchId: number, bookId: number): Promise<number> {
+  const gls = await db.select({ id: gradeLevelsTable.id }).from(gradeLevelsTable).where(eq(gradeLevelsTable.branchId, branchId));
   if (gls.length === 0) return 0;
   const glIds = gls.map(g => g.id);
   const grades = await db.select({ id: gradesTable.id }).from(gradesTable).where(inArray(gradesTable.gradeLevelId, glIds));
@@ -89,12 +84,33 @@ router.get("/classes", async (req, res) => {
     rows = gradeIds.length > 0 ? rows.filter(c => gradeIds.includes(c.gradeId)) : [];
   }
 
+  // Batch-fetch school info for all classes at once
+  const gradeIdSet = [...new Set(rows.map(c => c.gradeId))];
+  const [allGrades, allGradeLevels, allBranches, allSchools] = gradeIdSet.length > 0
+    ? await Promise.all([
+        db.select().from(gradesTable).where(inArray(gradesTable.id, gradeIdSet)),
+        db.select().from(gradeLevelsTable),
+        db.select().from(branchesTable),
+        db.select().from(schoolsTable),
+      ])
+    : [[], [], [], []];
+
   const enriched = await Promise.all(rows.map(async cls => {
     const [stu, tea] = await Promise.all([
       db.select({ count: count() }).from(classStudentsTable).where(eq(classStudentsTable.classId, cls.id)),
       db.select({ count: count() }).from(classTeachersTable).where(eq(classTeachersTable.classId, cls.id)),
     ]);
-    return { ...cls, studentCount: Number(stu[0]?.count ?? 0), teacherCount: Number(tea[0]?.count ?? 0) };
+    const grade = allGrades.find(g => g.id === cls.gradeId);
+    const gl    = grade ? allGradeLevels.find(g => g.id === grade.gradeLevelId) : null;
+    const branch = gl  ? allBranches.find(b => b.id === gl.branchId)           : null;
+    const school = branch ? allSchools.find(s => s.id === branch.schoolId)     : null;
+    return {
+      ...cls,
+      studentCount: Number(stu[0]?.count ?? 0),
+      teacherCount: Number(tea[0]?.count ?? 0),
+      schoolId:   school?.id   ?? null,
+      schoolName: school?.name ?? null,
+    };
   }));
   res.json(enriched);
 });
@@ -149,13 +165,13 @@ router.post("/classes/:id/students", async (req, res) => {
     return;
   }
 
-  // License check: adding a student "uses" one license for each book in this class
-  const schoolId = await getSchoolIdForClass(classId);
-  if (schoolId) {
+  // License check: adding a student "uses" one license per book in this class (per-branch)
+  const branchId = await getBranchIdForClass(classId);
+  if (branchId) {
     const bookRows = await db.select({ bookId: classBooksTable.bookId }).from(classBooksTable).where(eq(classBooksTable.classId, classId));
     const violations: string[] = [];
     for (const { bookId } of bookRows) {
-      const [purchased, used] = await Promise.all([getPurchasedCount(schoolId, bookId), getUsedCount(schoolId, bookId)]);
+      const [purchased, used] = await Promise.all([getPurchasedCount(branchId, bookId), getUsedCount(branchId, bookId)]);
       if (used >= purchased) {
         const [book] = await db.select({ title: booksTable.title }).from(booksTable).where(eq(booksTable.id, bookId));
         violations.push(`${book?.title ?? `کتاب #${bookId}`} (خریداری‌شده: ${purchased}، در حال استفاده: ${used})`);
@@ -268,12 +284,12 @@ router.post("/classes/:id/books", async (req, res) => {
   const classId = parseInt(req.params.id);
   const { bookId } = req.body;
 
-  // License check: adding a book to a class "uses" N licenses (N = students currently in class)
-  const schoolId = await getSchoolIdForClass(classId);
-  if (schoolId) {
+  // License check: adding a book to a class "uses" N licenses per branch (N = students currently in class)
+  const branchId = await getBranchIdForClass(classId);
+  if (branchId) {
     const [purchased, used, studs] = await Promise.all([
-      getPurchasedCount(schoolId, bookId),
-      getUsedCount(schoolId, bookId),
+      getPurchasedCount(branchId, bookId),
+      getUsedCount(branchId, bookId),
       db.select({ count: count() }).from(classStudentsTable).where(eq(classStudentsTable.classId, classId)),
     ]);
     const classStudentCount = Number(studs[0]?.count ?? 0);
@@ -379,12 +395,20 @@ router.get("/classes/:id/book/:bookId/lesson-report", async (req, res) => {
 
 router.get("/classes/:id/performance", async (req, res) => {
   const classId = parseInt(req.params.id);
+  const { teacherId } = req.query as Record<string, string>;
   const studentRows = await db.select({ studentId: classStudentsTable.studentId }).from(classStudentsTable).where(eq(classStudentsTable.classId, classId));
   const studentIds = studentRows.map(r => r.studentId);
   if (studentIds.length === 0) { res.json([]); return; }
 
-  const bookRows = await db.select({ bookId: classBooksTable.bookId }).from(classBooksTable).where(eq(classBooksTable.classId, classId));
-  const bookIds = bookRows.map(r => r.bookId);
+  let bookIds: number[];
+  if (teacherId) {
+    const teacherRows = await db.select().from(classTeachersTable)
+      .where(and(eq(classTeachersTable.classId, classId), eq(classTeachersTable.teacherId, parseInt(teacherId))));
+    bookIds = [...new Set(teacherRows.map(r => r.bookId).filter((id): id is number => id != null))];
+  } else {
+    const bookRows = await db.select({ bookId: classBooksTable.bookId }).from(classBooksTable).where(eq(classBooksTable.classId, classId));
+    bookIds = bookRows.map(r => r.bookId);
+  }
 
   const [students, books, allPresence, allProgress] = await Promise.all([
     db.select().from(usersTable).where(inArray(usersTable.id, studentIds)),

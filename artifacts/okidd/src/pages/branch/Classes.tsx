@@ -78,7 +78,7 @@ export default function BranchClasses() {
 
   const { data: gradeLevels = [] } = useQuery<any[]>({ queryKey: ["grade-levels"], queryFn: () => api.get("/grade-levels") });
   const { data: grades = [] }      = useQuery<any[]>({ queryKey: ["grades"],        queryFn: () => api.get("/grades") });
-  const { data: classes = [], refetch: refetchClasses } = useQuery<any[]>({ queryKey: ["classes"], queryFn: () => api.get("/classes") });
+  const { data: classes = [], refetch: refetchClasses } = useQuery<any[]>({ queryKey: ["classes", branchId], queryFn: () => api.get(`/classes?branchId=${branchId}`), enabled: !!branchId });
 
   const branchGLs = gradeLevels.filter((gl: any) => gl.branchId === branchId);
   const branchGradeIds = new Set(

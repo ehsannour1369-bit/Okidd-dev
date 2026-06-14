@@ -294,4 +294,64 @@ router.get("/school-report/class-detail", async (req, res) => {
   res.json(result);
 });
 
+// Per-branch aggregated stats for school manager's comparison view
+router.get("/school-report/branch-stats", async (req, res) => {
+  const { schoolId } = req.query as Record<string, string>;
+  if (!schoolId) { res.status(400).json({ error: "schoolId required" }); return; }
+  const sid = parseInt(schoolId);
+
+  const branches = await db.select().from(branchesTable).where(eq(branchesTable.schoolId, sid));
+  if (!branches.length) { res.json([]); return; }
+
+  const stats = await Promise.all(branches.map(async branch => {
+    const classIds = await getBranchClassIds(branch.id);
+    if (!classIds.length) {
+      return { branchId: branch.id, branchName: branch.name, classCount: 0, studentCount: 0, teacherCount: 0, avgScore: 0, avgCompletion: 0, avgMinutesPerStudent: 0 };
+    }
+
+    const [studentRows, teacherRows, bookRows] = await Promise.all([
+      db.select({ studentId: classStudentsTable.studentId }).from(classStudentsTable).where(inArray(classStudentsTable.classId, classIds)),
+      db.select({ teacherId: classTeachersTable.teacherId }).from(classTeachersTable).where(inArray(classTeachersTable.classId, classIds)),
+      db.select({ bookId: classBooksTable.bookId }).from(classBooksTable).where(inArray(classBooksTable.classId, classIds)),
+    ]);
+
+    const studentIds = [...new Set(studentRows.map(r => r.studentId))];
+    const teacherCount = new Set(teacherRows.map(r => r.teacherId)).size;
+    if (!studentIds.length) {
+      return { branchId: branch.id, branchName: branch.name, classCount: classIds.length, studentCount: 0, teacherCount, avgScore: 0, avgCompletion: 0, avgMinutesPerStudent: 0 };
+    }
+
+    const uniqueBookIds = [...new Set(bookRows.map(r => r.bookId))];
+    const [allProgress, allPresence, books] = await Promise.all([
+      db.select({ studentId: studentProgressTable.studentId, score: studentProgressTable.score, completed: studentProgressTable.completed })
+        .from(studentProgressTable).where(inArray(studentProgressTable.studentId, studentIds)),
+      db.select({ studentId: presenceLogTable.studentId, durationMinutes: presenceLogTable.durationMinutes })
+        .from(presenceLogTable).where(inArray(presenceLogTable.studentId, studentIds)),
+      uniqueBookIds.length > 0
+        ? db.select({ id: booksTable.id, lessonCount: booksTable.lessonCount }).from(booksTable).where(inArray(booksTable.id, uniqueBookIds))
+        : Promise.resolve([]),
+    ]);
+
+    const totalScore = allProgress.reduce((s, p) => s + (p.score ?? 0), 0);
+    const avgScore = studentIds.length > 0 ? Math.round(totalScore / studentIds.length) : 0;
+    const totalLessons = (books as any[]).reduce((s: number, b: any) => s + (b.lessonCount ?? 0), 0) * studentIds.length;
+    const completedLessons = allProgress.filter(p => p.completed).length;
+    const avgCompletion = totalLessons > 0 ? Math.min(100, Math.round((completedLessons / totalLessons) * 100)) : 0;
+    const totalMinutes = allPresence.reduce((s, p) => s + (p.durationMinutes ?? 0), 0);
+
+    return {
+      branchId: branch.id,
+      branchName: branch.name,
+      classCount: classIds.length,
+      studentCount: studentIds.length,
+      teacherCount,
+      avgScore,
+      avgCompletion,
+      avgMinutesPerStudent: studentIds.length > 0 ? Math.round(totalMinutes / studentIds.length) : 0,
+    };
+  }));
+
+  res.json(stats);
+});
+
 export default router;

@@ -71,7 +71,7 @@ export default function SchoolClasses() {
   const { data: branches = [] }    = useQuery<any[]>({ queryKey: ["branches", user?.schoolId], queryFn: () => api.get(`/branches?schoolId=${user?.schoolId}`), enabled: !!user?.schoolId });
   const { data: gradeLevels = [] } = useQuery<any[]>({ queryKey: ["grade-levels"], queryFn: () => api.get("/grade-levels") });
   const { data: grades = [] }      = useQuery<any[]>({ queryKey: ["grades"], queryFn: () => api.get("/grades") });
-  const { data: classes = [], refetch: refetchClasses } = useQuery<any[]>({ queryKey: ["classes"], queryFn: () => api.get("/classes") });
+  const { data: classes = [], refetch: refetchClasses } = useQuery<any[]>({ queryKey: ["classes", user?.schoolId], queryFn: () => api.get(`/classes?schoolId=${user?.schoolId}`), enabled: !!user?.schoolId });
 
   const schoolGLIds = new Set(gradeLevels.filter((gl: any) => branches.some((b: any) => b.id === gl.branchId)).map((gl: any) => gl.id));
   const schoolGradeIds = new Set(grades.filter((g: any) => schoolGLIds.has(g.gradeLevelId)).map((g: any) => g.id));

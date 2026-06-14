@@ -171,7 +171,8 @@ export function LessonStarFetcher({ studentId, bookId, bookTitle, accentColor = 
         }}
       >
         <Star size={12} color="#f59e0b" fill="#f59e0b" />
-        <span style={{ fontSize: 12, color: accentColor, fontWeight: 600 }}>عملکرد درس به درس</span>
+        <span style={{ fontSize: 12, color: accentColor, fontWeight: 700 }}>{bookTitle}</span>
+        <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 500 }}>— درس به درس</span>
         {open ? <ChevronUp size={12} color={accentColor} /> : <ChevronDown size={12} color={accentColor} />}
       </button>
       {open && (

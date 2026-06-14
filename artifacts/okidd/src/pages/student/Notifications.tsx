@@ -47,10 +47,9 @@ export default function StudentNotifications() {
 
   const { data: received = [] } = useQuery<any[]>({
     queryKey: ["notifications", user?.schoolId, "student"],
-    queryFn: () => api.get(`/notifications?schoolId=${user?.schoolId}&targetRole=student`),
+    queryFn: () => api.get(`/notifications?schoolId=${user?.schoolId}&targetRole=student&status=approved`),
     enabled: !!user?.schoolId,
   });
-
 
   const { data: sent = [] } = useQuery<any[]>({
     queryKey: ["notifications", "student-sent", user?.id],
@@ -85,6 +84,8 @@ export default function StudentNotifications() {
       fromUserId: user?.id,
       fromRole: "student",
       fromName: user?.name ?? "دانش‌آموز",
+      type: "manual",
+      allowReply: true,
       recipientStudentIds: null,
       recipientTeacherIds: null,
       recipientClassIds: null,
@@ -170,6 +171,7 @@ export default function StudentNotifications() {
           const isExpanded = expandedIds.has(n.id);
           const isMine = tab === "sent";
           const read = isMine || isRead(n.id);
+          const canReply = !isMine && n.allowReply !== false;
           return (
             <div key={n.id} style={{ ...GLASS, borderRadius: 16, padding: "16px 18px", borderRight: !isMine && !read ? `3px solid ${accentColor}` : undefined, opacity: read ? 0.88 : 1, transition: "all 0.2s" }}>
               <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
@@ -199,12 +201,22 @@ export default function StudentNotifications() {
                   )}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 5, flexShrink: 0 }}>
-                  <button onClick={() => toggleExpand(n.id)}
-                    style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", background: isExpanded ? "rgba(124,58,237,0.15)" : "rgba(255,255,255,0.3)", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 8, color: accentColor, cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 12 }}>
-                    <MessageCircle size={14} />
-                    پاسخ‌ها
-                    {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                  </button>
+                  {canReply && (
+                    <button onClick={() => toggleExpand(n.id)}
+                      style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", background: isExpanded ? "rgba(124,58,237,0.15)" : "rgba(255,255,255,0.3)", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 8, color: accentColor, cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 12 }}>
+                      <MessageCircle size={14} />
+                      پاسخ‌ها
+                      {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                    </button>
+                  )}
+                  {isMine && (
+                    <button onClick={() => toggleExpand(n.id)}
+                      style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", background: isExpanded ? "rgba(124,58,237,0.15)" : "rgba(255,255,255,0.3)", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 8, color: accentColor, cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 12 }}>
+                      <MessageCircle size={14} />
+                      پاسخ‌ها
+                      {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                    </button>
+                  )}
                   {!isMine && !read && (
                     <button onClick={() => markRead(n.id)}
                       style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", background: "rgba(255,255,255,0.3)", border: "1px solid rgba(124,58,237,0.20)", borderRadius: 8, color: "#5b21b6", cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 12 }}>

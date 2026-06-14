@@ -5,6 +5,7 @@ import { z } from "zod/v4";
 export const bookOrdersTable = pgTable("book_orders", {
   id: serial("id").primaryKey(),
   schoolId: integer("school_id").notNull(),
+  branchId: integer("branch_id"),
   trackingNumber: varchar("tracking_number", { length: 100 }).notNull(),
   discount: numeric("discount", { precision: 5, scale: 2 }).notNull().default("0"),
   discountAmount: numeric("discount_amount", { precision: 12, scale: 0 }).notNull().default("0"),

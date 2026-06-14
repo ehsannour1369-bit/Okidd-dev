@@ -2,10 +2,11 @@ import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
+import { useTeacherSchoolStore } from "../../store/teacherSchool";
 import { useNotificationReads } from "../../hooks/useNotificationReads";
 import NotificationThread from "../../components/NotificationThread";
 import { showToast } from "../../lib/toast";
-import { Bell, Send, Plus, Users, User, ChevronDown, Calendar, Clock, CheckCheck, MessageCircle, ChevronUp } from "lucide-react";
+import { Bell, Send, Plus, Users, User, ChevronDown, Calendar, Clock, CheckCheck, MessageCircle, ChevronUp, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import PageTopBar from "../../components/PageTopBar";
 import { formatFaDateTime } from "../../lib/dateUtils";
 
@@ -42,23 +43,55 @@ const TARGET_OPTIONS = [
 
 export default function TeacherNotifications() {
   const { user } = useAuthStore();
+  const { selectedSchool } = useTeacherSchoolStore();
   const qc = useQueryClient();
   const { isRead, getReadAt, markRead, markAllRead, countUnread } = useNotificationReads(user?.id);
-  const [tab, setTab] = useState<"inbox" | "send">("inbox");
+  const [tab, setTab] = useState<"inbox" | "send" | "sent">("inbox");
   const [form, setForm] = useState({ classId: "", targetType: "all_students", title: "", body: "" });
   const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>([]);
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
 
-  const { data: inbox = [] } = useQuery<any[]>({
-    queryKey: ["notifications", "teacher", user?.id],
-    queryFn: () => api.get(`/notifications?targetRole=teacher&userId=${user?.id}`),
+  const inboxQueryKey = selectedSchool
+    ? ["notifications", "teacher", user?.id, selectedSchool.id]
+    : ["notifications", "teacher", user?.id];
+
+  const inboxUrl = selectedSchool
+    ? `/notifications?targetUserId=${user?.id}&schoolId=${selectedSchool.id}`
+    : `/notifications?targetUserId=${user?.id}`;
+
+  const { data: targeted = [] } = useQuery<any[]>({
+    queryKey: inboxQueryKey,
+    queryFn: () => api.get(inboxUrl),
     enabled: !!user?.id,
   });
-  const { data: classes = [] } = useQuery<any[]>({
+
+  const { data: sentNotifs = [] } = useQuery<any[]>({
+    queryKey: ["notifications-sent-teacher", user?.id],
+    queryFn: () => api.get(`/notifications?senderId=${user?.id}&type=manual`),
+    enabled: !!user?.id,
+  });
+
+  const broadcastSchoolId = selectedSchool?.id ?? user?.schoolId;
+  const { data: broadcast = [] } = useQuery<any[]>({
+    queryKey: ["notifications-broadcast-teacher", broadcastSchoolId],
+    queryFn: () => api.get(`/notifications?schoolId=${broadcastSchoolId}&targetRole=teacher&type=manual`),
+    enabled: !!broadcastSchoolId,
+  });
+
+  const inbox = useMemo(() => {
+    const seen = new Set<number>();
+    return [...targeted, ...broadcast]
+      .filter(n => { if (seen.has(n.id)) return false; seen.add(n.id); return true; })
+      .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [targeted, broadcast]);
+  const { data: allClasses = [] } = useQuery<any[]>({
     queryKey: ["classes", "teacher", user?.id],
     queryFn: () => api.get(`/classes?teacherId=${user?.id}`),
     enabled: !!user?.id,
   });
+  const classes = selectedSchool
+    ? allClasses.filter((c: any) => c.schoolId === selectedSchool.id)
+    : allClasses;
   const { data: classStudents = [] } = useQuery<any[]>({
     queryKey: ["class-students", form.classId],
     queryFn: () => api.get(`/classes/${form.classId}/students`),
@@ -128,7 +161,9 @@ export default function TeacherNotifications() {
                   </span>
                 )}
               </div>
-              <div style={{ fontSize: 13, color: TEXT2, marginTop: 2 }}>ارسال و دریافت پیام</div>
+              <div style={{ fontSize: 13, color: TEXT2, marginTop: 2 }}>
+                {selectedSchool ? <span style={{ color: TEAL_D, fontWeight: 700 }}>{selectedSchool.name}</span> : "ارسال و دریافت پیام"}
+              </div>
             </div>
           </div>
           {tab === "inbox" && unreadCount > 0 && (
@@ -151,6 +186,16 @@ export default function TeacherNotifications() {
               <Send size={15} /> ارسال پیام
             </span>
           </button>
+          <button style={tabBtn(tab === "sent")} onClick={() => setTab("sent")}>
+            <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <Clock size={15} /> ارسال‌شده
+              {sentNotifs.filter((n: any) => n.status === "pending").length > 0 && (
+                <span style={{ background: "#d97706", color: "white", borderRadius: 999, padding: "1px 7px", fontSize: 11 }}>
+                  {sentNotifs.filter((n: any) => n.status === "pending").length}
+                </span>
+              )}
+            </span>
+          </button>
         </div>
 
         {tab === "inbox" && (
@@ -158,6 +203,7 @@ export default function TeacherNotifications() {
             {inbox.map(n => {
               const read = isRead(n.id);
               const expanded = expandedIds.has(n.id);
+              const canReply = (n as any).allowReply !== false;
               return (
                 <div key={n.id} style={{
                   ...card,
@@ -172,7 +218,14 @@ export default function TeacherNotifications() {
                       {!read && <span style={{ position: "absolute", top: -3, right: -3, width: 9, height: 9, borderRadius: "50%", background: "#dc2626", border: "2px solid #f0fdf4" }} />}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 800, color: read ? `${TEXT}99` : TEXT, fontSize: 15, marginBottom: 4 }}>{n.title}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                        <div style={{ fontWeight: 800, color: read ? `${TEXT}99` : TEXT, fontSize: 15 }}>{n.title}</div>
+                        {!canReply && (
+                          <span style={{ fontSize: 11, background: "rgba(107,114,128,0.1)", border: "1px solid rgba(107,114,128,0.2)", borderRadius: 999, padding: "1px 7px", color: "#6b7280" }}>
+                            بدون پاسخ
+                          </span>
+                        )}
+                      </div>
                       <p style={{ color: TEXT2, fontSize: 13, margin: 0, lineHeight: 1.7 }}>{n.body}</p>
                       {n.createdAt && (
                         <div style={{ display: "flex", alignItems: "center", gap: 5, color: TEAL_D, fontSize: 11, marginTop: 8 }}>
@@ -188,12 +241,14 @@ export default function TeacherNotifications() {
                       )}
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 5, flexShrink: 0 }}>
-                      <button onClick={() => toggleExpand(n.id)}
-                        style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 10px", background: expanded ? `rgba(5,150,105,0.12)` : "rgba(255,255,255,0.60)", border: `1px solid rgba(5,150,105,0.28)`, borderRadius: 8, color: TEAL_D, cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 11, fontWeight: 600 }}>
-                        <MessageCircle size={12} />
-                        پاسخ
-                        {expanded ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
-                      </button>
+                      {canReply && (
+                        <button onClick={() => toggleExpand(n.id)}
+                          style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 10px", background: expanded ? `rgba(5,150,105,0.12)` : "rgba(255,255,255,0.60)", border: `1px solid rgba(5,150,105,0.28)`, borderRadius: 8, color: TEAL_D, cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 11, fontWeight: 600 }}>
+                          <MessageCircle size={12} />
+                          پاسخ
+                          {expanded ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+                        </button>
+                      )}
                       {!read && (
                         <button onClick={() => markRead(n.id)}
                           style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 10px", background: "rgba(255,255,255,0.60)", border: `1px solid rgba(5,150,105,0.20)`, borderRadius: 8, color: TEXT2, cursor: "pointer", fontFamily: "Vazirmatn", fontSize: 11, fontWeight: 600 }}>
@@ -203,7 +258,7 @@ export default function TeacherNotifications() {
                       )}
                     </div>
                   </div>
-                  {expanded && (
+                  {expanded && canReply && (
                     <NotificationThread
                       notifId={n.id}
                       currentUserId={user?.id ?? 0}
@@ -224,9 +279,63 @@ export default function TeacherNotifications() {
           </div>
         )}
 
+        {/* Sent notifications with status badges */}
+        {tab === "sent" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {sentNotifs.length === 0 ? (
+              <div style={{ ...card, textAlign: "center", padding: "60px 20px" }}>
+                <Send size={48} style={{ color: TEAL, opacity: 0.35, display: "block", margin: "0 auto 14px" }} />
+                <p style={{ color: TEXT2, margin: 0, fontSize: 15, fontWeight: 600 }}>هنوز پیامی ارسال نکرده‌اید</p>
+              </div>
+            ) : (
+              <>
+                <div style={{ background: "rgba(5,150,105,0.07)", border: "1px solid rgba(5,150,105,0.22)", borderRadius: 10, padding: "10px 14px", marginBottom: 4, fontSize: 12, color: TEXT2, display: "flex", alignItems: "center", gap: 6 }}>
+                  <AlertCircle size={13} />
+                  پیام‌های با وضعیت «در انتظار» باید توسط مدیر مدرسه یا شعبه تایید شوند تا برای دانش‌آموزان/والدین نمایش داده شوند
+                </div>
+                {[...sentNotifs].sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map((n: any) => {
+                  const statusInfo = n.status === "approved"
+                    ? { icon: <CheckCircle size={13} />, label: "تایید شده", bg: "rgba(16,185,129,0.12)", border: "rgba(16,185,129,0.35)", color: "#059669" }
+                    : n.status === "rejected"
+                    ? { icon: <XCircle size={13} />, label: "رد شده", bg: "rgba(248,113,113,0.12)", border: "rgba(248,113,113,0.3)", color: "#ef4444" }
+                    : { icon: <Clock size={13} />, label: "در انتظار تایید", bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.35)", color: "#d97706" };
+                  return (
+                    <div key={n.id} style={{ ...card, padding: "16px 18px", borderRight: `3px solid ${statusInfo.color}` }}>
+                      <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+                        <div style={{ width: 42, height: 42, borderRadius: 12, background: statusInfo.bg, border: `1px solid ${statusInfo.border}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <Send size={18} style={{ color: statusInfo.color }} />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
+                            <div style={{ fontWeight: 800, color: TEXT, fontSize: 15 }}>{n.title}</div>
+                            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: statusInfo.bg, border: `1px solid ${statusInfo.border}`, borderRadius: 999, padding: "2px 9px", fontSize: 11, color: statusInfo.color, fontWeight: 700 }}>
+                              {statusInfo.icon} {statusInfo.label}
+                            </span>
+                          </div>
+                          <p style={{ color: TEXT2, fontSize: 13, margin: 0, lineHeight: 1.7 }}>{n.body}</p>
+                          {n.createdAt && (
+                            <div style={{ display: "flex", alignItems: "center", gap: 5, color: TEAL_D, fontSize: 11, marginTop: 8 }}>
+                              <Calendar size={11} />
+                              {formatFaDateTime(n.createdAt)}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </>
+            )}
+          </div>
+        )}
+
         {tab === "send" && (
           <div style={{ ...card, padding: 24 }}>
             <h3 style={{ color: TEXT, fontSize: 16, fontWeight: 800, marginTop: 0, marginBottom: 20 }}>ارسال پیام جدید</h3>
+            <div style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: 10, padding: "10px 14px", marginBottom: 20, fontSize: 12, color: "#92400e", display: "flex", alignItems: "center", gap: 6 }}>
+              <AlertCircle size={13} />
+              پیام‌های ارسالی معلم ابتدا باید توسط مدیر مدرسه یا شعبه تایید شوند
+            </div>
             <div style={{ display: "grid", gap: 16 }}>
 
               <div>

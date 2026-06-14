@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
-import { BookMarked, Users, X, GraduationCap } from "lucide-react";
+import { BookMarked, Users, X, GraduationCap, School } from "lucide-react";
 import PageTopBar from "../../components/PageTopBar";
 
 const C = {
@@ -15,6 +15,7 @@ const C = {
 export default function TeacherClasses() {
   const { user } = useAuthStore();
   const [selectedClass, setSelectedClass] = useState<any>(null);
+  const [selectedSchoolId, setSelectedSchoolId] = useState<number | null>(null);
 
   const { data: classes = [] } = useQuery<any[]>({
     queryKey: ["classes", "teacher", user?.id],
@@ -28,16 +29,71 @@ export default function TeacherClasses() {
     enabled: !!selectedClass?.id,
   });
 
+  // Build unique schools list from classes
+  const schoolsMap = new Map<number, string>();
+  for (const cls of classes) {
+    if (cls.schoolId && cls.schoolName) schoolsMap.set(cls.schoolId, cls.schoolName);
+  }
+  const schools = Array.from(schoolsMap.entries()).map(([id, name]) => ({ id, name }));
+
+  // Filter classes by selected school
+  const visibleClasses = selectedSchoolId != null
+    ? classes.filter(c => c.schoolId === selectedSchoolId)
+    : classes;
+
   return (
     <div dir="rtl" style={{ fontFamily: "Vazirmatn, sans-serif" }}>
       <PageTopBar />
-      <div style={{ marginBottom: 24 }}>
+      <div style={{ marginBottom: 20 }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: C.text, margin: 0 }}>کلاس‌های من</h1>
-        <p style={{ color: C.text2, fontSize: 14, marginTop: 4 }}>{classes.length} کلاس</p>
       </div>
 
+      {/* School filter */}
+      {schools.length > 1 && (
+        <div style={{ marginBottom: 20, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <School size={16} color={C.text2} />
+          <span style={{ color: C.text2, fontSize: 13, fontWeight: 600 }}>مدرسه:</span>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              onClick={() => setSelectedSchoolId(null)}
+              style={{
+                padding: "6px 14px", borderRadius: 20, cursor: "pointer", fontSize: 12, fontFamily: "Vazirmatn, sans-serif", fontWeight: 600,
+                background: selectedSchoolId == null ? `linear-gradient(135deg,${C.purple},${C.purpleL})` : "rgba(139,92,246,0.1)",
+                color: selectedSchoolId == null ? "white" : C.text2,
+                border: `1px solid ${selectedSchoolId == null ? "transparent" : C.border}`,
+              }}
+            >
+              همه مدارس
+            </button>
+            {schools.map(s => (
+              <button
+                key={s.id}
+                onClick={() => setSelectedSchoolId(s.id)}
+                style={{
+                  padding: "6px 14px", borderRadius: 20, cursor: "pointer", fontSize: 12, fontFamily: "Vazirmatn, sans-serif", fontWeight: 600,
+                  background: selectedSchoolId === s.id ? `linear-gradient(135deg,${C.purple},${C.purpleL})` : "rgba(139,92,246,0.1)",
+                  color: selectedSchoolId === s.id ? "white" : C.text2,
+                  border: `1px solid ${selectedSchoolId === s.id ? "transparent" : C.border}`,
+                }}
+              >
+                {s.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {schools.length === 1 && (
+        <div style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+          <School size={15} color={C.text2} />
+          <span style={{ color: C.text2, fontSize: 13, fontWeight: 600 }}>{schools[0].name}</span>
+          <span style={{ color: C.text2, fontSize: 12 }}>—</span>
+          <span style={{ color: C.text2, fontSize: 12 }}>{visibleClasses.length} کلاس</span>
+        </div>
+      )}
+
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16 }}>
-        {classes.map(cls => (
+        {visibleClasses.map(cls => (
           <div
             key={cls.id}
             onClick={() => setSelectedClass(cls)}
@@ -62,7 +118,12 @@ export default function TeacherClasses() {
               <div style={{ width: 44, height: 44, borderRadius: 12, background: `linear-gradient(135deg,${C.purple},${C.purpleL})`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <BookMarked size={20} color="white" />
               </div>
-              <div style={{ fontWeight: 700, color: C.text, fontSize: 16 }}>{cls.name}</div>
+              <div>
+                <div style={{ fontWeight: 700, color: C.text, fontSize: 16 }}>{cls.name}</div>
+                {schools.length > 1 && cls.schoolName && (
+                  <div style={{ fontSize: 11, color: C.text2, marginTop: 2 }}>{cls.schoolName}</div>
+                )}
+              </div>
             </div>
             <div style={{ display: "flex", gap: 10 }}>
               <div style={{ flex: 1, background: "rgba(59,130,246,0.1)", borderRadius: 8, padding: "8px 10px", textAlign: "center" }}>
@@ -78,10 +139,10 @@ export default function TeacherClasses() {
             </div>
           </div>
         ))}
-        {classes.length === 0 && (
+        {visibleClasses.length === 0 && (
           <div style={{ gridColumn: "1/-1", textAlign: "center", padding: 40, color: C.text2 }}>
             <BookMarked size={48} style={{ marginBottom: 12, opacity: 0.5 }} />
-            <p>هنوز به هیچ کلاسی اضافه نشده‌اید</p>
+            <p>{classes.length === 0 ? "هنوز به هیچ کلاسی اضافه نشده‌اید" : "کلاسی برای این مدرسه یافت نشد"}</p>
           </div>
         )}
       </div>
@@ -97,6 +158,7 @@ export default function TeacherClasses() {
                 </div>
                 <div>
                   <h3 style={{ margin: 0, color: C.text, fontSize: 17, fontWeight: 800 }}>{selectedClass.name}</h3>
+                  {selectedClass.schoolName && <div style={{ fontSize: 12, color: C.text2 }}>{selectedClass.schoolName}</div>}
                   {selectedClass.capacity && <div style={{ fontSize: 12, color: C.text2 }}>ظرفیت: {selectedClass.capacity}</div>}
                 </div>
               </div>

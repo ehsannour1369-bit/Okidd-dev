@@ -1,9 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
-import { useState } from "react";
+import { useTeacherSchoolStore } from "../../store/teacherSchool";
+import { useState, useEffect } from "react";
 import { showToast } from "../../lib/toast";
-import { Lock, Unlock, BarChart2, Star, Clock, CheckCircle, UserRound, ChevronDown, ChevronUp, Trophy, BookOpen, GraduationCap, AlertCircle } from "lucide-react";
+import { Lock, Unlock, BarChart2, Star, Clock, CheckCircle, UserRound, ChevronDown, ChevronUp, Trophy, BookOpen, GraduationCap, AlertCircle, School } from "lucide-react";
 import PageTopBar from "../../components/PageTopBar";
 
 const TEAL    = "#059669";
@@ -42,6 +43,7 @@ function fmtDuration(mins: number) {
 
 export default function TeacherProgress() {
   const { user } = useAuthStore();
+  const { selectedSchool: storeSchool, setSelectedSchool: syncSchool } = useTeacherSchoolStore();
   const qc = useQueryClient();
   const [tab, setTab] = useState<ProgTab>("manage");
 
@@ -72,8 +74,8 @@ export default function TeacherProgress() {
 
   const [perfSelClass, setPerfSelClass] = useState<any>(null);
   const { data: perf = [], isLoading: perfLoading } = useQuery<any[]>({
-    queryKey: ["class-performance", perfSelClass?.id],
-    queryFn: () => api.get(`/classes/${perfSelClass?.id}/performance`),
+    queryKey: ["class-performance", perfSelClass?.id, user?.id],
+    queryFn: () => api.get(`/classes/${perfSelClass?.id}/performance?teacherId=${user?.id}`),
     enabled: !!perfSelClass?.id,
   });
 
@@ -81,6 +83,32 @@ export default function TeacherProgress() {
   const [rptSelClass, setRptSelClass] = useState<any>(null);
   const [rptSelBook,  setRptSelBook]  = useState<any>(null);
   const [rptExpanded, setRptExpanded] = useState<number | null>(null);
+
+  const [selectedSchoolId, setSelectedSchoolId] = useState<number | null>(storeSchool?.id ?? null);
+
+  // Derive unique schools from teacher's classes
+  const schoolsMap = new Map<number, string>();
+  for (const cls of classes) {
+    if (cls.schoolId && cls.schoolName) schoolsMap.set(cls.schoolId, cls.schoolName);
+  }
+  const teacherSchools = Array.from(schoolsMap.entries()).map(([id, name]) => ({ id, name }));
+  const filteredClasses = selectedSchoolId != null ? classes.filter((c: any) => c.schoolId === selectedSchoolId) : classes;
+
+  // Auto-select single school; sync store when school changes
+  useEffect(() => {
+    if (teacherSchools.length === 1 && selectedSchoolId == null) {
+      const s = teacherSchools[0];
+      setSelectedSchoolId(s.id);
+      syncSchool(s);
+    }
+  }, [teacherSchools.length]);
+
+  function changeSchool(id: number | null) {
+    setSelectedSchoolId(id);
+    setSelClass(null); setSelBook(null); setPerfSelClass(null); setRptSelClass(null); setRptSelBook(null);
+    const s = id != null ? teacherSchools.find(t => t.id === id) ?? null : null;
+    syncSchool(s);
+  }
 
   const { data: teacherBooks = [] } = useQuery<any[]>({
     queryKey: ["teacher-books", rptSelClass?.id, user?.id],
@@ -147,6 +175,26 @@ export default function TeacherProgress() {
       <div style={{ padding: "4px 0 24px" }}>
         <h1 style={{ fontSize: 20, fontWeight: 800, color: "#064e3b", marginBottom: 16 }}>مدیریت کلاس و عملکرد</h1>
 
+        {/* School filter */}
+        {teacherSchools.length > 1 && (
+          <div style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <School size={15} color={TEAL} />
+            <span style={{ color: TEAL_D, fontSize: 13, fontWeight: 600 }}>مدرسه:</span>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button
+                onClick={() => changeSchool(null)}
+                style={{ padding: "5px 13px", borderRadius: 20, cursor: "pointer", fontSize: 12, fontFamily: "Vazirmatn, sans-serif", fontWeight: 600, background: selectedSchoolId == null ? `linear-gradient(135deg,${TEAL},${TEAL_D})` : "rgba(5,150,105,0.1)", color: selectedSchoolId == null ? "white" : TEAL_D, border: `1px solid ${selectedSchoolId == null ? "transparent" : TEAL + "44"}` }}
+              >همه مدارس</button>
+              {teacherSchools.map(s => (
+                <button key={s.id}
+                  onClick={() => changeSchool(s.id)}
+                  style={{ padding: "5px 13px", borderRadius: 20, cursor: "pointer", fontSize: 12, fontFamily: "Vazirmatn, sans-serif", fontWeight: 600, background: selectedSchoolId === s.id ? `linear-gradient(135deg,${TEAL},${TEAL_D})` : "rgba(5,150,105,0.1)", color: selectedSchoolId === s.id ? "white" : TEAL_D, border: `1px solid ${selectedSchoolId === s.id ? "transparent" : TEAL + "44"}` }}
+                >{s.name}</button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Tabs */}
         <div style={{ display: "flex", gap: 10, marginBottom: 22, flexWrap: "wrap" }}>
           <button style={selStyle(tab === "manage")} onClick={() => setTab("manage")}>
@@ -166,9 +214,9 @@ export default function TeacherProgress() {
             <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
               <div style={{ flex: 1, minWidth: 200 }}>
                 <label style={{ display: "block", color: "#065f46", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>کلاس</label>
-                <select value={selClass?.id ?? ""} onChange={e => { setSelClass(classes.find(c => c.id === parseInt(e.target.value)) ?? null); setSelBook(null); }} style={inputStyle}>
+                <select value={selClass?.id ?? ""} onChange={e => { setSelClass(filteredClasses.find((c: any) => c.id === parseInt(e.target.value)) ?? null); setSelBook(null); }} style={inputStyle}>
                   <option value="" style={optStyle}>انتخاب کنید</option>
-                  {classes.map(c => <option key={c.id} value={c.id} style={optStyle}>{c.name}</option>)}
+                  {filteredClasses.map((c: any) => <option key={c.id} value={c.id} style={optStyle}>{c.name}</option>)}
                 </select>
               </div>
               {selClass && (
@@ -223,9 +271,9 @@ export default function TeacherProgress() {
           <div>
             <div style={{ marginBottom: 20 }}>
               <label style={{ display: "block", color: "#065f46", fontSize: 12, marginBottom: 5, fontWeight: 600 }}>انتخاب کلاس</label>
-              <select value={perfSelClass?.id ?? ""} onChange={e => { setPerfSelClass(classes.find(c => c.id === parseInt(e.target.value)) ?? null); setExpanded(null); }} style={{ ...inputStyle, maxWidth: 320 }}>
+              <select value={perfSelClass?.id ?? ""} onChange={e => { setPerfSelClass(filteredClasses.find((c: any) => c.id === parseInt(e.target.value)) ?? null); setExpanded(null); }} style={{ ...inputStyle, maxWidth: 320 }}>
                 <option value="" style={optStyle}>انتخاب کنید</option>
-                {classes.map(c => <option key={c.id} value={c.id} style={optStyle}>{c.name}</option>)}
+                {filteredClasses.map((c: any) => <option key={c.id} value={c.id} style={optStyle}>{c.name}</option>)}
               </select>
             </div>
 
@@ -356,14 +404,14 @@ export default function TeacherProgress() {
                 <select
                   value={rptSelClass?.id ?? ""}
                   onChange={e => {
-                    setRptSelClass(classes.find((c: any) => c.id === parseInt(e.target.value)) ?? null);
+                    setRptSelClass(filteredClasses.find((c: any) => c.id === parseInt(e.target.value)) ?? null);
                     setRptSelBook(null);
                     setRptExpanded(null);
                   }}
                   style={inputStyle}
                 >
                   <option value="" style={optStyle}>انتخاب کنید</option>
-                  {classes.map((c: any) => <option key={c.id} value={c.id} style={optStyle}>{c.name}</option>)}
+                  {filteredClasses.map((c: any) => <option key={c.id} value={c.id} style={optStyle}>{c.name}</option>)}
                 </select>
               </div>
               {rptSelClass && (

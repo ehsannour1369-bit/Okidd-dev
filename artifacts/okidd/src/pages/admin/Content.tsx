@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../store/auth";
@@ -143,6 +143,17 @@ function ContentModal({ editing, onClose, onSuccess }: { editing: Content | null
 
   const selectedBook = books.find(b => String(b.id) === form.bookId);
 
+  // When editing: auto-populate academicStage and grade from the selected book
+  useEffect(() => {
+    if (editing?.bookId && books.length > 0 && !form.academicStage) {
+      const b = books.find(bk => bk.id === editing.bookId);
+      if (b) {
+        const gradeVal = GRADES.find(g => g.label === b.gradeLevel)?.value ?? "";
+        setForm(f => ({ ...f, academicStage: b.academicStage ?? "", grade: gradeVal }));
+      }
+    }
+  }, [books]);
+
   const uniqueStages = Array.from(new Set([...STAGES, ...books.map(b => b.academicStage).filter(Boolean)]));
   const gradesForStage = form.academicStage && STAGE_GRADES[form.academicStage]
     ? STAGE_GRADES[form.academicStage]
@@ -155,9 +166,14 @@ function ContentModal({ editing, onClose, onSuccess }: { editing: Content | null
   function set(k: string, v: string) {
     setForm(f => {
       const next = { ...f, [k]: v };
-      if (k === "academicStage") { next.grade = ""; next.bookId = ""; next.lessonId = ""; }
-      if (k === "grade") { next.bookId = ""; next.lessonId = ""; }
-      if (k === "bookId") { next.lessonId = ""; }
+      // Only auto-clear dependent fields when creating; when editing, user controls selections manually
+      if (!editing) {
+        if (k === "academicStage") { next.grade = ""; next.bookId = ""; next.lessonId = ""; }
+        if (k === "grade") { next.bookId = ""; next.lessonId = ""; }
+        if (k === "bookId") { next.lessonId = ""; }
+      } else {
+        if (k === "bookId") { next.lessonId = ""; }
+      }
       return next;
     });
   }

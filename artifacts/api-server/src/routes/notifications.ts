@@ -8,26 +8,70 @@ import { sendPushForNotification } from "../lib/push";
 const router = Router();
 
 router.get("/notifications", async (req, res) => {
-  const { schoolId, targetRole, senderId, targetUserId } = req.query as Record<string, string>;
+  const { schoolId, targetRole, senderId, targetUserId, type, status } = req.query as Record<string, string>;
   let rows = await db.select().from(notificationsTable);
   if (schoolId) rows = rows.filter(n => n.schoolId === parseInt(schoolId));
   if (targetRole) rows = rows.filter(n => n.targetRole === targetRole);
   if (senderId) rows = rows.filter(n => n.senderId === parseInt(senderId));
   if (targetUserId) rows = rows.filter(n => n.targetUserId === parseInt(targetUserId));
+  if (type) rows = rows.filter(n => n.type === type);
+  if (status) rows = rows.filter(n => n.status === status);
   rows.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   res.json(rows);
 });
 
 router.post("/notifications", async (req, res) => {
-  const [notification] = await db.insert(notificationsTable).values(req.body).returning();
+  let status = "approved";
+  if (req.body.senderId) {
+    const [sender] = await db
+      .select({ role: usersTable.role })
+      .from(usersTable)
+      .where(eq(usersTable.id, req.body.senderId))
+      .limit(1);
+    if (sender?.role === "teacher") status = "pending";
+  }
+
+  const [notification] = await db
+    .insert(notificationsTable)
+    .values({ ...req.body, status })
+    .returning();
   res.status(201).json(notification);
-  sendPushForNotification({
-    schoolId: notification.schoolId,
-    targetRole: notification.targetRole,
-    targetUserId: notification.targetUserId,
-    title: notification.title,
-    body: notification.body,
-  }).catch(() => {});
+
+  if (status === "approved") {
+    sendPushForNotification({
+      schoolId: notification.schoolId,
+      targetRole: notification.targetRole,
+      targetUserId: notification.targetUserId,
+      title: notification.title,
+      body: notification.body,
+    }).catch(() => {});
+  }
+});
+
+router.patch("/notifications/:id/status", async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { status } = req.body as { status: string };
+  if (!["approved", "rejected"].includes(status)) {
+    res.status(400).json({ error: "status باید approved یا rejected باشد" }); return;
+  }
+  const [updated] = await db
+    .update(notificationsTable)
+    .set({ status })
+    .where(eq(notificationsTable.id, id))
+    .returning();
+  if (!updated) { res.status(404).json({ error: "اعلان پیدا نشد" }); return; }
+
+  if (status === "approved") {
+    sendPushForNotification({
+      schoolId: updated.schoolId,
+      targetRole: updated.targetRole,
+      targetUserId: updated.targetUserId,
+      title: updated.title,
+      body: updated.body,
+    }).catch(() => {});
+  }
+
+  res.json(updated);
 });
 
 router.delete("/notifications/:id", async (req, res) => {
@@ -110,6 +154,9 @@ router.post("/notifications/student-activity", async (req, res) => {
         targetRole: "parent",
         targetUserId: p.parentId,
         senderId: userId,
+        type: "activity",
+        allowReply: false,
+        status: "approved",
       })
     )
   );

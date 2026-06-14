@@ -2,16 +2,17 @@ import { Router, type Request, type Response, type NextFunction } from "express"
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
-import { db, usersTable, branchManagersTable } from "@workspace/db";
+import { db, usersTable, branchManagersTable, studentEnrollmentsTable, parentStudentsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5,                    // max 5 attempts per IP per window
+  max: 20,                   // max 20 attempts per IP per window
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "too_many_attempts", message: "تعداد تلاش‌های ورود بیش از حد مجاز است. لطفاً ۱۵ دقیقه دیگر دوباره امتحان کنید." },
   skipSuccessfulRequests: true, // successful logins don't count against limit
+  skip: () => process.env.NODE_ENV === "development",
 });
 
 const router = Router();
@@ -178,6 +179,49 @@ router.post("/auth/login", loginLimiter, async (req, res) => {
       and(eq(branchManagersTable.userId, user.id), eq(branchManagersTable.isActive, true))
     ).limit(1);
     branchId = bm[0]?.branchId ?? null;
+  }
+
+  // Defensive sync: ensure users.school_id matches active enrollment for students
+  if (user.role === "student") {
+    const [activeEnrollment] = await db
+      .select({ schoolId: studentEnrollmentsTable.schoolId })
+      .from(studentEnrollmentsTable)
+      .where(and(
+        eq(studentEnrollmentsTable.studentId, user.id),
+        eq(studentEnrollmentsTable.isActive, true),
+      ))
+      .limit(1);
+    if (activeEnrollment && activeEnrollment.schoolId !== user.schoolId) {
+      await db.update(usersTable)
+        .set({ schoolId: activeEnrollment.schoolId, updatedAt: new Date() })
+        .where(eq(usersTable.id, user.id));
+      user = { ...user, schoolId: activeEnrollment.schoolId };
+    }
+  }
+
+  // Defensive sync: ensure users.school_id matches first child's enrolled school for parents
+  if (user.role === "parent") {
+    const [link] = await db
+      .select({ studentId: parentStudentsTable.studentId })
+      .from(parentStudentsTable)
+      .where(eq(parentStudentsTable.parentId, user.id))
+      .limit(1);
+    if (link) {
+      const [activeEnrollment] = await db
+        .select({ schoolId: studentEnrollmentsTable.schoolId })
+        .from(studentEnrollmentsTable)
+        .where(and(
+          eq(studentEnrollmentsTable.studentId, link.studentId),
+          eq(studentEnrollmentsTable.isActive, true),
+        ))
+        .limit(1);
+      if (activeEnrollment && activeEnrollment.schoolId !== user.schoolId) {
+        await db.update(usersTable)
+          .set({ schoolId: activeEnrollment.schoolId, updatedAt: new Date() })
+          .where(eq(usersTable.id, user.id));
+        user = { ...user, schoolId: activeEnrollment.schoolId };
+      }
+    }
   }
 
   const token = signToken({ id: user.id, email: user.email!, role: user.role!, tokenVersion });
